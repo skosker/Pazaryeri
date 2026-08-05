@@ -1,0 +1,170 @@
+// Profestia - Prisma schema
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  BUYER
+  FREELANCER
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  IN_PROGRESS
+  DELIVERED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  INITIALIZED
+  SUCCESS
+  FAILED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(BUYER)
+  title        String? // e.g. "Grafik Tasarımcı" shown under name for freelancers
+  bio          String?
+  image        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  gigs        Gig[]     @relation("SellerGigs")
+  ordersMade  Order[]   @relation("BuyerOrders")
+  reviews     Review[]  @relation("BuyerReviews")
+
+  @@map("users")
+}
+
+model Category {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+  icon String @default("sparkles")
+
+  gigs Gig[]
+
+  @@map("categories")
+}
+
+model Gig {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String
+  coverColor  String   @default("indigo") // placeholder cover palette (no real images)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sellerId   String
+  seller     User     @relation("SellerGigs", fields: [sellerId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  packages Package[]
+  orders   Order[]
+  reviews  Review[]
+
+  @@index([categoryId])
+  @@index([sellerId])
+  @@map("gigs")
+}
+
+enum PackageTier {
+  STANDARD
+  BASIC
+  PREMIUM
+}
+
+model Package {
+  id            String      @id @default(cuid())
+  tier          PackageTier @default(STANDARD)
+  name          String      @default("Standart Paket")
+  description   String
+  price         Decimal     @db.Decimal(10, 2)
+  deliveryDays  Int
+  revisionCount Int         @default(2)
+  features      String[]    @default([])
+
+  gigId String
+  gig   Gig    @relation(fields: [gigId], references: [id], onDelete: Cascade)
+
+  orders Order[]
+
+  @@index([gigId])
+  @@map("packages")
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  status          OrderStatus @default(PENDING_PAYMENT)
+  amount          Decimal     @db.Decimal(10, 2)
+  escrowReleased  Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  buyerId String
+  buyer   User   @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
+
+  gigId String
+  gig   Gig    @relation(fields: [gigId], references: [id])
+
+  packageId String
+  package   Package @relation(fields: [packageId], references: [id])
+
+  payment Payment?
+  review  Review?
+
+  @@index([buyerId])
+  @@index([gigId])
+  @@map("orders")
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  provider       String        @default("iyzico")
+  status         PaymentStatus @default(INITIALIZED)
+  conversationId String        @unique
+  token          String?
+  paymentId      String?
+  rawResponse    Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  gigId String
+  gig   Gig    @relation(fields: [gigId], references: [id], onDelete: Cascade)
+
+  buyerId String
+  buyer   User   @relation("BuyerReviews", fields: [buyerId], references: [id], onDelete: Cascade)
+
+  @@index([gigId])
+  @@map("reviews")
+}
