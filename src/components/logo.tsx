@@ -30,14 +30,20 @@ export function LogoMark({ size = 32 }: { size?: number }) {
   );
 }
 
-export function Logo({ withText = true, size = 30 }: { withText?: boolean; size?: number }) {
+export function Logo({
+  withText = true,
+  size = 30,
+  textClassName = "text-brand-navy",
+}: {
+  withText?: boolean;
+  size?: number;
+  textClassName?: string;
+}) {
   return (
     <Link href="/" className="flex items-center gap-2 shrink-0">
       <LogoMark size={size} />
       {withText && (
-        <span className="text-xl font-extrabold tracking-tight text-brand-navy">
-          Profestia
-        </span>
+        <span className={`text-xl font-extrabold tracking-tight ${textClassName}`}>Profestia</span>
       )}
     </Link>
   );

@@ -1,9 +1,10 @@
 import Link from "next/link";
+import { AuthShell } from "@/components/auth-shell";
 import { LoginForm } from "./login-form";
 
 export default function LoginPage() {
   return (
-    <div className="mx-auto flex max-w-md flex-col px-4 py-16 sm:px-6">
+    <AuthShell>
       <h1 className="text-2xl font-bold text-brand-navy">Giriş Yap</h1>
       <p className="mt-1 text-sm text-slate-500">
         Hesabına giriş yap, siparişlerini ve ilanlarını yönet.
@@ -25,6 +26,6 @@ export default function LoginPage() {
         <p>alici: buyer@profestia.dev · satıcı: mert@profestia.dev</p>
         <p>şifre: password123</p>
       </div>
-    </div>
+    </AuthShell>
   );
 }

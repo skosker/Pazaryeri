@@ -102,6 +102,23 @@ export async function listGigs(filters: GigFilters): Promise<GigCardData[]> {
   return cards;
 }
 
+export async function getRelatedGigs(
+  categorySlug: string,
+  excludeSlug: string,
+  limit = 3
+): Promise<GigCardData[]> {
+  const gigs = await prisma.gig.findMany({
+    where: {
+      category: { slug: categorySlug },
+      slug: { not: excludeSlug },
+    },
+    include: gigCardInclude,
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+  return gigs.map(toCardData);
+}
+
 export async function getGigBySlug(slug: string) {
   const gig = await prisma.gig.findUnique({
     where: { slug },

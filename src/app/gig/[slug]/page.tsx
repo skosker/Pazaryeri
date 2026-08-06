@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@/auth";
-import { getGigBySlug } from "@/lib/gigs";
+import { getGigBySlug, getRelatedGigs } from "@/lib/gigs";
 import { coverImageUrl } from "@/lib/cover-colors";
 import { StarRating } from "@/components/star-rating";
+import { GigCard } from "@/components/gig-card";
 import { OrderPanel } from "./order-panel";
 
 function sellerLevelLabel(reviewCount: number) {
@@ -30,6 +31,7 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
       : null;
 
   const errorMessage = typeof searchParams.hata === "string" ? searchParams.hata : null;
+  const relatedGigs = await getRelatedGigs(gig.category.slug, gig.slug);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
@@ -131,6 +133,19 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
           isOwnGig={session?.user?.id === gig.sellerId}
         />
       </div>
+
+      {relatedGigs.length > 0 && (
+        <section className="mt-16 border-t border-slate-100 pt-10">
+          <h2 className="text-lg font-semibold text-brand-navy">
+            {gig.category.name} kategorisinde diğer hizmetler
+          </h2>
+          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {relatedGigs.map((related) => (
+              <GigCard key={related.slug} gig={related} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

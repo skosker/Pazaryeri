@@ -32,6 +32,20 @@ export default async function PanelPage() {
       : Promise.resolve([]),
   ]);
 
+  const activeStatuses = ["PAID", "IN_PROGRESS", "DELIVERED"] as const;
+  const sellerEarnings = ordersAsSeller
+    .filter((o) => o.status === "COMPLETED")
+    .reduce((sum, o) => sum + Number(o.amount), 0);
+  const sellerActiveCount = ordersAsSeller.filter((o) =>
+    (activeStatuses as readonly string[]).includes(o.status)
+  ).length;
+  const buyerSpent = ordersAsBuyer
+    .filter((o) => o.status !== "PENDING_PAYMENT" && o.status !== "CANCELLED")
+    .reduce((sum, o) => sum + Number(o.amount), 0);
+  const buyerActiveCount = ordersAsBuyer.filter((o) =>
+    (activeStatuses as readonly string[]).includes(o.status)
+  ).length;
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
@@ -41,6 +55,23 @@ export default async function PanelPage() {
             {role === "FREELANCER" ? "Freelancer paneli" : "Alıcı paneli"}
           </p>
         </div>
+      </div>
+
+      <div className="mb-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {role === "FREELANCER" ? (
+          <>
+            <StatCard label="Toplam Kazanç" value={`${sellerEarnings}₺`} />
+            <StatCard label="Aktif Sipariş" value={String(sellerActiveCount)} />
+            <StatCard label="Yayınlı İlan" value={String(myGigs.length)} />
+            <StatCard label="Gelen Sipariş" value={String(ordersAsSeller.length)} />
+          </>
+        ) : (
+          <>
+            <StatCard label="Toplam Harcama" value={`${buyerSpent}₺`} />
+            <StatCard label="Aktif Sipariş" value={String(buyerActiveCount)} />
+            <StatCard label="Toplam Sipariş" value={String(ordersAsBuyer.length)} />
+          </>
+        )}
       </div>
 
       {role === "FREELANCER" && (
@@ -123,6 +154,15 @@ export default async function PanelPage() {
           />
         )}
       </section>
+    </div>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-5">
+      <p className="text-xs uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="mt-2 text-2xl font-extrabold text-brand-navy">{value}</p>
     </div>
   );
 }

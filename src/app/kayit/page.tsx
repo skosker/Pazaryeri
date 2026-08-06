@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthShell } from "@/components/auth-shell";
 import { RegisterForm } from "./register-form";
 
 export default async function RegisterPage(props: PageProps<"/kayit">) {
@@ -6,7 +7,7 @@ export default async function RegisterPage(props: PageProps<"/kayit">) {
   const defaultRole = searchParams.role === "FREELANCER" ? "FREELANCER" : "BUYER";
 
   return (
-    <div className="mx-auto flex max-w-md flex-col px-4 py-16 sm:px-6">
+    <AuthShell>
       <h1 className="text-2xl font-bold text-brand-navy">Kayıt Ol</h1>
       <p className="mt-1 text-sm text-slate-500">
         Ücretsiz hesap oluştur, hizmet al ya da freelancer olarak ilan ver.
@@ -22,6 +23,6 @@ export default async function RegisterPage(props: PageProps<"/kayit">) {
           Giriş Yap
         </Link>
       </p>
-    </div>
+    </AuthShell>
   );
 }
