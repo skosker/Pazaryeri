@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { StarRating } from "@/components/star-rating";
-import { coverGradientClass } from "@/lib/cover-colors";
+import { coverImageUrl } from "@/lib/cover-colors";
 import type { GigCardData } from "@/lib/gigs";
 
 export function GigCard({ gig }: { gig: GigCardData }) {
@@ -9,14 +9,14 @@ export function GigCard({ gig }: { gig: GigCardData }) {
       href={`/gig/${gig.slug}`}
       className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-purple-100"
     >
-      <div
-        className={`flex h-40 items-center justify-center bg-gradient-to-br ${coverGradientClass(
-          gig.coverColor
-        )}`}
-      >
-        <span className="rotate-[-8deg] text-xs font-semibold uppercase tracking-widest text-white/70">
-          Gig Görseli
-        </span>
+      <div className="h-40 overflow-hidden bg-slate-100">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={coverImageUrl(gig.slug)}
+          alt=""
+          className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+          loading="lazy"
+        />
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
         <div className="flex items-center gap-2 text-sm text-slate-500">

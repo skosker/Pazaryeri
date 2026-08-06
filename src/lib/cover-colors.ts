@@ -10,3 +10,7 @@ export const coverGradients: Record<string, string> = {
 export function coverGradientClass(color: string) {
   return coverGradients[color] ?? coverGradients.indigo;
 }
+
+export function coverImageUrl(slug: string, size: `${number}/${number}` = "600/400") {
+  return `https://picsum.photos/seed/${encodeURIComponent(slug)}/${size}`;
+}

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { getGigBySlug } from "@/lib/gigs";
-import { coverGradientClass } from "@/lib/cover-colors";
+import { coverImageUrl } from "@/lib/cover-colors";
 import { StarRating } from "@/components/star-rating";
 import { OrderPanel } from "./order-panel";
 
@@ -70,14 +70,13 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
             {rating !== null && <StarRating rating={rating} count={reviewCount} />}
           </div>
 
-          <div
-            className={`mt-6 flex h-72 items-center justify-center rounded-2xl bg-gradient-to-br ${coverGradientClass(
-              gig.coverColor
-            )}`}
-          >
-            <span className="rotate-[-8deg] text-sm font-semibold uppercase tracking-widest text-white/70">
-              Gig Görseli
-            </span>
+          <div className="mt-6 h-72 overflow-hidden rounded-2xl bg-slate-100">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={coverImageUrl(gig.slug, "1200/800")}
+              alt={gig.title}
+              className="h-full w-full object-cover"
+            />
           </div>
 
           <section className="mt-8">
