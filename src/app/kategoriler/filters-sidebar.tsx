@@ -2,8 +2,9 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useTransition } from "react";
+import { CategoryIcon } from "@/components/category-icon";
 
-type Category = { slug: string; name: string };
+type Category = { slug: string; name: string; icon: string };
 
 export function FiltersSidebar({
   categories,
@@ -51,18 +52,22 @@ export function FiltersSidebar({
   }
 
   return (
-    <aside className="w-full shrink-0 space-y-8 md:w-64">
+    <aside className="w-full shrink-0 space-y-8 rounded-2xl border border-slate-200 bg-white p-5 md:w-64">
       <div>
         <h3 className="mb-3 font-semibold text-brand-navy">Kategori</h3>
-        <div className="space-y-2">
+        <div className="space-y-1">
           {categories.map((c) => (
-            <label key={c.slug} className="flex items-center gap-2 text-sm text-slate-600">
+            <label
+              key={c.slug}
+              className="flex cursor-pointer items-center gap-2 rounded-lg px-1.5 py-1.5 text-sm text-slate-600 hover:bg-slate-50"
+            >
               <input
                 type="checkbox"
                 checked={selected.includes(c.slug)}
                 onChange={() => toggleCategory(c.slug)}
                 className="h-4 w-4 rounded border-slate-300 text-purple-600 focus:ring-purple-400"
               />
+              <CategoryIcon icon={c.icon} className="h-4 w-4 text-slate-400" />
               {c.name}
             </label>
           ))}

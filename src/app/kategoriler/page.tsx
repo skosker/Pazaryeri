@@ -32,7 +32,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
   };
 
   const [categories, gigs] = await Promise.all([
-    prisma.category.findMany({ orderBy: { name: "asc" }, select: { slug: true, name: true } }),
+    prisma.category.findMany({ orderBy: { name: "asc" }, select: { slug: true, name: true, icon: true } }),
     listGigs(filters),
   ]);
 

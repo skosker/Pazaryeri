@@ -3,20 +3,21 @@ import { auth, signOut } from "@/auth";
 import { Logo } from "@/components/logo";
 import { LinkButton } from "@/components/ui/button";
 import { SearchBar } from "@/components/search-bar";
+import { MobileNav } from "@/components/mobile-nav";
 
 export async function Header() {
   const session = await auth();
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="relative mx-auto flex max-w-7xl items-center gap-6 px-4 py-3 sm:px-6 lg:px-8">
         <Logo />
 
         <nav className="hidden items-center gap-5 text-sm font-medium text-slate-600 md:flex">
-          <Link href="/kategoriler" className="hover:text-brand-navy">
+          <Link href="/kategoriler" className="transition hover:text-brand-navy">
             Kategoriler
           </Link>
-          <Link href="/nasil-calisir" className="hover:text-brand-navy">
+          <Link href="/nasil-calisir" className="transition hover:text-brand-navy">
             Nasıl Çalışır
           </Link>
         </nav>
@@ -48,6 +49,7 @@ export async function Header() {
                   "use server";
                   await signOut({ redirectTo: "/" });
                 }}
+                className="hidden md:block"
               >
                 <button
                   type="submit"
@@ -61,13 +63,23 @@ export async function Header() {
             <>
               <Link
                 href="/giris"
-                className="text-sm font-medium text-slate-600 hover:text-brand-navy"
+                className="hidden text-sm font-medium text-slate-600 hover:text-brand-navy sm:block"
               >
                 Giriş Yap
               </Link>
-              <LinkButton href="/kayit">Kayıt Ol</LinkButton>
+              <LinkButton href="/kayit" className="hidden sm:inline-flex">
+                Kayıt Ol
+              </LinkButton>
             </>
           )}
+
+          <MobileNav
+            user={session?.user ?? null}
+            signOutAction={async () => {
+              "use server";
+              await signOut({ redirectTo: "/" });
+            }}
+          />
         </div>
       </div>
     </header>
