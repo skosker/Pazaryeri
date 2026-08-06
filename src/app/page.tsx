@@ -36,7 +36,7 @@ export default async function Home() {
           <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
             Doğru Uzman, Doğru Hizmet, Doğru Sonuç
           </p>
-          <h1 className="mt-4 text-4xl font-extrabold leading-tight text-brand-navy sm:text-5xl">
+          <h1 className="mt-4 text-4xl font-extrabold leading-[1.1] tracking-tight text-brand-navy sm:text-6xl">
             İşini bilen freelancer&apos;larla
             <br /> projeni hayata geçir
           </h1>
@@ -46,7 +46,7 @@ export default async function Home() {
           </p>
 
           <div className="mx-auto mt-8 max-w-xl">
-            <SearchBar />
+            <SearchBar size="lg" />
           </div>
 
           <div className="mt-6 flex flex-wrap justify-center gap-2">
