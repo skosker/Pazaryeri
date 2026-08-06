@@ -132,6 +132,7 @@ async function main() {
         title: s.title,
         role: "FREELANCER",
         passwordHash: password,
+        emailVerified: new Date(),
         bio: `${s.title} olarak ${s.name.split(" ")[0]}, Profestia'da yıllardır profesyonel hizmet veriyor.`,
       },
     });
@@ -145,6 +146,7 @@ async function main() {
       email: "buyer@profestia.dev",
       role: "BUYER",
       passwordHash: password,
+      emailVerified: new Date(),
     },
   });
   void buyer;

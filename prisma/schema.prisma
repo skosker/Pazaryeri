@@ -31,22 +31,36 @@ enum PaymentStatus {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  passwordHash String
-  role         Role     @default(BUYER)
-  title        String? // e.g. "Grafik Tasarımcı" shown under name for freelancers
-  bio          String?
-  image        String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  passwordHash  String
+  role          Role      @default(BUYER)
+  title         String? // e.g. "Grafik Tasarımcı" shown under name for freelancers
+  bio           String?
+  image         String?
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  gigs        Gig[]     @relation("SellerGigs")
-  ordersMade  Order[]   @relation("BuyerOrders")
-  reviews     Review[]  @relation("BuyerReviews")
+  gigs               Gig[]               @relation("SellerGigs")
+  ordersMade         Order[]             @relation("BuyerOrders")
+  reviews            Review[]            @relation("BuyerReviews")
+  verificationTokens VerificationToken[]
 
   @@map("users")
+}
+
+model VerificationToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("verification_tokens")
 }
 
 model Category {

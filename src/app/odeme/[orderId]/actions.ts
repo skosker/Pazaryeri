@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { markOrderPaid } from "@/lib/order-actions";
 
 export async function completeMockPayment(orderId: string) {
   const session = await auth();
@@ -30,7 +31,7 @@ export async function completeMockPayment(orderId: string) {
     },
   });
 
-  await prisma.order.update({ where: { id: orderId }, data: { status: "PAID" } });
+  await markOrderPaid(orderId);
 
   redirect(`/siparis/${orderId}`);
 }

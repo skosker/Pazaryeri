@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { retrieveCheckoutForm } from "@/lib/iyzico";
+import { markOrderPaid } from "@/lib/order-actions";
 import type { Prisma } from "@/generated/prisma/client";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
@@ -30,10 +31,7 @@ export async function POST(request: Request) {
         rawResponse: result as unknown as Prisma.InputJsonValue,
       },
     });
-    await prisma.order.update({
-      where: { id: payment.orderId },
-      data: { status: "PAID" },
-    });
+    await markOrderPaid(payment.orderId);
     return NextResponse.redirect(`${appUrl}/siparis/${payment.orderId}`, 303);
   }
 

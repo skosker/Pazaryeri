@@ -1,7 +1,6 @@
 "use server";
 
-import { AuthError } from "next-auth";
-import { signIn } from "@/auth";
+import { redirect } from "next/navigation";
 import { registerUser, RegisterError } from "@/lib/register-user";
 
 export type FormState = { error?: string };
@@ -29,17 +28,5 @@ export async function registerAction(
     throw error;
   }
 
-  try {
-    await signIn("credentials", {
-      email,
-      password,
-      redirectTo: "/panel",
-    });
-    return {};
-  } catch (error) {
-    if (error instanceof AuthError) {
-      return { error: "Hesap oluşturuldu ama giriş yapılamadı, lütfen giriş yapın" };
-    }
-    throw error;
-  }
+  redirect("/kayit/basarili");
 }

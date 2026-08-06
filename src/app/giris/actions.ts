@@ -2,6 +2,8 @@
 
 import { AuthError } from "next-auth";
 import { signIn } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 export type FormState = { error?: string };
 
@@ -11,6 +13,18 @@ export async function loginAction(
 ): Promise<FormState> {
   const email = formData.get("email");
   const password = formData.get("password");
+
+  if (typeof email === "string" && typeof password === "string") {
+    const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+    if (user) {
+      const isValid = await bcrypt.compare(password, user.passwordHash);
+      if (isValid && !user.emailVerified) {
+        return {
+          error: "E-postanı henüz doğrulamadın. Gelen kutunu kontrol et ve doğrulama linkine tıkla.",
+        };
+      }
+    }
+  }
 
   try {
     await signIn("credentials", {
