@@ -20,12 +20,6 @@ export default function LoginPage() {
           Kayıt Ol
         </Link>
       </p>
-
-      <div className="mt-8 rounded-xl bg-slate-50 p-4 text-xs text-slate-500">
-        <p className="font-semibold text-slate-600">Demo hesap</p>
-        <p>alici: buyer@profestia.dev · satıcı: mert@profestia.dev</p>
-        <p>şifre: password123</p>
-      </div>
     </AuthShell>
   );
 }
