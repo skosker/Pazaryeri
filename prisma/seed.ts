@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
+import { generateBulkData } from "./bulk-gigs-data";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -324,6 +325,59 @@ async function main() {
             "2 revizyon hakkı",
             "Ticari kullanım lisansı",
           ],
+        },
+      });
+    }
+  }
+
+  console.log("Seeding bulk listings (50 per category)...");
+  const { sellers: bulkSellers, gigs: bulkGigs } = generateBulkData();
+
+  for (const s of bulkSellers) {
+    await prisma.user.upsert({
+      where: { email: s.email },
+      update: {},
+      create: {
+        name: s.name,
+        email: s.email,
+        title: s.title,
+        role: "FREELANCER",
+        passwordHash: password,
+        emailVerified: new Date(),
+        bio: `${s.title} olarak ${s.name.split(" ")[0]}, Profestia'da profesyonel hizmet veriyor.`,
+      },
+    });
+  }
+
+  for (const g of bulkGigs) {
+    const seller = await prisma.user.findUniqueOrThrow({ where: { email: g.sellerEmail } });
+    const category = await prisma.category.findUniqueOrThrow({ where: { slug: g.categorySlug } });
+
+    const gig = await prisma.gig.upsert({
+      where: { slug: g.slug },
+      update: {},
+      create: {
+        slug: g.slug,
+        title: g.title,
+        description: g.description,
+        coverColor: g.coverColor,
+        sellerId: seller.id,
+        categoryId: category.id,
+      },
+    });
+
+    const existingPackage = await prisma.package.findFirst({ where: { gigId: gig.id } });
+    if (!existingPackage) {
+      await prisma.package.create({
+        data: {
+          gigId: gig.id,
+          tier: "STANDARD",
+          name: "Standart Paket",
+          description: "Temel içerik paketi, 2 revizyon ve kaynak dosyalar dahil.",
+          price: g.price,
+          deliveryDays: g.delivery,
+          revisionCount: 2,
+          features: ["Kaynak dosyalar dahil", "2 revizyon hakkı", "Ticari kullanım lisansı"],
         },
       });
     }

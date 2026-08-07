@@ -23,6 +23,7 @@ function buildHref(base: {
   butce?: string;
   sure?: string;
   sirala?: string;
+  sayfa?: number;
 }) {
   const search = new URLSearchParams();
   base.categorySlugs.forEach((slug) => search.append("kategori", slug));
@@ -30,9 +31,12 @@ function buildHref(base: {
   if (base.butce) search.set("butce", base.butce);
   if (base.sure) search.set("sure", base.sure);
   if (base.sirala) search.set("sirala", base.sirala);
+  if (base.sayfa && base.sayfa > 1) search.set("sayfa", String(base.sayfa));
   const qs = search.toString();
   return qs ? `/kategoriler?${qs}` : "/kategoriler";
 }
+
+const PAGE_SIZE = 24;
 
 export default async function KategorilerPage(props: PageProps<"/kategoriler">) {
   const searchParams = await props.searchParams;
@@ -42,6 +46,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
   const butce = toSingle(searchParams.butce);
   const sure = toSingle(searchParams.sure);
   const sirala = toSingle(searchParams.sirala) as GigFilters["sort"];
+  const sayfa = Number(toSingle(searchParams.sayfa) ?? "1") || 1;
 
   const filters: GigFilters = {
     categorySlugs,
@@ -49,9 +54,11 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
     maxPrice: butce ? Number(butce) : undefined,
     maxDeliveryDays: sure && sure !== "farketmez" ? Number(sure) : undefined,
     sort: sirala ?? "uygun",
+    page: sayfa,
+    pageSize: PAGE_SIZE,
   };
 
-  const [categories, gigs] = await Promise.all([
+  const [categories, { cards: gigs, total, page, pageCount }] = await Promise.all([
     prisma.category.findMany({ orderBy: { name: "asc" }, select: { slug: true, name: true, icon: true } }),
     listGigs(filters),
   ]);
@@ -81,7 +88,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
         <div>
           <h1 className="text-2xl font-bold text-brand-navy sm:text-3xl">{heading}</h1>
           <p className="mt-1 text-sm text-slate-500">
-            <span className="font-semibold text-brand-navy">{gigs.length}</span> hizmet listeleniyor
+            <span className="font-semibold text-brand-navy">{total}</span> hizmet listeleniyor
           </p>
         </div>
       </div>
@@ -126,11 +133,51 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
               <p className="mt-1 text-sm text-slate-400">Filtreleri değiştirip tekrar dene.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {gigs.map((gig) => (
-                <GigCard key={gig.slug} gig={gig} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {gigs.map((gig) => (
+                  <GigCard key={gig.slug} gig={gig} />
+                ))}
+              </div>
+
+              {pageCount > 1 && (
+                <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
+                  <Link
+                    href={buildHref({ categorySlugs, q, butce, sure, sirala, sayfa: page - 1 })}
+                    aria-disabled={page <= 1}
+                    className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
+                      page <= 1
+                        ? "pointer-events-none border-slate-100 text-slate-300"
+                        : "border-slate-300 text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    Önceki
+                  </Link>
+                  {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
+                    <Link
+                      key={n}
+                      href={buildHref({ categorySlugs, q, butce, sure, sirala, sayfa: n })}
+                      className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
+                        n === page ? "bg-brand-navy text-white" : "text-slate-600 hover:bg-slate-100"
+                      }`}
+                    >
+                      {n}
+                    </Link>
+                  ))}
+                  <Link
+                    href={buildHref({ categorySlugs, q, butce, sure, sirala, sayfa: page + 1 })}
+                    aria-disabled={page >= pageCount}
+                    className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
+                      page >= pageCount
+                        ? "pointer-events-none border-slate-100 text-slate-300"
+                        : "border-slate-300 text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    Sonraki
+                  </Link>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

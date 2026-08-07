@@ -58,9 +58,18 @@ export type GigFilters = {
   maxPrice?: number;
   maxDeliveryDays?: number;
   sort?: "uygun" | "fiyat-artan" | "fiyat-azalan" | "yeni";
+  page?: number;
+  pageSize?: number;
 };
 
-export async function listGigs(filters: GigFilters): Promise<GigCardData[]> {
+export type GigListResult = {
+  cards: GigCardData[];
+  total: number;
+  page: number;
+  pageCount: number;
+};
+
+export async function listGigs(filters: GigFilters): Promise<GigListResult> {
   const where: Prisma.GigWhereInput = { published: true };
 
   if (filters.categorySlugs?.length) {
@@ -102,7 +111,14 @@ export async function listGigs(filters: GigFilters): Promise<GigCardData[]> {
     cards = cards.sort((a, b) => b.startingPrice - a.startingPrice);
   }
 
-  return cards;
+  const total = cards.length;
+  const pageSize = filters.pageSize ?? (total || 1);
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+  const page = Math.min(Math.max(1, filters.page ?? 1), pageCount);
+  const start = (page - 1) * pageSize;
+  const paged = filters.pageSize ? cards.slice(start, start + pageSize) : cards;
+
+  return { cards: paged, total, page, pageCount };
 }
 
 export async function getRelatedGigs(
