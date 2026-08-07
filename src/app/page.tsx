@@ -17,13 +17,19 @@ const quickChips = [
 ];
 
 export default async function Home() {
-  const [categories, gigCount, freelancerCount] = await Promise.all([
+  const [categories, gigCount, freelancerCount, recentFreelancers] = await Promise.all([
     prisma.category.findMany({
       orderBy: { name: "asc" },
       include: { _count: { select: { gigs: { where: { published: true } } } } },
     }),
-    prisma.gig.count(),
+    prisma.gig.count({ where: { published: true } }),
     prisma.user.count({ where: { role: "FREELANCER" } }),
+    prisma.user.findMany({
+      where: { role: "FREELANCER" },
+      select: { name: true },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    }),
   ]);
 
   return (
@@ -74,6 +80,25 @@ export default async function Home() {
             <Stat value={`${gigCount}+`} label="Hizmet" />
             <Stat value={`${freelancerCount}+`} label="Freelancer" />
           </dl>
+
+          {recentFreelancers.length > 0 && (
+            <div className="mt-8 flex items-center gap-3">
+              <div className="flex -space-x-2">
+                {recentFreelancers.map((f) => (
+                  <span
+                    key={f.name}
+                    className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-brand-navy bg-gradient-to-br from-fuchsia-500 to-indigo-500 text-xs font-semibold text-white"
+                  >
+                    {f.name.charAt(0)}
+                  </span>
+                ))}
+              </div>
+              <p className="text-xs text-white/60">
+                <span className="font-semibold text-white">{freelancerCount}+ freelancer</span> bugün sana yardım
+                etmeye hazır
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -109,14 +134,20 @@ export default async function Home() {
       <section className="border-t border-slate-100 bg-white">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
           <Feature
+            icon="shield"
+            accent="emerald"
             title="Profestia güvencesiyle ödeme"
             description="İş onaylanmadan ödeme satıcıya aktarılmaz."
           />
           <Feature
+            icon="check"
+            accent="sky"
             title="Doğrulanmış freelancer'lar"
             description="Değerlendirmeler ve tamamlanan iş geçmişiyle güvenle seç."
           />
           <Feature
+            icon="headset"
+            accent="fuchsia"
             title="7/24 destek"
             description="Sipariş sürecinde her adımda yanındayız."
           />
@@ -159,6 +190,13 @@ export default async function Home() {
           <p className="mt-4 max-w-xl text-white/70">
             Ücretsiz kayıt ol, ilk ilanını dakikalar içinde yayınla ve kazanmaya başla.
           </p>
+
+          <ul className="mt-8 flex flex-col gap-3 text-left sm:flex-row sm:gap-8">
+            <FreelancerBenefit text="Ücretsiz kayıt, gizli komisyon yok" />
+            <FreelancerBenefit text="Fiyatını ve teslim sürini sen belirle" />
+            <FreelancerBenefit text="Ödemen onay sonrası hesabına geçer" />
+          </ul>
+
           <LinkButton href="/kayit?role=FREELANCER" className="mt-8">
             Freelancer Ol
           </LinkButton>
@@ -180,6 +218,26 @@ function HowStep({ n, title, description }: { n: number; title: string; descript
   );
 }
 
+function FreelancerBenefit({ text }: { text: string }) {
+  return (
+    <li className="flex items-center gap-2 text-sm text-white/80">
+      <svg
+        className="h-4.5 w-4.5 shrink-0 text-emerald-400"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <path d="M20 6L9 17l-5-5" />
+      </svg>
+      {text}
+    </li>
+  );
+}
+
 function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div>
@@ -190,10 +248,47 @@ function Stat({ value, label }: { value: string; label: string }) {
   );
 }
 
-function Feature({ title, description }: { title: string; description: string }) {
+const featureIconPaths: Record<string, string> = {
+  shield: "M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z M9 12l2 2 4-4",
+  check: "M12 21a9 9 0 100-18 9 9 0 000 18z M8.5 12l2.5 2.5 4.5-4.5",
+  headset:
+    "M4 13v-1a8 8 0 0116 0v1 M3 13a2 2 0 012-2h1v6H5a2 2 0 01-2-2v-2z M19 13a2 2 0 00-2-2h-1v6h1a2 2 0 002-2v-2z",
+};
+
+const featureAccents: Record<string, { bg: string; text: string }> = {
+  emerald: { bg: "bg-emerald-50", text: "text-emerald-600" },
+  sky: { bg: "bg-sky-50", text: "text-sky-600" },
+  fuchsia: { bg: "bg-fuchsia-50", text: "text-fuchsia-600" },
+};
+
+function Feature({
+  icon,
+  accent,
+  title,
+  description,
+}: {
+  icon: keyof typeof featureIconPaths;
+  accent: keyof typeof featureAccents;
+  title: string;
+  description: string;
+}) {
+  const { bg, text } = featureAccents[accent];
   return (
     <div className="rounded-2xl border border-slate-100 p-6 transition hover:shadow-lg hover:shadow-slate-100">
-      <div className="mb-3 h-9 w-9 rounded-full brand-gradient" />
+      <span className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl ${bg} ${text}`}>
+        <svg
+          className="h-5.5 w-5.5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.8}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d={featureIconPaths[icon]} />
+        </svg>
+      </span>
       <h3 className="font-semibold text-brand-navy">{title}</h3>
       <p className="mt-1 text-sm text-slate-500">{description}</p>
     </div>
