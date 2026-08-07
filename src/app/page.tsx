@@ -1,21 +1,21 @@
 import Link from "next/link";
 import { SearchBar } from "@/components/search-bar";
-import { GigCard } from "@/components/gig-card";
 import { CategoryIcon } from "@/components/category-icon";
-import { getFeaturedGigs } from "@/lib/gigs";
 import { prisma } from "@/lib/prisma";
 
 const quickChips = [
-  "Sosyal Medya Yönetimi",
   "Logo & Marka Kimliği",
   "Web Sitesi Kurulumu",
-  "SEO İçerik Yazımı",
+  "Çeviri Hizmeti",
+  "Video Kurgu",
   "Reklam Yönetimi",
+  "Seslendirme",
+  "İş Danışmanlığı",
+  "Online Ders",
 ];
 
 export default async function Home() {
-  const [gigs, categories, gigCount, freelancerCount] = await Promise.all([
-    getFeaturedGigs(6),
+  const [categories, gigCount, freelancerCount] = await Promise.all([
     prisma.category.findMany({ orderBy: { name: "asc" } }),
     prisma.gig.count(),
     prisma.user.count({ where: { role: "FREELANCER" } }),
@@ -83,21 +83,6 @@ export default async function Home() {
               </span>
               <span className="text-sm font-medium text-brand-navy">{c.name}</span>
             </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-brand-navy">Öne Çıkan Hizmetler</h2>
-          <Link href="/kategoriler" className="text-sm font-semibold text-purple-700 hover:underline">
-            Tümünü Gör →
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {gigs.map((gig) => (
-            <GigCard key={gig.slug} gig={gig} />
           ))}
         </div>
       </section>
