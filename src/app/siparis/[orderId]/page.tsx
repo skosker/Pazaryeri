@@ -42,9 +42,13 @@ export default async function OrderDetailPage(props: PageProps<"/siparis/[orderI
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-brand-navy">{order.gig.title}</h1>
+          <h1 className="text-2xl font-bold text-brand-navy">Sipariş #{order.id.slice(-8).toUpperCase()}</h1>
           <p className="mt-1 text-sm text-slate-500">
-            {order.package.name} · {isBuyer ? `Satıcı: ${order.gig.seller.name}` : `Alıcı: ${order.buyer.name}`}
+            <Link href={`/gig/${order.gig.slug}`} className="hover:text-brand-navy hover:underline">
+              {order.gig.title}
+            </Link>{" "}
+            · {order.package.name} ·{" "}
+            {isBuyer ? `Satıcı: ${order.gig.seller.name}` : `Alıcı: ${order.buyer.name}`}
           </p>
         </div>
         <span className={`rounded-full px-4 py-1.5 text-sm font-semibold ${orderStatusColor[order.status]}`}>
