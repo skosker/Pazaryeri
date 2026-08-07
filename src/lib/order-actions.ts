@@ -10,21 +10,32 @@ export class OrderActionError extends Error {}
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-export async function getOrderForUser(orderId: string, userId: string) {
+const orderDetailInclude = {
+  gig: { include: { seller: true, category: true } },
+  package: true,
+  buyer: true,
+  payment: true,
+  review: true,
+} as const;
+
+export async function getOrderForUser(orderId: string, userId: string, role?: string) {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: {
-      gig: { include: { seller: true, category: true } },
-      package: true,
-      buyer: true,
-      payment: true,
-      review: true,
-    },
+    include: orderDetailInclude,
   });
 
   if (!order) return null;
+  if (role === "ADMIN") return order;
   if (order.buyerId !== userId && order.gig.sellerId !== userId) return null;
   return order;
+}
+
+export async function listPendingBankTransfers() {
+  return prisma.order.findMany({
+    where: { status: "PENDING_VERIFICATION" },
+    include: orderDetailInclude,
+    orderBy: { updatedAt: "asc" },
+  });
 }
 
 export async function markOrderPaid(orderId: string) {
@@ -49,9 +60,11 @@ export async function markOrderPaid(orderId: string) {
   return updated;
 }
 
-export async function sellerConfirmBankTransfer(orderId: string, sellerId: string) {
-  const order = await prisma.order.findUnique({ where: { id: orderId }, include: { gig: true } });
-  if (!order || order.gig.sellerId !== sellerId) throw new OrderActionError("Yetkisiz işlem");
+export async function adminConfirmBankTransfer(orderId: string, adminRole: string) {
+  if (adminRole !== "ADMIN") throw new OrderActionError("Yetkisiz işlem");
+
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!order) throw new OrderActionError("Sipariş bulunamadı");
   if (order.status !== "PENDING_VERIFICATION") throw new OrderActionError("Sipariş bu aşamada değil");
 
   await prisma.payment.update({ where: { orderId }, data: { status: "SUCCESS" } });

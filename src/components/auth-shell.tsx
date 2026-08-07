@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Logo } from "@/components/logo";
 
 const highlights = [
-  "iyzico güvencesiyle korunan ödemeler",
+  "Profestia güvencesiyle korunan ödemeler",
   "İş onaylanmadan ödeme satıcıya aktarılmaz",
   "Binlerce doğrulanmış freelancer",
 ];

@@ -101,7 +101,7 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
       </div>
 
       <p className="mt-4 text-center text-xs text-slate-400">
-        Ödemen iyzico güvencesiyle korunur, iş onaylanmadan satıcıya aktarılmaz.
+        Ödemen Profestia güvencesiyle korunur, iş onaylanmadan satıcıya aktarılmaz.
       </p>
     </div>
   );

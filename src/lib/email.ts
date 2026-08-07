@@ -78,22 +78,38 @@ export async function sendOrderPaidEmails(params: {
   );
 }
 
-export async function sendBankTransferNotifiedEmail(params: {
-  sellerEmail: string;
-  sellerName: string;
+export async function sendBankTransferAdminAlertEmail(params: {
+  adminEmail: string;
   buyerName: string;
   gigTitle: string;
   amount: number;
   orderUrl: string;
 }) {
   await sendEmail(
-    params.sellerEmail,
-    "Havale/EFT ödeme bildirimi",
+    params.adminEmail,
+    "Havale/EFT ödeme bildirimi — onay bekleniyor",
     layout(
-      "Ödeme bildirimi alındı",
-      `<p>Merhaba ${params.sellerName},</p>
-       <p><strong>${params.buyerName}</strong>, <strong>${params.gigTitle}</strong> siparişi için <strong>${params.amount}₺</strong> tutarında havale/EFT yaptığını bildirdi. Hesabına ödemeyi kontrol edip onaylayabilirsin.</p>
+      "Ödeme onayı bekleniyor",
+      `<p><strong>${params.buyerName}</strong>, <strong>${params.gigTitle}</strong> siparişi için <strong>${params.amount}₺</strong> tutarında havale/EFT yaptığını bildirdi. Şirket hesabını kontrol edip ödemeyi onayla.</p>
        ${button(params.orderUrl, "Ödemeyi Onayla")}`
+    )
+  );
+}
+
+export async function sendBankTransferSellerInfoEmail(params: {
+  sellerEmail: string;
+  sellerName: string;
+  gigTitle: string;
+  orderUrl: string;
+}) {
+  await sendEmail(
+    params.sellerEmail,
+    "Ödeme onayı bekleniyor",
+    layout(
+      "Sipariş için ödeme bildirildi",
+      `<p>Merhaba ${params.sellerName},</p>
+       <p><strong>${params.gigTitle}</strong> siparişi için alıcı havale/EFT ile ödeme yaptığını bildirdi. Ödeme Profestia ekibi tarafından kontrol ediliyor, onaylandığında sana haber vereceğiz.</p>
+       ${button(params.orderUrl, "Siparişi Görüntüle")}`
     )
   );
 }

@@ -58,7 +58,7 @@ export function Footer() {
           <div>
             <p className="text-sm font-semibold text-brand-navy">Güvence</p>
             <ul className="mt-4 space-y-2.5 text-sm text-slate-500">
-              <li>iyzico ile güvenli ödeme</li>
+              <li>Profestia güvencesiyle ödeme</li>
               <li>İş onaylanmadan ödeme aktarılmaz</li>
               <li>7/24 destek</li>
             </ul>
@@ -67,7 +67,7 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col gap-2 border-t border-slate-100 pt-6 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between">
           <span>© {new Date().getFullYear()} Profestia. Tüm hakları saklıdır.</span>
-          <span>Ödemeler iyzico güvencesiyle korunmaktadır.</span>
+          <span>Ödemeler Profestia güvencesiyle korunmaktadır.</span>
         </div>
       </div>
     </footer>

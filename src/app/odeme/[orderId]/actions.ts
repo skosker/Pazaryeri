@@ -5,9 +5,10 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { markOrderPaid } from "@/lib/order-actions";
-import { sendBankTransferNotifiedEmail } from "@/lib/email";
+import { sendBankTransferAdminAlertEmail, sendBankTransferSellerInfoEmail } from "@/lib/email";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const adminEmail = process.env.ADMIN_EMAIL;
 
 export async function completeMockPayment(orderId: string) {
   const session = await auth();
@@ -92,12 +93,20 @@ export async function notifyBankTransfer(orderId: string) {
 
   await prisma.order.update({ where: { id: orderId }, data: { status: "PENDING_VERIFICATION" } });
 
-  await sendBankTransferNotifiedEmail({
+  if (adminEmail) {
+    await sendBankTransferAdminAlertEmail({
+      adminEmail,
+      buyerName: order.buyer.name,
+      gigTitle: order.gig.title,
+      amount: Number(order.amount),
+      orderUrl: `${appUrl}/siparis/${orderId}`,
+    });
+  }
+
+  await sendBankTransferSellerInfoEmail({
     sellerEmail: order.gig.seller.email,
     sellerName: order.gig.seller.name,
-    buyerName: order.buyer.name,
     gigTitle: order.gig.title,
-    amount: Number(order.amount),
     orderUrl: `${appUrl}/siparis/${orderId}`,
   });
 

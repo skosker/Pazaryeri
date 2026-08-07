@@ -87,7 +87,7 @@ export async function OrderPanel({
 
       <ul className="mt-5 space-y-2 text-xs text-slate-500">
         <li className="flex items-start gap-2">
-          <CheckIcon /> iyzico güvencesiyle ödeme — iş onaylanmadan satıcıya aktarılmaz
+          <CheckIcon /> Profestia güvencesiyle ödeme — iş onaylanmadan satıcıya aktarılmaz
         </li>
         <li className="flex items-start gap-2">
           <CheckIcon /> Kredi kartına 3 taksit imkanı

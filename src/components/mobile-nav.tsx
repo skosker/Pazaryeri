@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { SearchBar } from "@/components/search-bar";
 
-type NavUser = { name?: string | null } | null;
+type NavUser = { name?: string | null; role?: string } | null;
 
 export function MobileNav({
   user,
@@ -56,6 +56,11 @@ export function MobileNav({
             {user && (
               <Link href="/panel" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2.5 hover:bg-slate-50">
                 Panelim
+              </Link>
+            )}
+            {user?.role === "ADMIN" && (
+              <Link href="/admin" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2.5 hover:bg-slate-50">
+                Admin
               </Link>
             )}
           </nav>

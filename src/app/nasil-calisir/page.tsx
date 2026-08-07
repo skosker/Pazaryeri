@@ -8,11 +8,11 @@ const buyerSteps = [
   },
   {
     title: "Paketi seç ve öde",
-    description: "Fiyat, teslim süresi ve revizyon hakkını incele. iyzico güvencesiyle ödemeni yap.",
+    description: "Fiyat, teslim süresi ve revizyon hakkını incele. Profestia güvencesiyle ödemeni yap.",
   },
   {
     title: "Satıcı işe başlar",
-    description: "Ödemen iyzico'da güvenle bekletilir, satıcı onaylayıp işe başlar.",
+    description: "Ödemen Profestia'da güvenle bekletilir, satıcı onaylayıp işe başlar.",
   },
   {
     title: "Teslim al ve onayla",
@@ -103,7 +103,7 @@ export default function HowItWorksPage() {
           <div className="mt-8 grid grid-cols-1 gap-6 text-left sm:grid-cols-2">
             <Faq
               q="Ödemem güvende mi?"
-              a="Evet. Ödemen iyzico altyapısıyla korunur ve iş teslim alınıp onaylanana kadar satıcıya aktarılmaz."
+              a="Evet. Ödemen Profestia güvencesiyle korunur ve iş teslim alınıp onaylanana kadar satıcıya aktarılmaz."
             />
             <Faq
               q="İşten memnun kalmazsam ne olur?"

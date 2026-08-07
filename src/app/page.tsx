@@ -94,7 +94,7 @@ export default async function Home() {
       <section className="border-t border-slate-100 bg-white">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
           <Feature
-            title="iyzico güvencesiyle ödeme"
+            title="Profestia güvencesiyle ödeme"
             description="İş onaylanmadan ödeme satıcıya aktarılmaz."
           />
           <Feature
@@ -118,7 +118,7 @@ export default async function Home() {
             <HowStep
               n={2}
               title="Güvenle öde"
-              description="iyzico ile ödemeni yap, iş onaylanana kadar güvencede tutulur."
+              description="Ödemeni yap, iş onaylanana kadar Profestia güvencesinde tutulur."
             />
             <HowStep n={3} title="İşini teslim al" description="Teslimatı onayla, ödeme satıcıya aktarılır." />
           </div>

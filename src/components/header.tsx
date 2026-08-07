@@ -33,6 +33,14 @@ export async function Header() {
 
           {session?.user ? (
             <>
+              {session.user.role === "ADMIN" && (
+                <Link
+                  href="/admin"
+                  className="hidden text-sm font-medium text-slate-600 hover:text-brand-navy md:block"
+                >
+                  Admin
+                </Link>
+              )}
               <Link
                 href="/panel"
                 className="hidden text-sm font-medium text-slate-600 hover:text-brand-navy md:block"

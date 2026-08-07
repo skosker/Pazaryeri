@@ -8,7 +8,7 @@ import {
   startOrderAction,
   deliverOrderAction,
   completeOrderAction,
-  confirmBankTransferAction,
+  adminConfirmBankTransferAction,
 } from "./actions";
 
 const timelineSteps = [
@@ -23,11 +23,12 @@ export default async function OrderDetailPage(props: PageProps<"/siparis/[orderI
   const session = await auth();
   if (!session?.user) redirect(`/giris?callbackUrl=/siparis/${orderId}`);
 
-  const order = await getOrderForUser(orderId, session.user.id);
+  const order = await getOrderForUser(orderId, session.user.id, session.user.role);
   if (!order) notFound();
 
   const isBuyer = order.buyerId === session.user.id;
   const isSeller = order.gig.sellerId === session.user.id;
+  const isAdmin = session.user.role === "ADMIN";
   const currentStepIndex = timelineSteps.findIndex((s) => s.key === order.status);
 
   return (
@@ -66,24 +67,33 @@ export default async function OrderDetailPage(props: PageProps<"/siparis/[orderI
       {order.status === "PENDING_VERIFICATION" && isBuyer && (
         <div className="mt-6 rounded-2xl border border-orange-200 bg-orange-50 p-5">
           <p className="text-sm text-orange-800">
-            Havale/EFT bildirimin alındı. Satıcı ödemeyi kontrol edip onayladığında siparişin
+            Havale/EFT bildirimin alındı. Ekibimiz ödemeni kontrol edip onayladığında siparişin
             durumu güncellenecek.
           </p>
         </div>
       )}
 
-      {order.status === "PENDING_VERIFICATION" && isSeller && (
+      {order.status === "PENDING_VERIFICATION" && isSeller && !isAdmin && (
         <div className="mt-6 rounded-2xl border border-orange-200 bg-orange-50 p-5">
           <p className="text-sm text-orange-800">
-            {order.buyer.name}, bu sipariş için havale/EFT ile ödeme yaptığını bildirdi. Hesabına
-            ödemenin geçtiğini kontrol ettikten sonra onayla.
+            {order.buyer.name}, bu sipariş için havale/EFT ile ödeme bildirdi. Ödeme Profestia
+            ekibi tarafından kontrol ediliyor, onaylandığında haber verilecek.
           </p>
-          <form action={confirmBankTransferAction.bind(null, order.id)}>
+        </div>
+      )}
+
+      {order.status === "PENDING_VERIFICATION" && isAdmin && (
+        <div className="mt-6 rounded-2xl border border-orange-200 bg-orange-50 p-5">
+          <p className="text-sm text-orange-800">
+            {order.buyer.name}, bu sipariş için havale/EFT ile ödeme yaptığını bildirdi. Şirket
+            hesabına ödemenin geçtiğini kontrol ettikten sonra onayla.
+          </p>
+          <form action={adminConfirmBankTransferAction.bind(null, order.id)}>
             <button
               type="submit"
               className="brand-gradient mt-3 rounded-full px-5 py-2 text-sm font-semibold text-white hover:opacity-90"
             >
-              Ödemeyi Onayladım
+              Ödemeyi Onayla
             </button>
           </form>
         </div>
@@ -123,7 +133,7 @@ export default async function OrderDetailPage(props: PageProps<"/siparis/[orderI
         <div className="mt-2 flex items-center justify-between text-sm">
           <span className="text-slate-500">Ödeme durumu</span>
           <span className="font-semibold text-brand-navy">
-            {order.escrowReleased ? "Satıcıya aktarıldı" : "iyzico güvencesinde bekletiliyor"}
+            {order.escrowReleased ? "Satıcıya aktarıldı" : "Profestia güvencesinde bekletiliyor"}
           </span>
         </div>
       </div>

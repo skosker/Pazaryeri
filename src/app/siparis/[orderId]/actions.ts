@@ -9,7 +9,7 @@ import {
   sellerStartOrder,
   sellerDeliverOrder,
   buyerCompleteOrder,
-  sellerConfirmBankTransfer,
+  adminConfirmBankTransfer,
   OrderActionError,
 } from "@/lib/order-actions";
 
@@ -29,10 +29,10 @@ export async function startOrderAction(orderId: string) {
   revalidatePath(`/siparis/${orderId}`);
 }
 
-export async function confirmBankTransferAction(orderId: string) {
+export async function adminConfirmBankTransferAction(orderId: string) {
   const user = await requireUser();
   try {
-    await sellerConfirmBankTransfer(orderId, user.id);
+    await adminConfirmBankTransfer(orderId, user.role);
   } catch (error) {
     if (!(error instanceof OrderActionError)) throw error;
   }
