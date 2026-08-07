@@ -16,6 +16,7 @@ export type GigCardData = {
   coverColor: string;
   seller: { id: string; name: string };
   categoryName: string;
+  categorySlug: string;
   startingPrice: number;
   rating: number | null;
   reviewCount: number;
@@ -34,6 +35,7 @@ function toCardData(gig: RawGig): GigCardData {
     coverColor: gig.coverColor,
     seller: gig.seller,
     categoryName: gig.category.name,
+    categorySlug: gig.category.slug,
     startingPrice: gig.packages[0] ? Number(gig.packages[0].price) : 0,
     rating,
     reviewCount,

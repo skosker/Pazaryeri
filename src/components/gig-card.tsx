@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { StarRating } from "@/components/star-rating";
 import { coverImageUrl } from "@/lib/cover-colors";
+import { getCategoryAccent } from "@/lib/category-style";
 import type { GigCardData } from "@/lib/gigs";
 
 export function GigCard({ gig }: { gig: GigCardData }) {
+  const accent = getCategoryAccent(gig.categorySlug);
+
   return (
     <Link
       href={`/gig/${gig.slug}`}
@@ -27,7 +30,9 @@ export function GigCard({ gig }: { gig: GigCardData }) {
       </div>
 
       <div className="flex flex-1 flex-col p-4">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-purple-500">
+        <span
+          className={`inline-block w-fit rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${accent.bg} ${accent.text}`}
+        >
           {gig.categoryName}
         </span>
         <h3 className="mt-1 line-clamp-2 font-medium text-brand-navy group-hover:text-purple-700">

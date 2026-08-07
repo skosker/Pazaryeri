@@ -3,6 +3,7 @@ import { SearchBar } from "@/components/search-bar";
 import { CategoryIcon } from "@/components/category-icon";
 import { LinkButton } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
+import { getCategoryAccent } from "@/lib/category-style";
 
 const quickChips = [
   "Logo & Marka Kimliği",
@@ -17,7 +18,10 @@ const quickChips = [
 
 export default async function Home() {
   const [categories, gigCount, freelancerCount] = await Promise.all([
-    prisma.category.findMany({ orderBy: { name: "asc" } }),
+    prisma.category.findMany({
+      orderBy: { name: "asc" },
+      include: { _count: { select: { gigs: { where: { published: true } } } } },
+    }),
     prisma.gig.count(),
     prisma.user.count({ where: { role: "FREELANCER" } }),
   ]);
@@ -74,20 +78,31 @@ export default async function Home() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <h2 className="text-center text-xl font-bold text-brand-navy">Popüler Kategoriler</h2>
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-brand-navy sm:text-2xl">Popüler Kategoriler</h2>
+          <p className="mt-2 text-sm text-slate-500">İhtiyacına en yakın kategoriyi seç, hemen keşfetmeye başla.</p>
+        </div>
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {categories.map((c) => (
-            <Link
-              key={c.id}
-              href={`/kategoriler?kategori=${c.slug}`}
-              className="group flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 text-center transition hover:-translate-y-0.5 hover:border-purple-200 hover:shadow-lg hover:shadow-purple-100"
-            >
-              <span className="brand-gradient flex h-11 w-11 items-center justify-center rounded-full text-white transition group-hover:scale-105">
-                <CategoryIcon icon={c.icon} className="h-5 w-5" />
-              </span>
-              <span className="text-sm font-medium text-brand-navy">{c.name}</span>
-            </Link>
-          ))}
+          {categories.map((c) => {
+            const accent = getCategoryAccent(c.slug);
+            return (
+              <Link
+                key={c.id}
+                href={`/kategoriler?kategori=${c.slug}`}
+                className={`group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-100 ${accent.ring}`}
+              >
+                <span
+                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${accent.bg} ${accent.text} transition group-hover:scale-105`}
+                >
+                  <CategoryIcon icon={c.icon} className="h-6 w-6" />
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate font-semibold text-brand-navy">{c.name}</p>
+                  <p className="mt-0.5 text-xs text-slate-400">{c._count.gigs} hizmet</p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
