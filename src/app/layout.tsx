@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Profestia — İşini bilen freelancer'larla projeni hayata geçir",
+  title: "Profestia — AI Destekli Profesyonel Hizmet Platformu",
   description:
     "Grafik tasarımdan yazılıma, binlerce yetenekli freelancer arasından seç, dakikalar içinde işine başla.",
 };
