@@ -49,6 +49,16 @@ export async function markOrderPaid(orderId: string) {
   return updated;
 }
 
+export async function sellerConfirmBankTransfer(orderId: string, sellerId: string) {
+  const order = await prisma.order.findUnique({ where: { id: orderId }, include: { gig: true } });
+  if (!order || order.gig.sellerId !== sellerId) throw new OrderActionError("Yetkisiz işlem");
+  if (order.status !== "PENDING_VERIFICATION") throw new OrderActionError("Sipariş bu aşamada değil");
+
+  await prisma.payment.update({ where: { orderId }, data: { status: "SUCCESS" } });
+
+  return markOrderPaid(orderId);
+}
+
 export async function sellerStartOrder(orderId: string, sellerId: string) {
   const order = await prisma.order.findUnique({
     where: { id: orderId },

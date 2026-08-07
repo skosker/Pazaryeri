@@ -17,6 +17,7 @@ enum Role {
 
 enum OrderStatus {
   PENDING_PAYMENT
+  PENDING_VERIFICATION
   PAID
   IN_PROGRESS
   DELIVERED

@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { isMockPayment, initializeCheckoutForm } from "@/lib/iyzico";
 import { MockCheckoutForm } from "./mock-checkout-form";
 import { IyzicoEmbed } from "./iyzico-embed";
+import { PaymentMethodTabs } from "./payment-method-tabs";
+import { BankTransferPanel } from "./bank-transfer-panel";
 import type { Prisma } from "@/generated/prisma/client";
 
 export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">) {
@@ -86,11 +88,16 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
       )}
 
       <div className="mt-6">
-        {isMockPayment ? (
-          <MockCheckoutForm orderId={order.id} amount={amount} />
-        ) : (
-          <IyzicoEmbed checkoutFormContent={checkoutFormContent ?? ""} />
-        )}
+        <PaymentMethodTabs
+          cardContent={
+            isMockPayment ? (
+              <MockCheckoutForm orderId={order.id} amount={amount} />
+            ) : (
+              <IyzicoEmbed checkoutFormContent={checkoutFormContent ?? ""} />
+            )
+          }
+          bankContent={<BankTransferPanel orderId={order.id} amount={amount} />}
+        />
       </div>
 
       <p className="mt-4 text-center text-xs text-slate-400">

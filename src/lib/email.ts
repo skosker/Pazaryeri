@@ -78,6 +78,26 @@ export async function sendOrderPaidEmails(params: {
   );
 }
 
+export async function sendBankTransferNotifiedEmail(params: {
+  sellerEmail: string;
+  sellerName: string;
+  buyerName: string;
+  gigTitle: string;
+  amount: number;
+  orderUrl: string;
+}) {
+  await sendEmail(
+    params.sellerEmail,
+    "Havale/EFT ödeme bildirimi",
+    layout(
+      "Ödeme bildirimi alındı",
+      `<p>Merhaba ${params.sellerName},</p>
+       <p><strong>${params.buyerName}</strong>, <strong>${params.gigTitle}</strong> siparişi için <strong>${params.amount}₺</strong> tutarında havale/EFT yaptığını bildirdi. Hesabına ödemeyi kontrol edip onaylayabilirsin.</p>
+       ${button(params.orderUrl, "Ödemeyi Onayla")}`
+    )
+  );
+}
+
 export async function sendOrderStartedEmail(params: {
   buyerEmail: string;
   buyerName: string;

@@ -4,7 +4,12 @@ import { auth } from "@/auth";
 import { getOrderForUser } from "@/lib/order-actions";
 import { orderStatusLabel, orderStatusColor } from "@/lib/order-status";
 import { ReviewForm } from "./review-form";
-import { startOrderAction, deliverOrderAction, completeOrderAction } from "./actions";
+import {
+  startOrderAction,
+  deliverOrderAction,
+  completeOrderAction,
+  confirmBankTransferAction,
+} from "./actions";
 
 const timelineSteps = [
   { key: "PAID", label: "Ödendi" },
@@ -58,7 +63,35 @@ export default async function OrderDetailPage(props: PageProps<"/siparis/[orderI
         </div>
       )}
 
-      {order.status !== "PENDING_PAYMENT" && order.status !== "CANCELLED" && (
+      {order.status === "PENDING_VERIFICATION" && isBuyer && (
+        <div className="mt-6 rounded-2xl border border-orange-200 bg-orange-50 p-5">
+          <p className="text-sm text-orange-800">
+            Havale/EFT bildirimin alındı. Satıcı ödemeyi kontrol edip onayladığında siparişin
+            durumu güncellenecek.
+          </p>
+        </div>
+      )}
+
+      {order.status === "PENDING_VERIFICATION" && isSeller && (
+        <div className="mt-6 rounded-2xl border border-orange-200 bg-orange-50 p-5">
+          <p className="text-sm text-orange-800">
+            {order.buyer.name}, bu sipariş için havale/EFT ile ödeme yaptığını bildirdi. Hesabına
+            ödemenin geçtiğini kontrol ettikten sonra onayla.
+          </p>
+          <form action={confirmBankTransferAction.bind(null, order.id)}>
+            <button
+              type="submit"
+              className="brand-gradient mt-3 rounded-full px-5 py-2 text-sm font-semibold text-white hover:opacity-90"
+            >
+              Ödemeyi Onayladım
+            </button>
+          </form>
+        </div>
+      )}
+
+      {order.status !== "PENDING_PAYMENT" &&
+        order.status !== "PENDING_VERIFICATION" &&
+        order.status !== "CANCELLED" && (
         <ol className="mt-8 flex items-center gap-2">
           {timelineSteps.map((step, i) => (
             <li key={step.key} className="flex flex-1 items-center gap-2">

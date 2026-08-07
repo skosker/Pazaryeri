@@ -2,6 +2,7 @@ import type { OrderStatus } from "@/generated/prisma/enums";
 
 export const orderStatusLabel: Record<OrderStatus, string> = {
   PENDING_PAYMENT: "Ödeme Bekleniyor",
+  PENDING_VERIFICATION: "Ödeme Onayı Bekleniyor",
   PAID: "Ödendi",
   IN_PROGRESS: "Devam Ediyor",
   DELIVERED: "Teslim Edildi",
@@ -11,6 +12,7 @@ export const orderStatusLabel: Record<OrderStatus, string> = {
 
 export const orderStatusColor: Record<OrderStatus, string> = {
   PENDING_PAYMENT: "bg-amber-50 text-amber-700",
+  PENDING_VERIFICATION: "bg-orange-50 text-orange-700",
   PAID: "bg-sky-50 text-sky-700",
   IN_PROGRESS: "bg-indigo-50 text-indigo-700",
   DELIVERED: "bg-purple-50 text-purple-700",
