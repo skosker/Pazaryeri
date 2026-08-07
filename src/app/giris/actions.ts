@@ -23,6 +23,9 @@ export async function loginAction(
           error: "E-postanı henüz doğrulamadın. Gelen kutunu kontrol et ve doğrulama linkine tıkla.",
         };
       }
+      if (isValid && user.suspended) {
+        return { error: "Hesabın askıya alındı. Destek ekibiyle iletişime geç." };
+      }
     }
   }
 

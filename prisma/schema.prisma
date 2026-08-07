@@ -42,6 +42,7 @@ model User {
   bio           String?
   image         String?
   emailVerified DateTime?
+  suspended     Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -82,6 +83,7 @@ model Gig {
   title       String
   description String
   coverColor  String   @default("indigo") // placeholder cover palette (no real images)
+  published   Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

@@ -42,6 +42,7 @@ function toCardData(gig: RawGig): GigCardData {
 
 export async function getFeaturedGigs(limit = 6): Promise<GigCardData[]> {
   const gigs = await prisma.gig.findMany({
+    where: { published: true },
     include: gigCardInclude,
     orderBy: { createdAt: "desc" },
     take: limit,
@@ -58,7 +59,7 @@ export type GigFilters = {
 };
 
 export async function listGigs(filters: GigFilters): Promise<GigCardData[]> {
-  const where: Prisma.GigWhereInput = {};
+  const where: Prisma.GigWhereInput = { published: true };
 
   if (filters.categorySlugs?.length) {
     where.category = { slug: { in: filters.categorySlugs } };
@@ -111,6 +112,7 @@ export async function getRelatedGigs(
     where: {
       category: { slug: categorySlug },
       slug: { not: excludeSlug },
+      published: true,
     },
     include: gigCardInclude,
     orderBy: { createdAt: "desc" },
