@@ -1,12 +1,34 @@
 "use client";
 
 import { useActionState } from "react";
-import { createGigAction, type FormState } from "./actions";
+import type { FormState } from "./actions";
 
 const initialState: FormState = {};
 
-export function GigForm({ categories }: { categories: { id: string; name: string }[] }) {
-  const [state, formAction, pending] = useActionState(createGigAction, initialState);
+type GigFormValues = {
+  title?: string;
+  categoryId?: string;
+  description?: string;
+  price?: number;
+  deliveryDays?: number;
+  revisionCount?: number;
+  packageDescription?: string;
+};
+
+export function GigForm({
+  categories,
+  action,
+  defaultValues,
+  submitLabel = "İlanı Yayınla",
+  pendingLabel = "Yayınlanıyor...",
+}: {
+  categories: { id: string; name: string }[];
+  action: (state: FormState, formData: FormData) => Promise<FormState>;
+  defaultValues?: GigFormValues;
+  submitLabel?: string;
+  pendingLabel?: string;
+}) {
+  const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
@@ -16,6 +38,7 @@ export function GigForm({ categories }: { categories: { id: string; name: string
           name="title"
           required
           minLength={10}
+          defaultValue={defaultValues?.title}
           placeholder="ör. Sosyal medya içerik tasarımı yapıyorum"
           className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
         />
@@ -26,6 +49,7 @@ export function GigForm({ categories }: { categories: { id: string; name: string
         <select
           name="categoryId"
           required
+          defaultValue={defaultValues?.categoryId ?? ""}
           className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
         >
           <option value="">Kategori seç</option>
@@ -44,6 +68,7 @@ export function GigForm({ categories }: { categories: { id: string; name: string
           required
           minLength={30}
           rows={5}
+          defaultValue={defaultValues?.description}
           placeholder="Hizmetini detaylıca anlat"
           className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
         />
@@ -60,6 +85,7 @@ export function GigForm({ categories }: { categories: { id: string; name: string
               min={1}
               step="1"
               required
+              defaultValue={defaultValues?.price}
               className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
             />
           </label>
@@ -71,6 +97,7 @@ export function GigForm({ categories }: { categories: { id: string; name: string
               min={1}
               step="1"
               required
+              defaultValue={defaultValues?.deliveryDays}
               className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
             />
           </label>
@@ -81,7 +108,7 @@ export function GigForm({ categories }: { categories: { id: string; name: string
               type="number"
               min={0}
               step="1"
-              defaultValue={2}
+              defaultValue={defaultValues?.revisionCount ?? 2}
               required
               className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
             />
@@ -94,6 +121,7 @@ export function GigForm({ categories }: { categories: { id: string; name: string
             required
             minLength={10}
             rows={2}
+            defaultValue={defaultValues?.packageDescription}
             placeholder="Temel içerik paketi, 2 revizyon ve kaynak dosyalar dahil."
             className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
           />
@@ -109,7 +137,7 @@ export function GigForm({ categories }: { categories: { id: string; name: string
         disabled={pending}
         className="brand-gradient self-start rounded-full px-6 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
       >
-        {pending ? "Yayınlanıyor..." : "İlanı Yayınla"}
+        {pending ? pendingLabel : submitLabel}
       </button>
     </form>
   );

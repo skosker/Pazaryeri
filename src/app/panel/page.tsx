@@ -1,16 +1,15 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { orderStatusLabel, orderStatusColor } from "@/lib/order-status";
 
 export default async function PanelPage() {
   const session = await auth();
-  if (!session?.user) redirect("/giris?callbackUrl=/panel");
+  if (!session?.user) return null;
 
   const { id: userId, role } = session.user;
 
-  const [myGigs, ordersAsBuyer, ordersAsSeller] = await Promise.all([
+  const [myGigs, ordersAsBuyer, ordersAsSeller, ratingAgg] = await Promise.all([
     role === "FREELANCER"
       ? prisma.gig.findMany({
           where: { sellerId: userId },
@@ -30,6 +29,12 @@ export default async function PanelPage() {
           orderBy: { createdAt: "desc" },
         })
       : Promise.resolve([]),
+    role === "FREELANCER"
+      ? prisma.review.aggregate({
+          where: { gig: { sellerId: userId } },
+          _avg: { rating: true },
+        })
+      : Promise.resolve(null),
   ]);
 
   const activeStatuses = ["PAID", "IN_PROGRESS", "DELIVERED"] as const;
@@ -45,9 +50,10 @@ export default async function PanelPage() {
   const buyerActiveCount = ordersAsBuyer.filter((o) =>
     (activeStatuses as readonly string[]).includes(o.status)
   ).length;
+  const avgRating = ratingAgg?._avg.rating ?? null;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <div>
       <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-brand-navy">Merhaba, {session.user.name}</h1>
@@ -55,6 +61,14 @@ export default async function PanelPage() {
             {role === "FREELANCER" ? "Freelancer paneli" : "Alıcı paneli"}
           </p>
         </div>
+        {role === "FREELANCER" && (
+          <Link
+            href="/panel/ilan-olustur"
+            className="brand-gradient rounded-full px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+          >
+            + Yeni İlan Oluştur
+          </Link>
+        )}
       </div>
 
       <div className="mb-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -62,8 +76,8 @@ export default async function PanelPage() {
           <>
             <StatCard label="Toplam Kazanç" value={`${sellerEarnings}₺`} />
             <StatCard label="Aktif Sipariş" value={String(sellerActiveCount)} />
-            <StatCard label="Yayınlı İlan" value={String(myGigs.length)} />
-            <StatCard label="Gelen Sipariş" value={String(ordersAsSeller.length)} />
+            <StatCard label="Yayınlı İlan" value={String(myGigs.filter((g) => g.published).length)} />
+            <StatCard label="Puan" value={avgRating ? `${avgRating.toFixed(1)} ★` : "—"} />
           </>
         ) : (
           <>
@@ -75,14 +89,11 @@ export default async function PanelPage() {
       </div>
 
       {role === "FREELANCER" && (
-        <section className="mb-12">
+        <section className="mb-10">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-brand-navy">İlanlarım</h2>
-            <Link
-              href="/panel/ilan-olustur"
-              className="brand-gradient rounded-full px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
-            >
-              + Yeni İlan Oluştur
+            <Link href="/panel/ilanlarim" className="text-sm font-semibold text-purple-700 hover:underline">
+              Tümünü Gör
             </Link>
           </div>
 
@@ -92,7 +103,7 @@ export default async function PanelPage() {
             </p>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {myGigs.map((gig) => (
+              {myGigs.slice(0, 3).map((gig) => (
                 <Link
                   key={gig.id}
                   href={`/gig/${gig.slug}`}
@@ -113,15 +124,20 @@ export default async function PanelPage() {
       )}
 
       {role === "FREELANCER" && (
-        <section className="mb-12">
-          <h2 className="mb-4 text-lg font-semibold text-brand-navy">Gelen Siparişler</h2>
+        <section className="mb-10">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-brand-navy">Gelen Siparişler</h2>
+            <Link href="/panel/siparisler" className="text-sm font-semibold text-purple-700 hover:underline">
+              Tümünü Gör
+            </Link>
+          </div>
           {ordersAsSeller.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-400">
               Henüz sipariş almadın.
             </p>
           ) : (
             <OrderTable
-              rows={ordersAsSeller.map((o) => ({
+              rows={ordersAsSeller.slice(0, 5).map((o) => ({
                 id: o.id,
                 title: o.gig.title,
                 subtitle: o.buyer.name,
@@ -134,7 +150,17 @@ export default async function PanelPage() {
       )}
 
       <section>
-        <h2 className="mb-4 text-lg font-semibold text-brand-navy">Siparişlerim</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-brand-navy">Siparişlerim</h2>
+          {ordersAsBuyer.length > 5 && (
+            <Link
+              href="/panel/siparisler?gorunum=alici"
+              className="text-sm font-semibold text-purple-700 hover:underline"
+            >
+              Tümünü Gör
+            </Link>
+          )}
+        </div>
         {ordersAsBuyer.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-400">
             Henüz bir sipariş vermedin.{" "}
@@ -144,7 +170,7 @@ export default async function PanelPage() {
           </p>
         ) : (
           <OrderTable
-            rows={ordersAsBuyer.map((o) => ({
+            rows={ordersAsBuyer.slice(0, 5).map((o) => ({
               id: o.id,
               title: o.gig.title,
               subtitle: null,

@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
-import { toggleSuspensionAction, toggleAdminAction } from "./actions";
+import { toggleSuspensionAction, changeUserRoleAction } from "./actions";
 
 const roleLabel: Record<string, string> = {
   BUYER: "Alıcı",
@@ -71,13 +71,25 @@ export default async function AdminUsersPage() {
                   {user.id === admin.id ? (
                     <p className="text-right text-xs text-slate-400">Bu sensin</p>
                   ) : (
-                    <div className="flex justify-end gap-2">
-                      <form action={toggleAdminAction.bind(null, user.id)}>
+                    <div className="flex flex-wrap items-center justify-end gap-2">
+                      <form
+                        action={changeUserRoleAction.bind(null, user.id)}
+                        className="flex items-center gap-1.5"
+                      >
+                        <select
+                          name="role"
+                          defaultValue={user.role}
+                          className="rounded-lg border border-slate-300 px-2 py-1.5 text-xs text-slate-600 focus:border-purple-400 focus:outline-none"
+                        >
+                          <option value="BUYER">Alıcı</option>
+                          <option value="FREELANCER">Freelancer</option>
+                          <option value="ADMIN">Admin</option>
+                        </select>
                         <button
                           type="submit"
                           className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
                         >
-                          {user.role === "ADMIN" ? "Adminliği Kaldır" : "Admin Yap"}
+                          Kaydet
                         </button>
                       </form>
                       <form action={toggleSuspensionAction.bind(null, user.id)}>

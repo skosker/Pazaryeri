@@ -23,3 +23,9 @@ export const reviewSchema = z.object({
   rating: z.coerce.number().int().min(1).max(5),
   comment: z.string().trim().min(5, "Yorum en az 5 karakter olmalı"),
 });
+
+export const profileSchema = z.object({
+  name: z.string().trim().min(2, "Ad Soyad en az 2 karakter olmalı").max(60),
+  title: z.string().trim().max(80).optional().or(z.literal("")),
+  bio: z.string().trim().max(600).optional().or(z.literal("")),
+});
