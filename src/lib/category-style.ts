@@ -7,6 +7,8 @@ const accents: Record<string, { bg: string; text: string; ring: string }> = {
   "muzik-ses": { bg: "bg-violet-50", text: "text-violet-600", ring: "group-hover:border-violet-200" },
   "is-danismanlik": { bg: "bg-emerald-50", text: "text-emerald-600", ring: "group-hover:border-emerald-200" },
   "egitim-ders": { bg: "bg-orange-50", text: "text-orange-600", ring: "group-hover:border-orange-200" },
+  "ai-otomasyon": { bg: "bg-cyan-50", text: "text-cyan-600", ring: "group-hover:border-cyan-200" },
+  "veri-analitik": { bg: "bg-teal-50", text: "text-teal-600", ring: "group-hover:border-teal-200" },
 };
 
 const fallback = { bg: "bg-purple-50", text: "text-purple-600", ring: "group-hover:border-purple-200" };

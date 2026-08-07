@@ -15,6 +15,8 @@ const categories = [
   { name: "Müzik & Ses", slug: "muzik-ses", icon: "music" },
   { name: "İş & Danışmanlık", slug: "is-danismanlik", icon: "briefcase" },
   { name: "Eğitim & Ders", slug: "egitim-ders", icon: "book" },
+  { name: "AI & Otomasyon", slug: "ai-otomasyon", icon: "cpu" },
+  { name: "Veri & Analitik", slug: "veri-analitik", icon: "chart" },
 ];
 
 const sellers = [

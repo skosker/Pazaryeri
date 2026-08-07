@@ -14,6 +14,12 @@ const paths: Record<string, { stroke: string; fill?: string }> = {
   music: { stroke: "M9 18V5l12-2v13 M9 18a3 3 0 11-6 0 3 3 0 016 0z M21 16a3 3 0 11-6 0 3 3 0 016 0z" },
   briefcase: { stroke: "M3 7h18v13H3z M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3 M3 13h18" },
   book: { stroke: "M12 4L3 8.5l9 4.5 9-4.5z M7 10.5v4c0 1.38 2.24 2.5 5 2.5s5-1.12 5-2.5v-4 M21 8.5v5" },
+  cpu: {
+    stroke:
+      "M7 4h10a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3z M11 1v3 M13 1v3 M11 20v3 M13 20v3 M1 11h3 M1 13h3 M20 11h3 M20 13h3",
+    fill: "M9 9h6v6H9z",
+  },
+  chart: { stroke: "M3 20h18 M6 20v-6 M12 20V8 M18 20V4" },
   sparkles: {
     stroke:
       "M12 3l1.8 4.9L18 9l-4.2 1.9L12 16l-1.8-5.1L6 9l4.2-1.1L12 3z M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14z",
