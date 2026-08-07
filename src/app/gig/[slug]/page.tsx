@@ -75,7 +75,7 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
           <div className="mt-6 h-72 overflow-hidden rounded-2xl bg-slate-100">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={coverImageUrl(gig.slug, "1200/800")}
+              src={coverImageUrl(gig.category.slug, gig.slug, "1200/800")}
               alt={gig.title}
               className="h-full w-full object-cover"
             />

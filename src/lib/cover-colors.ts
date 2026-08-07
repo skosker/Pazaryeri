@@ -11,6 +11,33 @@ export function coverGradientClass(color: string) {
   return coverGradients[color] ?? coverGradients.indigo;
 }
 
-export function coverImageUrl(slug: string, size: `${number}/${number}` = "600/400") {
-  return `https://picsum.photos/seed/${encodeURIComponent(slug)}/${size}`;
+const categoryKeywords: Record<string, string> = {
+  "grafik-tasarim": "graphic-design,branding",
+  "yazilim-web": "coding,programming",
+  "yazi-ceviri": "writing,typewriter",
+  "video-animasyon": "video-editing,filmmaking",
+  "dijital-pazarlama": "marketing,advertising",
+  "muzik-ses": "music,audio",
+  "is-danismanlik": "business,consulting",
+  "egitim-ders": "education,elearning",
+  "ai-otomasyon": "artificial-intelligence,robot",
+  "veri-analitik": "data,analytics",
+};
+
+function hashSeed(input: string) {
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
+  }
+  return hash % 1000;
+}
+
+export function coverImageUrl(
+  categorySlug: string,
+  gigSlug: string,
+  size: `${number}/${number}` = "600/400"
+) {
+  const keywords = categoryKeywords[categorySlug] ?? "business,office";
+  const lock = hashSeed(gigSlug);
+  return `https://loremflickr.com/${size}/${keywords}?lock=${lock}`;
 }

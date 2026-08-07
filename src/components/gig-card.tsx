@@ -15,7 +15,7 @@ export function GigCard({ gig }: { gig: GigCardData }) {
       <div className="relative h-48 overflow-hidden bg-slate-100">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={coverImageUrl(gig.slug)}
+          src={coverImageUrl(gig.categorySlug, gig.slug)}
           alt=""
           className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
           loading="lazy"

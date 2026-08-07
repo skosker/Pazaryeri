@@ -26,6 +26,8 @@ const sellers = [
   { name: "Can Y.", email: "can@profestia.dev", title: "Logo & Marka Tasarımcısı" },
   { name: "Zeynep B.", email: "zeynep@profestia.dev", title: "Video Editörü" },
   { name: "Burak S.", email: "burak@profestia.dev", title: "Reklam Yöneticisi" },
+  { name: "Deniz A.", email: "deniz@profestia.dev", title: "AI & Otomasyon Danışmanı" },
+  { name: "Ayşe Ö.", email: "ayse@profestia.dev", title: "Veri Analisti" },
 ];
 
 const gigs = [
@@ -108,6 +110,126 @@ const gigs = [
     delivery: 2,
     description:
       "Ürünlerinizi öne çıkaran, satış odaklı görsel post ve story tasarımları hazırlıyorum.",
+  },
+  {
+    seller: "asli@profestia.dev",
+    category: "yazi-ceviri",
+    title: "İngilizce-Türkçe profesyonel çeviri yapıyorum",
+    coverColor: "violet",
+    price: 220,
+    delivery: 2,
+    description:
+      "Teknik dokümanlar, web siteleri ve pazarlama metinlerinizi anlam bütünlüğünü koruyarak İngilizce-Türkçe çeviriyorum.",
+  },
+  {
+    seller: "zeynep@profestia.dev",
+    category: "video-animasyon",
+    title: "2D logo animasyonu ve marka intro'su hazırlıyorum",
+    coverColor: "emerald",
+    price: 550,
+    delivery: 4,
+    description:
+      "Markanızın logosunu akıcı bir 2D animasyona dönüştürüp video içeriklerinizin başına eklenecek profesyonel bir intro hazırlıyorum.",
+  },
+  {
+    seller: "zeynep@profestia.dev",
+    category: "muzik-ses",
+    title: "Podcast ve video için ses miksajı ve düzenleme yapıyorum",
+    coverColor: "indigo",
+    price: 300,
+    delivery: 3,
+    description:
+      "Ham ses kayıtlarınızı gürültüden arındırıp seviye dengelemesi yaparak yayına hazır, temiz bir mikse dönüştürüyorum.",
+  },
+  {
+    seller: "elif@profestia.dev",
+    category: "muzik-ses",
+    title: "Sosyal medya videolarınız için müzik ve seslendirme buluyorum",
+    coverColor: "rose",
+    price: 180,
+    delivery: 2,
+    description:
+      "İçeriğinizin tonuna uygun telifsiz müzik seçimi yapıyor, gerektiğinde kısa seslendirme kaydı da sağlıyorum.",
+  },
+  {
+    seller: "burak@profestia.dev",
+    category: "is-danismanlik",
+    title: "Küçük işletmeler için pazarlama stratejisi danışmanlığı veriyorum",
+    coverColor: "amber",
+    price: 750,
+    delivery: 5,
+    description:
+      "İşletmenizin hedef kitlesini, rakiplerini ve kanallarını analiz ederek uygulanabilir bir pazarlama yol haritası çıkarıyorum.",
+  },
+  {
+    seller: "mert@profestia.dev",
+    category: "is-danismanlik",
+    title: "Yazılım projeniz için teknik danışmanlık ve kod incelemesi yapıyorum",
+    coverColor: "sky",
+    price: 600,
+    delivery: 3,
+    description:
+      "Mevcut kod tabanınızı inceleyip mimari, performans ve güvenlik açısından somut iyileştirme önerileri sunuyorum.",
+  },
+  {
+    seller: "asli@profestia.dev",
+    category: "egitim-ders",
+    title: "İçerik yazarlığı ve SEO üzerine birebir online ders veriyorum",
+    coverColor: "violet",
+    price: 400,
+    delivery: 1,
+    description:
+      "SEO uyumlu içerik yazımının temellerini, anahtar kelime araştırmasını ve yazı planlamasını birebir canlı derste anlatıyorum.",
+  },
+  {
+    seller: "can@profestia.dev",
+    category: "egitim-ders",
+    title: "Grafik tasarım temelleri online eğitimi veriyorum",
+    coverColor: "amber",
+    price: 450,
+    delivery: 1,
+    description:
+      "Tipografi, renk teorisi ve kompozisyon temellerini örneklerle anlatan, yeni başlayanlara yönelik birebir eğitim veriyorum.",
+  },
+  {
+    seller: "deniz@profestia.dev",
+    category: "ai-otomasyon",
+    title: "Zapier & Make ile iş süreçlerinizi otomatikleştiriyorum",
+    coverColor: "indigo",
+    price: 850,
+    delivery: 5,
+    description:
+      "Tekrar eden manuel işlerinizi Zapier veya Make üzerinde kurduğum otomasyon akışlarıyla ortadan kaldırıyorum.",
+  },
+  {
+    seller: "deniz@profestia.dev",
+    category: "ai-otomasyon",
+    title: "ChatGPT/Claude entegrasyonlu AI chatbot geliştiriyorum",
+    coverColor: "sky",
+    price: 1400,
+    delivery: 8,
+    description:
+      "Web siteniz veya WhatsApp hattınız için müşteri sorularını yanıtlayan, kendi verilerinizle eğitilmiş bir AI chatbot geliştiriyorum.",
+  },
+  {
+    seller: "ayse@profestia.dev",
+    category: "veri-analitik",
+    title: "İşletmeniz için satış ve pazarlama verilerini analiz ediyorum",
+    coverColor: "emerald",
+    price: 700,
+    delivery: 4,
+    description:
+      "Ham verilerinizi düzenleyip anlamlı içgörülere dönüştürerek karar alma sürecinize somut veri desteği sağlıyorum.",
+  },
+  {
+    seller: "ayse@profestia.dev",
+    category: "veri-analitik",
+    title: "Excel/Power BI ile interaktif veri paneli (dashboard) hazırlıyorum",
+    coverColor: "violet",
+    price: 950,
+    delivery: 6,
+    description:
+      "Verilerinizi canlı güncellenen, filtrelenebilir bir Power BI veya Excel panelinde tek bakışta takip edilebilir hale getiriyorum.",
   },
 ];
 
