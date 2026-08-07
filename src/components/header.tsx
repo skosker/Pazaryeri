@@ -2,7 +2,6 @@ import Link from "next/link";
 import { auth, signOut } from "@/auth";
 import { Logo } from "@/components/logo";
 import { LinkButton } from "@/components/ui/button";
-import { SearchBar } from "@/components/search-bar";
 import { MobileNav } from "@/components/mobile-nav";
 
 export async function Header() {
@@ -22,11 +21,7 @@ export async function Header() {
           </Link>
         </nav>
 
-        <div className="ml-auto hidden flex-1 max-w-md sm:block">
-          <SearchBar />
-        </div>
-
-        <div className="ml-auto flex items-center gap-3 sm:ml-0">
+        <div className="ml-auto flex items-center gap-3">
           {!session?.user && (
             <Link
               href="/kayit?role=FREELANCER"
