@@ -58,6 +58,15 @@ export function MobileNav({
                 Panelim
               </Link>
             )}
+            {user?.role === "BUYER" && (
+              <Link
+                href="/panel/freelancer-ol"
+                onClick={() => setOpen(false)}
+                className="rounded-lg px-2 py-2.5 hover:bg-slate-50"
+              >
+                Freelancer Ol
+              </Link>
+            )}
             {user?.role === "ADMIN" && (
               <Link href="/admin" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2.5 hover:bg-slate-50">
                 Admin

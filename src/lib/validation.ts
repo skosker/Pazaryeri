@@ -29,3 +29,8 @@ export const profileSchema = z.object({
   title: z.string().trim().max(80).optional().or(z.literal("")),
   bio: z.string().trim().max(600).optional().or(z.literal("")),
 });
+
+export const becomeFreelancerSchema = z.object({
+  title: z.string().trim().min(2, "Unvan en az 2 karakter olmalı").max(80),
+  bio: z.string().trim().max(600).optional().or(z.literal("")),
+});

@@ -53,6 +53,14 @@ export async function Header() {
                   Admin
                 </Link>
               )}
+              {session.user.role === "BUYER" && (
+                <Link
+                  href="/panel/freelancer-ol"
+                  className="hidden text-sm font-medium text-slate-600 hover:text-brand-navy md:block"
+                >
+                  Freelancer Ol
+                </Link>
+              )}
               <Link
                 href="/panel"
                 className="hidden text-sm font-medium text-slate-600 hover:text-brand-navy md:block"

@@ -17,19 +17,12 @@ const quickChips = [
 ];
 
 export default async function Home() {
-  const [categories, gigCount, freelancerCount, recentFreelancers] = await Promise.all([
+  const [categories, gigCount] = await Promise.all([
     prisma.category.findMany({
       orderBy: { name: "asc" },
       include: { _count: { select: { gigs: { where: { published: true } } } } },
     }),
     prisma.gig.count({ where: { published: true } }),
-    prisma.user.count({ where: { role: "FREELANCER" } }),
-    prisma.user.findMany({
-      where: { role: "FREELANCER" },
-      select: { name: true },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-    }),
   ]);
 
   return (
@@ -75,30 +68,10 @@ export default async function Home() {
             ))}
           </div>
 
-          <dl className="mx-auto mt-14 grid max-w-lg grid-cols-3 gap-4 border-t border-white/10 pt-8">
+          <dl className="mx-auto mt-14 grid max-w-sm grid-cols-2 gap-4 border-t border-white/10 pt-8">
             <Stat value={`${categories.length}`} label="Kategori" />
             <Stat value={`${gigCount}+`} label="Hizmet" />
-            <Stat value={`${freelancerCount}+`} label="Freelancer" />
           </dl>
-
-          {recentFreelancers.length > 0 && (
-            <div className="mt-8 flex items-center gap-3">
-              <div className="flex -space-x-2">
-                {recentFreelancers.map((f) => (
-                  <span
-                    key={f.name}
-                    className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-brand-navy bg-gradient-to-br from-fuchsia-500 to-indigo-500 text-xs font-semibold text-white"
-                  >
-                    {f.name.charAt(0)}
-                  </span>
-                ))}
-              </div>
-              <p className="text-xs text-white/60">
-                <span className="font-semibold text-white">{freelancerCount}+ freelancer</span> bugün sana yardım
-                etmeye hazır
-              </p>
-            </div>
-          )}
         </div>
       </section>
 

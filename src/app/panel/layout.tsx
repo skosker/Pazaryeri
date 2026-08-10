@@ -7,12 +7,14 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   if (!session?.user) redirect("/giris?callbackUrl=/panel");
 
   const isFreelancer = session.user.role === "FREELANCER";
+  const isBuyer = session.user.role === "BUYER";
 
   const navItems = [
     { href: "/panel", label: "Genel Bakış" },
     ...(isFreelancer ? [{ href: "/panel/ilanlarim", label: "İlanlarım" }] : []),
     { href: "/panel/siparisler", label: isFreelancer ? "Siparişler" : "Siparişlerim" },
     { href: "/panel/profil", label: "Profilim" },
+    ...(isBuyer ? [{ href: "/panel/freelancer-ol", label: "Freelancer Ol" }] : []),
   ];
 
   return (
