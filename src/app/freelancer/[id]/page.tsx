@@ -22,6 +22,7 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
       title: true,
       bio: true,
       isOnline: true,
+      isPro: true,
       createdAt: true,
       role: true,
       suspended: true,
@@ -68,9 +69,16 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
             <h1 className="mt-4 text-lg font-bold text-brand-navy">{freelancer.name}</h1>
             <p className="mt-1 text-sm text-slate-500">{freelancer.title ?? "Freelancer"}</p>
 
-            <span className="mt-3 inline-block rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
-              {sellerLevelLabel(reviewCount)}
-            </span>
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5">
+              <span className="inline-block rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
+                {sellerLevelLabel(reviewCount)}
+              </span>
+              {freelancer.isPro && (
+                <span className="inline-block rounded-full bg-amber-400 px-3 py-1 text-xs font-bold uppercase tracking-wide text-amber-950">
+                  Pro
+                </span>
+              )}
+            </div>
 
             {reviewCount > 0 && rating !== null && (
               <div className="mt-3 flex justify-center">

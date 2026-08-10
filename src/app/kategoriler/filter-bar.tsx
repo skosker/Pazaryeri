@@ -22,6 +22,8 @@ export function FilterBar({
   initialBudget,
   initialDelivery,
   initialOnlineOnly,
+  isProBuyer,
+  initialProOnly,
 }: {
   categories: Category[];
   subcategoriesByCategory: Record<string, Subcategory[]>;
@@ -30,6 +32,8 @@ export function FilterBar({
   initialBudget: number;
   initialDelivery: string;
   initialOnlineOnly: boolean;
+  isProBuyer?: boolean;
+  initialProOnly?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -41,6 +45,7 @@ export function FilterBar({
   const [budget, setBudget] = useState(initialBudget);
   const [delivery, setDelivery] = useState(initialDelivery);
   const [onlineOnly, setOnlineOnly] = useState(initialOnlineOnly);
+  const [proOnly, setProOnly] = useState(initialProOnly ?? false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
   useEffect(() => {
@@ -66,6 +71,7 @@ export function FilterBar({
     butce?: number;
     sure?: string;
     cevrimici?: boolean;
+    proOnly?: boolean;
   }) {
     const params = new URLSearchParams(window.location.search);
 
@@ -86,6 +92,10 @@ export function FilterBar({
     const onlineValue = next.cevrimici ?? onlineOnly;
     if (onlineValue) params.set("cevrimici", "1");
     else params.delete("cevrimici");
+
+    const proValue = next.proOnly ?? proOnly;
+    if (proValue) params.set("pro", "1");
+    else params.delete("pro");
 
     params.delete("sayfa");
     router.push(`${pathname}?${params.toString()}`);
@@ -131,27 +141,52 @@ export function FilterBar({
         />
       </div>
 
-      <label className="flex cursor-pointer items-center gap-2.5 text-sm text-slate-600">
-        Çevrimiçi freelancer&apos;ların ilanlarını göster
-        <span
-          role="switch"
-          aria-checked={onlineOnly}
-          onClick={() => {
-            const next = !onlineOnly;
-            setOnlineOnly(next);
-            applyParams({ cevrimici: next });
-          }}
-          className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition ${
-            onlineOnly ? "bg-emerald-500" : "bg-slate-200"
-          }`}
-        >
+      <div className="flex flex-wrap items-center gap-4">
+        {isProBuyer && (
+          <label className="flex cursor-pointer items-center gap-2.5 text-sm text-slate-600">
+            Sadece Pro freelancer&apos;ları göster
+            <span
+              role="switch"
+              aria-checked={proOnly}
+              onClick={() => {
+                const next = !proOnly;
+                setProOnly(next);
+                applyParams({ proOnly: next });
+              }}
+              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition ${
+                proOnly ? "bg-amber-500" : "bg-slate-200"
+              }`}
+            >
+              <span
+                className={`inline-block h-4.5 w-4.5 transform rounded-full bg-white shadow transition ${
+                  proOnly ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </span>
+          </label>
+        )}
+        <label className="flex cursor-pointer items-center gap-2.5 text-sm text-slate-600">
+          Çevrimiçi freelancer&apos;ların ilanlarını göster
           <span
-            className={`inline-block h-4.5 w-4.5 transform rounded-full bg-white shadow transition ${
-              onlineOnly ? "translate-x-6" : "translate-x-1"
+            role="switch"
+            aria-checked={onlineOnly}
+            onClick={() => {
+              const next = !onlineOnly;
+              setOnlineOnly(next);
+              applyParams({ cevrimici: next });
+            }}
+            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition ${
+              onlineOnly ? "bg-emerald-500" : "bg-slate-200"
             }`}
-          />
-        </span>
-      </label>
+          >
+            <span
+              className={`inline-block h-4.5 w-4.5 transform rounded-full bg-white shadow transition ${
+                onlineOnly ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </span>
+        </label>
+      </div>
 
       {openPanel === "kategori" && (
         <div className="absolute left-0 top-full z-30 mt-2 max-h-[26rem] w-80 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-xl shadow-slate-200/60">

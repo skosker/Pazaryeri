@@ -15,6 +15,16 @@ export async function toggleSuspensionAction(userId: string) {
   revalidatePath("/admin/kullanicilar");
 }
 
+export async function toggleProFreelancerAction(userId: string) {
+  await requireAdmin();
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user || user.role !== "FREELANCER") return;
+
+  await prisma.user.update({ where: { id: userId }, data: { isPro: !user.isPro } });
+  revalidatePath("/admin/kullanicilar");
+}
+
 const assignableRoles = ["BUYER", "FREELANCER", "ADMIN"] as const;
 
 export async function changeUserRoleAction(userId: string, formData: FormData) {

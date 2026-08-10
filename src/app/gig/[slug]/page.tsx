@@ -84,6 +84,11 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
             <span className="ml-2 rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
               {sellerLevelLabel(reviewCount)}
             </span>
+            {gig.seller.isPro && (
+              <span className="rounded-full bg-amber-400 px-3 py-1 text-xs font-bold uppercase tracking-wide text-amber-950">
+                Pro
+              </span>
+            )}
             {rating !== null && <StarRating rating={rating} count={reviewCount} />}
           </Link>
 
@@ -111,7 +116,14 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
                 )}
               </span>
               <div>
-                <p className="font-semibold text-brand-navy">{gig.seller.name}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="font-semibold text-brand-navy">{gig.seller.name}</p>
+                  {gig.seller.isPro && (
+                    <span className="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950">
+                      Pro
+                    </span>
+                  )}
+                </div>
                 <p className="text-sm text-slate-400">{gig.seller.title ?? "Freelancer"}</p>
                 {gig.seller.bio && <p className="mt-2 max-w-xl text-sm text-slate-600">{gig.seller.bio}</p>}
               </div>

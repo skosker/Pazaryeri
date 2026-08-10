@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 
 const gigCardInclude = {
-  seller: { select: { id: true, name: true, isOnline: true } },
+  seller: { select: { id: true, name: true, isOnline: true, isPro: true } },
   category: { select: { name: true, slug: true } },
   subcategory: { select: { name: true, slug: true } },
   packages: { orderBy: { price: "asc" as const }, take: 1 },
@@ -15,7 +15,7 @@ export type GigCardData = {
   slug: string;
   title: string;
   coverColor: string;
-  seller: { id: string; name: string; isOnline: boolean };
+  seller: { id: string; name: string; isOnline: boolean; isPro: boolean };
   categoryName: string;
   categorySlug: string;
   subcategoryName: string | null;
@@ -64,6 +64,7 @@ export type GigFilters = {
   maxPrice?: number;
   maxDeliveryDays?: number;
   onlineSellersOnly?: boolean;
+  proSellersOnly?: boolean;
   sort?: "uygun" | "fiyat-artan" | "fiyat-azalan" | "yeni";
   page?: number;
   pageSize?: number;
@@ -87,8 +88,11 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
     where.subcategory = { slug: { in: filters.subcategorySlugs } };
   }
 
-  if (filters.onlineSellersOnly) {
-    where.seller = { isOnline: true };
+  if (filters.onlineSellersOnly || filters.proSellersOnly) {
+    where.seller = {
+      ...(filters.onlineSellersOnly ? { isOnline: true } : {}),
+      ...(filters.proSellersOnly ? { isPro: true } : {}),
+    };
   }
 
   if (filters.q) {
@@ -167,7 +171,7 @@ export async function getGigBySlug(slug: string) {
   const gig = await prisma.gig.findUnique({
     where: { slug },
     include: {
-      seller: { select: { id: true, name: true, title: true, bio: true, createdAt: true, isOnline: true } },
+      seller: { select: { id: true, name: true, title: true, bio: true, createdAt: true, isOnline: true, isPro: true } },
       category: { select: { name: true, slug: true } },
       subcategory: { select: { name: true, slug: true } },
       packages: { orderBy: { price: "asc" } },

@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
-import { toggleSuspensionAction, changeUserRoleAction } from "./actions";
+import { toggleSuspensionAction, changeUserRoleAction, toggleProFreelancerAction } from "./actions";
 
 const roleLabel: Record<string, string> = {
   BUYER: "Alıcı",
@@ -19,6 +19,7 @@ export default async function AdminUsersPage() {
       email: true,
       role: true,
       suspended: true,
+      isPro: true,
       emailVerified: true,
       createdAt: true,
       _count: { select: { gigs: true, ordersMade: true } },
@@ -48,7 +49,14 @@ export default async function AdminUsersPage() {
                   <p className="font-medium text-brand-navy">{user.name}</p>
                   <p className="text-xs text-slate-400">{user.email}</p>
                 </td>
-                <td className="px-5 py-4 text-slate-600">{roleLabel[user.role] ?? user.role}</td>
+                <td className="px-5 py-4 text-slate-600">
+                  <span>{roleLabel[user.role] ?? user.role}</span>
+                  {user.role === "FREELANCER" && user.isPro && (
+                    <span className="ml-1.5 inline-block rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                      Pro
+                    </span>
+                  )}
+                </td>
                 <td className="px-5 py-4">
                   {user.suspended ? (
                     <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
@@ -104,6 +112,20 @@ export default async function AdminUsersPage() {
                           {user.suspended ? "Askıyı Kaldır" : "Askıya Al"}
                         </button>
                       </form>
+                      {user.role === "FREELANCER" && (
+                        <form action={toggleProFreelancerAction.bind(null, user.id)}>
+                          <button
+                            type="submit"
+                            className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                              user.isPro
+                                ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                : "bg-amber-50 text-amber-700 hover:bg-amber-100"
+                            }`}
+                          >
+                            {user.isPro ? "Pro Kaldır" : "Pro Yap"}
+                          </button>
+                        </form>
+                      )}
                     </div>
                   )}
                 </td>

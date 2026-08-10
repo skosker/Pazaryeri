@@ -29,6 +29,11 @@ export function GigCard({ gig }: { gig: GigCardData }) {
             )}
           </span>
           <span className="text-sm font-medium text-white drop-shadow">{gig.seller.name}</span>
+          {gig.seller.isPro && (
+            <span className="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950 shadow-sm">
+              Pro
+            </span>
+          )}
         </div>
       </div>
 

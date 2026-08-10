@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { listGigs, type GigFilters } from "@/lib/gigs";
 import { GigCard } from "@/components/gig-card";
@@ -25,6 +26,7 @@ function buildHref(base: {
   sure?: string;
   sirala?: string;
   cevrimici?: boolean;
+  pro?: boolean;
   sayfa?: number;
 }) {
   const search = new URLSearchParams();
@@ -35,6 +37,7 @@ function buildHref(base: {
   if (base.sure) search.set("sure", base.sure);
   if (base.sirala) search.set("sirala", base.sirala);
   if (base.cevrimici) search.set("cevrimici", "1");
+  if (base.pro) search.set("pro", "1");
   if (base.sayfa && base.sayfa > 1) search.set("sayfa", String(base.sayfa));
   const qs = search.toString();
   return qs ? `/kategoriler?${qs}` : "/kategoriler";
@@ -52,7 +55,15 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
   const sure = toSingle(searchParams.sure);
   const sirala = toSingle(searchParams.sirala) as GigFilters["sort"];
   const cevrimici = toSingle(searchParams.cevrimici) === "1";
+  const proParam = toSingle(searchParams.pro) === "1";
   const sayfa = Number(toSingle(searchParams.sayfa) ?? "1") || 1;
+
+  const session = await auth();
+  const isProBuyer =
+    session?.user?.role === "BUYER"
+      ? Boolean((await prisma.user.findUnique({ where: { id: session.user.id }, select: { isPro: true } }))?.isPro)
+      : false;
+  const proOnly = isProBuyer && proParam;
 
   const filters: GigFilters = {
     categorySlugs,
@@ -61,13 +72,14 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
     maxPrice: butce ? Number(butce) : undefined,
     maxDeliveryDays: sure && sure !== "farketmez" ? Number(sure) : undefined,
     onlineSellersOnly: cevrimici,
+    proSellersOnly: proOnly,
     sort: sirala ?? "uygun",
     page: sayfa,
     pageSize: PAGE_SIZE,
   };
 
   const [categories, subcategories, { cards: gigs, total, page, pageCount }] = await Promise.all([
-    prisma.category.findMany({ orderBy: { name: "asc" }, select: { slug: true, name: true, icon: true } }),
+    prisma.category.findMany({ orderBy: { order: "asc" }, select: { slug: true, name: true, icon: true } }),
     prisma.subcategory.findMany({
       orderBy: { name: "asc" },
       select: { name: true, slug: true, category: { select: { slug: true } } },
@@ -128,6 +140,8 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
           initialBudget={butce ? Number(butce) : 3000}
           initialDelivery={sure ?? "farketmez"}
           initialOnlineOnly={cevrimici}
+          isProBuyer={isProBuyer}
+          initialProOnly={proOnly}
         />
       </div>
 
@@ -144,6 +158,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
                 sure,
                 sirala,
                 cevrimici,
+                pro: proOnly,
               })}
               className="inline-flex items-center gap-1.5 rounded-full bg-purple-50 px-3 py-1.5 text-xs font-semibold text-purple-700 hover:bg-purple-100"
             >
@@ -162,6 +177,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
                 sure,
                 sirala,
                 cevrimici,
+                pro: proOnly,
               })}
               className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200"
             >
@@ -193,7 +209,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
             {pageCount > 1 && (
               <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
                 <Link
-                  href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, cevrimici, sayfa: page - 1 })}
+                  href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, cevrimici, pro: proOnly, sayfa: page - 1 })}
                   aria-disabled={page <= 1}
                   className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
                     page <= 1
@@ -206,7 +222,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
                 {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
                   <Link
                     key={n}
-                    href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, cevrimici, sayfa: n })}
+                    href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, cevrimici, pro: proOnly, sayfa: n })}
                     className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
                       n === page ? "bg-brand-navy text-white" : "text-slate-600 hover:bg-slate-100"
                     }`}
@@ -215,7 +231,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
                   </Link>
                 ))}
                 <Link
-                  href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, cevrimici, sayfa: page + 1 })}
+                  href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, cevrimici, pro: proOnly, sayfa: page + 1 })}
                   aria-disabled={page >= pageCount}
                   className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
                     page >= pageCount
