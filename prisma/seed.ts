@@ -348,7 +348,12 @@ async function main() {
     const existingPackage = await prisma.package.findFirst({
       where: { gigId: gig.id },
     });
-    if (!existingPackage) {
+    if (existingPackage) {
+      await prisma.package.update({
+        where: { id: existingPackage.id },
+        data: { price: g.price, deliveryDays: g.delivery },
+      });
+    } else {
       await prisma.package.create({
         data: {
           gigId: gig.id,
@@ -406,7 +411,12 @@ async function main() {
     });
 
     const existingPackage = await prisma.package.findFirst({ where: { gigId: gig.id } });
-    if (!existingPackage) {
+    if (existingPackage) {
+      await prisma.package.update({
+        where: { id: existingPackage.id },
+        data: { price: g.price, deliveryDays: g.delivery },
+      });
+    } else {
       await prisma.package.create({
         data: {
           gigId: gig.id,

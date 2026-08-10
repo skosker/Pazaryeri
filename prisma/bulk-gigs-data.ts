@@ -23,6 +23,7 @@ type CategoryContent = {
   slug: string;
   sellerTitle: string;
   verbs: string[];
+  extraVerbs: string[];
   subjects: string[];
   // subcategory name for each subject, in the same order as `subjects`
   subcategories: string[];
@@ -38,6 +39,7 @@ const categoryContents: CategoryContent[] = [
     slug: "grafik-tasarim",
     sellerTitle: "Grafik Tasarımcı",
     verbs: ["tasarlıyorum", "hazırlıyorum", "oluşturuyorum", "çiziyorum"],
+    extraVerbs: ["yeniden tasarlıyorum", "özenle hazırlıyorum", "profesyonelce oluşturuyorum", "sıfırdan çiziyorum"],
     subjects: [
       "Minimalist logonuzu",
       "Kurumsal kimlik paketinizi",
@@ -76,6 +78,7 @@ const categoryContents: CategoryContent[] = [
     slug: "yazilim-web",
     sellerTitle: "Yazılım Geliştirici",
     verbs: ["geliştiriyorum", "kuruyorum", "entegre ediyorum", "optimize ediyorum"],
+    extraVerbs: ["yeniliyorum", "sıfırdan kuruyorum", "hatasız geliştiriyorum", "sorunsuz entegre ediyorum"],
     subjects: [
       "WordPress web sitenizi",
       "E-ticaret mağazanızı",
@@ -114,6 +117,7 @@ const categoryContents: CategoryContent[] = [
     slug: "yazi-ceviri",
     sellerTitle: "İçerik Yazarı",
     verbs: ["yazıyorum", "hazırlıyorum", "düzenliyorum", "çeviriyorum"],
+    extraVerbs: ["özenle yazıyorum", "yeniden düzenliyorum", "akıcı hale getiriyorum", "profesyonelce çeviriyorum"],
     subjects: [
       "Blog yazınızı",
       "Ürün açıklama metinlerinizi",
@@ -152,6 +156,7 @@ const categoryContents: CategoryContent[] = [
     slug: "video-animasyon",
     sellerTitle: "Video Editörü",
     verbs: ["kurguluyorum", "hazırlıyorum", "canlandırıyorum", "düzenliyorum"],
+    extraVerbs: ["yeniden kurguluyorum", "özenle hazırlıyorum", "akıcı hale getiriyorum", "profesyonelce düzenliyorum"],
     subjects: [
       "Youtube videonuzu",
       "Reels ve TikTok içeriğinizi",
@@ -190,6 +195,7 @@ const categoryContents: CategoryContent[] = [
     slug: "dijital-pazarlama",
     sellerTitle: "Dijital Pazarlama Uzmanı",
     verbs: ["yönetiyorum", "kuruyorum", "optimize ediyorum", "planlıyorum"],
+    extraVerbs: ["etkili yönetiyorum", "sıfırdan kuruyorum", "sürekli optimize ediyorum", "detaylıca planlıyorum"],
     subjects: [
       "Google Ads kampanyanızı",
       "Meta (Facebook/Instagram) reklamlarınızı",
@@ -228,6 +234,7 @@ const categoryContents: CategoryContent[] = [
     slug: "muzik-ses",
     sellerTitle: "Ses Mühendisi",
     verbs: ["kaydediyorum", "düzenliyorum", "besteliyorum", "mikslıyorum"],
+    extraVerbs: ["profesyonelce kaydediyorum", "yeniden düzenliyorum", "özenle besteliyorum", "temiz şekilde mikslıyorum"],
     subjects: [
       "Podcast bölümünüzü",
       "Reklam filminiz için jingle'ı",
@@ -266,6 +273,7 @@ const categoryContents: CategoryContent[] = [
     slug: "is-danismanlik",
     sellerTitle: "İş Danışmanı",
     verbs: ["veriyorum", "hazırlıyorum", "yönetiyorum", "kuruyorum"],
+    extraVerbs: ["detaylıca veriyorum", "özenle hazırlıyorum", "etkili yönetiyorum", "sıfırdan kuruyorum"],
     subjects: [
       "İş planınızı",
       "Finansal projeksiyonlarınızı",
@@ -304,6 +312,7 @@ const categoryContents: CategoryContent[] = [
     slug: "egitim-ders",
     sellerTitle: "Eğitmen",
     verbs: ["veriyorum", "hazırlıyorum", "anlatıyorum", "planlıyorum"],
+    extraVerbs: ["birebir veriyorum", "özenle hazırlıyorum", "sabırla anlatıyorum", "detaylıca planlıyorum"],
     subjects: [
       "Matematik dersinizi",
       "İngilizce konuşma pratiğinizi",
@@ -342,6 +351,7 @@ const categoryContents: CategoryContent[] = [
     slug: "ai-otomasyon",
     sellerTitle: "AI & Otomasyon Danışmanı",
     verbs: ["kuruyorum", "geliştiriyorum", "entegre ediyorum", "otomatikleştiriyorum"],
+    extraVerbs: ["sıfırdan kuruyorum", "özel olarak geliştiriyorum", "sorunsuz entegre ediyorum", "tam otomatik hale getiriyorum"],
     subjects: [
       "Müşteri destek chatbotunuzu",
       "Zapier/Make iş akışlarınızı",
@@ -380,6 +390,7 @@ const categoryContents: CategoryContent[] = [
     slug: "veri-analitik",
     sellerTitle: "Veri Analisti",
     verbs: ["hazırlıyorum", "kuruyorum", "analiz ediyorum", "raporluyorum"],
+    extraVerbs: ["detaylıca hazırlıyorum", "sıfırdan kuruyorum", "derinlemesine analiz ediyorum", "düzenli raporluyorum"],
     subjects: [
       "Satış verilerinizi",
       "Power BI panelinizi",
@@ -423,6 +434,12 @@ const firstNames = [
   "Efe", "Yasemin", "Alp", "Derya", "Oğuz", "Nil", "Kemal", "Beril", "Tarık", "Sibel",
   "Gökhan", "Aylin", "Baran", "Merve", "İlker", "Nihan", "Doruk", "Simge", "Batu", "Ceyda",
   "Uğur", "Damla", "Eren", "Selen", "Koray", "Aslıhan", "Fırat", "Duygu", "Kağan", "Ebru",
+  "Bora", "Elvan", "Sarp", "Yağmur", "Kutay", "Zehra", "Metin", "Aycan", "Rüya", "Kıvanç",
+  "Esin", "Bertan", "Nurcan", "Tayfun", "Gamze", "Erhan", "Buğra", "Sinem", "Cenk", "Aybüke",
+  "Halil", "Songül", "Mesut", "Perihan", "Taner", "Şeyma", "Bahadır", "Özge", "Reha", "Nazlı",
+  "Yiğit", "Selma", "Orkun", "Beste", "Timur", "Filiz", "Necati", "Aytekin", "Gülce", "Rıza",
+  "Nesrin", "Kaya", "Belgin", "Semih", "Ayten", "Doğukan", "Feride", "Salih", "Türkan", "Yavuz",
+  "Ilgın", "Cansel", "Burcu", "Deren", "Meltem", "Onat", "Gonca", "İbrahim", "Sevgi", "Aras",
 ];
 
 const lastInitials = [
@@ -453,6 +470,53 @@ export type BulkGig = {
 
 export const GIGS_PER_CATEGORY_GENERATED = 48;
 const SELLERS_PER_CATEGORY = 6;
+// Second wave: appended after the original data so existing gigs/sellers/slugs never change.
+export const EXTRA_GIGS_PER_CATEGORY_GENERATED = 48;
+const EXTRA_SELLERS_PER_CATEGORY = 6;
+
+function buildGig(
+  cat: CategoryContent,
+  subjectIndex: number,
+  verb: string,
+  variantIndex: number,
+  seller: BulkSeller,
+  subcategorySlug: string,
+  usedSlugs: Set<string>
+): BulkGig {
+  const subject = cat.subjects[subjectIndex];
+  const title = `${subject} ${verb}`;
+
+  let slug = slugify(title);
+  let attempt = 1;
+  while (usedSlugs.has(slug)) {
+    attempt++;
+    slug = `${slugify(title)}-${attempt}`;
+  }
+  usedSlugs.add(slug);
+
+  const h = hash(slug);
+
+  const priceRange = cat.priceMax - cat.priceMin;
+  const price = Math.round((cat.priceMin + (h % priceRange)) / 50) * 50;
+
+  const deliveryRange = cat.deliveryMax - cat.deliveryMin + 1;
+  const delivery = cat.deliveryMin + ((h >>> 8) % deliveryRange);
+
+  const coverColor = cat.coverColors[variantIndex % cat.coverColors.length];
+  const description = descriptionTemplates[h % descriptionTemplates.length];
+
+  return {
+    sellerEmail: seller.email,
+    categorySlug: cat.slug,
+    subcategorySlug,
+    title,
+    slug,
+    description,
+    price,
+    delivery,
+    coverColor,
+  };
+}
 
 export function generateBulkData(): {
   sellers: BulkSeller[];
@@ -465,6 +529,7 @@ export function generateBulkData(): {
   const usedSlugs = new Set<string>();
   const usedSubcategorySlugs = new Set<string>();
   let sellerCounter = 0;
+  let extraSellerCounter = categoryContents.length * SELLERS_PER_CATEGORY;
 
   for (const cat of categoryContents) {
     const catSellers: BulkSeller[] = [];
@@ -495,42 +560,30 @@ export function generateBulkData(): {
 
     for (let i = 0; i < GIGS_PER_CATEGORY_GENERATED; i++) {
       const subjectIndex = i % cat.subjects.length;
-      const subject = cat.subjects[subjectIndex];
       const verb = cat.verbs[Math.floor(i / cat.subjects.length) % cat.verbs.length];
-      const title = `${subject} ${verb}`;
       const subcategorySlug = catSubcategorySlugs.get(cat.subcategories[subjectIndex])!;
-
-      let slug = slugify(title);
-      let attempt = 1;
-      while (usedSlugs.has(slug)) {
-        attempt++;
-        slug = `${slugify(title)}-${attempt}`;
-      }
-      usedSlugs.add(slug);
-
       const seller = catSellers[i % catSellers.length];
-      const h = hash(slug);
+      gigs.push(buildGig(cat, subjectIndex, verb, i, seller, subcategorySlug, usedSlugs));
+    }
 
-      const priceRange = cat.priceMax - cat.priceMin;
-      const price = Math.round((cat.priceMin + (h % priceRange)) / 50) * 50;
+    const catExtraSellers: BulkSeller[] = [];
+    for (let s = 0; s < EXTRA_SELLERS_PER_CATEGORY; s++) {
+      const name = firstNames[extraSellerCounter % firstNames.length];
+      const initial = lastInitials[extraSellerCounter % lastInitials.length];
+      const email = `fl${extraSellerCounter + 1}@profestia.dev`;
+      const seller = { email, name: `${name} ${initial}`, title: cat.sellerTitle };
+      catExtraSellers.push(seller);
+      sellers.push(seller);
+      extraSellerCounter++;
+    }
+    const combinedSellers = [...catSellers, ...catExtraSellers];
 
-      const deliveryRange = cat.deliveryMax - cat.deliveryMin + 1;
-      const delivery = cat.deliveryMin + ((h >> 8) % deliveryRange);
-
-      const coverColor = cat.coverColors[i % cat.coverColors.length];
-      const description = descriptionTemplates[h % descriptionTemplates.length];
-
-      gigs.push({
-        sellerEmail: seller.email,
-        categorySlug: cat.slug,
-        subcategorySlug,
-        title,
-        slug,
-        description,
-        price,
-        delivery,
-        coverColor,
-      });
+    for (let i = 0; i < EXTRA_GIGS_PER_CATEGORY_GENERATED; i++) {
+      const subjectIndex = i % cat.subjects.length;
+      const verb = cat.extraVerbs[Math.floor(i / cat.subjects.length) % cat.extraVerbs.length];
+      const subcategorySlug = catSubcategorySlugs.get(cat.subcategories[subjectIndex])!;
+      const seller = combinedSellers[i % combinedSellers.length];
+      gigs.push(buildGig(cat, subjectIndex, verb, i, seller, subcategorySlug, usedSlugs));
     }
   }
 
