@@ -68,9 +68,12 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
         <div>
           <h1 className="text-2xl font-bold text-brand-navy sm:text-3xl">{gig.title}</h1>
 
-          <div className="mt-4 flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-sm font-semibold text-slate-600">
+          <Link href={`/freelancer/${gig.seller.id}`} className="mt-4 flex items-center gap-3 hover:opacity-80">
+            <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-sm font-semibold text-slate-600">
               {gig.seller.name.charAt(0)}
+              {gig.seller.isOnline && (
+                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
+              )}
             </span>
             <div>
               <p className="text-sm font-semibold text-brand-navy">{gig.seller.name}</p>
@@ -82,7 +85,7 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
               {sellerLevelLabel(reviewCount)}
             </span>
             {rating !== null && <StarRating rating={rating} count={reviewCount} />}
-          </div>
+          </Link>
 
           <div className="mt-6 h-72 overflow-hidden rounded-2xl bg-slate-100">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -100,16 +103,19 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
 
           <section className="mt-10 border-t border-slate-100 pt-8">
             <h2 className="text-lg font-semibold text-brand-navy">Satıcı hakkında</h2>
-            <div className="mt-4 flex items-start gap-4">
-              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-lg font-semibold text-slate-600">
+            <Link href={`/freelancer/${gig.seller.id}`} className="mt-4 flex items-start gap-4 hover:opacity-80">
+              <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-lg font-semibold text-slate-600">
                 {gig.seller.name.charAt(0)}
+                {gig.seller.isOnline && (
+                  <span className="absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
+                )}
               </span>
               <div>
                 <p className="font-semibold text-brand-navy">{gig.seller.name}</p>
                 <p className="text-sm text-slate-400">{gig.seller.title ?? "Freelancer"}</p>
                 {gig.seller.bio && <p className="mt-2 max-w-xl text-sm text-slate-600">{gig.seller.bio}</p>}
               </div>
-            </div>
+            </Link>
           </section>
 
           <section className="mt-10 border-t border-slate-100 pt-8">

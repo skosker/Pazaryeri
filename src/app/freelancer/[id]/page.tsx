@@ -1,0 +1,143 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { getGigsBySeller } from "@/lib/gigs";
+import { GigCard } from "@/components/gig-card";
+import { StarRating } from "@/components/star-rating";
+
+function sellerLevelLabel(reviewCount: number) {
+  if (reviewCount === 0) return "Yeni Satıcı";
+  if (reviewCount >= 50) return "Level 2 Satıcı";
+  return "Level 1 Satıcı";
+}
+
+export default async function FreelancerProfilePage(props: PageProps<"/freelancer/[id]">) {
+  const { id } = await props.params;
+
+  const freelancer = await prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      title: true,
+      bio: true,
+      isOnline: true,
+      createdAt: true,
+      role: true,
+      suspended: true,
+    },
+  });
+
+  if (!freelancer || freelancer.role !== "FREELANCER" || freelancer.suspended) notFound();
+
+  const [gigs, reviewAgg, completedCount, cancelledCount] = await Promise.all([
+    getGigsBySeller(freelancer.id),
+    prisma.review.aggregate({
+      where: { gig: { sellerId: freelancer.id } },
+      _avg: { rating: true },
+      _count: true,
+    }),
+    prisma.order.count({ where: { gig: { sellerId: freelancer.id }, status: "COMPLETED" } }),
+    prisma.order.count({ where: { gig: { sellerId: freelancer.id }, status: "CANCELLED" } }),
+  ]);
+
+  const reviewCount = reviewAgg._count;
+  const rating = reviewAgg._avg.rating;
+  const memberSince = freelancer.createdAt.toLocaleDateString("tr-TR", { month: "long", year: "numeric" });
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+      <nav className="mb-6 text-xs text-slate-400">
+        <Link href="/" className="hover:text-slate-600">
+          Ana Sayfa
+        </Link>
+        <span className="mx-1.5">/</span>
+        <span className="text-slate-500">{freelancer.name}</span>
+      </nav>
+
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[300px_1fr]">
+        <aside className="lg:sticky lg:top-20 lg:self-start">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center">
+            <span className="relative mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-500 to-indigo-500 text-3xl font-bold text-white">
+              {freelancer.name.charAt(0)}
+              {freelancer.isOnline && (
+                <span className="absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-500" />
+              )}
+            </span>
+
+            <h1 className="mt-4 text-lg font-bold text-brand-navy">{freelancer.name}</h1>
+            <p className="mt-1 text-sm text-slate-500">{freelancer.title ?? "Freelancer"}</p>
+
+            <span className="mt-3 inline-block rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
+              {sellerLevelLabel(reviewCount)}
+            </span>
+
+            {reviewCount > 0 && rating !== null && (
+              <div className="mt-3 flex justify-center">
+                <StarRating rating={rating} count={reviewCount} />
+              </div>
+            )}
+
+            <button
+              type="button"
+              title="Yakında"
+              disabled
+              className="mt-5 w-full cursor-not-allowed rounded-full border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-400"
+            >
+              Mesaj Gönder
+            </button>
+
+            <dl className="mt-6 space-y-3 border-t border-slate-100 pt-5 text-left text-sm">
+              <div className="flex items-center justify-between">
+                <dt className="text-slate-400">Tamamlanan Sipariş</dt>
+                <dd className="font-semibold text-brand-navy">{completedCount}</dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt className="text-slate-400">İptal Sayısı</dt>
+                <dd className="font-semibold text-brand-navy">{cancelledCount}</dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt className="text-slate-400">Üyelik</dt>
+                <dd className="font-semibold text-brand-navy">{memberSince}</dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt className="text-slate-400">Durum</dt>
+                <dd className={`font-semibold ${freelancer.isOnline ? "text-emerald-600" : "text-slate-400"}`}>
+                  {freelancer.isOnline ? "Çevrimiçi" : "Çevrimdışı"}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </aside>
+
+        <div>
+          {freelancer.bio && (
+            <section>
+              <h2 className="text-lg font-semibold text-brand-navy">Hakkımda</h2>
+              <p className="mt-3 whitespace-pre-line text-sm text-slate-600">{freelancer.bio}</p>
+            </section>
+          )}
+
+          <section className={freelancer.bio ? "mt-10 border-t border-slate-100 pt-8" : ""}>
+            <h2 className="text-lg font-semibold text-brand-navy">
+              {freelancer.name} kullanıcısının ilanları
+              {gigs.length > 0 && <span className="ml-1 font-normal text-slate-400">({gigs.length})</span>}
+            </h2>
+
+            {gigs.length === 0 ? (
+              <p className="mt-4 rounded-2xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-400">
+                Bu freelancer&apos;ın henüz yayında bir ilanı yok.
+              </p>
+            ) : (
+              <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+                {gigs.map((gig) => (
+                  <GigCard key={gig.slug} gig={gig} />
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}

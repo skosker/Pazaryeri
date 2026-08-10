@@ -154,11 +154,20 @@ export async function getRelatedGigs(
   return gigs.map(toCardData);
 }
 
+export async function getGigsBySeller(sellerId: string): Promise<GigCardData[]> {
+  const gigs = await prisma.gig.findMany({
+    where: { sellerId, published: true },
+    include: gigCardInclude,
+    orderBy: { createdAt: "desc" },
+  });
+  return gigs.map(toCardData);
+}
+
 export async function getGigBySlug(slug: string) {
   const gig = await prisma.gig.findUnique({
     where: { slug },
     include: {
-      seller: { select: { id: true, name: true, title: true, bio: true, createdAt: true } },
+      seller: { select: { id: true, name: true, title: true, bio: true, createdAt: true, isOnline: true } },
       category: { select: { name: true, slug: true } },
       subcategory: { select: { name: true, slug: true } },
       packages: { orderBy: { price: "asc" } },
