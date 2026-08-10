@@ -21,7 +21,7 @@ const ICON_OPTIONS = [
 
 export default async function AdminCategoriesPage() {
   const categories = await prisma.category.findMany({
-    orderBy: { name: "asc" },
+    orderBy: { order: "asc" },
     include: { _count: { select: { gigs: true } } },
   });
 

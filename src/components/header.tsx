@@ -9,7 +9,7 @@ import { CategoryMegaMenu } from "@/components/category-mega-menu";
 export async function Header() {
   const [session, categories, subcategories] = await Promise.all([
     auth(),
-    prisma.category.findMany({ orderBy: { name: "asc" }, select: { slug: true, name: true, icon: true } }),
+    prisma.category.findMany({ orderBy: { order: "asc" }, select: { slug: true, name: true, icon: true } }),
     prisma.subcategory.findMany({
       orderBy: { name: "asc" },
       select: { name: true, slug: true, category: { select: { slug: true } } },

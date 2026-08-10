@@ -15,7 +15,7 @@ export default async function EditGigPage(props: PageProps<"/panel/ilanlarim/[gi
       where: { id: gigId },
       include: { packages: { orderBy: { price: "asc" }, take: 1 } },
     }),
-    prisma.category.findMany({ orderBy: { name: "asc" } }),
+    prisma.category.findMany({ orderBy: { order: "asc" } }),
   ]);
 
   if (!gig || gig.sellerId !== session.user.id) notFound();

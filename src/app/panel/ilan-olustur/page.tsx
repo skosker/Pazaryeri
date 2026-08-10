@@ -9,7 +9,7 @@ export default async function CreateGigPage() {
   if (!session?.user) redirect("/giris?callbackUrl=/panel/ilan-olustur");
   if (session.user.role !== "FREELANCER") redirect("/panel");
 
-  const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
+  const categories = await prisma.category.findMany({ orderBy: { order: "asc" } });
 
   return (
     <div className="max-w-2xl">

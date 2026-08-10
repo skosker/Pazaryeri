@@ -8,16 +8,16 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 const categories = [
-  { name: "Grafik Tasarım", slug: "grafik-tasarim", icon: "palette" },
-  { name: "Yazılım & Web", slug: "yazilim-web", icon: "code" },
-  { name: "Yazı & Çeviri", slug: "yazi-ceviri", icon: "pen" },
-  { name: "Video & Animasyon", slug: "video-animasyon", icon: "video" },
-  { name: "Dijital Pazarlama", slug: "dijital-pazarlama", icon: "megaphone" },
-  { name: "Müzik & Ses", slug: "muzik-ses", icon: "music" },
-  { name: "İş & Danışmanlık", slug: "is-danismanlik", icon: "briefcase" },
-  { name: "Eğitim & Ders", slug: "egitim-ders", icon: "book" },
-  { name: "AI & Otomasyon", slug: "ai-otomasyon", icon: "cpu" },
-  { name: "Veri & Analitik", slug: "veri-analitik", icon: "chart" },
+  { name: "AI & Otomasyon", slug: "ai-otomasyon", icon: "cpu", order: 1 },
+  { name: "Yazılım & Web", slug: "yazilim-web", icon: "code", order: 2 },
+  { name: "Grafik Tasarım", slug: "grafik-tasarim", icon: "palette", order: 3 },
+  { name: "Dijital Pazarlama", slug: "dijital-pazarlama", icon: "megaphone", order: 4 },
+  { name: "Veri & Analitik", slug: "veri-analitik", icon: "chart", order: 5 },
+  { name: "İş & Danışmanlık", slug: "is-danismanlik", icon: "briefcase", order: 6 },
+  { name: "Yazı & Çeviri", slug: "yazi-ceviri", icon: "pen", order: 7 },
+  { name: "Video & Animasyon", slug: "video-animasyon", icon: "video", order: 8 },
+  { name: "Eğitim & Ders", slug: "egitim-ders", icon: "book", order: 9 },
+  { name: "Müzik & Ses", slug: "muzik-ses", icon: "music", order: 10 },
 ];
 
 const sellers = [
@@ -263,7 +263,7 @@ async function main() {
   for (const c of categories) {
     await prisma.category.upsert({
       where: { slug: c.slug },
-      update: {},
+      update: { order: c.order },
       create: c,
     });
   }

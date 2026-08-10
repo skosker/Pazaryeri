@@ -37,7 +37,8 @@ export async function createCategoryAction(
   });
   if (existing) return { error: "Bu isimde bir kategori zaten var" };
 
-  await prisma.category.create({ data: { name, slug, icon } });
+  const last = await prisma.category.findFirst({ orderBy: { order: "desc" } });
+  await prisma.category.create({ data: { name, slug, icon, order: (last?.order ?? 0) + 1 } });
   revalidatePath("/admin/kategoriler");
   return {};
 }
