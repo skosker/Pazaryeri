@@ -68,10 +68,11 @@ model VerificationToken {
 }
 
 model Category {
-  id   String @id @default(cuid())
-  name String @unique
-  slug String @unique
-  icon String @default("sparkles")
+  id    String @id @default(cuid())
+  name  String @unique
+  slug  String @unique
+  icon  String @default("sparkles")
+  order Int    @default(0)
 
   gigs           Gig[]
   subcategories  Subcategory[]

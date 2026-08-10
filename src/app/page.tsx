@@ -5,25 +5,11 @@ import { LinkButton } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
 import { getCategoryAccent } from "@/lib/category-style";
 
-const quickChips = [
-  "Logo & Marka Kimliği",
-  "Web Sitesi Kurulumu",
-  "Çeviri Hizmeti",
-  "Video Kurgu",
-  "Reklam Yönetimi",
-  "Seslendirme",
-  "İş Danışmanlığı",
-  "Online Ders",
-];
-
 export default async function Home() {
-  const [categories, gigCount] = await Promise.all([
-    prisma.category.findMany({
-      orderBy: { name: "asc" },
-      include: { _count: { select: { gigs: { where: { published: true } } } } },
-    }),
-    prisma.gig.count({ where: { published: true } }),
-  ]);
+  const categories = await prisma.category.findMany({
+    orderBy: { order: "asc" },
+    include: { _count: { select: { gigs: { where: { published: true } } } } },
+  });
 
   return (
     <div>
@@ -54,24 +40,6 @@ export default async function Home() {
           <div className="mx-auto mt-8 w-full max-w-xl">
             <SearchBar size="lg" />
           </div>
-
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-sm text-white/60">
-            <span className="font-medium">Popüler:</span>
-            {quickChips.slice(0, 5).map((chip) => (
-              <Link
-                key={chip}
-                href={`/kategoriler?q=${encodeURIComponent(chip)}`}
-                className="rounded-full border border-white/15 px-3 py-1 text-xs text-white/80 transition hover:border-white/40 hover:text-white"
-              >
-                {chip}
-              </Link>
-            ))}
-          </div>
-
-          <dl className="mx-auto mt-14 grid max-w-sm grid-cols-2 gap-4 border-t border-white/10 pt-8">
-            <Stat value={`${categories.length}`} label="Kategori" />
-            <Stat value={`${gigCount}+`} label="Hizmet" />
-          </dl>
         </div>
       </section>
 
@@ -208,16 +176,6 @@ function FreelancerBenefit({ text }: { text: string }) {
       </svg>
       {text}
     </li>
-  );
-}
-
-function Stat({ value, label }: { value: string; label: string }) {
-  return (
-    <div>
-      <dt className="sr-only">{label}</dt>
-      <dd className="text-2xl font-extrabold text-white">{value}</dd>
-      <p className="mt-1 text-xs uppercase tracking-wide text-white/50">{label}</p>
-    </div>
   );
 }
 
