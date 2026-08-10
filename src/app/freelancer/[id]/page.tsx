@@ -31,7 +31,7 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
 
   if (!freelancer || freelancer.role !== "FREELANCER" || freelancer.suspended) notFound();
 
-  const [gigs, reviewAgg, completedCount, cancelledCount] = await Promise.all([
+  const [gigs, reviewAgg, completedCount, cancelledCount, reviews] = await Promise.all([
     getGigsBySeller(freelancer.id),
     prisma.review.aggregate({
       where: { gig: { sellerId: freelancer.id } },
@@ -40,6 +40,14 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
     }),
     prisma.order.count({ where: { gig: { sellerId: freelancer.id }, status: "COMPLETED" } }),
     prisma.order.count({ where: { gig: { sellerId: freelancer.id }, status: "CANCELLED" } }),
+    freelancer.isPro
+      ? prisma.review.findMany({
+          where: { gig: { sellerId: freelancer.id } },
+          include: { buyer: { select: { name: true } }, gig: { select: { title: true, slug: true } } },
+          orderBy: { createdAt: "desc" },
+          take: 20,
+        })
+      : Promise.resolve([]),
   ]);
 
   const reviewCount = reviewAgg._count;
@@ -144,6 +152,37 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
               </div>
             )}
           </section>
+
+          {freelancer.isPro && (
+            <section className="mt-10 border-t border-slate-100 pt-8">
+              <h2 className="text-lg font-semibold text-brand-navy">
+                Değerlendirmeler
+                {reviewCount > 0 && <span className="ml-1 font-normal text-slate-400">({reviewCount})</span>}
+              </h2>
+
+              {reviewCount === 0 ? (
+                <p className="mt-4 text-sm text-slate-400">Bu freelancer için henüz değerlendirme yapılmadı.</p>
+              ) : (
+                <ul className="mt-6 space-y-5">
+                  {reviews.map((review) => (
+                    <li key={review.id} className="border-b border-slate-100 pb-5">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-brand-navy">{review.buyer.name}</p>
+                        <StarRating rating={review.rating} />
+                      </div>
+                      <Link
+                        href={`/gig/${review.gig.slug}`}
+                        className="mt-0.5 inline-block text-xs text-slate-400 hover:text-purple-700"
+                      >
+                        {review.gig.title}
+                      </Link>
+                      <p className="mt-1.5 text-sm text-slate-600">{review.comment}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          )}
         </div>
       </div>
     </div>
