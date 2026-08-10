@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { SearchBar } from "@/components/search-bar";
 
 type NavUser = { name?: string | null; role?: string } | null;
@@ -14,6 +15,8 @@ export function MobileNav({
   signOutAction: () => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const isFreelancerProfile = pathname?.startsWith("/freelancer/");
 
   return (
     <div className="md:hidden">
@@ -38,9 +41,11 @@ export function MobileNav({
         <div className="absolute inset-x-0 top-full border-b border-slate-200 bg-white px-4 py-4 shadow-lg">
           <SearchBar />
           <nav className="mt-4 flex flex-col gap-1 text-sm font-medium text-slate-600">
-            <Link href="/kategoriler" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2.5 hover:bg-slate-50">
-              Kategoriler
-            </Link>
+            {!isFreelancerProfile && (
+              <Link href="/kategoriler" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2.5 hover:bg-slate-50">
+                Kategoriler
+              </Link>
+            )}
             <Link href="/nasil-calisir" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2.5 hover:bg-slate-50">
               Nasıl Çalışır
             </Link>

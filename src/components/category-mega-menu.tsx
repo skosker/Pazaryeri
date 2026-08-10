@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { CategoryIcon } from "@/components/category-icon";
 import { getCategoryAccent } from "@/lib/category-style";
 
@@ -15,6 +16,7 @@ export function CategoryMegaMenu({
   categories: Category[];
   subcategoriesByCategory: Record<string, Subcategory[]>;
 }) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(categories[0]?.slug ?? "");
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -46,6 +48,8 @@ export function CategoryMegaMenu({
       document.removeEventListener("mousedown", onClickOutside);
     };
   }, []);
+
+  if (pathname?.startsWith("/freelancer/")) return null;
 
   const activeSubcategories = subcategoriesByCategory[active] ?? [];
 
