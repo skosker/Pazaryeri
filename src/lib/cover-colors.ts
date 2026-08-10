@@ -24,6 +24,21 @@ const categoryKeywords: Record<string, string> = {
   "veri-analitik": "data,analytics",
 };
 
+// A share of covers use an Istanbul/Turkey-flavored search instead of the
+// pure category keyword, so the catalog doesn't read as entirely foreign stock photos.
+const turkishFlavorKeywords: Record<string, string> = {
+  "grafik-tasarim": "istanbul,design",
+  "yazilim-web": "istanbul,office",
+  "yazi-ceviri": "istanbul,writing",
+  "video-animasyon": "istanbul,film",
+  "dijital-pazarlama": "istanbul,marketing",
+  "muzik-ses": "istanbul,music",
+  "is-danismanlik": "istanbul,business",
+  "egitim-ders": "istanbul,education",
+  "ai-otomasyon": "istanbul,technology",
+  "veri-analitik": "istanbul,office",
+};
+
 function hashSeed(input: string) {
   let hash = 0;
   for (let i = 0; i < input.length; i++) {
@@ -37,7 +52,10 @@ export function coverImageUrl(
   gigSlug: string,
   size: `${number}/${number}` = "600/400"
 ) {
-  const keywords = categoryKeywords[categorySlug] ?? "business,office";
   const lock = hashSeed(gigSlug);
+  const useTurkishFlavor = lock % 3 === 0;
+  const keywords = useTurkishFlavor
+    ? (turkishFlavorKeywords[categorySlug] ?? "istanbul,business")
+    : (categoryKeywords[categorySlug] ?? "business,office");
   return `https://loremflickr.com/${size}/${keywords}?lock=${lock}`;
 }
