@@ -4,7 +4,7 @@ import { listGigs, type GigFilters } from "@/lib/gigs";
 import { GigCard } from "@/components/gig-card";
 import { CategoryIcon } from "@/components/category-icon";
 import { getCategoryAccent } from "@/lib/category-style";
-import { FiltersSidebar } from "./filters-sidebar";
+import { FilterBar } from "./filter-bar";
 import { SortSelect } from "./sort-select";
 
 function toArray(value: string | string[] | undefined): string[] {
@@ -24,6 +24,7 @@ function buildHref(base: {
   butce?: string;
   sure?: string;
   sirala?: string;
+  cevrimici?: boolean;
   sayfa?: number;
 }) {
   const search = new URLSearchParams();
@@ -33,6 +34,7 @@ function buildHref(base: {
   if (base.butce) search.set("butce", base.butce);
   if (base.sure) search.set("sure", base.sure);
   if (base.sirala) search.set("sirala", base.sirala);
+  if (base.cevrimici) search.set("cevrimici", "1");
   if (base.sayfa && base.sayfa > 1) search.set("sayfa", String(base.sayfa));
   const qs = search.toString();
   return qs ? `/kategoriler?${qs}` : "/kategoriler";
@@ -49,6 +51,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
   const butce = toSingle(searchParams.butce);
   const sure = toSingle(searchParams.sure);
   const sirala = toSingle(searchParams.sirala) as GigFilters["sort"];
+  const cevrimici = toSingle(searchParams.cevrimici) === "1";
   const sayfa = Number(toSingle(searchParams.sayfa) ?? "1") || 1;
 
   const filters: GigFilters = {
@@ -57,6 +60,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
     q,
     maxPrice: butce ? Number(butce) : undefined,
     maxDeliveryDays: sure && sure !== "farketmez" ? Number(sure) : undefined,
+    onlineSellersOnly: cevrimici,
     sort: sirala ?? "uygun",
     page: sayfa,
     pageSize: PAGE_SIZE,
@@ -101,7 +105,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
         <span className="text-slate-500">Kategoriler</span>
       </nav>
 
-      <div className="mb-8 flex items-center gap-3">
+      <div className="mb-6 flex items-center gap-3">
         {accent && (
           <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${accent.bg} ${accent.text}`}>
             <CategoryIcon icon={singleCategory!.icon} className="h-5 w-5" />
@@ -115,113 +119,116 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
         </div>
       </div>
 
-      <div className="flex flex-col gap-8 md:flex-row">
-        <FiltersSidebar
+      <div className="rounded-2xl border border-slate-200 bg-white p-4">
+        <FilterBar
           categories={categories}
           subcategoriesByCategory={subcategoriesByCategory}
           selectedCategories={categorySlugs}
           selectedSubcategories={subcategorySlugs}
           initialBudget={butce ? Number(butce) : 3000}
           initialDelivery={sure ?? "farketmez"}
+          initialOnlineOnly={cevrimici}
         />
+      </div>
 
-        <div className="flex-1">
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              {selectedCategoryObjects.map((c) => (
-                <Link
-                  key={c.slug}
-                  href={buildHref({
-                    categorySlugs: categorySlugs.filter((s) => s !== c.slug),
-                    subcategorySlugs,
-                    q,
-                    butce,
-                    sure,
-                    sirala,
-                  })}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-purple-50 px-3 py-1.5 text-xs font-semibold text-purple-700 hover:bg-purple-100"
-                >
-                  {c.name}
-                  <span aria-hidden>×</span>
-                </Link>
-              ))}
-              {selectedSubcategoryObjects.map((sc) => (
-                <Link
-                  key={sc.slug}
-                  href={buildHref({
-                    categorySlugs,
-                    subcategorySlugs: subcategorySlugs.filter((s) => s !== sc.slug),
-                    q,
-                    butce,
-                    sure,
-                    sirala,
-                  })}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200"
-                >
-                  {sc.name}
-                  <span aria-hidden>×</span>
-                </Link>
-              ))}
-            </div>
-            <SortSelect value={filters.sort ?? "uygun"} />
-          </div>
-
-          {gigs.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-300 p-16 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-                <CategoryIcon icon="sparkles" className="h-6 w-6" />
-              </div>
-              <p className="mt-4 font-medium text-slate-600">Aramanıza uygun hizmet bulunamadı.</p>
-              <p className="mt-1 text-sm text-slate-400">Filtreleri değiştirip tekrar dene.</p>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {gigs.map((gig) => (
-                  <GigCard key={gig.slug} gig={gig} />
-                ))}
-              </div>
-
-              {pageCount > 1 && (
-                <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
-                  <Link
-                    href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, sayfa: page - 1 })}
-                    aria-disabled={page <= 1}
-                    className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
-                      page <= 1
-                        ? "pointer-events-none border-slate-100 text-slate-300"
-                        : "border-slate-300 text-slate-600 hover:bg-slate-50"
-                    }`}
-                  >
-                    Önceki
-                  </Link>
-                  {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
-                    <Link
-                      key={n}
-                      href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, sayfa: n })}
-                      className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
-                        n === page ? "bg-brand-navy text-white" : "text-slate-600 hover:bg-slate-100"
-                      }`}
-                    >
-                      {n}
-                    </Link>
-                  ))}
-                  <Link
-                    href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, sayfa: page + 1 })}
-                    aria-disabled={page >= pageCount}
-                    className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
-                      page >= pageCount
-                        ? "pointer-events-none border-slate-100 text-slate-300"
-                        : "border-slate-300 text-slate-600 hover:bg-slate-50"
-                    }`}
-                  >
-                    Sonraki
-                  </Link>
-                </div>
-              )}
-            </>
-          )}
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {selectedCategoryObjects.map((c) => (
+            <Link
+              key={c.slug}
+              href={buildHref({
+                categorySlugs: categorySlugs.filter((s) => s !== c.slug),
+                subcategorySlugs,
+                q,
+                butce,
+                sure,
+                sirala,
+                cevrimici,
+              })}
+              className="inline-flex items-center gap-1.5 rounded-full bg-purple-50 px-3 py-1.5 text-xs font-semibold text-purple-700 hover:bg-purple-100"
+            >
+              {c.name}
+              <span aria-hidden>×</span>
+            </Link>
+          ))}
+          {selectedSubcategoryObjects.map((sc) => (
+            <Link
+              key={sc.slug}
+              href={buildHref({
+                categorySlugs,
+                subcategorySlugs: subcategorySlugs.filter((s) => s !== sc.slug),
+                q,
+                butce,
+                sure,
+                sirala,
+                cevrimici,
+              })}
+              className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200"
+            >
+              {sc.name}
+              <span aria-hidden>×</span>
+            </Link>
+          ))}
         </div>
+        <SortSelect value={filters.sort ?? "uygun"} />
+      </div>
+
+      <div className="mt-6">
+        {gigs.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-300 p-16 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+              <CategoryIcon icon="sparkles" className="h-6 w-6" />
+            </div>
+            <p className="mt-4 font-medium text-slate-600">Aramanıza uygun hizmet bulunamadı.</p>
+            <p className="mt-1 text-sm text-slate-400">Filtreleri değiştirip tekrar dene.</p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {gigs.map((gig) => (
+                <GigCard key={gig.slug} gig={gig} />
+              ))}
+            </div>
+
+            {pageCount > 1 && (
+              <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
+                <Link
+                  href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, cevrimici, sayfa: page - 1 })}
+                  aria-disabled={page <= 1}
+                  className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
+                    page <= 1
+                      ? "pointer-events-none border-slate-100 text-slate-300"
+                      : "border-slate-300 text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  Önceki
+                </Link>
+                {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
+                  <Link
+                    key={n}
+                    href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, cevrimici, sayfa: n })}
+                    className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
+                      n === page ? "bg-brand-navy text-white" : "text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    {n}
+                  </Link>
+                ))}
+                <Link
+                  href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, cevrimici, sayfa: page + 1 })}
+                  aria-disabled={page >= pageCount}
+                  className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
+                    page >= pageCount
+                      ? "pointer-events-none border-slate-100 text-slate-300"
+                      : "border-slate-300 text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  Sonraki
+                </Link>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

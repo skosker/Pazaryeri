@@ -22,8 +22,11 @@ export function GigCard({ gig }: { gig: GigCardData }) {
         />
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/40 to-transparent" />
         <div className="absolute bottom-3 left-3 flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-slate-200 text-xs font-semibold text-slate-600 shadow-sm">
+          <span className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-slate-200 text-xs font-semibold text-slate-600 shadow-sm">
             {gig.seller.name.charAt(0)}
+            {gig.seller.isOnline && (
+              <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
+            )}
           </span>
           <span className="text-sm font-medium text-white drop-shadow">{gig.seller.name}</span>
         </div>

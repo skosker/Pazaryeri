@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 
 const gigCardInclude = {
-  seller: { select: { id: true, name: true } },
+  seller: { select: { id: true, name: true, isOnline: true } },
   category: { select: { name: true, slug: true } },
   subcategory: { select: { name: true, slug: true } },
   packages: { orderBy: { price: "asc" as const }, take: 1 },
@@ -15,7 +15,7 @@ export type GigCardData = {
   slug: string;
   title: string;
   coverColor: string;
-  seller: { id: string; name: string };
+  seller: { id: string; name: string; isOnline: boolean };
   categoryName: string;
   categorySlug: string;
   subcategoryName: string | null;
@@ -63,6 +63,7 @@ export type GigFilters = {
   q?: string;
   maxPrice?: number;
   maxDeliveryDays?: number;
+  onlineSellersOnly?: boolean;
   sort?: "uygun" | "fiyat-artan" | "fiyat-azalan" | "yeni";
   page?: number;
   pageSize?: number;
@@ -84,6 +85,10 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
 
   if (filters.subcategorySlugs?.length) {
     where.subcategory = { slug: { in: filters.subcategorySlugs } };
+  }
+
+  if (filters.onlineSellersOnly) {
+    where.seller = { isOnline: true };
   }
 
   if (filters.q) {
