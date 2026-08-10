@@ -21,8 +21,13 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-8 lg:flex-row">
         <aside className="w-full shrink-0 lg:w-56">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
             {isFreelancer ? "Freelancer Paneli" : "Alıcı Paneli"}
+          </p>
+          <p className="mb-4 mt-1 text-xs text-slate-400">
+            {isFreelancer
+              ? "Alıcı olarak da sipariş verebilirsin — Siparişler > Verdiğim Siparişler."
+              : "Siparişlerini ve profilini buradan yönetirsin."}
           </p>
           <PanelNav items={navItems} />
         </aside>
