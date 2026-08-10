@@ -8,7 +8,6 @@ import { getCategoryAccent } from "@/lib/category-style";
 export default async function Home() {
   const categories = await prisma.category.findMany({
     orderBy: { order: "asc" },
-    include: { _count: { select: { gigs: { where: { published: true } } } } },
   });
 
   return (
@@ -64,7 +63,6 @@ export default async function Home() {
                 </span>
                 <div className="min-w-0">
                   <p className="truncate font-semibold text-brand-navy">{c.name}</p>
-                  <p className="mt-0.5 text-xs text-slate-400">{c._count.gigs} hizmet</p>
                 </div>
               </Link>
             );
