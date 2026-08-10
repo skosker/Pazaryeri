@@ -72,9 +72,24 @@ model Category {
   slug String @unique
   icon String @default("sparkles")
 
-  gigs Gig[]
+  gigs           Gig[]
+  subcategories  Subcategory[]
 
   @@map("categories")
+}
+
+model Subcategory {
+  id   String @id @default(cuid())
+  name String
+  slug String @unique
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  gigs Gig[]
+
+  @@index([categoryId])
+  @@map("subcategories")
 }
 
 model Gig {
@@ -92,12 +107,16 @@ model Gig {
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
 
+  subcategoryId String?
+  subcategory   Subcategory? @relation(fields: [subcategoryId], references: [id])
+
   packages Package[]
   orders   Order[]
   reviews  Review[]
 
   @@index([categoryId])
   @@index([sellerId])
+  @@index([subcategoryId])
   @@map("gigs")
 }
 

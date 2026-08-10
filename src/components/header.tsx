@@ -1,11 +1,25 @@
 import Link from "next/link";
 import { auth, signOut } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { Logo } from "@/components/logo";
 import { LinkButton } from "@/components/ui/button";
 import { MobileNav } from "@/components/mobile-nav";
+import { CategoryMegaMenu } from "@/components/category-mega-menu";
 
 export async function Header() {
-  const session = await auth();
+  const [session, categories, subcategories] = await Promise.all([
+    auth(),
+    prisma.category.findMany({ orderBy: { name: "asc" }, select: { slug: true, name: true, icon: true } }),
+    prisma.subcategory.findMany({
+      orderBy: { name: "asc" },
+      select: { name: true, slug: true, category: { select: { slug: true } } },
+    }),
+  ]);
+
+  const subcategoriesByCategory: Record<string, { name: string; slug: string }[]> = {};
+  for (const sc of subcategories) {
+    (subcategoriesByCategory[sc.category.slug] ??= []).push({ name: sc.name, slug: sc.slug });
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
@@ -13,9 +27,7 @@ export async function Header() {
         <Logo />
 
         <nav className="hidden items-center gap-5 text-sm font-medium text-slate-600 md:flex">
-          <Link href="/kategoriler" className="transition hover:text-brand-navy">
-            Kategoriler
-          </Link>
+          <CategoryMegaMenu categories={categories} subcategoriesByCategory={subcategoriesByCategory} />
           <Link href="/nasil-calisir" className="transition hover:text-brand-navy">
             Nasıl Çalışır
           </Link>

@@ -19,6 +19,7 @@ function toSingle(value: string | string[] | undefined): string | undefined {
 
 function buildHref(base: {
   categorySlugs: string[];
+  subcategorySlugs: string[];
   q?: string;
   butce?: string;
   sure?: string;
@@ -27,6 +28,7 @@ function buildHref(base: {
 }) {
   const search = new URLSearchParams();
   base.categorySlugs.forEach((slug) => search.append("kategori", slug));
+  base.subcategorySlugs.forEach((slug) => search.append("alt", slug));
   if (base.q) search.set("q", base.q);
   if (base.butce) search.set("butce", base.butce);
   if (base.sure) search.set("sure", base.sure);
@@ -42,6 +44,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
   const searchParams = await props.searchParams;
 
   const categorySlugs = toArray(searchParams.kategori);
+  const subcategorySlugs = toArray(searchParams.alt);
   const q = toSingle(searchParams.q);
   const butce = toSingle(searchParams.butce);
   const sure = toSingle(searchParams.sure);
@@ -50,6 +53,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
 
   const filters: GigFilters = {
     categorySlugs,
+    subcategorySlugs,
     q,
     maxPrice: butce ? Number(butce) : undefined,
     maxDeliveryDays: sure && sure !== "farketmez" ? Number(sure) : undefined,
@@ -58,16 +62,34 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
     pageSize: PAGE_SIZE,
   };
 
-  const [categories, { cards: gigs, total, page, pageCount }] = await Promise.all([
+  const [categories, subcategories, { cards: gigs, total, page, pageCount }] = await Promise.all([
     prisma.category.findMany({ orderBy: { name: "asc" }, select: { slug: true, name: true, icon: true } }),
+    prisma.subcategory.findMany({
+      orderBy: { name: "asc" },
+      select: { name: true, slug: true, category: { select: { slug: true } } },
+    }),
     listGigs(filters),
   ]);
 
+  const subcategoriesByCategory: Record<string, { name: string; slug: string }[]> = {};
+  for (const sc of subcategories) {
+    (subcategoriesByCategory[sc.category.slug] ??= []).push({ name: sc.name, slug: sc.slug });
+  }
+
   const selectedCategoryObjects = categories.filter((c) => categorySlugs.includes(c.slug));
+  const selectedSubcategoryObjects = subcategories.filter((sc) => subcategorySlugs.includes(sc.slug));
   const singleCategory = selectedCategoryObjects.length === 1 ? selectedCategoryObjects[0] : null;
+  const singleSubcategory =
+    selectedSubcategoryObjects.length === 1 ? selectedSubcategoryObjects[0] : null;
   const accent = singleCategory ? getCategoryAccent(singleCategory.slug) : null;
 
-  const heading = q ? `"${q}" için sonuçlar` : singleCategory ? singleCategory.name : "Tüm Hizmetler";
+  const heading = q
+    ? `"${q}" için sonuçlar`
+    : singleSubcategory
+      ? singleSubcategory.name
+      : singleCategory
+        ? singleCategory.name
+        : "Tüm Hizmetler";
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -96,7 +118,9 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
       <div className="flex flex-col gap-8 md:flex-row">
         <FiltersSidebar
           categories={categories}
+          subcategoriesByCategory={subcategoriesByCategory}
           selectedCategories={categorySlugs}
+          selectedSubcategories={subcategorySlugs}
           initialBudget={butce ? Number(butce) : 3000}
           initialDelivery={sure ?? "farketmez"}
         />
@@ -109,6 +133,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
                   key={c.slug}
                   href={buildHref({
                     categorySlugs: categorySlugs.filter((s) => s !== c.slug),
+                    subcategorySlugs,
                     q,
                     butce,
                     sure,
@@ -117,6 +142,23 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
                   className="inline-flex items-center gap-1.5 rounded-full bg-purple-50 px-3 py-1.5 text-xs font-semibold text-purple-700 hover:bg-purple-100"
                 >
                   {c.name}
+                  <span aria-hidden>×</span>
+                </Link>
+              ))}
+              {selectedSubcategoryObjects.map((sc) => (
+                <Link
+                  key={sc.slug}
+                  href={buildHref({
+                    categorySlugs,
+                    subcategorySlugs: subcategorySlugs.filter((s) => s !== sc.slug),
+                    q,
+                    butce,
+                    sure,
+                    sirala,
+                  })}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200"
+                >
+                  {sc.name}
                   <span aria-hidden>×</span>
                 </Link>
               ))}
@@ -143,7 +185,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
               {pageCount > 1 && (
                 <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
                   <Link
-                    href={buildHref({ categorySlugs, q, butce, sure, sirala, sayfa: page - 1 })}
+                    href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, sayfa: page - 1 })}
                     aria-disabled={page <= 1}
                     className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
                       page <= 1
@@ -156,7 +198,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
                   {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
                     <Link
                       key={n}
-                      href={buildHref({ categorySlugs, q, butce, sure, sirala, sayfa: n })}
+                      href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, sayfa: n })}
                       className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
                         n === page ? "bg-brand-navy text-white" : "text-slate-600 hover:bg-slate-100"
                       }`}
@@ -165,7 +207,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
                     </Link>
                   ))}
                   <Link
-                    href={buildHref({ categorySlugs, q, butce, sure, sirala, sayfa: page + 1 })}
+                    href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, sayfa: page + 1 })}
                     aria-disabled={page >= pageCount}
                     className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
                       page >= pageCount

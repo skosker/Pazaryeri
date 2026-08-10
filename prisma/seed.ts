@@ -35,6 +35,7 @@ const gigs = [
   {
     seller: "elif@profestia.dev",
     category: "dijital-pazarlama",
+    subcategory: "Sosyal Medya Yönetimi",
     title: "Sosyal medya içerik tasarımı yapıyorum",
     coverColor: "rose",
     price: 350,
@@ -45,6 +46,7 @@ const gigs = [
   {
     seller: "mert@profestia.dev",
     category: "yazilim-web",
+    subcategory: "Web Sitesi Geliştirme",
     title: "Kurumsal web siteniz için ön yüz geliştiriyorum",
     coverColor: "sky",
     price: 1200,
@@ -55,6 +57,7 @@ const gigs = [
   {
     seller: "asli@profestia.dev",
     category: "yazi-ceviri",
+    subcategory: "İçerik & Blog Yazarlığı",
     title: "SEO uyumlu blog yazıları ve içerik üretiyorum",
     coverColor: "violet",
     price: 180,
@@ -65,6 +68,7 @@ const gigs = [
   {
     seller: "can@profestia.dev",
     category: "grafik-tasarim",
+    subcategory: "Kurumsal Kimlik",
     title: "Profesyonel logo ve marka kimliği tasarlıyorum",
     coverColor: "amber",
     price: 650,
@@ -75,6 +79,7 @@ const gigs = [
   {
     seller: "zeynep@profestia.dev",
     category: "video-animasyon",
+    subcategory: "Sosyal Medya Video Kurgu",
     title: "Youtube ve reels için video kurgusu yapıyorum",
     coverColor: "emerald",
     price: 420,
@@ -85,6 +90,7 @@ const gigs = [
   {
     seller: "burak@profestia.dev",
     category: "dijital-pazarlama",
+    subcategory: "Sosyal Medya Reklamcılığı",
     title: "Google & Meta reklam kampanyanızı yönetiyorum",
     coverColor: "indigo",
     price: 900,
@@ -95,6 +101,7 @@ const gigs = [
   {
     seller: "mert@profestia.dev",
     category: "yazilim-web",
+    subcategory: "E-ticaret Geliştirme",
     title: "E-ticaret siteniz için ödeme entegrasyonu yapıyorum",
     coverColor: "sky",
     price: 1500,
@@ -105,6 +112,7 @@ const gigs = [
   {
     seller: "can@profestia.dev",
     category: "grafik-tasarim",
+    subcategory: "Sosyal Medya Tasarımları",
     title: "Ürün kataloğunuz için sosyal medya postu tasarlıyorum",
     coverColor: "amber",
     price: 250,
@@ -115,6 +123,7 @@ const gigs = [
   {
     seller: "asli@profestia.dev",
     category: "yazi-ceviri",
+    subcategory: "Çeviri Hizmetleri",
     title: "İngilizce-Türkçe profesyonel çeviri yapıyorum",
     coverColor: "violet",
     price: 220,
@@ -125,6 +134,7 @@ const gigs = [
   {
     seller: "zeynep@profestia.dev",
     category: "video-animasyon",
+    subcategory: "Logo & Motion Animasyon",
     title: "2D logo animasyonu ve marka intro'su hazırlıyorum",
     coverColor: "emerald",
     price: 550,
@@ -135,6 +145,7 @@ const gigs = [
   {
     seller: "zeynep@profestia.dev",
     category: "muzik-ses",
+    subcategory: "Podcast Prodüksiyonu",
     title: "Podcast ve video için ses miksajı ve düzenleme yapıyorum",
     coverColor: "indigo",
     price: 300,
@@ -145,6 +156,7 @@ const gigs = [
   {
     seller: "elif@profestia.dev",
     category: "muzik-ses",
+    subcategory: "Video & Sunum Müziği",
     title: "Sosyal medya videolarınız için müzik ve seslendirme buluyorum",
     coverColor: "rose",
     price: 180,
@@ -155,6 +167,7 @@ const gigs = [
   {
     seller: "burak@profestia.dev",
     category: "is-danismanlik",
+    subcategory: "Pazarlama & Marka Danışmanlığı",
     title: "Küçük işletmeler için pazarlama stratejisi danışmanlığı veriyorum",
     coverColor: "amber",
     price: 750,
@@ -165,6 +178,7 @@ const gigs = [
   {
     seller: "mert@profestia.dev",
     category: "is-danismanlik",
+    subcategory: "Süreç & Proje Yönetimi",
     title: "Yazılım projeniz için teknik danışmanlık ve kod incelemesi yapıyorum",
     coverColor: "sky",
     price: 600,
@@ -175,6 +189,7 @@ const gigs = [
   {
     seller: "asli@profestia.dev",
     category: "egitim-ders",
+    subcategory: "Tasarım & Dijital Beceri Eğitimi",
     title: "İçerik yazarlığı ve SEO üzerine birebir online ders veriyorum",
     coverColor: "violet",
     price: 400,
@@ -185,6 +200,7 @@ const gigs = [
   {
     seller: "can@profestia.dev",
     category: "egitim-ders",
+    subcategory: "Tasarım & Dijital Beceri Eğitimi",
     title: "Grafik tasarım temelleri online eğitimi veriyorum",
     coverColor: "amber",
     price: 450,
@@ -195,6 +211,7 @@ const gigs = [
   {
     seller: "deniz@profestia.dev",
     category: "ai-otomasyon",
+    subcategory: "İş Akışı Otomasyonu (Zapier/Make/n8n)",
     title: "Zapier & Make ile iş süreçlerinizi otomatikleştiriyorum",
     coverColor: "indigo",
     price: 850,
@@ -205,6 +222,7 @@ const gigs = [
   {
     seller: "deniz@profestia.dev",
     category: "ai-otomasyon",
+    subcategory: "Chatbot Geliştirme",
     title: "ChatGPT/Claude entegrasyonlu AI chatbot geliştiriyorum",
     coverColor: "sky",
     price: 1400,
@@ -215,6 +233,7 @@ const gigs = [
   {
     seller: "ayse@profestia.dev",
     category: "veri-analitik",
+    subcategory: "Satış & Pazarlama Analitiği",
     title: "İşletmeniz için satış ve pazarlama verilerini analiz ediyorum",
     coverColor: "emerald",
     price: 700,
@@ -225,6 +244,7 @@ const gigs = [
   {
     seller: "ayse@profestia.dev",
     category: "veri-analitik",
+    subcategory: "Dashboard & Raporlama (Power BI/Excel)",
     title: "Excel/Power BI ile interaktif veri paneli (dashboard) hazırlıyorum",
     coverColor: "violet",
     price: 950,
@@ -238,6 +258,7 @@ async function main() {
   console.log("Seeding...");
 
   const password = await bcrypt.hash("password123", 10);
+  const { sellers: bulkSellers, subcategories: bulkSubcategories, gigs: bulkGigs } = generateBulkData();
 
   for (const c of categories) {
     await prisma.category.upsert({
@@ -245,6 +266,17 @@ async function main() {
       update: {},
       create: c,
     });
+  }
+
+  const subcategoryBySlugAndName = new Map<string, string>();
+  for (const sc of bulkSubcategories) {
+    const category = await prisma.category.findUniqueOrThrow({ where: { slug: sc.categorySlug } });
+    await prisma.subcategory.upsert({
+      where: { slug: sc.slug },
+      update: {},
+      create: { name: sc.name, slug: sc.slug, categoryId: category.id },
+    });
+    subcategoryBySlugAndName.set(`${sc.categorySlug}::${sc.name}`, sc.slug);
   }
 
   for (const s of sellers) {
@@ -283,6 +315,7 @@ async function main() {
     const category = await prisma.category.findUniqueOrThrow({
       where: { slug: g.category },
     });
+    const subcategorySlug = subcategoryBySlugAndName.get(`${g.category}::${g.subcategory}`);
     const slug = g.title
       .toLowerCase()
       .replace(/ğ/g, "g")
@@ -294,9 +327,13 @@ async function main() {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
+    const subcategoryId = subcategorySlug
+      ? (await prisma.subcategory.findUniqueOrThrow({ where: { slug: subcategorySlug } })).id
+      : null;
+
     const gig = await prisma.gig.upsert({
       where: { slug },
-      update: {},
+      update: { subcategoryId },
       create: {
         slug,
         title: g.title,
@@ -304,6 +341,7 @@ async function main() {
         coverColor: g.coverColor,
         sellerId: seller.id,
         categoryId: category.id,
+        subcategoryId,
       },
     });
 
@@ -331,7 +369,6 @@ async function main() {
   }
 
   console.log("Seeding bulk listings (50 per category)...");
-  const { sellers: bulkSellers, gigs: bulkGigs } = generateBulkData();
 
   for (const s of bulkSellers) {
     await prisma.user.upsert({
@@ -352,10 +389,11 @@ async function main() {
   for (const g of bulkGigs) {
     const seller = await prisma.user.findUniqueOrThrow({ where: { email: g.sellerEmail } });
     const category = await prisma.category.findUniqueOrThrow({ where: { slug: g.categorySlug } });
+    const subcategory = await prisma.subcategory.findUniqueOrThrow({ where: { slug: g.subcategorySlug } });
 
     const gig = await prisma.gig.upsert({
       where: { slug: g.slug },
-      update: {},
+      update: { subcategoryId: subcategory.id },
       create: {
         slug: g.slug,
         title: g.title,
@@ -363,6 +401,7 @@ async function main() {
         coverColor: g.coverColor,
         sellerId: seller.id,
         categoryId: category.id,
+        subcategoryId: subcategory.id,
       },
     });
 

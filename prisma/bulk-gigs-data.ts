@@ -24,6 +24,8 @@ type CategoryContent = {
   sellerTitle: string;
   verbs: string[];
   subjects: string[];
+  // subcategory name for each subject, in the same order as `subjects`
+  subcategories: string[];
   priceMin: number;
   priceMax: number;
   deliveryMin: number;
@@ -50,6 +52,20 @@ const categoryContents: CategoryContent[] = [
       "İkon setinizi",
       "Banner ve afiş tasarımınızı",
     ],
+    subcategories: [
+      "Logo Tasarımı",
+      "Kurumsal Kimlik",
+      "Sosyal Medya Tasarımları",
+      "Baskı & Ambalaj Tasarımı",
+      "Baskı & Ambalaj Tasarımı",
+      "İkon & İllüstrasyon",
+      "Sosyal Medya Tasarımları",
+      "Baskı & Ambalaj Tasarımı",
+      "Baskı & Ambalaj Tasarımı",
+      "Sunum Tasarımı",
+      "İkon & İllüstrasyon",
+      "Baskı & Ambalaj Tasarımı",
+    ],
     priceMin: 150,
     priceMax: 900,
     deliveryMin: 1,
@@ -73,6 +89,20 @@ const categoryContents: CategoryContent[] = [
       "SEO teknik yapınızı",
       "Web sitenizin hız performansını",
       "Özel yazılım projenizi",
+    ],
+    subcategories: [
+      "Web Sitesi Geliştirme",
+      "E-ticaret Geliştirme",
+      "Mobil Uygulama Geliştirme",
+      "Web Sitesi Geliştirme",
+      "API & Entegrasyon",
+      "Özel Yazılım & Panel",
+      "Web Sitesi Geliştirme",
+      "API & Entegrasyon",
+      "E-ticaret Geliştirme",
+      "Teknik SEO & Performans",
+      "Teknik SEO & Performans",
+      "Özel Yazılım & Panel",
     ],
     priceMin: 400,
     priceMax: 2500,
@@ -98,6 +128,20 @@ const categoryContents: CategoryContent[] = [
       "Akademik metninizi",
       "Senaryo veya diyalog metninizi",
     ],
+    subcategories: [
+      "İçerik & Blog Yazarlığı",
+      "Ürün & Web Metni",
+      "İçerik & Blog Yazarlığı",
+      "Çeviri Hizmetleri",
+      "Çeviri Hizmetleri",
+      "Kariyer Metinleri",
+      "Ürün & Web Metni",
+      "Kurumsal & Akademik Metin",
+      "Sosyal Medya & Senaryo",
+      "Kurumsal & Akademik Metin",
+      "Kurumsal & Akademik Metin",
+      "Sosyal Medya & Senaryo",
+    ],
     priceMin: 120,
     priceMax: 500,
     deliveryMin: 1,
@@ -121,6 +165,20 @@ const categoryContents: CategoryContent[] = [
       "Motion graphic içeriğinizi",
       "Whiteboard animasyonunuzu",
       "Etkinlik videonuzu",
+    ],
+    subcategories: [
+      "Sosyal Medya Video Kurgu",
+      "Sosyal Medya Video Kurgu",
+      "Kurumsal & Reklam Filmi",
+      "Logo & Motion Animasyon",
+      "Ürün & Tanıtım Videosu",
+      "Etkinlik & Düğün Videosu",
+      "Eğitim & Podcast Videosu",
+      "Eğitim & Podcast Videosu",
+      "Kurumsal & Reklam Filmi",
+      "Logo & Motion Animasyon",
+      "Logo & Motion Animasyon",
+      "Etkinlik & Düğün Videosu",
     ],
     priceMin: 250,
     priceMax: 1200,
@@ -146,6 +204,20 @@ const categoryContents: CategoryContent[] = [
       "Dönüşüm oranı optimizasyonunuzu",
       "E-ticaret pazarlama huninizi",
     ],
+    subcategories: [
+      "Arama Motoru Reklamcılığı (SEM)",
+      "Sosyal Medya Reklamcılığı",
+      "SEO & İçerik Pazarlama",
+      "E-posta & Dönüşüm Pazarlama",
+      "Sosyal Medya Yönetimi",
+      "SEO & İçerik Pazarlama",
+      "Sosyal Medya Reklamcılığı",
+      "Sosyal Medya Yönetimi",
+      "Marka Stratejisi",
+      "Arama Motoru Reklamcılığı (SEM)",
+      "E-posta & Dönüşüm Pazarlama",
+      "E-posta & Dönüşüm Pazarlama",
+    ],
     priceMin: 300,
     priceMax: 1500,
     deliveryMin: 3,
@@ -169,6 +241,20 @@ const categoryContents: CategoryContent[] = [
       "Oyun müziklerinizi",
       "Enstrümantal beat'inizi",
       "Ses kayıt post prodüksiyonunuzu",
+    ],
+    subcategories: [
+      "Podcast Prodüksiyonu",
+      "Reklam & Jingle",
+      "Seslendirme",
+      "Müzik Besteleme & Beat",
+      "Ses Efektleri & Mix",
+      "Video & Sunum Müziği",
+      "Video & Sunum Müziği",
+      "Seslendirme",
+      "Reklam & Jingle",
+      "Müzik Besteleme & Beat",
+      "Müzik Besteleme & Beat",
+      "Podcast Prodüksiyonu",
     ],
     priceMin: 100,
     priceMax: 600,
@@ -194,6 +280,20 @@ const categoryContents: CategoryContent[] = [
       "E-ticaret operasyonunuzu",
       "Kurumsal eğitim programınızı",
     ],
+    subcategories: [
+      "İş Planı & Finansal Danışmanlık",
+      "İş Planı & Finansal Danışmanlık",
+      "Pazarlama & Marka Danışmanlığı",
+      "İK & Kurumsal Eğitim",
+      "Startup & Yatırımcı Danışmanlığı",
+      "Startup & Yatırımcı Danışmanlığı",
+      "Süreç & Proje Yönetimi",
+      "Pazarlama & Marka Danışmanlığı",
+      "Satış & E-ticaret Danışmanlığı",
+      "Süreç & Proje Yönetimi",
+      "Satış & E-ticaret Danışmanlığı",
+      "İK & Kurumsal Eğitim",
+    ],
     priceMin: 350,
     priceMax: 2000,
     deliveryMin: 2,
@@ -217,6 +317,20 @@ const categoryContents: CategoryContent[] = [
       "Yoga ve nefes dersinizi",
       "Kişisel gelişim koçluğunuzu",
       "Kariyer danışmanlığınızı",
+    ],
+    subcategories: [
+      "Akademik Dersler",
+      "Dil Eğitimi",
+      "Yazılım & Ofis Eğitimi",
+      "Tasarım & Dijital Beceri Eğitimi",
+      "Sanat & Hobi Dersleri",
+      "Akademik Dersler",
+      "Yazılım & Ofis Eğitimi",
+      "Tasarım & Dijital Beceri Eğitimi",
+      "Sanat & Hobi Dersleri",
+      "Kişisel Gelişim & Kariyer Koçluğu",
+      "Kişisel Gelişim & Kariyer Koçluğu",
+      "Kişisel Gelişim & Kariyer Koçluğu",
     ],
     priceMin: 150,
     priceMax: 700,
@@ -242,6 +356,20 @@ const categoryContents: CategoryContent[] = [
       "n8n otomasyon senaryonuzu",
       "Yapay zeka danışmanlık sürecinizi",
     ],
+    subcategories: [
+      "Chatbot Geliştirme",
+      "İş Akışı Otomasyonu (Zapier/Make/n8n)",
+      "AI Asistan & İçerik Üretimi",
+      "Veri & CRM Otomasyonu",
+      "AI Entegrasyonları",
+      "Chatbot Geliştirme",
+      "AI Asistan & İçerik Üretimi",
+      "Veri & CRM Otomasyonu",
+      "AI Danışmanlığı & Raporlama",
+      "AI Entegrasyonları",
+      "İş Akışı Otomasyonu (Zapier/Make/n8n)",
+      "AI Danışmanlığı & Raporlama",
+    ],
     priceMin: 500,
     priceMax: 3000,
     deliveryMin: 3,
@@ -265,6 +393,20 @@ const categoryContents: CategoryContent[] = [
       "Finansal veri modelinizi",
       "Envanter analiz sisteminizi",
       "Web sitesi trafik analizinizi",
+    ],
+    subcategories: [
+      "Satış & Pazarlama Analitiği",
+      "Dashboard & Raporlama (Power BI/Excel)",
+      "Web & Trafik Analitiği",
+      "Dashboard & Raporlama (Power BI/Excel)",
+      "Müşteri & Test Analizi",
+      "Satış & Pazarlama Analitiği",
+      "Veritabanı & SQL Analizi",
+      "Müşteri & Test Analizi",
+      "Dashboard & Raporlama (Power BI/Excel)",
+      "Finansal & Envanter Analizi",
+      "Finansal & Envanter Analizi",
+      "Web & Trafik Analitiği",
     ],
     priceMin: 400,
     priceMax: 1800,
@@ -296,9 +438,11 @@ const descriptionTemplates = [
 ];
 
 export type BulkSeller = { email: string; name: string; title: string };
+export type BulkSubcategory = { name: string; slug: string; categorySlug: string };
 export type BulkGig = {
   sellerEmail: string;
   categorySlug: string;
+  subcategorySlug: string;
   title: string;
   slug: string;
   description: string;
@@ -310,10 +454,16 @@ export type BulkGig = {
 export const GIGS_PER_CATEGORY_GENERATED = 48;
 const SELLERS_PER_CATEGORY = 6;
 
-export function generateBulkData(): { sellers: BulkSeller[]; gigs: BulkGig[] } {
+export function generateBulkData(): {
+  sellers: BulkSeller[];
+  subcategories: BulkSubcategory[];
+  gigs: BulkGig[];
+} {
   const sellers: BulkSeller[] = [];
+  const subcategories: BulkSubcategory[] = [];
   const gigs: BulkGig[] = [];
   const usedSlugs = new Set<string>();
+  const usedSubcategorySlugs = new Set<string>();
   let sellerCounter = 0;
 
   for (const cat of categoryContents) {
@@ -328,10 +478,27 @@ export function generateBulkData(): { sellers: BulkSeller[]; gigs: BulkGig[] } {
       sellerCounter++;
     }
 
+    const catSubcategorySlugs = new Map<string, string>();
+    for (const name of cat.subcategories) {
+      if (catSubcategorySlugs.has(name)) continue;
+      const baseSlug = slugify(`${cat.slug}-${name}`);
+      let slug = baseSlug;
+      let attempt = 1;
+      while (usedSubcategorySlugs.has(slug)) {
+        attempt++;
+        slug = `${baseSlug}-${attempt}`;
+      }
+      usedSubcategorySlugs.add(slug);
+      catSubcategorySlugs.set(name, slug);
+      subcategories.push({ name, slug, categorySlug: cat.slug });
+    }
+
     for (let i = 0; i < GIGS_PER_CATEGORY_GENERATED; i++) {
-      const subject = cat.subjects[i % cat.subjects.length];
+      const subjectIndex = i % cat.subjects.length;
+      const subject = cat.subjects[subjectIndex];
       const verb = cat.verbs[Math.floor(i / cat.subjects.length) % cat.verbs.length];
       const title = `${subject} ${verb}`;
+      const subcategorySlug = catSubcategorySlugs.get(cat.subcategories[subjectIndex])!;
 
       let slug = slugify(title);
       let attempt = 1;
@@ -356,6 +523,7 @@ export function generateBulkData(): { sellers: BulkSeller[]; gigs: BulkGig[] } {
       gigs.push({
         sellerEmail: seller.email,
         categorySlug: cat.slug,
+        subcategorySlug,
         title,
         slug,
         description,
@@ -366,5 +534,5 @@ export function generateBulkData(): { sellers: BulkSeller[]; gigs: BulkGig[] } {
     }
   }
 
-  return { sellers, gigs };
+  return { sellers, subcategories, gigs };
 }
