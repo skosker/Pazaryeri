@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { SearchBar } from "@/components/search-bar";
 import { LinkButton } from "@/components/ui/button";
 
@@ -61,30 +60,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-t border-slate-100 bg-slate-50/60">
-        <div className="mx-auto max-w-5xl px-4 py-16 text-center sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-brand-navy">Nasıl Çalışır?</h2>
-          <p className="mt-2 text-sm text-slate-500">Üç adımda işini hayata geçir.</p>
-
-          <div className="mt-10 grid grid-cols-1 gap-8 text-left sm:grid-cols-3">
-            <HowStep n={1} title="Hizmeti bul" description="Kategorilere göz at, ihtiyacına en uygun ilanı seç." />
-            <HowStep
-              n={2}
-              title="Güvenle öde"
-              description="Ödemeni yap, iş onaylanana kadar Profestia güvencesinde tutulur."
-            />
-            <HowStep n={3} title="İşini teslim al" description="Teslimatı onayla, ödeme satıcıya aktarılır." />
-          </div>
-
-          <Link
-            href="/nasil-calisir"
-            className="mt-10 inline-block text-sm font-semibold text-purple-700 hover:underline"
-          >
-            Detaylı incele →
-          </Link>
-        </div>
-      </section>
-
       <section className="relative overflow-hidden bg-brand-navy">
         <div
           aria-hidden
@@ -109,18 +84,6 @@ export default function Home() {
           </LinkButton>
         </div>
       </section>
-    </div>
-  );
-}
-
-function HowStep({ n, title, description }: { n: number; title: string; description: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6">
-      <span className="brand-gradient flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold text-white">
-        {n}
-      </span>
-      <p className="mt-4 font-semibold text-brand-navy">{title}</p>
-      <p className="mt-1 text-sm text-slate-500">{description}</p>
     </div>
   );
 }
