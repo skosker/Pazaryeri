@@ -38,11 +38,6 @@ export function Footer() {
             <p className="text-sm font-semibold text-brand-navy">Profestia</p>
             <ul className="mt-4 space-y-2.5 text-sm text-slate-500">
               <li>
-                <Link href="/nasil-calisir" className="hover:text-brand-navy">
-                  Nasıl Çalışır
-                </Link>
-              </li>
-              <li>
                 <Link href="/kayit?role=FREELANCER" className="hover:text-brand-navy">
                   Freelancer Ol
                 </Link>
