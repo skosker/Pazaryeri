@@ -21,7 +21,7 @@ export default function Home() {
             </svg>
             Profesyonel Hizmette Yeni Nesil Platform
           </span>
-          <h1 className="mt-6 text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-6xl">
+          <h1 className="mt-6 text-3xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl">
             İhtiyacın olan hizmeti
             <br />
             <span className="brand-gradient-text">dakikalar içinde</span> bul
@@ -34,29 +34,6 @@ export default function Home() {
           <div className="mx-auto mt-8 w-full max-w-xl">
             <SearchBar size="lg" />
           </div>
-        </div>
-      </section>
-
-      <section className="border-t border-slate-100 bg-white">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
-          <Feature
-            icon="shield"
-            accent="emerald"
-            title="Profestia güvencesiyle ödeme"
-            description="İş onaylanmadan ödeme satıcıya aktarılmaz."
-          />
-          <Feature
-            icon="check"
-            accent="sky"
-            title="Doğrulanmış freelancer'lar"
-            description="Değerlendirmeler ve tamamlanan iş geçmişiyle güvenle seç."
-          />
-          <Feature
-            icon="headset"
-            accent="fuchsia"
-            title="7/24 destek"
-            description="Sipariş sürecinde her adımda yanındayız."
-          />
         </div>
       </section>
 
@@ -108,49 +85,3 @@ function FreelancerBenefit({ text }: { text: string }) {
   );
 }
 
-const featureIconPaths: Record<string, string> = {
-  shield: "M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z M9 12l2 2 4-4",
-  check: "M12 21a9 9 0 100-18 9 9 0 000 18z M8.5 12l2.5 2.5 4.5-4.5",
-  headset:
-    "M4 13v-1a8 8 0 0116 0v1 M3 13a2 2 0 012-2h1v6H5a2 2 0 01-2-2v-2z M19 13a2 2 0 00-2-2h-1v6h1a2 2 0 002-2v-2z",
-};
-
-const featureAccents: Record<string, { bg: string; text: string }> = {
-  emerald: { bg: "bg-emerald-50", text: "text-emerald-600" },
-  sky: { bg: "bg-sky-50", text: "text-sky-600" },
-  fuchsia: { bg: "bg-fuchsia-50", text: "text-fuchsia-600" },
-};
-
-function Feature({
-  icon,
-  accent,
-  title,
-  description,
-}: {
-  icon: keyof typeof featureIconPaths;
-  accent: keyof typeof featureAccents;
-  title: string;
-  description: string;
-}) {
-  const { bg, text } = featureAccents[accent];
-  return (
-    <div className="rounded-2xl border border-slate-100 p-6 transition hover:shadow-lg hover:shadow-slate-100">
-      <span className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl ${bg} ${text}`}>
-        <svg
-          className="h-5.5 w-5.5"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={1.8}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden
-        >
-          <path d={featureIconPaths[icon]} />
-        </svg>
-      </span>
-      <h3 className="font-semibold text-brand-navy">{title}</h3>
-      <p className="mt-1 text-sm text-slate-500">{description}</p>
-    </div>
-  );
-}
