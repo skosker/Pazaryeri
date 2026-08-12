@@ -1,15 +1,8 @@
 import Link from "next/link";
 import { SearchBar } from "@/components/search-bar";
-import { CategoryIcon } from "@/components/category-icon";
 import { LinkButton } from "@/components/ui/button";
-import { prisma } from "@/lib/prisma";
-import { getCategoryAccent } from "@/lib/category-style";
 
-export default async function Home() {
-  const categories = await prisma.category.findMany({
-    orderBy: { order: "asc" },
-  });
-
+export default function Home() {
   return (
     <div>
       <section className="relative overflow-hidden bg-brand-navy">
@@ -23,7 +16,10 @@ export default async function Home() {
         />
 
         <div className="relative mx-auto flex max-w-4xl flex-col items-center px-4 py-20 text-center sm:px-6 lg:py-28 lg:px-8">
-          <span className="inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs font-semibold text-white/80">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-fuchsia-400/50 bg-gradient-to-r from-fuchsia-500/25 via-purple-500/25 to-indigo-500/25 px-4 py-1.5 text-xs font-semibold text-white shadow-sm shadow-fuchsia-500/20">
+            <svg className="h-3.5 w-3.5 text-fuchsia-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+              <path d="M10 1.5l1.7 4.6 4.6 1.7-4.6 1.7-1.7 4.6-1.7-4.6L3.7 7.8l4.6-1.7L10 1.5z" />
+            </svg>
             Profesyonel Hizmette Yeni Nesil Platform
           </span>
           <h1 className="mt-6 text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-6xl">
@@ -39,34 +35,6 @@ export default async function Home() {
           <div className="mx-auto mt-8 w-full max-w-xl">
             <SearchBar size="lg" />
           </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h2 className="text-xl font-bold text-brand-navy sm:text-2xl">Popüler Kategoriler</h2>
-          <p className="mt-2 text-sm text-slate-500">İhtiyacına en yakın kategoriyi seç, hemen keşfetmeye başla.</p>
-        </div>
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {categories.map((c) => {
-            const accent = getCategoryAccent(c.slug);
-            return (
-              <Link
-                key={c.id}
-                href={`/kategoriler?kategori=${c.slug}`}
-                className={`group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-100 ${accent.ring}`}
-              >
-                <span
-                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${accent.bg} ${accent.text} transition group-hover:scale-105`}
-                >
-                  <CategoryIcon icon={c.icon} className="h-6 w-6" />
-                </span>
-                <div className="min-w-0">
-                  <p className="truncate font-semibold text-brand-navy">{c.name}</p>
-                </div>
-              </Link>
-            );
-          })}
         </div>
       </section>
 
