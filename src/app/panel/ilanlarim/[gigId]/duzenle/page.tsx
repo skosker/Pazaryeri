@@ -13,14 +13,23 @@ export default async function EditGigPage(props: PageProps<"/panel/ilanlarim/[gi
   const [gig, categories] = await Promise.all([
     prisma.gig.findUnique({
       where: { id: gigId },
-      include: { packages: { orderBy: { price: "asc" }, take: 1 } },
+      include: { packages: true },
     }),
     prisma.category.findMany({ orderBy: { order: "asc" } }),
   ]);
 
   if (!gig || gig.sellerId !== session.user.id) notFound();
 
-  const pkg = gig.packages[0];
+  const tierValues = (tier: "BASIC" | "STANDARD" | "PREMIUM") => {
+    const pkg = gig.packages.find((p) => p.tier === tier);
+    if (!pkg) return undefined;
+    return {
+      price: Number(pkg.price),
+      deliveryDays: pkg.deliveryDays,
+      revisionCount: pkg.revisionCount,
+      description: pkg.description,
+    };
+  };
 
   return (
     <div className="max-w-2xl">
@@ -37,10 +46,9 @@ export default async function EditGigPage(props: PageProps<"/panel/ilanlarim/[gi
             title: gig.title,
             categoryId: gig.categoryId,
             description: gig.description,
-            price: pkg ? Number(pkg.price) : undefined,
-            deliveryDays: pkg?.deliveryDays,
-            revisionCount: pkg?.revisionCount,
-            packageDescription: pkg?.description,
+            basic: tierValues("BASIC"),
+            standard: tierValues("STANDARD"),
+            premium: tierValues("PREMIUM"),
           }}
         />
       </div>

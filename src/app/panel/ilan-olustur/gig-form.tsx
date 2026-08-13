@@ -5,15 +5,42 @@ import type { FormState } from "./actions";
 
 const initialState: FormState = {};
 
+export type TierValues = {
+  price?: number;
+  deliveryDays?: number;
+  revisionCount?: number;
+  description?: string;
+};
+
 type GigFormValues = {
   title?: string;
   categoryId?: string;
   description?: string;
-  price?: number;
-  deliveryDays?: number;
-  revisionCount?: number;
-  packageDescription?: string;
+  basic?: TierValues;
+  standard?: TierValues;
+  premium?: TierValues;
 };
+
+const tiers = [
+  {
+    key: "basic",
+    label: "Temel Paket",
+    hint: "Sade kapsam, uygun fiyat.",
+    placeholder: "Tek konsept, temel teslimat.",
+  },
+  {
+    key: "standard",
+    label: "Standart Paket",
+    hint: "En çok tercih edilen paket.",
+    placeholder: "Kaynak dosyalar ve revizyon hakkı dahil.",
+  },
+  {
+    key: "premium",
+    label: "Premium Paket",
+    hint: "Geniş kapsam, öncelikli teslimat.",
+    placeholder: "Tüm kaynak dosyalar, ek revizyon ve öncelikli teslimat dahil.",
+  },
+] as const;
 
 export function GigForm({
   categories,
@@ -74,59 +101,75 @@ export function GigForm({
         />
       </label>
 
-      <div className="rounded-2xl border border-slate-200 p-4">
-        <h3 className="mb-3 font-semibold text-brand-navy">Standart Paket</h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
-            Fiyat (₺)
-            <input
-              name="price"
-              type="number"
-              min={1}
-              step="1"
-              required
-              defaultValue={defaultValues?.price}
-              className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
-            />
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
-            Teslim (gün)
-            <input
-              name="deliveryDays"
-              type="number"
-              min={1}
-              step="1"
-              required
-              defaultValue={defaultValues?.deliveryDays}
-              className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
-            />
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
-            Revizyon
-            <input
-              name="revisionCount"
-              type="number"
-              min={0}
-              step="1"
-              defaultValue={defaultValues?.revisionCount ?? 2}
-              required
-              className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
-            />
-          </label>
-        </div>
-        <label className="mt-4 flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
-          Paket açıklaması
-          <textarea
-            name="packageDescription"
-            required
-            minLength={10}
-            rows={2}
-            defaultValue={defaultValues?.packageDescription}
-            placeholder="Temel içerik paketi, 2 revizyon ve kaynak dosyalar dahil."
-            className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
-          />
-        </label>
+      <div>
+        <h3 className="font-semibold text-brand-navy">Paketler</h3>
+        <p className="mt-1 text-sm text-slate-500">
+          Alıcılar bu üç paketten birini seçerek sipariş verir. Fiyatlar Temel&apos;den
+          Premium&apos;a doğru artmalı.
+        </p>
       </div>
+
+      {tiers.map((tier) => {
+        const values = defaultValues?.[tier.key];
+        return (
+          <div key={tier.key} className="rounded-2xl border border-slate-200 p-4">
+            <div className="mb-3 flex items-baseline gap-2">
+              <h4 className="font-semibold text-brand-navy">{tier.label}</h4>
+              <span className="text-xs text-slate-400">{tier.hint}</span>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
+                Fiyat (₺)
+                <input
+                  name={`${tier.key}Price`}
+                  type="number"
+                  min={1}
+                  step="1"
+                  required
+                  defaultValue={values?.price}
+                  className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
+                />
+              </label>
+              <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
+                Teslim (gün)
+                <input
+                  name={`${tier.key}DeliveryDays`}
+                  type="number"
+                  min={1}
+                  step="1"
+                  required
+                  defaultValue={values?.deliveryDays}
+                  className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
+                />
+              </label>
+              <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
+                Revizyon
+                <input
+                  name={`${tier.key}RevisionCount`}
+                  type="number"
+                  min={0}
+                  step="1"
+                  required
+                  defaultValue={values?.revisionCount ?? 2}
+                  className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
+                />
+              </label>
+            </div>
+            <label className="mt-4 flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
+              Paket açıklaması
+              <textarea
+                name={`${tier.key}Description`}
+                required
+                minLength={10}
+                rows={2}
+                defaultValue={values?.description}
+                placeholder={tier.placeholder}
+                className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
+              />
+            </label>
+          </div>
+        );
+      })}
 
       {state.error && (
         <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{state.error}</p>

@@ -21,8 +21,7 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
   const gig = await getGigBySlug(slug);
   if (!gig) notFound();
 
-  const pkg = gig.packages[0];
-  if (!pkg) notFound();
+  if (gig.packages.length === 0) notFound();
 
   const reviewCount = gig.reviews.length;
   const rating =
@@ -154,12 +153,16 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
 
         <OrderPanel
           slug={gig.slug}
-          packageId={pkg.id}
-          packageName={pkg.name}
-          price={Number(pkg.price)}
-          deliveryDays={pkg.deliveryDays}
-          revisionCount={pkg.revisionCount}
-          description={pkg.description}
+          packages={gig.packages.map((p) => ({
+            id: p.id,
+            tier: p.tier,
+            name: p.name,
+            description: p.description,
+            price: Number(p.price),
+            deliveryDays: p.deliveryDays,
+            revisionCount: p.revisionCount,
+            features: p.features,
+          }))}
           isOwnGig={session?.user?.id === gig.sellerId}
         />
       </div>

@@ -9,15 +9,26 @@ export const registerSchema = z.object({
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 
-export const gigSchema = z.object({
-  title: z.string().trim().min(10, "Başlık en az 10 karakter olmalı").max(100),
-  description: z.string().trim().min(30, "Açıklama en az 30 karakter olmalı"),
-  categoryId: z.string().min(1, "Kategori seçin"),
-  price: z.coerce.number().positive("Fiyat 0'dan büyük olmalı"),
-  deliveryDays: z.coerce.number().int().positive("Teslim süresi 0'dan büyük olmalı"),
+const tierFields = (label: string) => ({
+  price: z.coerce.number().positive(`${label} paketin fiyatı 0'dan büyük olmalı`),
+  deliveryDays: z.coerce.number().int().positive(`${label} paketin teslim süresi 0'dan büyük olmalı`),
   revisionCount: z.coerce.number().int().min(0).default(2),
-  packageDescription: z.string().trim().min(10, "Paket açıklaması en az 10 karakter olmalı"),
+  description: z.string().trim().min(10, `${label} paket açıklaması en az 10 karakter olmalı`),
 });
+
+export const gigSchema = z
+  .object({
+    title: z.string().trim().min(10, "Başlık en az 10 karakter olmalı").max(100),
+    description: z.string().trim().min(30, "Açıklama en az 30 karakter olmalı"),
+    categoryId: z.string().min(1, "Kategori seçin"),
+    basic: z.object(tierFields("Temel")),
+    standard: z.object(tierFields("Standart")),
+    premium: z.object(tierFields("Premium")),
+  })
+  .refine((v) => v.basic.price < v.standard.price && v.standard.price < v.premium.price, {
+    message: "Fiyatlar Temel < Standart < Premium sırasında artmalı",
+    path: ["standard", "price"],
+  });
 
 export const reviewSchema = z.object({
   rating: z.coerce.number().int().min(1).max(5),

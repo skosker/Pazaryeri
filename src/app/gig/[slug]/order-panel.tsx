@@ -1,109 +1,144 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { auth } from "@/auth";
-import { createOrder, OrderError } from "@/lib/orders";
+"use client";
 
-export async function OrderPanel({
-  slug,
-  packageId,
-  packageName,
-  price,
-  deliveryDays,
-  revisionCount,
-  description,
-  isOwnGig,
-}: {
-  slug: string;
-  packageId: string;
-  packageName: string;
+import { useState } from "react";
+import Link from "next/link";
+import { orderAction } from "./actions";
+
+export type PackageOption = {
+  id: string;
+  tier: string;
+  name: string;
+  description: string;
   price: number;
   deliveryDays: number;
   revisionCount: number;
-  description: string;
+  features: string[];
+};
+
+const tierLabels: Record<string, string> = {
+  BASIC: "Temel",
+  STANDARD: "Standart",
+  PREMIUM: "Premium",
+};
+
+export function OrderPanel({
+  slug,
+  packages,
+  isOwnGig,
+}: {
+  slug: string;
+  packages: PackageOption[];
   isOwnGig: boolean;
 }) {
-  async function orderAction() {
-    "use server";
-    const session = await auth();
-    if (!session?.user) {
-      redirect(`/giris?callbackUrl=/gig/${slug}`);
-    }
+  // Default to the middle tier when there is a full ladder, otherwise the cheapest.
+  const defaultIndex = packages.length === 3 ? 1 : 0;
+  const [selected, setSelected] = useState(defaultIndex);
+  const pkg = packages[selected] ?? packages[0];
 
-    try {
-      const order = await createOrder(session.user.id, packageId);
-      redirect(`/odeme/${order.id}`);
-    } catch (error) {
-      if (error instanceof OrderError) {
-        redirect(`/gig/${slug}?hata=${encodeURIComponent(error.message)}`);
-      }
-      throw error;
-    }
-  }
+  if (!pkg) return null;
 
   return (
-    <div className="sticky top-24 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-brand-navy">{packageName}</h2>
-        <div className="text-right">
-          <span className="text-2xl font-extrabold text-brand-navy">{price}₺</span>
-          <p className="text-xs text-slate-400">KDV dahil</p>
+    <div className="sticky top-24 rounded-2xl border border-slate-200 bg-white shadow-sm">
+      {packages.length > 1 && (
+        <div className="flex border-b border-slate-200" role="tablist">
+          {packages.map((p, i) => {
+            const isActive = i === selected;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => setSelected(i)}
+                className={`flex-1 border-b-2 px-2 py-3 text-sm font-semibold transition ${
+                  isActive
+                    ? "border-purple-600 text-purple-700"
+                    : "border-transparent text-slate-500 hover:text-brand-navy"
+                }`}
+              >
+                {tierLabels[p.tier] ?? p.name}
+              </button>
+            );
+          })}
         </div>
-      </div>
-
-      <p className="mt-3 text-sm text-slate-500">{description}</p>
-
-      <div className="mt-4 flex items-center gap-4 border-t border-slate-100 pt-4 text-sm text-slate-500">
-        <span className="flex items-center gap-1">
-          <ClockIcon /> {deliveryDays} gün teslim
-        </span>
-        <span className="flex items-center gap-1">
-          <RefreshIcon /> {revisionCount} revizyon
-        </span>
-      </div>
-
-      {isOwnGig ? (
-        <p className="mt-5 rounded-full bg-slate-100 px-4 py-2.5 text-center text-sm font-semibold text-slate-500">
-          Bu senin ilanın
-        </p>
-      ) : (
-        <form action={orderAction}>
-          <button
-            type="submit"
-            className="brand-gradient mt-5 w-full rounded-full px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
-          >
-            Devam Et
-          </button>
-        </form>
       )}
 
-      <button
-        type="button"
-        title="Yakında"
-        disabled
-        className="mt-3 w-full cursor-not-allowed rounded-full border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-400"
-      >
-        Satıcıya Mesaj Gönder
-      </button>
+      <div className="p-6">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-brand-navy">{pkg.name}</h2>
+          <div className="text-right">
+            <span className="text-2xl font-extrabold text-brand-navy">{pkg.price}₺</span>
+            <p className="text-xs text-slate-400">KDV dahil</p>
+          </div>
+        </div>
 
-      <ul className="mt-5 space-y-2 text-xs text-slate-500">
-        <li className="flex items-start gap-2">
-          <CheckIcon /> Profestia güvencesiyle ödeme — iş onaylanmadan satıcıya aktarılmaz
-        </li>
-        <li className="flex items-start gap-2">
-          <CheckIcon /> Kredi kartına 3 taksit imkanı
-        </li>
-        <li className="flex items-start gap-2">
-          <CheckIcon /> 7/24 Türkçe destek
-        </li>
-      </ul>
+        <p className="mt-3 text-sm text-slate-500">{pkg.description}</p>
 
-      <p className="mt-4 text-center text-[11px] text-slate-400">
-        Devam ederek{" "}
-        <Link href="/kategoriler" className="underline">
-          kullanım koşullarını
-        </Link>{" "}
-        kabul etmiş olursun.
-      </p>
+        <div className="mt-4 flex items-center gap-4 border-t border-slate-100 pt-4 text-sm text-slate-500">
+          <span className="flex items-center gap-1">
+            <ClockIcon /> {pkg.deliveryDays} gün teslim
+          </span>
+          <span className="flex items-center gap-1">
+            <RefreshIcon /> {pkg.revisionCount} revizyon
+          </span>
+        </div>
+
+        {pkg.features.length > 0 && (
+          <ul className="mt-4 space-y-2 text-sm text-slate-600">
+            {pkg.features.map((f) => (
+              <li key={f} className="flex items-start gap-2">
+                <CheckIcon /> {f}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {isOwnGig ? (
+          <p className="mt-5 rounded-full bg-slate-100 px-4 py-2.5 text-center text-sm font-semibold text-slate-500">
+            Bu senin ilanın
+          </p>
+        ) : (
+          <form action={orderAction}>
+            <input type="hidden" name="slug" value={slug} />
+            <input type="hidden" name="packageId" value={pkg.id} />
+            <button
+              type="submit"
+              className="brand-gradient mt-5 w-full rounded-full px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+            >
+              Devam Et
+            </button>
+          </form>
+        )}
+
+        <button
+          type="button"
+          title="Yakında"
+          disabled
+          className="mt-3 w-full cursor-not-allowed rounded-full border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-400"
+        >
+          Satıcıya Mesaj Gönder
+        </button>
+
+        <ul className="mt-5 space-y-2 border-t border-slate-100 pt-5 text-xs text-slate-500">
+          <li className="flex items-start gap-2">
+            <CheckIcon /> Profestia güvencesiyle ödeme — iş onaylanmadan satıcıya aktarılmaz
+          </li>
+          <li className="flex items-start gap-2">
+            <CheckIcon /> Kredi kartına 3 taksit imkanı
+          </li>
+          <li className="flex items-start gap-2">
+            <CheckIcon /> 7/24 Türkçe destek
+          </li>
+        </ul>
+
+        <p className="mt-4 text-center text-[11px] text-slate-400">
+          Devam ederek{" "}
+          <Link href="/kategoriler" className="underline">
+            kullanım koşullarını
+          </Link>{" "}
+          kabul etmiş olursun.
+        </p>
+      </div>
     </div>
   );
 }

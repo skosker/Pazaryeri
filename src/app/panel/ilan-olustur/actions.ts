@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { gigSchema } from "@/lib/validation";
+import { readGigForm, packageData } from "@/lib/gig-form";
 
 export type FormState = { error?: string };
 
@@ -29,22 +30,13 @@ export async function createGigAction(
     return { error: "Sadece freelancer hesapları ilan oluşturabilir" };
   }
 
-  const parsed = gigSchema.safeParse({
-    title: formData.get("title"),
-    description: formData.get("description"),
-    categoryId: formData.get("categoryId"),
-    price: formData.get("price"),
-    deliveryDays: formData.get("deliveryDays"),
-    revisionCount: formData.get("revisionCount"),
-    packageDescription: formData.get("packageDescription"),
-  });
+  const parsed = gigSchema.safeParse(readGigForm(formData));
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Geçersiz form verisi" };
   }
 
-  const { title, description, categoryId, price, deliveryDays, revisionCount, packageDescription } =
-    parsed.data;
+  const { title, description, categoryId, basic, standard, premium } = parsed.data;
 
   const category = await prisma.category.findUnique({ where: { id: categoryId } });
   if (!category) return { error: "Geçersiz kategori" };
@@ -65,14 +57,11 @@ export async function createGigAction(
       categoryId,
       sellerId: session.user.id,
       packages: {
-        create: {
-          name: "Standart Paket",
-          description: packageDescription,
-          price,
-          deliveryDays,
-          revisionCount,
-          features: ["Kaynak dosyalar dahil", `${revisionCount} revizyon hakkı`],
-        },
+        create: [
+          packageData("BASIC", basic),
+          packageData("STANDARD", standard),
+          packageData("PREMIUM", premium),
+        ],
       },
     },
   });
