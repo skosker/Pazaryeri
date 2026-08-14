@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { normalizeCoverImage } from "@/lib/image-processing";
 
 /**
  * Uploads go to Vercel Blob when BLOB_READ_WRITE_TOKEN is set, and to Postgres
@@ -9,24 +10,21 @@ export function usingBlobStorage() {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 }
 
-/** Stores the file and returns the URL to render it from. */
+/** Downscales the upload, stores it, and returns the URL to render it from. */
 export async function putImage(file: File): Promise<string> {
+  const { buffer, mimeType, extension } = await normalizeCoverImage(file);
+
   if (usingBlobStorage()) {
     const { put } = await import("@vercel/blob");
-    const extension = file.type.split("/")[1]?.replace("jpeg", "jpg") ?? "jpg";
-    const blob = await put(`kapak/${crypto.randomUUID()}.${extension}`, file, {
+    const blob = await put(`kapak/${crypto.randomUUID()}.${extension}`, buffer, {
       access: "public",
-      contentType: file.type,
+      contentType: mimeType,
     });
     return blob.url;
   }
 
   const image = await prisma.uploadedImage.create({
-    data: {
-      mimeType: file.type,
-      data: Buffer.from(await file.arrayBuffer()),
-      size: file.size,
-    },
+    data: { mimeType, data: new Uint8Array(buffer), size: buffer.length },
     select: { id: true },
   });
   return `/api/gorsel/${image.id}`;
