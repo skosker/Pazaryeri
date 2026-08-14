@@ -18,11 +18,19 @@ export default function Home() {
 
         <div className="relative mx-auto max-w-6xl px-4 pb-20 pt-10 sm:px-6 lg:px-8 lg:pb-28 lg:pt-14">
           <div className="flex justify-center">
-            <span className="inline-flex items-center gap-2.5 rounded-full border border-fuchsia-400/50 bg-gradient-to-r from-fuchsia-500/25 via-purple-500/25 to-indigo-500/25 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-sm shadow-fuchsia-500/20 sm:text-base">
-              <svg className="h-4 w-4 shrink-0 text-fuchsia-300 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-                <path d="M10 1.5l1.7 4.6 4.6 1.7-4.6 1.7-1.7 4.6-1.7-4.6L3.7 7.8l4.6-1.7L10 1.5z" />
-              </svg>
-              Profesyonel Hizmette Yeni Nesil Platform
+            <span className="brand-gradient relative inline-flex items-center rounded-full px-7 py-3 text-center text-sm font-bold tracking-tight text-white shadow-lg shadow-fuchsia-500/40 ring-1 ring-inset ring-white/25 sm:text-base">
+              {/* A blurred copy of the pill bleeding past its edge, so the badge reads as
+                  lit against the navy rather than sitting flat on it. */}
+              <span
+                aria-hidden
+                className="brand-gradient pointer-events-none absolute -inset-1.5 -z-10 rounded-full opacity-60 blur-lg"
+              />
+              <span className="flex items-center gap-2.5">
+                <svg className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                  <path d="M10 1.5l1.7 4.6 4.6 1.7-4.6 1.7-1.7 4.6-1.7-4.6L3.7 7.8l4.6-1.7L10 1.5z" />
+                </svg>
+                Profesyonel Hizmette Yeni Nesil Platform
+              </span>
             </span>
           </div>
 
