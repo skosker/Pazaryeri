@@ -87,7 +87,7 @@ export default function Home() {
               icon="compass"
               image="/neden-kesfet.png"
               title="Yeteneğin Sınır Tanımasın"
-              description="Nerede olduğunun değil, ne yapabildiğinin önemli. Yeteneklerini keşfet, fırsatları yakala."
+              description="Nerede olduğunun değil, ne yapabildiğinin önemli."
             />
             <WhyCard
               icon="users"

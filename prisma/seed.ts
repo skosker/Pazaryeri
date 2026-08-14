@@ -38,7 +38,7 @@ const gigs = [
     subcategory: "Sosyal Medya Yönetimi",
     title: "Sosyal medya içerik tasarımı yapıyorum",
     coverColor: "rose",
-    price: 350,
+    price: 2100,
     delivery: 3,
     description:
       "Instagram, Facebook ve LinkedIn hesabınız için markanıza özel, dikkat çekici sosyal medya içerikleri tasarlıyorum. Kaynak dosyalar ve 2 revizyon dahildir.",
@@ -49,7 +49,7 @@ const gigs = [
     subcategory: "Web Sitesi Geliştirme",
     title: "Kurumsal web siteniz için ön yüz geliştiriyorum",
     coverColor: "sky",
-    price: 1200,
+    price: 8400,
     delivery: 7,
     description:
       "Next.js ve Tailwind CSS ile hızlı, mobil uyumlu ve SEO dostu kurumsal web siteleri geliştiriyorum. Modern, temiz ve sürdürülebilir kod.",
@@ -60,7 +60,7 @@ const gigs = [
     subcategory: "İçerik & Blog Yazarlığı",
     title: "SEO uyumlu blog yazıları ve içerik üretiyorum",
     coverColor: "violet",
-    price: 180,
+    price: 800,
     delivery: 2,
     description:
       "Anahtar kelime araştırması yaparak Google'da üst sıralarda yer almanızı sağlayacak, akıcı ve özgün blog içerikleri yazıyorum.",
@@ -71,7 +71,7 @@ const gigs = [
     subcategory: "Kurumsal Kimlik",
     title: "Profesyonel logo ve marka kimliği tasarlıyorum",
     coverColor: "amber",
-    price: 650,
+    price: 3250,
     delivery: 4,
     description:
       "Markanızı yansıtan özgün logo tasarımı, renk paleti ve tipografi ile eksiksiz bir marka kimliği paketi hazırlıyorum.",
@@ -82,7 +82,7 @@ const gigs = [
     subcategory: "Sosyal Medya Video Kurgu",
     title: "Youtube ve reels için video kurgusu yapıyorum",
     coverColor: "emerald",
-    price: 420,
+    price: 2300,
     delivery: 3,
     description:
       "Ham çekimlerinizi profesyonel geçişler, altyazı ve renk düzenlemesiyle akıcı bir kurguya dönüştürüyorum.",
@@ -93,7 +93,7 @@ const gigs = [
     subcategory: "Sosyal Medya Reklamcılığı",
     title: "Google & Meta reklam kampanyanızı yönetiyorum",
     coverColor: "indigo",
-    price: 900,
+    price: 5400,
     delivery: 5,
     description:
       "Bütçenizi verimli kullanarak dönüşüm odaklı Google Ads ve Meta Ads kampanyaları kurup optimize ediyorum.",
@@ -104,7 +104,7 @@ const gigs = [
     subcategory: "E-ticaret Geliştirme",
     title: "E-ticaret siteniz için ödeme entegrasyonu yapıyorum",
     coverColor: "sky",
-    price: 1500,
+    price: 10500,
     delivery: 6,
     description:
       "iyzico, Stripe veya PayPal ile güvenli ödeme altyapısını sitenize sorunsuz şekilde entegre ediyorum.",
@@ -115,7 +115,7 @@ const gigs = [
     subcategory: "Sosyal Medya Tasarımları",
     title: "Ürün kataloğunuz için sosyal medya postu tasarlıyorum",
     coverColor: "amber",
-    price: 250,
+    price: 1250,
     delivery: 2,
     description:
       "Ürünlerinizi öne çıkaran, satış odaklı görsel post ve story tasarımları hazırlıyorum.",
@@ -126,7 +126,7 @@ const gigs = [
     subcategory: "Çeviri Hizmetleri",
     title: "İngilizce-Türkçe profesyonel çeviri yapıyorum",
     coverColor: "violet",
-    price: 220,
+    price: 1000,
     delivery: 2,
     description:
       "Teknik dokümanlar, web siteleri ve pazarlama metinlerinizi anlam bütünlüğünü koruyarak İngilizce-Türkçe çeviriyorum.",
@@ -137,7 +137,7 @@ const gigs = [
     subcategory: "Logo & Motion Animasyon",
     title: "2D logo animasyonu ve marka intro'su hazırlıyorum",
     coverColor: "emerald",
-    price: 550,
+    price: 3000,
     delivery: 4,
     description:
       "Markanızın logosunu akıcı bir 2D animasyona dönüştürüp video içeriklerinizin başına eklenecek profesyonel bir intro hazırlıyorum.",
@@ -148,7 +148,7 @@ const gigs = [
     subcategory: "Podcast Prodüksiyonu",
     title: "Podcast ve video için ses miksajı ve düzenleme yapıyorum",
     coverColor: "indigo",
-    price: 300,
+    price: 1500,
     delivery: 3,
     description:
       "Ham ses kayıtlarınızı gürültüden arındırıp seviye dengelemesi yaparak yayına hazır, temiz bir mikse dönüştürüyorum.",
@@ -159,7 +159,7 @@ const gigs = [
     subcategory: "Video & Sunum Müziği",
     title: "Sosyal medya videolarınız için müzik ve seslendirme buluyorum",
     coverColor: "rose",
-    price: 180,
+    price: 900,
     delivery: 2,
     description:
       "İçeriğinizin tonuna uygun telifsiz müzik seçimi yapıyor, gerektiğinde kısa seslendirme kaydı da sağlıyorum.",
@@ -170,7 +170,7 @@ const gigs = [
     subcategory: "Pazarlama & Marka Danışmanlığı",
     title: "Küçük işletmeler için pazarlama stratejisi danışmanlığı veriyorum",
     coverColor: "amber",
-    price: 750,
+    price: 4900,
     delivery: 5,
     description:
       "İşletmenizin hedef kitlesini, rakiplerini ve kanallarını analiz ederek uygulanabilir bir pazarlama yol haritası çıkarıyorum.",
@@ -181,7 +181,7 @@ const gigs = [
     subcategory: "Süreç & Proje Yönetimi",
     title: "Yazılım projeniz için teknik danışmanlık ve kod incelemesi yapıyorum",
     coverColor: "sky",
-    price: 600,
+    price: 3900,
     delivery: 3,
     description:
       "Mevcut kod tabanınızı inceleyip mimari, performans ve güvenlik açısından somut iyileştirme önerileri sunuyorum.",
@@ -192,7 +192,7 @@ const gigs = [
     subcategory: "Tasarım & Dijital Beceri Eğitimi",
     title: "İçerik yazarlığı ve SEO üzerine birebir online ders veriyorum",
     coverColor: "violet",
-    price: 400,
+    price: 1800,
     delivery: 1,
     description:
       "SEO uyumlu içerik yazımının temellerini, anahtar kelime araştırmasını ve yazı planlamasını birebir canlı derste anlatıyorum.",
@@ -203,7 +203,7 @@ const gigs = [
     subcategory: "Tasarım & Dijital Beceri Eğitimi",
     title: "Grafik tasarım temelleri online eğitimi veriyorum",
     coverColor: "amber",
-    price: 450,
+    price: 2000,
     delivery: 1,
     description:
       "Tipografi, renk teorisi ve kompozisyon temellerini örneklerle anlatan, yeni başlayanlara yönelik birebir eğitim veriyorum.",
@@ -214,7 +214,7 @@ const gigs = [
     subcategory: "İş Akışı Otomasyonu (Zapier/Make/n8n)",
     title: "Zapier & Make ile iş süreçlerinizi otomatikleştiriyorum",
     coverColor: "indigo",
-    price: 850,
+    price: 6400,
     delivery: 5,
     description:
       "Tekrar eden manuel işlerinizi Zapier veya Make üzerinde kurduğum otomasyon akışlarıyla ortadan kaldırıyorum.",
@@ -225,7 +225,7 @@ const gigs = [
     subcategory: "Chatbot Geliştirme",
     title: "ChatGPT/Claude entegrasyonlu AI chatbot geliştiriyorum",
     coverColor: "sky",
-    price: 1400,
+    price: 10500,
     delivery: 8,
     description:
       "Web siteniz veya WhatsApp hattınız için müşteri sorularını yanıtlayan, kendi verilerinizle eğitilmiş bir AI chatbot geliştiriyorum.",
@@ -236,7 +236,7 @@ const gigs = [
     subcategory: "Satış & Pazarlama Analitiği",
     title: "İşletmeniz için satış ve pazarlama verilerini analiz ediyorum",
     coverColor: "emerald",
-    price: 700,
+    price: 4900,
     delivery: 4,
     description:
       "Ham verilerinizi düzenleyip anlamlı içgörülere dönüştürerek karar alma sürecinize somut veri desteği sağlıyorum.",
@@ -247,12 +247,65 @@ const gigs = [
     subcategory: "Dashboard & Raporlama (Power BI/Excel)",
     title: "Excel/Power BI ile interaktif veri paneli (dashboard) hazırlıyorum",
     coverColor: "violet",
-    price: 950,
+    price: 6650,
     delivery: 6,
     description:
       "Verilerinizi canlı güncellenen, filtrelenebilir bir Power BI veya Excel panelinde tek bakışta takip edilebilir hale getiriyorum.",
   },
 ];
+
+/**
+ * Every gig gets the same three-tier ladder derived from its base (Standart) price:
+ * Temel ~60% price and a day slower, Premium ~180% price and a day faster.
+ * Upserting per tier means re-running the seed re-prices existing rows instead of
+ * leaving a stale ladder behind.
+ */
+async function seedPackageLadder(gigId: string, basePrice: number, baseDelivery: number) {
+  const tiers = [
+    {
+      tier: "BASIC" as const,
+      name: "Temel Paket",
+      description: "İhtiyacın olan temel çalışma. Tek konsept, sade teslimat.",
+      price: Math.round((basePrice * 0.6) / 50) * 50,
+      deliveryDays: baseDelivery + 1,
+      revisionCount: 1,
+      features: ["Temel kapsam", "1 revizyon hakkı", "Standart teslim"],
+    },
+    {
+      tier: "STANDARD" as const,
+      name: "Standart Paket",
+      description: "Temel içerik paketi, 2 revizyon ve kaynak dosyalar dahil.",
+      price: basePrice,
+      deliveryDays: baseDelivery,
+      revisionCount: 2,
+      features: ["Kaynak dosyalar dahil", "2 revizyon hakkı", "Ticari kullanım lisansı"],
+    },
+    {
+      tier: "PREMIUM" as const,
+      name: "Premium Paket",
+      description: "Geniş kapsam, tüm kaynak dosyalar ve öncelikli teslimat.",
+      price: Math.round((basePrice * 1.8) / 50) * 50,
+      deliveryDays: Math.max(1, baseDelivery - 1),
+      revisionCount: 4,
+      features: [
+        "Kaynak dosyalar dahil",
+        "Ticari kullanım lisansı",
+        "Öncelikli teslimat",
+        "4 revizyon hakkı",
+      ],
+    },
+  ];
+
+  for (const t of tiers) {
+    const existing = await prisma.package.findFirst({ where: { gigId, tier: t.tier } });
+    if (existing) {
+      await prisma.package.update({ where: { id: existing.id }, data: t });
+    } else {
+      await prisma.package.create({ data: { ...t, gigId } });
+    }
+  }
+}
+
 
 async function main() {
   console.log("Seeding...");
@@ -345,32 +398,7 @@ async function main() {
       },
     });
 
-    const existingPackage = await prisma.package.findFirst({
-      where: { gigId: gig.id },
-    });
-    if (existingPackage) {
-      await prisma.package.update({
-        where: { id: existingPackage.id },
-        data: { price: g.price, deliveryDays: g.delivery },
-      });
-    } else {
-      await prisma.package.create({
-        data: {
-          gigId: gig.id,
-          tier: "STANDARD",
-          name: "Standart Paket",
-          description: "Temel içerik paketi, 2 revizyon ve kaynak dosyalar dahil.",
-          price: g.price,
-          deliveryDays: g.delivery,
-          revisionCount: 2,
-          features: [
-            "Kaynak dosyalar dahil",
-            "2 revizyon hakkı",
-            "Ticari kullanım lisansı",
-          ],
-        },
-      });
-    }
+    await seedPackageLadder(gig.id, g.price, g.delivery);
   }
 
   console.log("Seeding bulk listings (50 per category)...");
@@ -410,26 +438,7 @@ async function main() {
       },
     });
 
-    const existingPackage = await prisma.package.findFirst({ where: { gigId: gig.id } });
-    if (existingPackage) {
-      await prisma.package.update({
-        where: { id: existingPackage.id },
-        data: { price: g.price, deliveryDays: g.delivery },
-      });
-    } else {
-      await prisma.package.create({
-        data: {
-          gigId: gig.id,
-          tier: "STANDARD",
-          name: "Standart Paket",
-          description: "Temel içerik paketi, 2 revizyon ve kaynak dosyalar dahil.",
-          price: g.price,
-          deliveryDays: g.delivery,
-          revisionCount: 2,
-          features: ["Kaynak dosyalar dahil", "2 revizyon hakkı", "Ticari kullanım lisansı"],
-        },
-      });
-    }
+    await seedPackageLadder(gig.id, g.price, g.delivery);
   }
 
   console.log("Seed complete.");
