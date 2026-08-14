@@ -93,7 +93,7 @@ export default function Home() {
               icon="users"
               image="/neden-isbirligi.png"
               title="Birlikten İş Doğar"
-              description="Doğru insanlarla bir araya gel, fikirlerini projelere dönüştür."
+              description="Fikirlerini projelere dönüştür."
             />
             <WhyCard
               icon="growth"
