@@ -1,28 +1,56 @@
-const paths: Record<string, { stroke: string; fill?: string }> = {
-  palette: {
-    stroke:
-      "M12 3a9 9 0 100 18c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.4-.3-.4-.5-.8-.5-1.3 0-.9.7-1.6 1.6-1.6H16a5 5 0 005-5c0-3.9-4-6.7-9-6.7z",
-    fill: "M7.5 12a1.5 1.5 0 110-3 1.5 1.5 0 010 3z M11 8.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z M15.5 9.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z",
-  },
-  code: { stroke: "M9 18l-6-6 6-6 M15 6l6 6-6 6" },
-  pen: { stroke: "M12 20h9 M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z" },
-  video: {
-    stroke: "M4 5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V5z",
-    fill: "M10 8.3l6 3.7-6 3.7z",
-  },
-  megaphone: { stroke: "M3 11v2a2 2 0 002 2h1l3 5V4l-3 5H5a2 2 0 00-2 2z M14 8a4 4 0 010 8 M18 5a8 8 0 010 14" },
-  music: { stroke: "M9 18V5l12-2v13 M9 18a3 3 0 11-6 0 3 3 0 016 0z M21 16a3 3 0 11-6 0 3 3 0 016 0z" },
-  briefcase: { stroke: "M3 7h18v13H3z M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3 M3 13h18" },
-  book: { stroke: "M12 4L3 8.5l9 4.5 9-4.5z M7 10.5v4c0 1.38 2.24 2.5 5 2.5s5-1.12 5-2.5v-4 M21 8.5v5" },
+// Duotone icon set: an optional soft-filled base shape carries the category's
+// accent colour, and a crisp stroke on top keeps the glyph readable down to 14px.
+const paths: Record<string, { soft?: string; stroke: string }> = {
   cpu: {
+    soft: "M9.5 9.5h5v5h-5z",
     stroke:
-      "M7 4h10a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3z M11 1v3 M13 1v3 M11 20v3 M13 20v3 M1 11h3 M1 13h3 M20 11h3 M20 13h3",
-    fill: "M9 9h6v6H9z",
+      "M6.5 4.5h11a2 2 0 012 2v11a2 2 0 01-2 2h-11a2 2 0 01-2-2v-11a2 2 0 012-2z M9.5 9.5h5v5h-5z M9.5 1.5v3 M14.5 1.5v3 M9.5 19.5v3 M14.5 19.5v3 M1.5 9.5h3 M1.5 14.5h3 M19.5 9.5h3 M19.5 14.5h3",
   },
-  chart: { stroke: "M3 20h18 M6 20v-6 M12 20V8 M18 20V4" },
-  sparkles: {
+  code: {
+    stroke: "M8.5 17.5L3 12l5.5-5.5 M15.5 6.5L21 12l-5.5 5.5 M13.8 4l-3.6 16",
+  },
+  palette: {
+    soft: "M8 13.4a1.4 1.4 0 110-2.8 1.4 1.4 0 010 2.8z M11 9a1.4 1.4 0 110-2.8A1.4 1.4 0 0111 9z M15.4 10.2a1.4 1.4 0 110-2.8 1.4 1.4 0 010 2.8z",
     stroke:
-      "M12 3l1.8 4.9L18 9l-4.2 1.9L12 16l-1.8-5.1L6 9l4.2-1.1L12 3z M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14z",
+      "M12 3.2c-5 0-9 3.6-9 8.4 0 4.7 4 8.4 9 8.4 1 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.2-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.8-1.8h1.6c2.7 0 4.8-2.2 4.8-4.8 0-3.9-3.9-6.9-9-6.9z",
+  },
+  megaphone: {
+    soft: "M18 6.5v11l-9-3.2V9.7z",
+    stroke:
+      "M18 6.5v11l-9-3.2H5.5A1.5 1.5 0 014 12.8v-1.6A1.5 1.5 0 015.5 9.7H9z M7.5 14.4l1.6 4.4a1 1 0 00.95.7h1.05a.8.8 0 00.75-1.07l-1.4-4.03 M20.6 10.2a3 3 0 010 3.6",
+  },
+  chart: {
+    soft: "M6 13h2.4v6H6z M10.8 9h2.4v10h-2.4z M15.6 5h2.4v14h-2.4z",
+    stroke: "M3.5 3.5v17h17 M6 13h2.4v6H6z M10.8 9h2.4v10h-2.4z M15.6 5h2.4v14h-2.4z",
+  },
+  briefcase: {
+    soft: "M3 11.5h18V18a2 2 0 01-2 2H5a2 2 0 01-2-2z",
+    stroke:
+      "M5 7h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z M9 7V5.2A1.2 1.2 0 0110.2 4h3.6A1.2 1.2 0 0115 5.2V7 M3 11.5h18",
+  },
+  pen: {
+    soft: "M15.4 5.3l3.3 3.3-2 2-3.3-3.3z",
+    stroke: "M4 20h4L19 9a2.35 2.35 0 00-3.3-3.3L4.7 16.7z M13.4 7.3l3.3 3.3",
+  },
+  video: {
+    soft: "M4 6.5h10.5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2v-7a2 2 0 012-2z",
+    stroke:
+      "M4 6.5h10.5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2v-7a2 2 0 012-2z M16.5 10.6l4.2-2.6a.6.6 0 01.9.5v7a.6.6 0 01-.9.5l-4.2-2.6z",
+  },
+  book: {
+    soft: "M12 3.5L2.5 8.2 12 12.9l9.5-4.7z",
+    stroke:
+      "M12 3.5L2.5 8.2 12 12.9l9.5-4.7z M6.5 10.6v4.6c0 1.6 2.5 2.9 5.5 2.9s5.5-1.3 5.5-2.9v-4.6 M21.5 8.2v6",
+  },
+  music: {
+    soft: "M6 20.5a2.6 2.6 0 110-5.2 2.6 2.6 0 010 5.2z M18.5 18.4a2.6 2.6 0 110-5.2 2.6 2.6 0 010 5.2z",
+    stroke:
+      "M8.6 17.9V5.6l12.5-2.1v12.2 M8.6 9.7l12.5-2.1 M6 20.5a2.6 2.6 0 110-5.2 2.6 2.6 0 010 5.2z M18.5 18.4a2.6 2.6 0 110-5.2 2.6 2.6 0 010 5.2z",
+  },
+  sparkles: {
+    soft: "M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z",
+    stroke:
+      "M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z M18.4 15l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7z",
   },
 };
 
@@ -34,12 +62,12 @@ export function CategoryIcon({ icon, className = "h-5 w-5" }: { icon: string; cl
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.8}
+      strokeWidth={1.7}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden
     >
-      {p.fill && <path d={p.fill} fill="currentColor" stroke="none" />}
+      {p.soft && <path d={p.soft} fill="currentColor" stroke="none" opacity={0.25} />}
       <path d={p.stroke} />
     </svg>
   );

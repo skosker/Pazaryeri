@@ -90,8 +90,8 @@ export function CategoryMegaMenu({
                     isActive ? "bg-white text-brand-navy" : "text-slate-600 hover:bg-white/60"
                   }`}
                 >
-                  <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md ${accent.bg} ${accent.text}`}>
-                    <CategoryIcon icon={c.icon} className="h-3.5 w-3.5" />
+                  <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${accent.bg} ${accent.text}`}>
+                    <CategoryIcon icon={c.icon} className="h-4 w-4" />
                   </span>
                   <span className="truncate">{c.name}</span>
                 </Link>

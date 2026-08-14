@@ -205,8 +205,8 @@ export function FilterBar({
                       onChange={() => toggleCategory(c.slug)}
                       className="h-4 w-4 rounded border-slate-300 text-purple-600 focus:ring-purple-400"
                     />
-                    <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md ${accent.bg} ${accent.text}`}>
-                      <CategoryIcon icon={c.icon} className="h-3.5 w-3.5" />
+                    <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${accent.bg} ${accent.text}`}>
+                      <CategoryIcon icon={c.icon} className="h-4 w-4" />
                     </span>
                     <span className="truncate text-slate-700">{c.name}</span>
                   </label>
