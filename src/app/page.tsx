@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { SearchBar } from "@/components/search-bar";
 import { LinkButton } from "@/components/ui/button";
@@ -73,19 +74,22 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mt-14 grid grid-cols-1 gap-12 sm:grid-cols-3">
+          <div className="mt-14 grid grid-cols-1 gap-10 sm:grid-cols-3">
             <WhyCard
               icon="compass"
+              image="/neden-kesfet.png"
               title="Potansiyelini Keşfet"
               description="Yeteneklerini sergile, görünürlüğünü artır. Doğru fırsatlarla buluşarak kariyerini bir üst seviyeye taşı."
             />
             <WhyCard
               icon="users"
+              image="/neden-isbirligi.png"
               title="İş Birlikleri Kur"
               description="Farklı uzmanlarla tanış, ortak projeler geliştir. Bilgi ve deneyim paylaşımının gücüyle daha büyük işler başar."
             />
             <WhyCard
               icon="growth"
+              image="/neden-deger.png"
               title="Değer Üret, Kazan"
               description="Yeteneklerinle değer yarat, hak ettiğin kazancı elde et. Kendi koşullarınla, kendi geleceğini inşa et."
             />
@@ -126,16 +130,32 @@ const whyIconPaths: Record<string, string> = {
 
 function WhyCard({
   icon,
+  image,
   title,
   description,
 }: {
   icon: keyof typeof whyIconPaths;
+  image: string;
   title: string;
   description: string;
 }) {
   return (
     <div className="flex flex-col items-center text-center">
-      <span className="flex h-16 w-16 items-center justify-center rounded-full bg-purple-50 text-purple-600">
+      {/* The illustrations have different aspect ratios and a dark vignette at their
+          edges, so they are cropped to a common band that keeps the lit centre. */}
+      <div className="relative h-44 w-full overflow-hidden rounded-2xl bg-brand-navy">
+        <Image
+          src={image}
+          alt=""
+          fill
+          sizes="(min-width: 640px) 33vw, 100vw"
+          className="scale-110 object-cover object-center"
+        />
+      </div>
+
+      {/* The badge overlaps the image edge so the icon and illustration read as one unit;
+          z-10 keeps it above the positioned image wrapper. */}
+      <span className="relative z-10 -mt-8 flex h-16 w-16 items-center justify-center rounded-full bg-purple-50 text-purple-600 ring-4 ring-white">
         <svg
           className="h-7 w-7"
           viewBox="0 0 24 24"
@@ -149,7 +169,7 @@ function WhyCard({
           <path d={whyIconPaths[icon]} />
         </svg>
       </span>
-      <h3 className="mt-6 text-lg font-bold text-brand-navy">{title}</h3>
+      <h3 className="mt-4 text-lg font-bold text-brand-navy">{title}</h3>
       <p className="mt-3 max-w-xs text-sm leading-relaxed text-slate-500">{description}</p>
     </div>
   );
