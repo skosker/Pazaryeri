@@ -97,6 +97,7 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
               categoryIcon={gig.category.icon}
               gigSlug={gig.slug}
               coverColor={gig.coverColor}
+              coverImage={gig.coverImage}
               size="1200/800"
               alt={gig.title}
               iconClassName="h-24 w-24"

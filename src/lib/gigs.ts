@@ -15,6 +15,7 @@ export type GigCardData = {
   slug: string;
   title: string;
   coverColor: string;
+  coverImage: string | null;
   seller: { id: string; name: string; isOnline: boolean; isPro: boolean };
   categoryName: string;
   categorySlug: string;
@@ -37,6 +38,7 @@ function toCardData(gig: RawGig): GigCardData {
     slug: gig.slug,
     title: gig.title,
     coverColor: gig.coverColor,
+    coverImage: gig.coverImage,
     seller: gig.seller,
     categoryName: gig.category.name,
     categorySlug: gig.category.slug,

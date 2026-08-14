@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { gigSchema } from "@/lib/validation";
 import { readGigForm, packageData } from "@/lib/gig-form";
+import { readCoverFromForm } from "@/lib/gig-cover";
 
 export type FormState = { error?: string };
 
@@ -41,6 +42,9 @@ export async function createGigAction(
   const category = await prisma.category.findUnique({ where: { id: categoryId } });
   if (!category) return { error: "Geçersiz kategori" };
 
+  const cover = await readCoverFromForm(formData);
+  if (cover.error) return { error: cover.error };
+
   const baseSlug = slugify(title);
   let slug = baseSlug;
   let attempt = 1;
@@ -55,6 +59,7 @@ export async function createGigAction(
       title,
       description,
       categoryId,
+      coverImage: cover.coverImage ?? null,
       sellerId: session.user.id,
       packages: {
         create: [

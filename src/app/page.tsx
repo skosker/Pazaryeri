@@ -49,7 +49,7 @@ export default function Home() {
 
             <div className="flex flex-col items-center border-t border-white/10 pt-16 text-center lg:items-start lg:border-t-0 lg:border-l lg:pl-16 lg:pt-0 lg:text-left">
               <h2 className="text-2xl font-extrabold text-white sm:text-4xl">
-                Yeteneğini bir hizmete dönüştür
+                Yeteneğini hizmete dönüştür
               </h2>
               <p className="mt-4 max-w-xl text-white/70">
                 Ücretsiz kayıt ol, ilk ilanını hemen yayınla ve kazanmaya başla.
@@ -78,14 +78,14 @@ export default function Home() {
             <WhyCard
               icon="compass"
               image="/neden-kesfet.png"
-              title="Potansiyelini Keşfet"
-              description="Yeteneklerini sergile, görünürlüğünü artır. Doğru fırsatlarla buluşarak kariyerini bir üst seviyeye taşı."
+              title="Yeteneğin Sınır Tanımasın"
+              description="Nerede olduğunun değil, ne yapabildiğinin önemli. Yeteneklerini keşfet, fırsatları yakala."
             />
             <WhyCard
               icon="users"
               image="/neden-isbirligi.png"
-              title="İş Birlikleri Kur"
-              description="Farklı uzmanlarla tanış, ortak projeler geliştir. Bilgi ve deneyim paylaşımının gücüyle daha büyük işler başar."
+              title="Birlikten İş Doğar"
+              description="Doğru insanlarla bir araya gel, fikirlerini projelere dönüştür."
             />
             <WhyCard
               icon="growth"

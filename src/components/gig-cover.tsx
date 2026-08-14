@@ -6,16 +6,17 @@ import { coverGradientClass, coverImageUrl } from "@/lib/cover-colors";
 import { getCategoryAccent } from "@/lib/category-style";
 
 /**
- * Cover photos come from a third-party placeholder service, so they can fail:
- * the host may be blocked, rate-limited or simply slow. The gradient and the
- * watermarked category icon are painted underneath and stay visible on failure,
- * which beats the browser's broken-image glyph.
+ * Prefers the seller's uploaded cover and falls back to a third-party placeholder
+ * photo when the gig has none. Either can fail — the host may be blocked,
+ * rate-limited or simply slow — so the gradient and the watermarked category icon
+ * are painted underneath and stay visible, which beats the broken-image glyph.
  */
 export function GigCover({
   categorySlug,
   categoryIcon,
   gigSlug,
   coverColor,
+  coverImage,
   size,
   alt = "",
   imageClassName = "",
@@ -25,6 +26,7 @@ export function GigCover({
   categoryIcon: string;
   gigSlug: string;
   coverColor: string;
+  coverImage?: string | null;
   size?: `${number}/${number}`;
   alt?: string;
   imageClassName?: string;
@@ -47,7 +49,7 @@ export function GigCover({
       {!failed && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={coverImageUrl(categorySlug, gigSlug, size)}
+          src={coverImage || coverImageUrl(categorySlug, gigSlug, size)}
           alt={alt}
           onError={() => setFailed(true)}
           className={`relative h-full w-full object-cover ${imageClassName}`}

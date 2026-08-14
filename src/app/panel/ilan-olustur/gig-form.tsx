@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { CoverImageField } from "@/components/cover-image-field";
 import type { FormState } from "./actions";
 
 const initialState: FormState = {};
@@ -16,6 +17,7 @@ type GigFormValues = {
   title?: string;
   categoryId?: string;
   description?: string;
+  coverImage?: string | null;
   basic?: TierValues;
   standard?: TierValues;
   premium?: TierValues;
@@ -100,6 +102,8 @@ export function GigForm({
           className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
         />
       </label>
+
+      <CoverImageField currentUrl={defaultValues?.coverImage} />
 
       <div>
         <h3 className="font-semibold text-brand-navy">Paketler</h3>

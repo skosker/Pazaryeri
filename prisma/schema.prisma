@@ -101,7 +101,8 @@ model Gig {
   slug        String   @unique
   title       String
   description String
-  coverColor  String   @default("indigo") // placeholder cover palette (no real images)
+  coverColor  String   @default("indigo") // gradient fallback shown when there is no cover
+  coverImage  String? // seller-uploaded cover: a Blob CDN URL, or /api/gorsel/<id> when stored in Postgres
   published   Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -208,4 +209,16 @@ model Review {
 
   @@index([gigId])
   @@map("reviews")
+}
+
+// Fallback image store used when no BLOB_READ_WRITE_TOKEN is configured, so
+// uploads work with nothing but DATABASE_URL. Served by /api/gorsel/[id].
+model UploadedImage {
+  id        String   @id @default(cuid())
+  mimeType  String
+  data      Bytes
+  size      Int
+  createdAt DateTime @default(now())
+
+  @@map("uploaded_images")
 }
