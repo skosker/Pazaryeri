@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { StarRating } from "@/components/star-rating";
-import { coverImageUrl } from "@/lib/cover-colors";
+import { GigCover } from "@/components/gig-cover";
 import { getCategoryAccent } from "@/lib/category-style";
 import type { GigCardData } from "@/lib/gigs";
 
@@ -13,12 +13,12 @@ export function GigCard({ gig }: { gig: GigCardData }) {
       className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-100/70"
     >
       <div className="relative h-48 overflow-hidden bg-slate-100">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={coverImageUrl(gig.categorySlug, gig.slug)}
-          alt=""
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
-          loading="lazy"
+        <GigCover
+          categorySlug={gig.categorySlug}
+          categoryIcon={gig.categoryIcon}
+          gigSlug={gig.slug}
+          coverColor={gig.coverColor}
+          imageClassName="transition duration-500 group-hover:scale-110"
         />
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/40 to-transparent" />
         <div className="absolute bottom-3 left-3 flex items-center gap-2">

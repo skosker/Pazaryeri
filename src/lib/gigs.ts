@@ -3,7 +3,7 @@ import type { Prisma } from "@/generated/prisma/client";
 
 const gigCardInclude = {
   seller: { select: { id: true, name: true, isOnline: true, isPro: true } },
-  category: { select: { name: true, slug: true } },
+  category: { select: { name: true, slug: true, icon: true } },
   subcategory: { select: { name: true, slug: true } },
   packages: { orderBy: { price: "asc" as const }, take: 1 },
   reviews: { select: { rating: true } },
@@ -18,6 +18,7 @@ export type GigCardData = {
   seller: { id: string; name: string; isOnline: boolean; isPro: boolean };
   categoryName: string;
   categorySlug: string;
+  categoryIcon: string;
   subcategoryName: string | null;
   subcategorySlug: string | null;
   startingPrice: number;
@@ -39,6 +40,7 @@ function toCardData(gig: RawGig): GigCardData {
     seller: gig.seller,
     categoryName: gig.category.name,
     categorySlug: gig.category.slug,
+    categoryIcon: gig.category.icon,
     subcategoryName: gig.subcategory?.name ?? null,
     subcategorySlug: gig.subcategory?.slug ?? null,
     startingPrice: gig.packages[0] ? Number(gig.packages[0].price) : 0,
@@ -172,7 +174,7 @@ export async function getGigBySlug(slug: string) {
     where: { slug },
     include: {
       seller: { select: { id: true, name: true, title: true, bio: true, createdAt: true, isOnline: true, isPro: true } },
-      category: { select: { name: true, slug: true } },
+      category: { select: { name: true, slug: true, icon: true } },
       subcategory: { select: { name: true, slug: true } },
       packages: { orderBy: { price: "asc" } },
       reviews: {

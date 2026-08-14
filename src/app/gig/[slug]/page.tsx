@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { getGigBySlug, getRelatedGigs } from "@/lib/gigs";
-import { coverImageUrl } from "@/lib/cover-colors";
+import { GigCover } from "@/components/gig-cover";
 import { StarRating } from "@/components/star-rating";
 import { GigCard } from "@/components/gig-card";
 import { OrderPanel } from "./order-panel";
@@ -91,12 +91,15 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
             {rating !== null && <StarRating rating={rating} count={reviewCount} />}
           </Link>
 
-          <div className="mt-6 h-72 overflow-hidden rounded-2xl bg-slate-100">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={coverImageUrl(gig.category.slug, gig.slug, "1200/800")}
+          <div className="relative mt-6 h-72 overflow-hidden rounded-2xl bg-slate-100">
+            <GigCover
+              categorySlug={gig.category.slug}
+              categoryIcon={gig.category.icon}
+              gigSlug={gig.slug}
+              coverColor={gig.coverColor}
+              size="1200/800"
               alt={gig.title}
-              className="h-full w-full object-cover"
+              iconClassName="h-24 w-24"
             />
           </div>
 
