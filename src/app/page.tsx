@@ -52,7 +52,7 @@ export default function Home() {
                 Yeteneğini hizmete dönüştür
               </h2>
               <p className="mt-4 max-w-xl text-white/70">
-                Ücretsiz kayıt ol, ilk ilanını hemen yayınla ve kazanmaya başla.
+                Kayıt ol, ilk ilanını hemen yayınla ve kazanmaya başla.
               </p>
 
               <div className="mt-8 flex items-center lg:mt-auto lg:h-14">
