@@ -91,7 +91,7 @@ export default function Home() {
               icon="growth"
               image="/neden-deger.png"
               title="Değer Üret, Kazan"
-              description="Yeteneklerinle değer yarat, hak ettiğin kazancı elde et. Kendi koşullarınla, kendi geleceğini inşa et."
+              description="Yeteneğini fırsata, emeğini kazanca dönüştür."
             />
           </div>
 
