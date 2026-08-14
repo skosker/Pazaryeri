@@ -25,9 +25,9 @@ export default function Home() {
             </span>
           </div>
 
-          <div className="mt-12 grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
+          <div className="mt-12 grid grid-cols-1 gap-16 lg:grid-cols-2">
             <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
-              <h1 className="text-3xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl">
+              <h1 className="text-2xl font-extrabold leading-[1.15] tracking-tight text-white sm:text-4xl">
                 İhtiyacın olan hizmeti
                 <br />
                 <span className="brand-gradient-text">dakikalar içinde</span> bul
@@ -37,22 +37,26 @@ export default function Home() {
                 hemen başla.
               </p>
 
-              <div className="mt-8 w-full max-w-xl">
-                <SearchBar size="lg" />
+              {/* Both columns end in an equal-height, centred row pushed to the bottom by
+                  mt-auto, so the search bar and the Freelancer Ol button line up at lg and up. */}
+              <div className="mt-8 flex w-full max-w-xl items-center lg:mt-auto lg:h-14">
+                <div className="w-full">
+                  <SearchBar size="lg" />
+                </div>
               </div>
             </div>
 
             <div className="flex flex-col items-center border-t border-white/10 pt-16 text-center lg:items-start lg:border-t-0 lg:border-l lg:pl-16 lg:pt-0 lg:text-left">
-              <h2 className="text-2xl font-extrabold text-white sm:text-3xl">
+              <h2 className="text-2xl font-extrabold text-white sm:text-4xl">
                 Yeteneğini bir hizmete dönüştür
               </h2>
               <p className="mt-4 max-w-xl text-white/70">
-                Ücretsiz kayıt ol, ilk ilanını dakikalar içinde yayınla ve kazanmaya başla.
+                Ücretsiz kayıt ol, ilk ilanını hemen yayınla ve kazanmaya başla.
               </p>
 
-              <LinkButton href="/kayit?role=FREELANCER" className="mt-8">
-                Freelancer Ol
-              </LinkButton>
+              <div className="mt-8 flex items-center lg:mt-auto lg:h-14">
+                <LinkButton href="/kayit?role=FREELANCER">Freelancer Ol</LinkButton>
+              </div>
             </div>
           </div>
         </div>
@@ -71,7 +75,7 @@ export default function Home() {
 
           <div className="mt-14 grid grid-cols-1 gap-12 sm:grid-cols-3">
             <WhyCard
-              icon="user"
+              icon="compass"
               title="Potansiyelini Keşfet"
               description="Yeteneklerini sergile, görünürlüğünü artır. Doğru fırsatlarla buluşarak kariyerini bir üst seviyeye taşı."
             />
@@ -114,9 +118,10 @@ export default function Home() {
 }
 
 const whyIconPaths: Record<string, string> = {
-  user: "M12 12a4 4 0 100-8 4 4 0 000 8z M5 20a7 7 0 0114 0",
-  users: "M9 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7z M2.5 20a6.5 6.5 0 0113 0 M17 4.3a3.5 3.5 0 010 6.9 M18 14.2a6.5 6.5 0 013.5 5.8",
-  growth: "M4 20h16 M7 20v-6 M12 20V9 M17 20v-9 M14 5h5v5",
+  compass: "M12 21a9 9 0 100-18 9 9 0 000 18z M15.6 8.4l-2.3 4.9-4.9 2.3 2.3-4.9 4.9-2.3z",
+  users:
+    "M9.3 11.2a3.2 3.2 0 100-6.4 3.2 3.2 0 000 6.4z M3.3 19.5a6 6 0 0112 0 M16.2 5.3a3 3 0 010 5.6 M17.6 13.7a5.6 5.6 0 013.4 4.9",
+  growth: "M4 20h16 M8 20v-4.5 M12.5 20v-8 M17 20v-11 M13.5 6.5L17 3l3.5 3.5",
 };
 
 function WhyCard({
