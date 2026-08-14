@@ -16,7 +16,7 @@ export default function Home() {
           className="pointer-events-none absolute -bottom-40 -left-20 h-96 w-96 rounded-full bg-gradient-to-br from-indigo-600 to-purple-700 opacity-20 blur-3xl"
         />
 
-        <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28 lg:px-8">
+        <div className="relative mx-auto max-w-6xl px-4 pb-20 pt-10 sm:px-6 lg:px-8 lg:pb-28 lg:pt-14">
           <div className="flex justify-center">
             <span className="inline-flex items-center gap-2.5 rounded-full border border-fuchsia-400/50 bg-gradient-to-r from-fuchsia-500/25 via-purple-500/25 to-indigo-500/25 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-sm shadow-fuchsia-500/20 sm:text-base">
               <svg className="h-4 w-4 shrink-0 text-fuchsia-300 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
@@ -26,7 +26,7 @@ export default function Home() {
             </span>
           </div>
 
-          <div className="mt-12 grid grid-cols-1 gap-16 lg:grid-cols-2">
+          <div className="mt-10 grid grid-cols-1 gap-16 lg:grid-cols-2">
             <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
               <h1 className="text-2xl font-extrabold leading-[1.15] tracking-tight text-white sm:text-4xl">
                 İhtiyacın Burada,
