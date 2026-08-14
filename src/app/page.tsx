@@ -29,13 +29,13 @@ export default function Home() {
           <div className="mt-12 grid grid-cols-1 gap-16 lg:grid-cols-2">
             <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
               <h1 className="text-2xl font-extrabold leading-[1.15] tracking-tight text-white sm:text-4xl">
-                İhtiyacın olan hizmeti
+                İhtiyacın Burada,
                 <br />
-                <span className="brand-gradient-text">dakikalar içinde</span> bul
+                <span className="brand-gradient-text">Çözümün Hazır</span>
               </h1>
               <p className="mt-5 max-w-xl text-white/70">
-                Grafik tasarımdan yazılıma, binlerce yetenekli freelancer arasından seç, işine
-                hemen başla.
+                Binlerce freelancer arasından ihtiyacına en uygun yeteneği bul, hemen çalışmaya
+                başla.
               </p>
 
               {/* Both columns end in an equal-height, centred row pushed to the bottom by
