@@ -41,8 +41,20 @@ cp .env.example .env
 ### 2. Veritabanı
 
 ```bash
-npx prisma migrate dev   # şemayı veritabanına uygular
-npm run db:seed          # kategoriler, örnek freelancer'lar ve ilanlarla doldurur
+npm run db:setup   # şemayı kurar ve demo içeriği yükler
+```
+
+Bu komut migration'ları uygular ve ardından seed'i çalıştırır. Erken dönemdeki
+altı migration demo içeriği doğrudan `INSERT` ile ekliyor ve henüz var olmayan
+satırlara atıfta bulunduğu için boş bir veritabanında hata veriyor; aynı içeriği
+seed zaten ürettiğinden bu betik onları çalıştırmadan uygulanmış sayıyor.
+Dağıtımdaki veritabanları etkilenmez — orada bu migration'lar zaten uygulanmış
+durumda.
+
+Veriyi tazelemek için tek başına seed yeterli:
+
+```bash
+npm run db:seed
 ```
 
 ### 3. Geliştirme sunucusu
