@@ -12,14 +12,15 @@ export async function registerAction(
   const name = formData.get("name");
   const email = formData.get("email");
   const password = formData.get("password");
-  const role = formData.get("role");
+  const wantsToSell = formData.get("niyet") === "satici";
 
   try {
     await registerUser({
       name: String(name ?? ""),
       email: String(email ?? ""),
       password: String(password ?? ""),
-      role: role === "FREELANCER" ? "FREELANCER" : "BUYER",
+      // Sellers convert from the panel after verifying their address.
+      role: "BUYER",
     });
   } catch (error) {
     if (error instanceof RegisterError) {
@@ -28,5 +29,5 @@ export async function registerAction(
     throw error;
   }
 
-  redirect("/kayit/basarili");
+  redirect(wantsToSell ? "/kayit/basarili?satici=1" : "/kayit/basarili");
 }

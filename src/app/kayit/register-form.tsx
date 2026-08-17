@@ -1,37 +1,20 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { registerAction, type FormState } from "./actions";
 
 const initialState: FormState = {};
 
-export function RegisterForm({ defaultRole }: { defaultRole: "BUYER" | "FREELANCER" }) {
+export function RegisterForm({ wantsToSell = false }: { wantsToSell?: boolean }) {
   const [state, formAction, pending] = useActionState(registerAction, initialState);
-  const [role, setRole] = useState<"BUYER" | "FREELANCER">(defaultRole);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-2 rounded-full bg-slate-100 p-1 text-sm font-semibold">
-        <button
-          type="button"
-          onClick={() => setRole("BUYER")}
-          className={`rounded-full py-2 transition ${
-            role === "BUYER" ? "bg-white text-brand-navy shadow-sm" : "text-slate-500"
-          }`}
-        >
-          Alıcıyım
-        </button>
-        <button
-          type="button"
-          onClick={() => setRole("FREELANCER")}
-          className={`rounded-full py-2 transition ${
-            role === "FREELANCER" ? "bg-white text-brand-navy shadow-sm" : "text-slate-500"
-          }`}
-        >
-          Freelancer&apos;ım
-        </button>
-      </div>
-      <input type="hidden" name="role" value={role} />
+      {/* Everyone starts with the same account. Selling is switched on later from the
+          panel, once the address is verified and the person is actually signed in —
+          which is also the earliest point that flow can run. This field only tailors
+          the confirmation copy; it does not set the role. */}
+      {wantsToSell && <input type="hidden" name="niyet" value="satici" />}
 
       <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
         Ad Soyad

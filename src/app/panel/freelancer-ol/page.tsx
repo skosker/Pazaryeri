@@ -17,10 +17,7 @@ export default async function FreelancerOlPage() {
 
       <ul className="mt-6 space-y-2 text-sm text-slate-600">
         <li className="flex items-start gap-2">
-          <span className="mt-0.5 text-emerald-500">✓</span> Ücretsiz, gizli komisyon yok
-        </li>
-        <li className="flex items-start gap-2">
-          <span className="mt-0.5 text-emerald-500">✓</span> Fiyatını ve teslim sürini sen belirlersin
+          <span className="mt-0.5 text-emerald-500">✓</span> Fiyatını ve teslim süreni sen belirlersin
         </li>
         <li className="flex items-start gap-2">
           <span className="mt-0.5 text-emerald-500">✓</span> Ödemen onay sonrası hesabına geçer

@@ -4,17 +4,19 @@ import { RegisterForm } from "./register-form";
 
 export default async function RegisterPage(props: PageProps<"/kayit">) {
   const searchParams = await props.searchParams;
-  const defaultRole = searchParams.role === "FREELANCER" ? "FREELANCER" : "BUYER";
+  const wantsToSell = searchParams.role === "FREELANCER";
 
   return (
     <AuthShell>
       <h1 className="text-2xl font-bold text-brand-navy">Kayıt Ol</h1>
       <p className="mt-1 text-sm text-slate-500">
-        Ücretsiz hesap oluştur, hizmet al ya da freelancer olarak ilan ver.
+        {wantsToSell
+          ? "Hesabını oluştur; doğruladıktan sonra panelinden freelancer hesabına geçip ilan vermeye başlayabilirsin."
+          : "Hesap oluştur, hizmet al ya da dilediğin zaman freelancer olarak ilan ver."}
       </p>
 
       <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <RegisterForm defaultRole={defaultRole} />
+        <RegisterForm wantsToSell={wantsToSell} />
       </div>
 
       <p className="mt-6 text-center text-sm text-slate-500">
