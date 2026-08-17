@@ -6,7 +6,12 @@ import { prisma } from "@/lib/prisma";
 
 export type PayoutFormState = { error?: string; success?: string };
 
+// Every export in a "use server" module is reachable as its own endpoint, so each one
+// authorises itself. These read seller bank details; none of them may answer without
+// an admin session behind the call.
+
 export async function listPendingPayouts() {
+  await requireAdmin();
   return prisma.payout.findMany({
     where: { status: "PENDING" },
     orderBy: { createdAt: "asc" },
@@ -18,6 +23,7 @@ export async function listPendingPayouts() {
 }
 
 export async function listRecentPaidPayouts(take = 20) {
+  await requireAdmin();
   return prisma.payout.findMany({
     where: { status: "PAID" },
     orderBy: { paidAt: "desc" },
