@@ -24,7 +24,6 @@ export function RolePicker() {
       <h1 className="text-2xl font-bold text-brand-navy sm:text-3xl">
         Profestia&apos;ya hoş geldin
       </h1>
-      <p className="mt-2 text-sm text-slate-500">Seni en iyi hangisi anlatıyor?</p>
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {roles.map((option) => (
