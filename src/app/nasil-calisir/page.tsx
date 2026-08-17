@@ -63,7 +63,7 @@ function StepList({
         <li key={step.title} className="flex gap-4">
           <div className="relative shrink-0">
             <span className={`flex h-12 w-12 items-center justify-center rounded-2xl ${badgeColor}`}>
-              <StepIcon name={step.icon} className="h-6 w-6" />
+              <StepIcon name={step.icon} className="text-2xl" />
             </span>
             <span className="brand-gradient absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white ring-2 ring-white">
               {i + 1}
@@ -166,7 +166,7 @@ function Faq({ icon, q, a }: { icon: string; q: string; a: string }) {
   return (
     <div className="flex gap-4 rounded-2xl border border-slate-100 p-5">
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-700">
-        <StepIcon name={icon} className="h-5 w-5" />
+        <StepIcon name={icon} className="text-xl" />
       </span>
       <div>
         <p className="font-semibold text-brand-navy">{q}</p>
@@ -179,7 +179,7 @@ function Faq({ icon, q, a }: { icon: string; q: string; a: string }) {
 function TrustBadge({ icon, label }: { icon: string; label: string }) {
   return (
     <span className="inline-flex items-center gap-2 rounded-full border border-purple-100 bg-white px-4 py-2 text-sm font-medium text-brand-navy shadow-sm">
-      <StepIcon name={icon} className="h-4 w-4 text-purple-700" />
+      <StepIcon name={icon} className="text-base" />
       {label}
     </span>
   );

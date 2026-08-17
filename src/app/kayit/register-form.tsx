@@ -5,16 +5,14 @@ import { registerAction, type FormState } from "./actions";
 
 const initialState: FormState = {};
 
-export function RegisterForm({ wantsToSell = false }: { wantsToSell?: boolean }) {
+export function RegisterForm({ role }: { role: "BUYER" | "FREELANCER" }) {
   const [state, formAction, pending] = useActionState(registerAction, initialState);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      {/* Everyone starts with the same account. Selling is switched on later from the
-          panel, once the address is verified and the person is actually signed in —
-          which is also the earliest point that flow can run. This field only tailors
-          the confirmation copy; it does not set the role. */}
-      {wantsToSell && <input type="hidden" name="niyet" value="satici" />}
+      {/* Chosen on the previous step; the account is created with this role. Either
+          side can still switch later from the panel. */}
+      <input type="hidden" name="role" value={role} />
 
       <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
         Ad Soyad

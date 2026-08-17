@@ -1,22 +1,40 @@
 import Link from "next/link";
 import { AuthShell } from "@/components/auth-shell";
 import { RegisterForm } from "./register-form";
+import { RolePicker } from "./role-picker";
 
 export default async function RegisterPage(props: PageProps<"/kayit">) {
   const searchParams = await props.searchParams;
-  const wantsToSell = searchParams.role === "FREELANCER";
+  const role = searchParams.role === "FREELANCER" ? "FREELANCER" : searchParams.role === "BUYER" ? "BUYER" : null;
+
+  // Signup opens on the role choice; the form only appears once a side is picked.
+  if (!role) {
+    return (
+      <AuthShell wide>
+        <RolePicker />
+      </AuthShell>
+    );
+  }
+
+  const sells = role === "FREELANCER";
 
   return (
     <AuthShell>
-      <h1 className="text-2xl font-bold text-brand-navy">Kayıt Ol</h1>
+      <Link href="/kayit" className="text-sm text-slate-500 hover:text-brand-navy">
+        ← Geri
+      </Link>
+
+      <h1 className="mt-3 text-2xl font-bold text-brand-navy">
+        {sells ? "Hizmet Vereceğim" : "Hizmet Alacağım"}
+      </h1>
       <p className="mt-1 text-sm text-slate-500">
-        {wantsToSell
-          ? "Hesabını oluştur; doğruladıktan sonra panelinden freelancer hesabına geçip ilan vermeye başlayabilirsin."
-          : "Hesap oluştur, hizmet al ya da dilediğin zaman freelancer olarak ilan ver."}
+        {sells
+          ? "Hesabını oluştur, ilanını yayınla ve kazanmaya başla."
+          : "Hesabını oluştur, aradığın hizmeti bul ve işe hemen başla."}
       </p>
 
       <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <RegisterForm wantsToSell={wantsToSell} />
+        <RegisterForm role={role} />
       </div>
 
       <p className="mt-6 text-center text-sm text-slate-500">
