@@ -120,7 +120,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
       <div className="mb-6 flex items-center gap-3">
         {accent && (
           <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${accent.bg} ${accent.text}`}>
-            <CategoryIcon icon={singleCategory!.icon} className="h-5 w-5" />
+            <CategoryIcon icon={singleCategory!.icon} className="text-2xl" />
           </span>
         )}
         <div>
@@ -193,7 +193,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
         {gigs.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-300 p-16 text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-              <CategoryIcon icon="sparkles" className="h-6 w-6" />
+              <CategoryIcon icon="sparkles" className="text-3xl" />
             </div>
             <p className="mt-4 font-medium text-slate-600">Aramanıza uygun hizmet bulunamadı.</p>
             <p className="mt-1 text-sm text-slate-400">Filtreleri değiştirip tekrar dene.</p>

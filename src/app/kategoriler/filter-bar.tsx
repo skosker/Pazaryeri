@@ -206,7 +206,7 @@ export function FilterBar({
                       className="h-4 w-4 rounded border-slate-300 text-purple-600 focus:ring-purple-400"
                     />
                     <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${accent.bg} ${accent.text}`}>
-                      <CategoryIcon icon={c.icon} className="h-4 w-4" />
+                      <CategoryIcon icon={c.icon} className="text-lg" />
                     </span>
                     <span className="truncate text-slate-700">{c.name}</span>
                   </label>

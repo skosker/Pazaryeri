@@ -20,7 +20,7 @@ export function GigCover({
   size,
   alt = "",
   imageClassName = "",
-  iconClassName = "h-16 w-16",
+  iconClassName = "text-5xl",
 }: {
   categorySlug: string;
   categoryIcon: string;

@@ -91,7 +91,7 @@ export function CategoryMegaMenu({
                   }`}
                 >
                   <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${accent.bg} ${accent.text}`}>
-                    <CategoryIcon icon={c.icon} className="h-4 w-4" />
+                    <CategoryIcon icon={c.icon} className="text-lg" />
                   </span>
                   <span className="truncate">{c.name}</span>
                 </Link>

@@ -54,7 +54,7 @@ export default async function AdminCategoriesPage() {
                 >
                   <td className="px-5 py-3">
                     <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-50 text-purple-700">
-                      <CategoryIcon icon={category.icon} className="h-4.5 w-4.5" />
+                      <CategoryIcon icon={category.icon} className="text-lg" />
                     </span>
                   </td>
                   <td className="px-5 py-3">

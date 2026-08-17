@@ -524,7 +524,10 @@ export const GIGS_PER_CATEGORY_GENERATED = 48;
 const SELLERS_PER_CATEGORY = 6;
 // Second wave: appended after the original data so existing gigs/sellers/slugs never change.
 export const EXTRA_GIGS_PER_CATEGORY_GENERATED = 48;
-const EXTRA_SELLERS_PER_CATEGORY = 14;
+const EXTRA_SELLERS_PER_CATEGORY = 6;
+// Third wave: its own counter picks up after the first two, so every existing
+// seller keeps the category it was generated into.
+const THIRD_SELLERS_PER_CATEGORY = 8;
 
 function buildGig(
   cat: CategoryContent,
@@ -582,6 +585,8 @@ export function generateBulkData(): {
   const usedSubcategorySlugs = new Set<string>();
   let sellerCounter = 0;
   let extraSellerCounter = categoryContents.length * SELLERS_PER_CATEGORY;
+  let thirdSellerCounter =
+    categoryContents.length * (SELLERS_PER_CATEGORY + EXTRA_SELLERS_PER_CATEGORY);
 
   for (const cat of categoryContents) {
     const catSellers: BulkSeller[] = [];
@@ -629,7 +634,18 @@ export function generateBulkData(): {
       sellers.push(seller);
       extraSellerCounter++;
     }
-    const combinedSellers = [...catSellers, ...catExtraSellers];
+    const catThirdSellers: BulkSeller[] = [];
+    for (let s = 0; s < THIRD_SELLERS_PER_CATEGORY; s++) {
+      const name = firstNames[thirdSellerCounter % firstNames.length];
+      const initial = lastInitials[thirdSellerCounter % lastInitials.length];
+      const email = `fl${thirdSellerCounter + 1}@profestia.dev`;
+      const seller = { email, name: `${name} ${initial}`, title: cat.sellerTitle };
+      catThirdSellers.push(seller);
+      sellers.push(seller);
+      thirdSellerCounter++;
+    }
+
+    const combinedSellers = [...catSellers, ...catExtraSellers, ...catThirdSellers];
 
     for (let i = 0; i < EXTRA_GIGS_PER_CATEGORY_GENERATED; i++) {
       const subjectIndex = i % cat.subjects.length;
