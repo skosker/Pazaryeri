@@ -27,6 +27,10 @@ type CategoryContent = {
   subjects: string[];
   // subcategory name for each subject, in the same order as `subjects`
   subcategories: string[];
+  // Some subjects do not accept every verb in the category: a voice recording is not
+  // composed, a report is not "set up". Those subjects get their own verb lists here,
+  // keyed by the subject text, and fall back to the category verbs when absent.
+  verbOverrides?: Record<string, { verbs: string[]; extraVerbs: string[] }>;
   priceMin: number;
   priceMax: number;
   deliveryMin: number;
@@ -44,15 +48,15 @@ const categoryContents: CategoryContent[] = [
       "Minimalist logonuzu",
       "Kurumsal kimlik paketinizi",
       "Sosyal medya kapak görselinizi",
-      "Ambalaj tasarımınızı",
-      "Broşür ve katalog tasarımınızı",
+      "Ambalajınızı",
+      "Broşür ve kataloğunuzu",
       "İnfografiğinizi",
       "Instagram post şablonunuzu",
-      "Kartvizit tasarımınızı",
-      "El ilanı (flyer) tasarımınızı",
-      "Sunum (PowerPoint) tasarımınızı",
+      "Kartvizitinizi",
+      "El ilanınızı (flyer)",
+      "Sunumunuzu (PowerPoint)",
       "İkon setinizi",
-      "Banner ve afiş tasarımınızı",
+      "Banner ve afişinizi",
     ],
     subcategories: [
       "Logo Tasarımı",
@@ -107,6 +111,9 @@ const categoryContents: CategoryContent[] = [
       "Teknik SEO & Performans",
       "Özel Yazılım & Panel",
     ],
+    verbOverrides: {
+      "Web sitenizin hız performansını": { verbs: ["iyileştiriyorum", "optimize ediyorum", "artırıyorum", "ölçüyorum"], extraVerbs: ["belirgin şekilde iyileştiriyorum", "baştan sona optimize ediyorum", "gözle görülür artırıyorum", "detaylıca ölçüyorum"] },
+    },
     priceMin: 3500,
     priceMax: 22000,
     deliveryMin: 3,
@@ -146,6 +153,9 @@ const categoryContents: CategoryContent[] = [
       "Kurumsal & Akademik Metin",
       "Sosyal Medya & Senaryo",
     ],
+    verbOverrides: {
+      "İngilizce-Türkçe belgenizi": { verbs: ["çeviriyorum", "düzenliyorum", "redakte ediyorum", "akıcı hale getiriyorum"], extraVerbs: ["profesyonelce çeviriyorum", "yeniden düzenliyorum", "titizlikle redakte ediyorum", "doğal bir dille akıcı hale getiriyorum"] },
+    },
     priceMin: 500,
     priceMax: 3500,
     deliveryMin: 1,
@@ -224,6 +234,9 @@ const categoryContents: CategoryContent[] = [
       "E-posta & Dönüşüm Pazarlama",
       "E-posta & Dönüşüm Pazarlama",
     ],
+    verbOverrides: {
+      "Dönüşüm oranı optimizasyonunuzu": { verbs: ["yürütüyorum", "planlıyorum", "yönetiyorum", "test ediyorum"], extraVerbs: ["baştan sona yürütüyorum", "detaylıca planlıyorum", "etkili yönetiyorum", "sistemli test ediyorum"] },
+    },
     priceMin: 2500,
     priceMax: 14000,
     deliveryMin: 3,
@@ -233,8 +246,8 @@ const categoryContents: CategoryContent[] = [
   {
     slug: "muzik-ses",
     sellerTitle: "Ses Mühendisi",
-    verbs: ["kaydediyorum", "düzenliyorum", "besteliyorum", "mikslıyorum"],
-    extraVerbs: ["profesyonelce kaydediyorum", "yeniden düzenliyorum", "özenle besteliyorum", "temiz şekilde mikslıyorum"],
+    verbs: ["kaydediyorum", "düzenliyorum", "besteliyorum", "miksliyorum"],
+    extraVerbs: ["profesyonelce kaydediyorum", "yeniden düzenliyorum", "özenle besteliyorum", "temiz şekilde miksliyorum"],
     subjects: [
       "Podcast bölümünüzü",
       "Reklam filminiz için jingle'ı",
@@ -263,6 +276,15 @@ const categoryContents: CategoryContent[] = [
       "Müzik Besteleme & Beat",
       "Podcast Prodüksiyonu",
     ],
+    verbOverrides: {
+      "Podcast bölümünüzü": { verbs: ["kaydediyorum", "düzenliyorum", "miksliyorum", "temizliyorum"], extraVerbs: ["profesyonelce kaydediyorum", "yeniden düzenliyorum", "temiz şekilde miksliyorum", "baştan sona temizliyorum"] },
+      "Seslendirme kaydınızı": { verbs: ["yapıyorum", "düzenliyorum", "miksliyorum", "temizliyorum"], extraVerbs: ["profesyonelce yapıyorum", "yeniden düzenliyorum", "temiz şekilde miksliyorum", "baştan sona temizliyorum"] },
+      "Ses efektlerinizi": { verbs: ["hazırlıyorum", "düzenliyorum", "miksliyorum", "tasarlıyorum"], extraVerbs: ["özenle hazırlıyorum", "yeniden düzenliyorum", "temiz şekilde miksliyorum", "sıfırdan tasarlıyorum"] },
+      "Telesekreter mesajınızı": { verbs: ["kaydediyorum", "seslendiriyorum", "düzenliyorum", "miksliyorum"], extraVerbs: ["profesyonelce kaydediyorum", "profesyonelce seslendiriyorum", "yeniden düzenliyorum", "temiz şekilde miksliyorum"] },
+      "Radyo spotunuzu": { verbs: ["hazırlıyorum", "seslendiriyorum", "kurguluyorum", "miksliyorum"], extraVerbs: ["özenle hazırlıyorum", "profesyonelce seslendiriyorum", "yeniden kurguluyorum", "temiz şekilde miksliyorum"] },
+      "Ses kayıt post prodüksiyonunuzu": { verbs: ["yapıyorum", "üstleniyorum", "tamamlıyorum", "yönetiyorum"], extraVerbs: ["profesyonelce yapıyorum", "baştan sona üstleniyorum", "eksiksiz tamamlıyorum", "titizlikle yönetiyorum"] },
+      "Şarkı düzenlemenizi": { verbs: ["yapıyorum", "hazırlıyorum", "miksliyorum", "tamamlıyorum"], extraVerbs: ["profesyonelce yapıyorum", "özenle hazırlıyorum", "temiz şekilde miksliyorum", "eksiksiz tamamlıyorum"] },
+    },
     priceMin: 800,
     priceMax: 5000,
     deliveryMin: 1,
@@ -272,8 +294,8 @@ const categoryContents: CategoryContent[] = [
   {
     slug: "is-danismanlik",
     sellerTitle: "İş Danışmanı",
-    verbs: ["veriyorum", "hazırlıyorum", "yönetiyorum", "kuruyorum"],
-    extraVerbs: ["detaylıca veriyorum", "özenle hazırlıyorum", "etkili yönetiyorum", "sıfırdan kuruyorum"],
+    verbs: ["kuruyorum", "hazırlıyorum", "yönetiyorum", "planlıyorum"],
+    extraVerbs: ["sıfırdan kuruyorum", "özenle hazırlıyorum", "etkili yönetiyorum", "detaylıca planlıyorum"],
     subjects: [
       "İş planınızı",
       "Finansal projeksiyonlarınızı",
@@ -302,6 +324,15 @@ const categoryContents: CategoryContent[] = [
       "Satış & E-ticaret Danışmanlığı",
       "İK & Kurumsal Eğitim",
     ],
+    verbOverrides: {
+      "Startup danışmanlığınızı": { verbs: ["veriyorum", "yürütüyorum", "planlıyorum", "yönetiyorum"], extraVerbs: ["detaylıca veriyorum", "baştan sona yürütüyorum", "detaylıca planlıyorum", "etkili yönetiyorum"] },
+      "İş planınızı": { verbs: ["hazırlıyorum", "yazıyorum", "planlıyorum", "gözden geçiriyorum"], extraVerbs: ["özenle hazırlıyorum", "sıfırdan yazıyorum", "detaylıca planlıyorum", "baştan sona gözden geçiriyorum"] },
+      "Finansal projeksiyonlarınızı": { verbs: ["hazırlıyorum", "modelliyorum", "güncelliyorum", "gözden geçiriyorum"], extraVerbs: ["özenle hazırlıyorum", "detaylıca modelliyorum", "periyodik güncelliyorum", "baştan sona gözden geçiriyorum"] },
+      "Yatırımcı sunumunuzu (pitch deck)": { verbs: ["hazırlıyorum", "yazıyorum", "tasarlıyorum", "güçlendiriyorum"], extraVerbs: ["özenle hazırlıyorum", "sıfırdan yazıyorum", "profesyonelce tasarlıyorum", "belirgin şekilde güçlendiriyorum"] },
+      "Pazarlama stratejinizi": { verbs: ["kuruyorum", "hazırlıyorum", "planlıyorum", "yönetiyorum"], extraVerbs: ["sıfırdan kuruyorum", "özenle hazırlıyorum", "detaylıca planlıyorum", "etkili yönetiyorum"] },
+      "Marka stratejinizi": { verbs: ["kuruyorum", "hazırlıyorum", "planlıyorum", "yönetiyorum"], extraVerbs: ["sıfırdan kuruyorum", "özenle hazırlıyorum", "detaylıca planlıyorum", "etkili yönetiyorum"] },
+      "Kurumsal eğitim programınızı": { verbs: ["hazırlıyorum", "planlıyorum", "yürütüyorum", "tasarlıyorum"], extraVerbs: ["özenle hazırlıyorum", "detaylıca planlıyorum", "baştan sona yürütüyorum", "kurumunuza özel tasarlıyorum"] },
+    },
     priceMin: 3000,
     priceMax: 17000,
     deliveryMin: 2,
@@ -341,6 +372,11 @@ const categoryContents: CategoryContent[] = [
       "Kişisel Gelişim & Kariyer Koçluğu",
       "Kişisel Gelişim & Kariyer Koçluğu",
     ],
+    verbOverrides: {
+      "Kişisel gelişim koçluğunuzu": { verbs: ["veriyorum", "planlıyorum", "yürütüyorum", "yapıyorum"], extraVerbs: ["birebir veriyorum", "detaylıca planlıyorum", "baştan sona yürütüyorum", "profesyonelce yapıyorum"] },
+      "Kariyer danışmanlığınızı": { verbs: ["veriyorum", "planlıyorum", "yürütüyorum", "yapıyorum"], extraVerbs: ["birebir veriyorum", "detaylıca planlıyorum", "baştan sona yürütüyorum", "profesyonelce yapıyorum"] },
+      "Sınav hazırlık programınızı": { verbs: ["hazırlıyorum", "planlıyorum", "yürütüyorum", "takip ediyorum"], extraVerbs: ["özenle hazırlıyorum", "detaylıca planlıyorum", "baştan sona yürütüyorum", "düzenli takip ediyorum"] },
+    },
     priceMin: 600,
     priceMax: 4000,
     deliveryMin: 1,
@@ -419,6 +455,15 @@ const categoryContents: CategoryContent[] = [
       "Finansal & Envanter Analizi",
       "Web & Trafik Analitiği",
     ],
+    verbOverrides: {
+      "Satış verilerinizi": { verbs: ["analiz ediyorum", "raporluyorum", "görselleştiriyorum", "yorumluyorum"], extraVerbs: ["derinlemesine analiz ediyorum", "düzenli raporluyorum", "anlaşılır şekilde görselleştiriyorum", "detaylıca yorumluyorum"] },
+      "Müşteri segmentasyonunuzu": { verbs: ["yapıyorum", "analiz ediyorum", "raporluyorum", "modelliyorum"], extraVerbs: ["profesyonelce yapıyorum", "derinlemesine analiz ediyorum", "düzenli raporluyorum", "detaylıca modelliyorum"] },
+      "Pazarlama performans raporunuzu": { verbs: ["hazırlıyorum", "raporluyorum", "yorumluyorum", "güncelliyorum"], extraVerbs: ["detaylıca hazırlıyorum", "düzenli raporluyorum", "derinlemesine yorumluyorum", "periyodik güncelliyorum"] },
+      "SQL veritabanı sorgularınızı": { verbs: ["yazıyorum", "optimize ediyorum", "düzenliyorum", "hızlandırıyorum"], extraVerbs: ["sıfırdan yazıyorum", "baştan sona optimize ediyorum", "yeniden düzenliyorum", "belirgin şekilde hızlandırıyorum"] },
+      "A/B test analizinizi": { verbs: ["yapıyorum", "analiz ediyorum", "raporluyorum", "yorumluyorum"], extraVerbs: ["profesyonelce yapıyorum", "derinlemesine analiz ediyorum", "düzenli raporluyorum", "detaylıca yorumluyorum"] },
+      "Web sitesi trafik analizinizi": { verbs: ["yapıyorum", "analiz ediyorum", "raporluyorum", "yorumluyorum"], extraVerbs: ["profesyonelce yapıyorum", "derinlemesine analiz ediyorum", "düzenli raporluyorum", "detaylıca yorumluyorum"] },
+      "Google Analytics kurulumunuzu": { verbs: ["yapıyorum", "kuruyorum", "yapılandırıyorum", "optimize ediyorum"], extraVerbs: ["profesyonelce yapıyorum", "sıfırdan kuruyorum", "eksiksiz yapılandırıyorum", "baştan sona optimize ediyorum"] },
+    },
     priceMin: 3000,
     priceMax: 19000,
     deliveryMin: 2,
@@ -468,11 +513,18 @@ export type BulkGig = {
   coverColor: string;
 };
 
+/** Falls back to the category verbs when a subject has no list of its own. */
+function verbsFor(cat: CategoryContent, subject: string, wave: "base" | "extra") {
+  const override = cat.verbOverrides?.[subject];
+  if (override) return wave === "base" ? override.verbs : override.extraVerbs;
+  return wave === "base" ? cat.verbs : cat.extraVerbs;
+}
+
 export const GIGS_PER_CATEGORY_GENERATED = 48;
 const SELLERS_PER_CATEGORY = 6;
 // Second wave: appended after the original data so existing gigs/sellers/slugs never change.
 export const EXTRA_GIGS_PER_CATEGORY_GENERATED = 48;
-const EXTRA_SELLERS_PER_CATEGORY = 6;
+const EXTRA_SELLERS_PER_CATEGORY = 14;
 
 function buildGig(
   cat: CategoryContent,
@@ -560,7 +612,8 @@ export function generateBulkData(): {
 
     for (let i = 0; i < GIGS_PER_CATEGORY_GENERATED; i++) {
       const subjectIndex = i % cat.subjects.length;
-      const verb = cat.verbs[Math.floor(i / cat.subjects.length) % cat.verbs.length];
+      const subjectVerbs = verbsFor(cat, cat.subjects[subjectIndex], "base");
+      const verb = subjectVerbs[Math.floor(i / cat.subjects.length) % subjectVerbs.length];
       const subcategorySlug = catSubcategorySlugs.get(cat.subcategories[subjectIndex])!;
       const seller = catSellers[i % catSellers.length];
       gigs.push(buildGig(cat, subjectIndex, verb, i, seller, subcategorySlug, usedSlugs));
@@ -580,7 +633,8 @@ export function generateBulkData(): {
 
     for (let i = 0; i < EXTRA_GIGS_PER_CATEGORY_GENERATED; i++) {
       const subjectIndex = i % cat.subjects.length;
-      const verb = cat.extraVerbs[Math.floor(i / cat.subjects.length) % cat.extraVerbs.length];
+      const subjectVerbs = verbsFor(cat, cat.subjects[subjectIndex], "extra");
+      const verb = subjectVerbs[Math.floor(i / cat.subjects.length) % subjectVerbs.length];
       const subcategorySlug = catSubcategorySlugs.get(cat.subcategories[subjectIndex])!;
       const seller = combinedSellers[i % combinedSellers.length];
       gigs.push(buildGig(cat, subjectIndex, verb, i, seller, subcategorySlug, usedSlugs));
