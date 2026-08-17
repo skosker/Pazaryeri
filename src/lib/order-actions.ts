@@ -120,10 +120,32 @@ export async function buyerCompleteOrder(orderId: string, buyerId: string) {
   if (!order || order.buyerId !== buyerId) throw new OrderActionError("Yetkisiz işlem");
   if (order.status !== "DELIVERED") throw new OrderActionError("Sipariş bu aşamada değil");
 
-  const updated = await prisma.order.update({
-    where: { id: orderId },
-    data: { status: "COMPLETED", escrowReleased: true },
-  });
+  const amount = order.amount;
+
+  // The payout row is what the admin payout screen works from, so it has to appear in
+  // the same transaction that releases the escrow — otherwise a crash in between would
+  // mark the money released with nothing recording that it is owed. Seller bank details
+  // are copied in: they may change later, but a transfer that already went out must
+  // keep the details it was actually sent to.
+  const [updated] = await prisma.$transaction([
+    prisma.order.update({
+      where: { id: orderId },
+      data: { status: "COMPLETED", escrowReleased: true },
+    }),
+    prisma.payout.upsert({
+      where: { orderId },
+      update: {},
+      create: {
+        orderId,
+        sellerId: order.gig.sellerId,
+        gross: amount,
+        commission: 0,
+        net: amount,
+        iban: order.gig.seller.iban,
+        ibanHolder: order.gig.seller.ibanHolder,
+      },
+    }),
+  ]);
 
   await sendOrderCompletedEmail({
     sellerEmail: order.gig.seller.email,

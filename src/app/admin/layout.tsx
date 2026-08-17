@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/require-admin";
 const navItems = [
   { href: "/admin", label: "Genel Bakış" },
   { href: "/admin/havale-onaylari", label: "Havale/EFT Onayları" },
+  { href: "/admin/hakedisler", label: "Hakedişler" },
   { href: "/admin/siparisler", label: "Siparişler" },
   { href: "/admin/kullanicilar", label: "Kullanıcılar" },
   { href: "/admin/ilanlar", label: "İlanlar" },
