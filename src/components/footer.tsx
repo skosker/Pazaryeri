@@ -11,9 +11,13 @@ const categoryLinks = [
   { label: "Yazı & Çeviri", slug: "yazi-ceviri" },
 ];
 
+// Pages that carry their own closing section, or that should stay focused on a single
+// task, do not get the footer.
+const hiddenOn = ["/", "/giris", "/kayit"];
+
 export function Footer() {
   const pathname = usePathname();
-  if (pathname === "/") return null;
+  if (pathname && hiddenOn.includes(pathname)) return null;
 
   return (
     <footer className="border-t border-slate-200 bg-white">
