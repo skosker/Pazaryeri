@@ -5,10 +5,11 @@ import { loginAction, type FormState } from "./actions";
 
 const initialState: FormState = {};
 
+// Showcase accounts only. The admin account is deliberately absent: publishing a
+// credential that can suspend users or release escrow is not a demo feature.
 const demoAccounts = [
   { label: "Alıcı", email: "buyer@profestia.dev" },
   { label: "Satıcı", email: "mert@profestia.dev" },
-  { label: "Admin", email: "admin@profestia.dev" },
 ];
 const demoPassword = "password123";
 
