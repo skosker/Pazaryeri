@@ -25,7 +25,7 @@ export default async function RegisterPage(props: PageProps<"/kayit">) {
       </Link>
 
       <h1 className="mt-3 text-2xl font-bold text-brand-navy">
-        {sells ? "Hizmet Sağlayacağım" : "Hizmet Satın Alacağım"}
+        {sells ? "Hizmet Sağlayacağım (Freelancer)" : "Hizmet Satın Alacağım"}
       </h1>
       <p className="mt-1 text-sm text-slate-500">
         {sells
