@@ -4,7 +4,7 @@ const roles = [
   {
     role: "BUYER",
     emoji: "💼",
-    title: "Hizmet Alacağım",
+    title: "Hizmet Satın Alacağım",
     description: "İhtiyacın olan işi tarif et, doğru freelancer'ı bul.",
     tint: "from-purple-100 to-fuchsia-100",
   },
