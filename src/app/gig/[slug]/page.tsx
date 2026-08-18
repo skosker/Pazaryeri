@@ -95,10 +95,8 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
             <GigCover
               categoryIcon={gig.category.icon}
               gigSlug={gig.slug}
-              size="1200/800"
               coverImage={gig.coverImage}
               alt={gig.title}
-              iconClassName="text-7xl"
             />
           </div>
 

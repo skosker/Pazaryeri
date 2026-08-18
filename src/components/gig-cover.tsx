@@ -1,71 +1,63 @@
 "use client";
 
 import { useState } from "react";
-import { CategoryIcon } from "@/components/category-icon";
-import { coverImageUrl } from "@/lib/cover-colors";
-import { coverArt } from "@/lib/cover-art";
+import { coverArt, COVER_VIEWBOX } from "@/lib/cover-art";
 
 /**
- * Covers, in order of preference: the seller's upload, then a photo keyed to the gig
- * slug. Generated artwork sits underneath and shows through when a photo cannot be
- * fetched, so a blocked or slow image host never leaves a broken glyph on the card.
+ * The seller's uploaded cover when there is one, otherwise artwork drawn from the
+ * category and the gig slug. Nothing is fetched for the generated case, so covers are
+ * relevant to the category, distinct per listing and never wait on an image host.
  */
 export function GigCover({
   categoryIcon,
   gigSlug,
   coverImage,
-  size,
   alt = "",
   imageClassName = "",
-  iconClassName = "text-5xl",
 }: {
   categoryIcon: string;
   gigSlug: string;
   coverImage?: string | null;
-  size?: `${number}/${number}`;
   alt?: string;
   imageClassName?: string;
-  iconClassName?: string;
 }) {
   const [failed, setFailed] = useState(false);
-  const art = coverArt(gigSlug);
+  const art = coverArt(categoryIcon, gigSlug);
+  const showUpload = Boolean(coverImage) && !failed;
 
   return (
     <>
-      <div className="absolute inset-0 overflow-hidden" style={{ background: art.background }} aria-hidden>
+      <div className="absolute inset-0" style={{ background: art.background }} aria-hidden>
         <svg
-          className="absolute inset-0 h-full w-full"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
+          className="h-full w-full"
+          viewBox={COVER_VIEWBOX}
+          preserveAspectRatio="xMidYMid slice"
         >
-          {art.shapes.map((shape, i) =>
-            shape.kind === "circle" ? (
-              <circle key={i} cx={shape.cx} cy={shape.cy} r={shape.r} fill={shape.fill} opacity={shape.opacity} />
-            ) : shape.kind === "rect" ? (
-              <rect
-                key={i}
-                x={shape.x}
-                y={shape.y}
-                width={shape.w}
-                height={shape.h}
-                fill={shape.fill}
-                opacity={shape.opacity}
-                transform={`rotate(${shape.rotate} 50 50)`}
-              />
+          {art.prims.map((p, i) =>
+            p.t === "rect" ? (
+              <rect key={i} x={p.x} y={p.y} width={p.w} height={p.h} rx={p.rx} fill={p.fill} opacity={p.o ?? 1} />
+            ) : p.t === "circle" ? (
+              <circle key={i} cx={p.cx} cy={p.cy} r={p.r} fill={p.fill} opacity={p.o ?? 1} />
             ) : (
-              <path key={i} d={shape.d} fill={shape.fill} opacity={shape.opacity} />
+              <path
+                key={i}
+                d={p.d}
+                fill={p.fill ?? "none"}
+                stroke={p.stroke}
+                strokeWidth={p.sw}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                opacity={p.o ?? 1}
+              />
             )
           )}
         </svg>
-        <span className="absolute inset-0 flex items-center justify-center opacity-80">
-          <CategoryIcon icon={categoryIcon} className={iconClassName} />
-        </span>
       </div>
 
-      {!failed && (
+      {showUpload && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={coverImage || coverImageUrl(gigSlug, size)}
+          src={coverImage as string}
           alt={alt}
           onError={() => setFailed(true)}
           className={`relative h-full w-full object-cover ${imageClassName}`}

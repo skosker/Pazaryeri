@@ -10,19 +10,3 @@ export const coverGradients: Record<string, string> = {
 export function coverGradientClass(color: string) {
   return coverGradients[color] ?? coverGradients.indigo;
 }
-
-/**
- * Cover photo for a listing that has no uploaded one.
- *
- * This used to be a keyword search on loremflickr. A narrow search there resolves to a
- * handful of photos, so unrelated listings kept showing the same picture however the
- * seed varied, and the "istanbul" keyword pulled in mosques. Picsum serves one large
- * curated set instead and maps a seed onto it, so neighbouring cards land on different
- * photos and no keyword can steer the result somewhere unsuitable.
- */
-export function coverImageUrl(
-  gigSlug: string,
-  size: `${number}/${number}` = "600/400"
-) {
-  return `https://picsum.photos/seed/${encodeURIComponent(gigSlug)}/${size.replace("/", "/")}`;
-}
