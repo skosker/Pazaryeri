@@ -51,9 +51,15 @@ type Ink = { deep: string; mid: string; soft: string; pale: string };
 
 type Motif = (r: (n: number) => number, ink: Ink) => Prim[];
 
-const motifs: Record<string, Motif> = {
+/**
+ * Three motifs per category rather than one. A single drawing per category meant every
+ * card in a listing page repeated the same shape with only the tint changing, which
+ * reads as "all the same" however different the palette is.
+ */
+const motifs: Record<string, Motif[]> = {
   // Yazılım & Web — a code window with brackets.
-  code: (r, ink) => {
+  code: [
+    (r, ink) => {
     const lines = 3 + r(2);
     const prims: Prim[] = [
       { t: "rect", x: 22, y: 16, w: 76, h: 48, rx: 5, fill: ink.pale },
@@ -81,9 +87,38 @@ const motifs: Record<string, Motif> = {
     }
     return prims;
   },
+    // Terminal prompt
+    (r, ink) => {
+      const rows = 3 + r(3);
+      const prims: Prim[] = [
+        { t: "rect", x: 18, y: 14, w: 84, h: 52, rx: 6, fill: ink.deep, o: 0.92 },
+        { t: "rect", x: 18, y: 14, w: 84, h: 8, rx: 6, fill: ink.mid },
+      ];
+      for (let i = 0; i < rows; i++) {
+        prims.push({ t: "path", d: `M26 ${30 + i * 9} l4 3 l-4 3`, stroke: ink.pale, sw: 2 });
+        prims.push({ t: "rect", x: 34, y: 31 + i * 9, w: 20 + r(34), h: 3, rx: 1.5, fill: ink.pale, o: 0.7 });
+      }
+      return prims;
+    },
+    // Stacked layers / deployment
+    (r, ink) => {
+      const layers = 3 + r(2);
+      const prims: Prim[] = [];
+      for (let i = 0; i < layers; i++) {
+        prims.push({
+          t: "path",
+          d: `M60 ${20 + i * 13} L92 ${28 + i * 13} L60 ${36 + i * 13} L28 ${28 + i * 13} Z`,
+          fill: i % 2 ? ink.mid : ink.deep,
+          o: 0.55 + i * 0.12,
+        });
+      }
+      return prims;
+    },
+  ],
 
   // Grafik Tasarım — pen nib over colour swatches.
-  palette: (r, ink) => {
+  palette: [
+    (r, ink) => {
     const swatches = 3 + r(2);
     const prims: Prim[] = [
       { t: "path", d: "M52 14 L68 30 L46 56 L34 60 L38 48 Z", fill: ink.soft },
@@ -104,9 +139,38 @@ const motifs: Record<string, Motif> = {
     }
     return prims;
   },
+    // Colour wheel
+    (r, ink) => {
+      const wedges = 5 + r(3);
+      const prims: Prim[] = [{ t: "circle", cx: 60, cy: 40, r: 26, fill: ink.pale }];
+      for (let i = 0; i < wedges; i++) {
+        const a0 = (i / wedges) * Math.PI * 2;
+        const a1 = ((i + 1) / wedges) * Math.PI * 2;
+        prims.push({
+          t: "path",
+          d: `M60 40 L${(60 + Math.cos(a0) * 26).toFixed(1)} ${(40 + Math.sin(a0) * 26).toFixed(1)} A26 26 0 0 1 ${(60 + Math.cos(a1) * 26).toFixed(1)} ${(40 + Math.sin(a1) * 26).toFixed(1)} Z`,
+          fill: i % 2 ? ink.deep : ink.mid,
+          o: 0.55 + (i % 3) * 0.15,
+        });
+      }
+      prims.push({ t: "circle", cx: 60, cy: 40, r: 8, fill: ink.pale });
+      return prims;
+    },
+    // Layout frame
+    (r, ink) => {
+      const blocks = 3 + r(2);
+      const prims: Prim[] = [{ t: "rect", x: 26, y: 14, w: 68, h: 52, rx: 5, fill: ink.pale }];
+      prims.push({ t: "rect", x: 32, y: 20, w: 56, h: 14, rx: 3, fill: ink.deep, o: 0.8 });
+      for (let i = 0; i < blocks; i++) {
+        prims.push({ t: "rect", x: 32 + i * (56 / blocks), y: 40, w: 56 / blocks - 4, h: 20, rx: 3, fill: ink.mid, o: 0.75 });
+      }
+      return prims;
+    },
+  ],
 
   // Yazı & Çeviri — a page of text with a translation arrow.
-  pen: (r, ink) => {
+  pen: [
+    (r, ink) => {
     const rows = 4 + r(2);
     const prims: Prim[] = [{ t: "rect", x: 26, y: 12, w: 42, h: 56, rx: 4, fill: ink.pale }];
     for (let i = 0; i < rows; i++) {
@@ -125,9 +189,37 @@ const motifs: Record<string, Motif> = {
     prims.push({ t: "path", d: "M70 40 L76 40 M73 36 L77 40 L73 44", stroke: ink.deep, sw: 2.2 });
     return prims;
   },
+    // Quote mark over lines
+    (r, ink) => {
+      const rows = 3 + r(2);
+      const prims: Prim[] = [
+        { t: "path", d: "M34 20 q-8 10 -8 20 h12 v-14 h-6 q1 -4 6 -6 Z", fill: ink.deep, o: 0.85 },
+        { t: "path", d: "M56 20 q-8 10 -8 20 h12 v-14 h-6 q1 -4 6 -6 Z", fill: ink.mid, o: 0.85 },
+      ];
+      for (let i = 0; i < rows; i++) {
+        prims.push({ t: "rect", x: 30, y: 50 + i * 8, w: 30 + r(30), h: 3, rx: 1.5, fill: ink.mid, o: 0.7 });
+      }
+      return prims;
+    },
+    // Two language bubbles
+    (r, ink) => {
+      const prims: Prim[] = [
+        { t: "rect", x: 20, y: 18, w: 44, h: 26, rx: 8, fill: ink.deep, o: 0.85 },
+        { t: "path", d: "M32 44 L30 54 L42 44 Z", fill: ink.deep, o: 0.85 },
+        { t: "rect", x: 58, y: 40, w: 44, h: 26, rx: 8, fill: ink.mid, o: 0.85 },
+        { t: "path", d: "M88 66 L92 76 L78 66 Z", fill: ink.mid, o: 0.85 },
+      ];
+      for (let i = 0; i < 2 + r(2); i++) {
+        prims.push({ t: "rect", x: 27, y: 25 + i * 7, w: 16 + r(16), h: 3, rx: 1.5, fill: ink.pale, o: 0.8 });
+        prims.push({ t: "rect", x: 65, y: 47 + i * 7, w: 16 + r(16), h: 3, rx: 1.5, fill: ink.pale, o: 0.8 });
+      }
+      return prims;
+    },
+  ],
 
   // Video & Animasyon — film frame with a play mark and a timeline.
-  video: (r, ink) => {
+  video: [
+    (r, ink) => {
     const cells = 4 + r(2);
     const prims: Prim[] = [
       { t: "rect", x: 24, y: 14, w: 72, h: 40, rx: 5, fill: ink.pale },
@@ -147,9 +239,31 @@ const motifs: Record<string, Motif> = {
     }
     return prims;
   },
+    // Film strip
+    (r, ink) => {
+      const frames = 3 + r(2);
+      const prims: Prim[] = [{ t: "rect", x: 16, y: 22, w: 88, h: 36, rx: 4, fill: ink.deep, o: 0.9 }];
+      for (let i = 0; i < frames; i++) {
+        prims.push({ t: "rect", x: 22 + i * (88 / frames), y: 30, w: 88 / frames - 8, h: 20, rx: 2, fill: ink.pale });
+      }
+      for (let i = 0; i < 6; i++) {
+        prims.push({ t: "rect", x: 20 + i * 16, y: 24, w: 5, h: 4, rx: 1, fill: ink.pale, o: 0.7 });
+        prims.push({ t: "rect", x: 20 + i * 16, y: 52, w: 5, h: 4, rx: 1, fill: ink.pale, o: 0.7 });
+      }
+      return prims;
+    },
+    // Camera on tripod
+    (r, ink) => [
+      { t: "rect", x: 30, y: 22, w: 44, h: 26, rx: 5, fill: ink.deep, o: 0.9 },
+      { t: "path", d: "M74 30 L92 24 L92 46 L74 40 Z", fill: ink.mid },
+      { t: "circle", cx: 46, cy: 35, r: 6 + r(3), fill: ink.pale },
+      { t: "path", d: "M52 48 L44 68 M52 48 L62 68 M52 48 L52 68", stroke: ink.mid, sw: 2.6 },
+    ],
+  ],
 
   // Dijital Pazarlama — a megaphone with reach waves.
-  megaphone: (r, ink) => {
+  megaphone: [
+    (r, ink) => {
     const waves = 2 + r(2);
     const prims: Prim[] = [
       { t: "path", d: "M30 34 L62 22 L62 58 L30 46 Z", fill: ink.deep, o: 0.9 },
@@ -168,9 +282,33 @@ const motifs: Record<string, Motif> = {
     }
     return prims;
   },
+    // Rising funnel
+    (r, ink) => {
+      const steps = 3 + r(2);
+      const prims: Prim[] = [];
+      for (let i = 0; i < steps; i++) {
+        const w = 66 - i * (46 / steps);
+        prims.push({ t: "rect", x: 60 - w / 2, y: 18 + i * (44 / steps), w, h: 44 / steps - 3, rx: 3, fill: i % 2 ? ink.mid : ink.deep, o: 0.85 });
+      }
+      return prims;
+    },
+    // Target with arrow
+    (r, ink) => {
+      const rings = 2 + r(2);
+      const prims: Prim[] = [];
+      for (let i = rings; i > 0; i--) {
+        prims.push({ t: "circle", cx: 56, cy: 40, r: i * 9, fill: i % 2 ? ink.mid : ink.pale, o: 0.9 });
+      }
+      prims.push({ t: "circle", cx: 56, cy: 40, r: 4, fill: ink.deep });
+      prims.push({ t: "path", d: "M88 16 L60 38", stroke: ink.deep, sw: 3 });
+      prims.push({ t: "path", d: "M88 16 L80 18 L86 24 Z", fill: ink.deep });
+      return prims;
+    },
+  ],
 
   // Müzik & Ses — a waveform.
-  music: (r, ink) => {
+  music: [
+    (r, ink) => {
     const bars = 12 + r(6);
     const prims: Prim[] = [];
     for (let i = 0; i < bars; i++) {
@@ -188,9 +326,36 @@ const motifs: Record<string, Motif> = {
     }
     return prims;
   },
+    // Note with staff
+    (r, ink) => {
+      const prims: Prim[] = [];
+      for (let i = 0; i < 4; i++) {
+        prims.push({ t: "rect", x: 16, y: 22 + i * 10, w: 88, h: 1.6, fill: ink.mid, o: 0.5 });
+      }
+      prims.push({ t: "circle", cx: 44, cy: 52, r: 8, fill: ink.deep });
+      prims.push({ t: "rect", x: 50, y: 18, w: 3.5, h: 34, fill: ink.deep });
+      prims.push({ t: "circle", cx: 76, cy: 44, r: 8, fill: ink.mid });
+      prims.push({ t: "rect", x: 82, y: 14, w: 3.5, h: 30, fill: ink.mid });
+      prims.push({ t: "path", d: `M53 18 q14 ${4 + r(6)} 32 -4`, stroke: ink.deep, sw: 3 });
+      return prims;
+    },
+    // Mixer faders
+    (r, ink) => {
+      const channels = 4 + r(3);
+      const prims: Prim[] = [];
+      for (let i = 0; i < channels; i++) {
+        const x = 24 + i * (72 / channels);
+        const knob = 20 + r(36);
+        prims.push({ t: "rect", x: x + 3, y: 16, w: 3, h: 48, rx: 1.5, fill: ink.mid, o: 0.6 });
+        prims.push({ t: "rect", x, y: 16 + knob, w: 9, h: 7, rx: 2, fill: ink.deep });
+      }
+      return prims;
+    },
+  ],
 
   // İş & Danışmanlık — briefcase with a rising line.
-  briefcase: (r, ink) => {
+  briefcase: [
+    (r, ink) => {
     const steps = 3 + r(2);
     const prims: Prim[] = [
       { t: "rect", x: 30, y: 28, w: 60, h: 38, rx: 5, fill: ink.pale },
@@ -208,9 +373,36 @@ const motifs: Record<string, Motif> = {
     prims.push({ t: "path", d, stroke: ink.deep, sw: 2.6 });
     return prims;
   },
+    // Handshake blocks
+    (r, ink) => [
+      { t: "rect", x: 20, y: 32, w: 34, h: 16, rx: 4, fill: ink.deep, o: 0.9 },
+      { t: "rect", x: 66, y: 32, w: 34, h: 16, rx: 4, fill: ink.mid },
+      { t: "rect", x: 50, y: 28, w: 20, h: 24, rx: 5, fill: ink.pale },
+      { t: "path", d: "M56 40 l4 4 l6 -8", stroke: ink.deep, sw: 2.6 },
+    ],
+    // Strategy board
+    (r, ink) => {
+      const notes = 3 + r(3);
+      const prims: Prim[] = [{ t: "rect", x: 22, y: 14, w: 76, h: 52, rx: 4, fill: ink.pale }];
+      for (let i = 0; i < notes; i++) {
+        prims.push({
+          t: "rect",
+          x: 30 + (i % 3) * 22,
+          y: 22 + Math.floor(i / 3) * 22,
+          w: 16,
+          h: 16,
+          rx: 2,
+          fill: i % 2 ? ink.mid : ink.deep,
+          o: 0.8,
+        });
+      }
+      return prims;
+    },
+  ],
 
   // Eğitim & Ders — an open book.
-  book: (r, ink) => {
+  book: [
+    (r, ink) => {
     const rows = 2 + r(2);
     const prims: Prim[] = [
       { t: "path", d: "M60 24 C50 18 38 18 28 22 L28 60 C38 56 50 56 60 62 Z", fill: ink.pale },
@@ -223,9 +415,31 @@ const motifs: Record<string, Motif> = {
     }
     return prims;
   },
+    // Graduation cap
+    (r, ink) => [
+      { t: "path", d: "M60 18 L100 34 L60 50 L20 34 Z", fill: ink.deep, o: 0.9 },
+      { t: "path", d: "M36 40 L36 56 q24 12 48 0 L84 40", fill: ink.mid, o: 0.85 },
+      { t: "path", d: `M100 34 L100 ${52 + r(8)}`, stroke: ink.deep, sw: 2.4 },
+      { t: "circle", cx: 100, cy: 58 + r(6), r: 3.5, fill: ink.deep },
+    ],
+    // Lesson board
+    (r, ink) => {
+      const rows = 2 + r(3);
+      const prims: Prim[] = [
+        { t: "rect", x: 20, y: 14, w: 80, h: 44, rx: 4, fill: ink.pale },
+        { t: "rect", x: 20, y: 14, w: 80, h: 44, rx: 4, fill: ink.soft, o: 0.5 },
+        { t: "path", d: "M44 58 L44 68 M76 58 L76 68", stroke: ink.mid, sw: 2.4 },
+      ];
+      for (let i = 0; i < rows; i++) {
+        prims.push({ t: "rect", x: 28, y: 22 + i * 10, w: 24 + r(38), h: 3.4, rx: 1.7, fill: ink.deep, o: 0.65 });
+      }
+      return prims;
+    },
+  ],
 
   // AI & Otomasyon — connected nodes.
-  cpu: (r, ink) => {
+  cpu: [
+    (r, ink) => {
     const prims: Prim[] = [
       { t: "rect", x: 46, y: 28, w: 28, h: 24, rx: 5, fill: ink.deep, o: 0.9 },
       { t: "rect", x: 54, y: 35, w: 12, h: 10, rx: 2, fill: ink.pale },
@@ -240,9 +454,40 @@ const motifs: Record<string, Motif> = {
     }
     return prims;
   },
+    // Chat bubbles from a bot
+    (r, ink) => {
+      const lines = 2 + r(2);
+      const prims: Prim[] = [
+        { t: "rect", x: 20, y: 26, w: 30, h: 28, rx: 6, fill: ink.deep, o: 0.9 },
+        { t: "circle", cx: 29, cy: 38, r: 3, fill: ink.pale },
+        { t: "circle", cx: 41, cy: 38, r: 3, fill: ink.pale },
+        { t: "path", d: "M30 46 q5 4 10 0", stroke: ink.pale, sw: 2 },
+        { t: "rect", x: 58, y: 20, w: 44, h: 24, rx: 8, fill: ink.mid, o: 0.9 },
+        { t: "rect", x: 58, y: 50, w: 34, h: 18, rx: 8, fill: ink.soft },
+      ];
+      for (let i = 0; i < lines; i++) {
+        prims.push({ t: "rect", x: 65, y: 27 + i * 7, w: 14 + r(18), h: 3, rx: 1.5, fill: ink.pale, o: 0.85 });
+      }
+      return prims;
+    },
+    // Automation flow
+    (r, ink) => {
+      const steps = 3 + r(2);
+      const prims: Prim[] = [];
+      for (let i = 0; i < steps; i++) {
+        const x = 22 + i * (76 / steps);
+        prims.push({ t: "rect", x, y: 30, w: 76 / steps - 12, h: 20, rx: 5, fill: i % 2 ? ink.mid : ink.deep, o: 0.88 });
+        if (i < steps - 1) {
+          prims.push({ t: "path", d: `M${x + 76 / steps - 11} 40 L${x + 76 / steps - 3} 40`, stroke: ink.deep, sw: 2.2 });
+        }
+      }
+      return prims;
+    },
+  ],
 
   // Veri & Analitik — bar chart with a trend line.
-  chart: (r, ink) => {
+  chart: [
+    (r, ink) => {
     const bars = 4 + r(3);
     const prims: Prim[] = [
       { t: "path", d: "M26 16 L26 64 L96 64", stroke: ink.mid, sw: 2.2, o: 0.7 },
@@ -257,12 +502,44 @@ const motifs: Record<string, Motif> = {
     prims.push({ t: "path", d, stroke: ink.deep, sw: 2.4 });
     return prims;
   },
+    // Donut breakdown
+    (r, ink) => {
+      const slices = 3 + r(2);
+      const prims: Prim[] = [{ t: "circle", cx: 60, cy: 40, r: 26, fill: ink.pale }];
+      let a = 0;
+      for (let i = 0; i < slices; i++) {
+        const span = (Math.PI * 2) / slices + (r(20) - 10) / 60;
+        const a1 = a + span;
+        prims.push({
+          t: "path",
+          d: `M60 40 L${(60 + Math.cos(a) * 26).toFixed(1)} ${(40 + Math.sin(a) * 26).toFixed(1)} A26 26 0 ${span > Math.PI ? 1 : 0} 1 ${(60 + Math.cos(a1) * 26).toFixed(1)} ${(40 + Math.sin(a1) * 26).toFixed(1)} Z`,
+          fill: i % 2 ? ink.mid : ink.deep,
+          o: 0.85,
+        });
+        a = a1;
+      }
+      prims.push({ t: "circle", cx: 60, cy: 40, r: 12, fill: ink.pale });
+      return prims;
+    },
+    // Dashboard tiles
+    (r, ink) => {
+      const prims: Prim[] = [{ t: "rect", x: 20, y: 14, w: 80, h: 52, rx: 5, fill: ink.pale }];
+      prims.push({ t: "rect", x: 26, y: 20, w: 34, h: 18, rx: 3, fill: ink.deep, o: 0.85 });
+      prims.push({ t: "rect", x: 64, y: 20, w: 30, h: 18, rx: 3, fill: ink.mid, o: 0.85 });
+      const bars = 3 + r(3);
+      for (let i = 0; i < bars; i++) {
+        const h = 6 + r(16);
+        prims.push({ t: "rect", x: 28 + i * (64 / bars), y: 58 - h, w: 64 / bars - 5, h, rx: 2, fill: ink.mid, o: 0.8 });
+      }
+      return prims;
+    },
+  ],
 
-  sparkles: (r, ink) => [
+  sparkles: [(r, ink) => [
     { t: "path", d: "M60 20 L66 36 L82 42 L66 48 L60 64 L54 48 L38 42 L54 36 Z", fill: ink.deep, o: 0.85 },
     { t: "circle", cx: 90, cy: 26, r: 4 + r(3), fill: ink.mid },
     { t: "circle", cx: 32, cy: 58, r: 3 + r(3), fill: ink.soft },
-  ],
+  ]],
 };
 
 /**
@@ -285,7 +562,8 @@ export function coverArt(categoryIcon: string, gigSlug: string): CoverArt {
     pale: `hsl(${hue} 70% 97%)`,
   };
 
-  const motif = motifs[categoryIcon] ?? motifs.sparkles;
+  const variants = motifs[categoryIcon] ?? motifs.sparkles;
+  const motif = variants[r(variants.length)];
   return { background, prims: motif(r, ink) };
 }
 
