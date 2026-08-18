@@ -30,7 +30,7 @@ export function RolePicker() {
           <Link
             key={option.role}
             href={`/kayit?role=${option.role}`}
-            className="group rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:-translate-y-0.5 hover:border-purple-300 hover:shadow-lg hover:shadow-purple-100"
+            className="group rounded-2xl border border-slate-200 bg-white p-4 text-center transition hover:-translate-y-0.5 hover:border-purple-300 hover:shadow-lg hover:shadow-purple-100"
           >
             <span
               className={`flex h-32 items-center justify-center rounded-xl bg-gradient-to-br ${option.tint} text-5xl`}
@@ -38,7 +38,7 @@ export function RolePicker() {
             >
               {option.emoji}
             </span>
-            <span className="mt-4 flex items-center gap-1.5 font-semibold text-brand-navy">
+            <span className="mt-4 flex items-center justify-center gap-1.5 font-semibold text-brand-navy">
               {option.title}
               <span className="transition group-hover:translate-x-0.5" aria-hidden>
                 →
@@ -54,10 +54,6 @@ export function RolePicker() {
         <Link href="/giris" className="font-semibold text-purple-700 hover:underline">
           Giriş Yap
         </Link>
-      </p>
-
-      <p className="mt-3 text-xs text-slate-400">
-        Seçimin kalıcı değil — sonradan panelinden de hizmet vermeye başlayabilirsin.
       </p>
     </div>
   );
