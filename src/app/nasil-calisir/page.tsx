@@ -98,28 +98,30 @@ export default function HowItWorksPage() {
       </section>
 
       <section className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8">
-        <div className="rounded-3xl border border-slate-200 bg-white p-8">
-          <span className="rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
+        {/* Both cards are columns whose step list grows, so the two buttons line up
+            even though the columns hold different amounts of text. */}
+        <div className="flex flex-col rounded-3xl border border-slate-200 bg-white p-8">
+          <span className="w-fit rounded-full bg-purple-50 px-3.5 py-1.5 text-sm font-semibold text-purple-700">
             Alıcılar için
           </span>
           <h2 className="mt-3 text-xl font-bold text-brand-navy">Hizmet almak</h2>
-          <div className="mt-6">
+          <div className="mt-6 flex-1">
             <StepList steps={buyerSteps} accent="purple" />
           </div>
-          <LinkButton href="/kategoriler" className="mt-8">
+          <LinkButton href="/kategoriler" variant="outline" className="mt-8 self-start">
             Hizmetlere Göz At
           </LinkButton>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-8">
-          <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
+        <div className="flex flex-col rounded-3xl border border-slate-200 bg-white p-8">
+          <span className="w-fit rounded-full bg-indigo-50 px-3.5 py-1.5 text-sm font-semibold text-indigo-700">
             Freelancer&apos;lar için
           </span>
           <h2 className="mt-3 text-xl font-bold text-brand-navy">Hizmet vermek</h2>
-          <div className="mt-6">
+          <div className="mt-6 flex-1">
             <StepList steps={sellerSteps} accent="indigo" />
           </div>
-          <LinkButton href="/kayit?role=FREELANCER" variant="outline" className="mt-8">
+          <LinkButton href="/kayit?role=FREELANCER" variant="outline" className="mt-8 self-start">
             Freelancer Ol
           </LinkButton>
         </div>
