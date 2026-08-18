@@ -11,40 +11,41 @@ export function coverGradientClass(color: string) {
   return coverGradients[color] ?? coverGradients.indigo;
 }
 
-const categoryKeywords: Record<string, string> = {
-  "grafik-tasarim": "graphic-design,branding",
-  "yazilim-web": "coding,programming",
-  "yazi-ceviri": "writing,typewriter",
-  "video-animasyon": "video-editing,filmmaking",
-  "dijital-pazarlama": "marketing,advertising",
-  "muzik-ses": "music,audio",
-  "is-danismanlik": "business,consulting",
-  "egitim-ders": "education,elearning",
-  "ai-otomasyon": "artificial-intelligence,robot",
-  "veri-analitik": "data,analytics",
+// Several keyword sets per category, so ~98 listings in one category are not all
+// drawing from the same photo pool. One set in each group keeps an Istanbul/Turkey
+// flavour, so the catalogue does not read as entirely foreign stock photography.
+const categoryKeywords: Record<string, string[]> = {
+  "grafik-tasarim": ["graphic-design,branding", "logo,sketch", "designer,workspace", "istanbul,design"],
+  "yazilim-web": ["coding,programming", "developer,laptop", "software,screen", "istanbul,office"],
+  "yazi-ceviri": ["writing,typewriter", "notebook,pen", "books,translation", "istanbul,writing"],
+  "video-animasyon": ["video-editing,filmmaking", "camera,studio", "animation,motion", "istanbul,film"],
+  "dijital-pazarlama": ["marketing,advertising", "social-media,campaign", "billboard,brand", "istanbul,marketing"],
+  "muzik-ses": ["music,audio", "recording,studio", "microphone,mixer", "istanbul,music"],
+  "is-danismanlik": ["business,consulting", "meeting,strategy", "office,teamwork", "istanbul,business"],
+  "egitim-ders": ["education,elearning", "classroom,student", "books,learning", "istanbul,education"],
+  "ai-otomasyon": ["artificial-intelligence,robot", "automation,circuit", "machine-learning,server", "istanbul,technology"],
+  "veri-analitik": ["data,analytics", "dashboard,chart", "statistics,report", "istanbul,office"],
 };
 
-// A share of covers use an Istanbul/Turkey-flavored search instead of the
-// pure category keyword, so the catalog doesn't read as entirely foreign stock photos.
-const turkishFlavorKeywords: Record<string, string> = {
-  "grafik-tasarim": "istanbul,design",
-  "yazilim-web": "istanbul,office",
-  "yazi-ceviri": "istanbul,writing",
-  "video-animasyon": "istanbul,film",
-  "dijital-pazarlama": "istanbul,marketing",
-  "muzik-ses": "istanbul,music",
-  "is-danismanlik": "istanbul,business",
-  "egitim-ders": "istanbul,education",
-  "ai-otomasyon": "istanbul,technology",
-  "veri-analitik": "istanbul,office",
-};
+const fallbackKeywords = ["business,office", "workspace,desk", "team,meeting", "istanbul,business"];
 
+/**
+ * FNV-1a with a final avalanche step. The lock pins which photo the placeholder
+ * service returns, so two gigs landing on the same lock and keywords show the same
+ * picture — the previous `% 1000` left far too little room for a catalogue this size
+ * and put 81 listings on a shared photo. The full 32-bit range makes a collision
+ * vanishingly unlikely, and the avalanche keeps near-identical slugs far apart.
+ */
 function hashSeed(input: string) {
-  let hash = 0;
+  let hash = 0x811c9dc5;
   for (let i = 0; i < input.length; i++) {
-    hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
   }
-  return hash % 1000;
+  hash ^= hash >>> 16;
+  hash = Math.imul(hash, 0x7feb352d) >>> 0;
+  hash ^= hash >>> 15;
+  return hash >>> 0;
 }
 
 export function coverImageUrl(
@@ -53,9 +54,7 @@ export function coverImageUrl(
   size: `${number}/${number}` = "600/400"
 ) {
   const lock = hashSeed(gigSlug);
-  const useTurkishFlavor = lock % 3 === 0;
-  const keywords = useTurkishFlavor
-    ? (turkishFlavorKeywords[categorySlug] ?? "istanbul,business")
-    : (categoryKeywords[categorySlug] ?? "business,office");
+  const variants = categoryKeywords[categorySlug] ?? fallbackKeywords;
+  const keywords = variants[lock % variants.length];
   return `https://loremflickr.com/${size}/${keywords}?lock=${lock}`;
 }

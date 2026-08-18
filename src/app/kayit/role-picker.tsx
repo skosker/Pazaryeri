@@ -12,7 +12,7 @@ const roles = [
     role: "FREELANCER",
     emoji: "💻",
     title: "Hizmet Vereceğim",
-    description: "İlanını yayınla, işini büyüt, kazanmaya başla.",
+    description: "İlanını yayınla, kazanmaya başla.",
     tint: "from-indigo-100 to-purple-100",
   },
 ] as const;
