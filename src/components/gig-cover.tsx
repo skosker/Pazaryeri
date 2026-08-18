@@ -2,54 +2,59 @@
 
 import { useState } from "react";
 import { CategoryIcon } from "@/components/category-icon";
-import { coverGradientClass, coverImageUrl } from "@/lib/cover-colors";
-import { getCategoryAccent } from "@/lib/category-style";
+import { coverArt } from "@/lib/cover-art";
 
 /**
- * Prefers the seller's uploaded cover and falls back to a third-party placeholder
- * photo when the gig has none. Either can fail — the host may be blocked,
- * rate-limited or simply slow — so the gradient and the watermarked category icon
- * are painted underneath and stay visible, which beats the broken-image glyph.
+ * Shows the seller's uploaded cover when there is one. Otherwise the listing gets
+ * artwork generated from its slug — unique per gig, drawn locally, with no stock-photo
+ * lookup that could repeat across listings or return unsuitable imagery.
  */
 export function GigCover({
-  categorySlug,
   categoryIcon,
   gigSlug,
-  coverColor,
   coverImage,
-  size,
   alt = "",
   imageClassName = "",
   iconClassName = "text-5xl",
 }: {
-  categorySlug: string;
   categoryIcon: string;
   gigSlug: string;
-  coverColor: string;
   coverImage?: string | null;
-  size?: `${number}/${number}`;
   alt?: string;
   imageClassName?: string;
   iconClassName?: string;
 }) {
   const [failed, setFailed] = useState(false);
-  const accent = getCategoryAccent(categorySlug);
+  const art = coverArt(gigSlug);
+  const showUpload = Boolean(coverImage) && !failed;
 
   return (
     <>
-      <div
-        className={`absolute inset-0 bg-gradient-to-br ${coverGradientClass(coverColor)}`}
-        aria-hidden
-      >
-        <span className={`flex h-full w-full items-center justify-center ${accent.text} opacity-25`}>
+      <div className="absolute inset-0 overflow-hidden" style={{ background: art.background }} aria-hidden>
+        {art.blobs.map((blob, i) => (
+          <span
+            key={i}
+            className="absolute rounded-full blur-2xl"
+            style={{
+              left: blob.cx,
+              top: blob.cy,
+              width: blob.r,
+              aspectRatio: "1",
+              background: blob.color,
+              opacity: 0.55,
+              transform: "translate(-50%, -50%)",
+            }}
+          />
+        ))}
+        <span className="absolute inset-0 flex items-center justify-center opacity-70">
           <CategoryIcon icon={categoryIcon} className={iconClassName} />
         </span>
       </div>
 
-      {!failed && (
+      {showUpload && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={coverImage || coverImageUrl(categorySlug, gigSlug, size)}
+          src={coverImage as string}
           alt={alt}
           onError={() => setFailed(true)}
           className={`relative h-full w-full object-cover ${imageClassName}`}

@@ -14,10 +14,8 @@ export function GigCard({ gig }: { gig: GigCardData }) {
     >
       <div className="relative h-48 overflow-hidden bg-slate-100">
         <GigCover
-          categorySlug={gig.categorySlug}
           categoryIcon={gig.categoryIcon}
           gigSlug={gig.slug}
-          coverColor={gig.coverColor}
           coverImage={gig.coverImage}
           imageClassName="transition duration-500 group-hover:scale-110"
         />
