@@ -108,7 +108,7 @@ export default function HowItWorksPage() {
           <div className="mt-6 flex-1">
             <StepList steps={buyerSteps} accent="purple" />
           </div>
-          <LinkButton href="/kategoriler" variant="outline" className="mt-8 self-start">
+          <LinkButton href="/kategoriler" className="mt-8 self-start">
             Hizmetlere Göz At
           </LinkButton>
         </div>
@@ -121,7 +121,7 @@ export default function HowItWorksPage() {
           <div className="mt-6 flex-1">
             <StepList steps={sellerSteps} accent="indigo" />
           </div>
-          <LinkButton href="/kayit?role=FREELANCER" variant="outline" className="mt-8 self-start">
+          <LinkButton href="/kayit?role=FREELANCER" className="mt-8 self-start">
             Freelancer Ol
           </LinkButton>
         </div>
