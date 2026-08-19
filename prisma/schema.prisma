@@ -45,6 +45,15 @@ model User {
   ibanHolder    String?
   bio           String?
   image         String?
+  // Freelancer profile details: shown on the profile page and used by the directory
+  // filters. Nullable because buyers and older accounts never filled them in.
+  city          String?
+  age           Int?
+  /// Uzmanlık: what this freelancer actually does, a handful of short labels.
+  skills        String[]  @default([])
+  /// Generated showcase profile rather than a real sign-up. The generator only ever
+  /// writes rows carrying this flag, so re-running it cannot touch a real account.
+  synthetic     Boolean   @default(false)
   emailVerified DateTime?
   suspended     Boolean   @default(false)
   isOnline      Boolean   @default(false)
@@ -60,6 +69,7 @@ model User {
   verificationTokens VerificationToken[]
   passwordResets     PasswordResetToken[]
 
+  @@index([role, synthetic])
   @@map("users")
 }
 

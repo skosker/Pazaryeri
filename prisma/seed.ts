@@ -3,6 +3,9 @@ import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import { generateBulkData } from "./bulk-gigs-data";
+import { generateSyntheticFreelancers } from "./synthetic-freelancers";
+import { DEMO_SELLERS, showcaseFreelancers } from "./showcase-freelancers";
+import { syncShowcaseFreelancers, syncSyntheticFreelancers } from "./sync-synthetic-freelancers";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -18,17 +21,6 @@ const categories = [
   { name: "Video & Animasyon", slug: "video-animasyon", icon: "video", order: 8 },
   { name: "Eğitim & Ders", slug: "egitim-ders", icon: "book", order: 9 },
   { name: "Müzik & Ses", slug: "muzik-ses", icon: "music", order: 10 },
-];
-
-const sellers = [
-  { name: "Elif K.", email: "elif@profestia.dev", title: "Sosyal Medya Uzmanı" },
-  { name: "Mert A.", email: "mert@profestia.dev", title: "Full Stack Geliştirici" },
-  { name: "Aslı T.", email: "asli@profestia.dev", title: "SEO İçerik Yazarı" },
-  { name: "Can Y.", email: "can@profestia.dev", title: "Logo & Marka Tasarımcısı" },
-  { name: "Zeynep B.", email: "zeynep@profestia.dev", title: "Video Editörü" },
-  { name: "Burak S.", email: "burak@profestia.dev", title: "Reklam Yöneticisi" },
-  { name: "Deniz A.", email: "deniz@profestia.dev", title: "AI & Otomasyon Danışmanı" },
-  { name: "Ayşe Ö.", email: "ayse@profestia.dev", title: "Veri Analisti" },
 ];
 
 const gigs = [
@@ -332,7 +324,7 @@ async function main() {
     subcategoryBySlugAndName.set(`${sc.categorySlug}::${sc.name}`, sc.slug);
   }
 
-  for (const s of sellers) {
+  for (const s of DEMO_SELLERS) {
     await prisma.user.upsert({
       where: { email: s.email },
       update: {},
@@ -440,6 +432,17 @@ async function main() {
 
     await seedPackageLadder(gig.id, g.price, g.delivery);
   }
+
+  console.log("Seeding synthetic freelancer profiles...");
+
+  const synthetic = await syncSyntheticFreelancers(prisma, generateSyntheticFreelancers());
+  console.log(
+    `  ${synthetic.created} created, ${synthetic.updated} refreshed` +
+      (synthetic.skipped.length > 0 ? `, ${synthetic.skipped.length} real accounts left alone` : "")
+  );
+
+  const showcase = await syncShowcaseFreelancers(prisma, showcaseFreelancers());
+  console.log(`  ${showcase.updated} older demo sellers completed`);
 
   console.log("Seed complete.");
 }

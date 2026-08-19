@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { StarRating } from "@/components/star-rating";
 import { GigCover } from "@/components/gig-cover";
+import { UserAvatar } from "@/components/user-avatar";
 import { getCategoryAccent } from "@/lib/category-style";
 import type { GigCardData } from "@/lib/gigs";
 
@@ -21,8 +22,13 @@ export function GigCard({ gig }: { gig: GigCardData }) {
         />
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/40 to-transparent" />
         <div className="absolute bottom-3 left-3 flex items-center gap-2">
-          <span className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-slate-200 text-xs font-semibold text-slate-600 shadow-sm">
-            {gig.seller.name.charAt(0)}
+          <span className="relative block h-8 w-8">
+            <UserAvatar
+              name={gig.seller.name}
+              image={gig.seller.image}
+              className="h-8 w-8 border-2 border-white text-xs shadow-sm"
+              fallbackClassName="bg-slate-200 text-slate-600"
+            />
             {gig.seller.isOnline && (
               <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
             )}

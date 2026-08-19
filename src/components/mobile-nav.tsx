@@ -46,6 +46,9 @@ export function MobileNav({
                 Kategoriler
               </Link>
             )}
+            <Link href="/freelancerlar" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2.5 hover:bg-slate-50">
+              Freelancer Bul
+            </Link>
             <Link href="/nasil-calisir" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2.5 hover:bg-slate-50">
               Nasıl Çalışır
             </Link>
