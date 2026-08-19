@@ -14,7 +14,8 @@
     "db:studio": "prisma studio",
     "admin:sifre": "tsx scripts/set-admin-password.ts",
     "kapak:fotograf": "tsx scripts/fetch-cover-photos.ts",
-    "freelancer:uret": "tsx scripts/generate-freelancers.ts"
+    "freelancer:uret": "tsx scripts/generate-freelancers.ts",
+    "profil:fotograf": "tsx scripts/fetch-profile-photos.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
