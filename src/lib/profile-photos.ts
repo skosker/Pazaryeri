@@ -29,27 +29,33 @@ const SEARCH_ATTEMPTS = 3;
 type Bucket = "kadin" | "erkek";
 
 /**
- * Searches are interleaved by gender so a run that stops halfway has filled in both,
- * and worded to bring back head-and-shoulders shots: a full-body photo loses its face
- * when a round avatar crops it.
+ * Searches are interleaved by gender so a run that stops halfway has filled in both, and
+ * worded to bring back head-and-shoulders shots: a full-body photo loses its face when a
+ * round avatar crops it.
+ *
+ * The list is ordered by how local the results are. Turkish-language searches with the
+ * Turkish locale come first, because the profiles carry Turkish names and a marketplace
+ * that serves Turkey should look like it; broader Mediterranean and European terms follow
+ * as a deeper pool, since Pexels does not hold twelve hundred Turkish portraits. Whatever
+ * the searches do not cover keeps its drawn avatar.
  */
-const searches: { query: string; bucket: Bucket }[] = [
-  { query: "woman portrait", bucket: "kadin" },
-  { query: "man portrait", bucket: "erkek" },
-  { query: "businesswoman headshot", bucket: "kadin" },
-  { query: "businessman headshot", bucket: "erkek" },
-  { query: "young woman smiling face", bucket: "kadin" },
-  { query: "young man smiling face", bucket: "erkek" },
-  { query: "professional woman portrait", bucket: "kadin" },
-  { query: "professional man portrait", bucket: "erkek" },
-  { query: "woman face close up", bucket: "kadin" },
-  { query: "man face close up", bucket: "erkek" },
-  { query: "woman office portrait", bucket: "kadin" },
-  { query: "man office portrait", bucket: "erkek" },
-  { query: "female student portrait", bucket: "kadin" },
-  { query: "male student portrait", bucket: "erkek" },
-  { query: "woman headshot studio", bucket: "kadin" },
-  { query: "man headshot studio", bucket: "erkek" },
+const searches: { query: string; bucket: Bucket; locale: string }[] = [
+  { query: "türk kadın portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "türk erkek portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "kadın portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "erkek portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "iş kadını portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "iş adamı portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "genç kadın gülümseme", bucket: "kadin", locale: "tr-TR" },
+  { query: "genç erkek gülümseme", bucket: "erkek", locale: "tr-TR" },
+  { query: "ofiste kadın portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "ofiste erkek portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "turkish woman portrait", bucket: "kadin", locale: "en-US" },
+  { query: "turkish man portrait", bucket: "erkek", locale: "en-US" },
+  { query: "mediterranean woman portrait", bucket: "kadin", locale: "en-US" },
+  { query: "mediterranean man portrait", bucket: "erkek", locale: "en-US" },
+  { query: "european woman headshot", bucket: "kadin", locale: "en-US" },
+  { query: "european man headshot", bucket: "erkek", locale: "en-US" },
 ];
 
 export type ProfilePhotoProgress = {
@@ -126,10 +132,17 @@ function isTransient(status: number) {
   return status === 429 || status >= 500;
 }
 
-async function searchPage(query: string, page: number, apiKey: string): Promise<Photo[]> {
+async function searchPage(
+  query: string,
+  page: number,
+  apiKey: string,
+  locale: string
+): Promise<Photo[]> {
+  // The locale is what makes a Turkish query search Turkish content rather than being
+  // read as an unfamiliar string.
   const url =
     `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}` +
-    `&per_page=${PER_PAGE}&page=${page}&orientation=portrait`;
+    `&per_page=${PER_PAGE}&page=${page}&orientation=portrait&locale=${locale}`;
 
   let lastStatus = 0;
 
@@ -224,7 +237,7 @@ export async function assignProfilePhotos({
   }
 
   for (; index < searches.length && queriesRun < maxQueries; index++) {
-    const { query, bucket } = searches[index];
+    const { query, bucket, locale } = searches[index];
     if (queue[bucket].length === 0) continue; // nobody left needing this kind of photo
 
     queriesRun += 1;
@@ -237,7 +250,7 @@ export async function assignProfilePhotos({
         let photo = pool.find((candidate) => !used.has(candidate.id));
 
         while (!photo && page <= MAX_PAGES_PER_QUERY) {
-          const fetched = await searchPage(query, page, apiKey);
+          const fetched = await searchPage(query, page, apiKey, locale);
           page += 1;
           if (fetched.length === 0) break;
           pool.push(...fetched);
