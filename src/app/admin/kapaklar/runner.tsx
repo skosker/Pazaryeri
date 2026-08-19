@@ -29,6 +29,7 @@ export function CoverPhotoRunner({
     setExhausted([]);
 
     const dead = new Set<string>();
+    let emptyRounds = 0;
 
     for (;;) {
       const result = await runCoverPhotoBatch(force);
@@ -43,8 +44,21 @@ export function CoverPhotoRunner({
       setProgress(batch);
       setExhausted([...dead]);
 
-      // A batch that assigns nothing means every remaining term is out of photos.
-      if (batch.pending === 0 || batch.assigned === 0) {
+      if (batch.rateLimited) {
+        setError(batch.rateLimited);
+        break;
+      }
+
+      if (batch.pending === 0) {
+        setFinished(true);
+        break;
+      }
+
+      // A round that places nothing is usually every remaining term being out of unused
+      // photos, but it can also be a bad minute at Pexels — so give it one more round
+      // before calling it done rather than stopping on the first empty one.
+      emptyRounds = batch.assigned === 0 ? emptyRounds + 1 : 0;
+      if (emptyRounds >= 2) {
         setFinished(true);
         break;
       }

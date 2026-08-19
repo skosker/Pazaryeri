@@ -17,7 +17,7 @@ import { assignCoverPhotos, coverPhotoProgress, PEXELS_HOST } from "../src/lib/c
 
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
-const force = args.includes("--force");
+let force = args.includes("--force");
 
 async function showPlan() {
   const gigs = await prisma.gig.findMany({
@@ -51,13 +51,26 @@ async function run() {
   );
 
   const exhausted = new Set<string>();
+  let emptyRounds = 0;
   for (;;) {
     const batch = await assignCoverPhotos({ force, maxQueries: 8 });
     batch.exhausted.forEach((query) => exhausted.add(query));
     console.log(`  +${batch.assigned} fotoğraf · ${batch.pending} ilan kaldı`);
+    if (batch.failed.length > 0) {
+      console.warn(`  ! arama başarısız, sonraki turda tekrar denenecek: ${batch.failed.join(", ")}`);
+    }
 
-    // A batch that assigns nothing means every remaining term is out of unused photos.
-    if (batch.pending === 0 || batch.assigned === 0) break;
+    if (batch.rateLimited) {
+      console.warn(`\n${batch.rateLimited}`);
+      break;
+    }
+    if (batch.pending === 0) break;
+
+    // Two placeless rounds in a row means the remaining terms really are out of photos.
+    emptyRounds = batch.assigned === 0 ? emptyRounds + 1 : 0;
+    if (emptyRounds >= 2) break;
+
+    force = false;
   }
 
   const end = await coverPhotoProgress();

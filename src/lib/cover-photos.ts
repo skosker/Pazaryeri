@@ -25,6 +25,7 @@ const PER_PAGE = 80;
 const MAX_PAGES_PER_QUERY = 4;
 const PHOTO_WIDTH = 900; // covers render at most ~800px wide
 const UPDATE_CHUNK = 25;
+const SEARCH_ATTEMPTS = 3;
 
 export type CoverPhotoProgress = {
   total: number;
@@ -38,6 +39,10 @@ export type CoverPhotoBatch = CoverPhotoProgress & {
   queriesRun: number;
   /** Terms that ran out of unused photos; those listings keep the drawn cover. */
   exhausted: string[];
+  /** Terms the search failed on after retrying; the next round tries them again. */
+  failed: string[];
+  /** Set when the hourly quota stopped the run early. Everything assigned is saved. */
+  rateLimited: string | null;
 };
 
 type GigRow = {
@@ -83,29 +88,56 @@ export function hasPexelsKey() {
 
 type Photo = { id: number; url: string };
 
+/** Their gateway hands out the odd 504; those are worth another go, a 401 is not. */
+function isTransient(status: number) {
+  return status === 429 || status >= 500;
+}
+
+export class RateLimitError extends Error {}
+
 async function searchPage(query: string, page: number, apiKey: string): Promise<Photo[]> {
   const url =
     `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}` +
     `&per_page=${PER_PAGE}&page=${page}&orientation=landscape`;
 
-  const response = await fetch(url, { headers: { Authorization: apiKey }, cache: "no-store" });
+  let lastStatus = 0;
 
-  if (response.status === 429) {
-    throw new Error(
-      "Pexels saatlik istek sınırına takıldı. Bir süre sonra kaldığı yerden devam edebilirsin."
-    );
+  for (let attempt = 0; attempt < SEARCH_ATTEMPTS; attempt++) {
+    if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, 600 * attempt));
+
+    let response: Response;
+    try {
+      response = await fetch(url, { headers: { Authorization: apiKey }, cache: "no-store" });
+    } catch {
+      lastStatus = 0; // the connection itself failed; treat it like a transient upstream error
+      continue;
+    }
+
+    if (response.ok) {
+      const body = (await response.json()) as { photos: { id: number; src: { large: string } }[] };
+      return body.photos.map((photo) => ({
+        id: photo.id,
+        // Their CDN takes sizing in the query string, so ask for what the cards render.
+        url: `${photo.src.large.split("?")[0]}?auto=compress&cs=tinysrgb&w=${PHOTO_WIDTH}`,
+      }));
+    }
+
+    lastStatus = response.status;
+
+    // The hourly quota does not recover in a few hundred milliseconds, and a bad key
+    // never will, so stop the whole run rather than retrying into the same wall.
+    if (response.status === 429) {
+      throw new RateLimitError(
+        "Pexels saatlik istek sınırına takıldı. Atanan fotoğraflar kaydedildi; bir süre sonra kaldığın yerden devam edebilirsin."
+      );
+    }
+    if (response.status === 401 || response.status === 403) {
+      throw new Error(`Pexels anahtarı kabul edilmedi (${response.status}).`);
+    }
+    if (!isTransient(response.status)) break;
   }
-  if (!response.ok) {
-    throw new Error(`Pexels ${response.status} — "${query}" araması başarısız.`);
-  }
 
-  const body = (await response.json()) as { photos: { id: number; src: { large: string } }[] };
-
-  return body.photos.map((photo) => ({
-    id: photo.id,
-    // Their CDN takes sizing in the query string, so ask for what the cards render.
-    url: `${photo.src.large.split("?")[0]}?auto=compress&cs=tinysrgb&w=${PHOTO_WIDTH}`,
-  }));
+  throw new Error(`Pexels ${lastStatus || "bağlantı hatası"} — "${query}" araması başarısız.`);
 }
 
 /**
@@ -141,47 +173,74 @@ export async function assignCoverPhotos({
   }
 
   const exhausted: string[] = [];
-  const assignments: { id: string; url: string }[] = [];
+  const failed: string[] = [];
+  let assigned = 0;
   let queriesRun = 0;
+  let rateLimited: RateLimitError | null = null;
+
+  async function save(assignments: { id: string; url: string }[]) {
+    for (let i = 0; i < assignments.length; i += UPDATE_CHUNK) {
+      await prisma.$transaction(
+        assignments.slice(i, i + UPDATE_CHUNK).map((assignment) =>
+          prisma.gig.update({
+            where: { id: assignment.id },
+            data: { coverImage: assignment.url },
+          })
+        )
+      );
+    }
+    assigned += assignments.length;
+  }
 
   for (const [query, gigsForQuery] of [...groups].slice(0, maxQueries)) {
+    const assignments: { id: string; url: string }[] = [];
     const pool: Photo[] = [];
     let page = 1;
     queriesRun += 1;
 
-    for (const gig of gigsForQuery) {
-      let photo = pool.find((candidate) => !used.has(candidate.id));
+    try {
+      for (const gig of gigsForQuery) {
+        let photo = pool.find((candidate) => !used.has(candidate.id));
 
-      while (!photo && page <= MAX_PAGES_PER_QUERY) {
-        const fetched = await searchPage(query, page, apiKey);
-        page += 1;
-        if (fetched.length === 0) break;
-        pool.push(...fetched);
-        photo = pool.find((candidate) => !used.has(candidate.id));
+        while (!photo && page <= MAX_PAGES_PER_QUERY) {
+          const fetched = await searchPage(query, page, apiKey);
+          page += 1;
+          if (fetched.length === 0) break;
+          pool.push(...fetched);
+          photo = pool.find((candidate) => !used.has(candidate.id));
+        }
+
+        if (!photo) {
+          // Nothing unused left for this term; the drawn cover stays, which is fine.
+          if (!exhausted.includes(query)) exhausted.push(query);
+          break;
+        }
+
+        used.add(photo.id);
+        assignments.push({ id: gig.id, url: photo.url });
       }
-
-      if (!photo) {
-        // Nothing unused left for this term; the drawn cover stays, which is fine.
-        if (!exhausted.includes(query)) exhausted.push(query);
-        break;
+    } catch (error) {
+      // One flaky search must not cost the terms that already succeeded, so each is
+      // saved on its own and a failure only drops the term it happened on.
+      if (error instanceof RateLimitError) rateLimited = error;
+      else {
+        failed.push(query);
+        for (const assignment of assignments) used.delete(photoIdOf(assignment.url) ?? -1);
+        assignments.length = 0;
       }
-
-      used.add(photo.id);
-      assignments.push({ id: gig.id, url: photo.url });
     }
-  }
 
-  for (let i = 0; i < assignments.length; i += UPDATE_CHUNK) {
-    await prisma.$transaction(
-      assignments.slice(i, i + UPDATE_CHUNK).map((assignment) =>
-        prisma.gig.update({
-          where: { id: assignment.id },
-          data: { coverImage: assignment.url },
-        })
-      )
-    );
+    await save(assignments);
+    if (rateLimited) break;
   }
 
   const after = summarise(await loadGigs(), force);
-  return { ...after, assigned: assignments.length, queriesRun, exhausted };
+  return {
+    ...after,
+    assigned,
+    queriesRun,
+    exhausted,
+    failed,
+    rateLimited: rateLimited?.message ?? null,
+  };
 }
