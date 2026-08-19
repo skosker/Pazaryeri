@@ -10,12 +10,30 @@ export class OrderActionError extends Error {}
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
+/**
+ * Order pages show who is on each side of the order, so both users come along with the
+ * row. Prisma returns whole rows unless told otherwise, and User carries passwordHash,
+ * email and the seller's IBAN — one prop-pass into a client component would serialise
+ * all of that into the page source. Listing the fields keeps that from being possible.
+ *
+ * Payment is left out on the same grounds: its rawResponse is the whole iyzico payload,
+ * and nothing that reads an order needs it.
+ */
 const orderDetailInclude = {
-  gig: { include: { seller: true, category: true } },
-  package: true,
-  buyer: true,
-  payment: true,
-  review: true,
+  gig: {
+    select: { slug: true, title: true, sellerId: true, seller: { select: { name: true } } },
+  },
+  package: { select: { name: true, deliveryDays: true } },
+  buyer: { select: { name: true } },
+  review: { select: { rating: true, comment: true } },
+} as const;
+
+/** Just enough of the two sides to address the notification emails. */
+const notificationSelect = {
+  gig: {
+    select: { title: true, sellerId: true, seller: { select: { name: true, email: true } } },
+  },
+  buyer: { select: { name: true, email: true } },
 } as const;
 
 export async function getOrderForUser(orderId: string, userId: string, role?: string) {
@@ -41,7 +59,7 @@ export async function listPendingBankTransfers() {
 export async function markOrderPaid(orderId: string) {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { gig: { include: { seller: true } }, buyer: true },
+    include: notificationSelect,
   });
   if (!order) throw new OrderActionError("Sipariş bulunamadı");
 
@@ -75,7 +93,7 @@ export async function adminConfirmBankTransfer(orderId: string, adminRole: strin
 export async function sellerStartOrder(orderId: string, sellerId: string) {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { gig: { include: { seller: true } }, buyer: true },
+    include: notificationSelect,
   });
   if (!order || order.gig.sellerId !== sellerId) throw new OrderActionError("Yetkisiz işlem");
   if (order.status !== "PAID") throw new OrderActionError("Sipariş bu aşamada değil");
@@ -95,7 +113,7 @@ export async function sellerStartOrder(orderId: string, sellerId: string) {
 export async function sellerDeliverOrder(orderId: string, sellerId: string) {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { gig: { include: { seller: true } }, buyer: true },
+    include: notificationSelect,
   });
   if (!order || order.gig.sellerId !== sellerId) throw new OrderActionError("Yetkisiz işlem");
   if (order.status !== "IN_PROGRESS") throw new OrderActionError("Sipariş bu aşamada değil");
@@ -115,7 +133,16 @@ export async function sellerDeliverOrder(orderId: string, sellerId: string) {
 export async function buyerCompleteOrder(orderId: string, buyerId: string) {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { gig: { include: { seller: true } } },
+    include: {
+      gig: {
+        select: {
+          title: true,
+          sellerId: true,
+          // The payout row copies the account details in, so they are needed here.
+          seller: { select: { name: true, email: true, iban: true, ibanHolder: true } },
+        },
+      },
+    },
   });
   if (!order || order.buyerId !== buyerId) throw new OrderActionError("Yetkisiz işlem");
   if (order.status !== "DELIVERED") throw new OrderActionError("Sipariş bu aşamada değil");
