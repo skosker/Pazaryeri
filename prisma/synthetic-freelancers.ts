@@ -12,6 +12,8 @@
  * the e-mail, so two people with the same profession still look nothing alike.
  */
 
+import { feminineNames, looksFeminine, masculineNames } from "../src/lib/turkish-names";
+
 export type SyntheticFreelancer = {
   email: string;
   name: string;
@@ -361,53 +363,6 @@ const catalogue: CategoryProfessions[] = [
     ],
   },
 ];
-
-/**
- * First names are kept in two lists because the drawn avatar follows the name: a
- * profile called Elif should not come back with a beard. The list a name comes from is
- * the only thing gender is used for.
- */
-const feminineNames = [
-  "Elif", "Zeynep", "Ayşe", "Fatma", "Merve", "Selin", "Ece", "Buse", "Ceren", "Gizem",
-  "Naz", "Pelin", "İrem", "Sude", "Melis", "Hazal", "Sena", "Cansu", "Yasemin", "Derya",
-  "Nil", "Beril", "Sibel", "Aylin", "Nihan", "Simge", "Ceyda", "Damla", "Selen", "Aslıhan",
-  "Duygu", "Ebru", "Elvan", "Yağmur", "Zehra", "Esin", "Nurcan", "Gamze", "Sinem", "Aybüke",
-  "Songül", "Perihan", "Şeyma", "Özge", "Nazlı", "Selma", "Beste", "Filiz", "Gülce", "Nesrin",
-  "Belgin", "Ayten", "Feride", "Türkan", "Cansel", "Burcu", "Meltem", "Gonca", "Sevgi", "Dilara",
-  "Melike", "Eda", "Tuğçe", "Berrak", "Hande", "Şevval", "İpek", "Bengi", "Ayça", "Şule",
-  "Neslihan", "Rüya", "Ilgın", "Deren", "Aycan", "Betül", "Esra", "Öykü", "Defne", "Zeliha",
-  "Bahar", "Çiğdem", "Seda", "Tuba", "Yeliz", "Nuray", "Sevil", "Ceyhan", "Ela", "Lale",
-];
-
-const masculineNames = [
-  "Ahmet", "Mehmet", "Emre", "Kerem", "Onur", "Kaan", "Yusuf", "Barış", "Tolga", "Serkan",
-  "Emir", "Volkan", "Berk", "Arda", "Cem", "Umut", "Efe", "Alp", "Oğuz", "Kemal",
-  "Tarık", "Gökhan", "Baran", "İlker", "Doruk", "Batu", "Uğur", "Eren", "Koray", "Fırat",
-  "Kağan", "Bora", "Sarp", "Kutay", "Metin", "Kıvanç", "Bertan", "Tayfun", "Erhan", "Buğra",
-  "Cenk", "Halil", "Mesut", "Taner", "Bahadır", "Reha", "Yiğit", "Orkun", "Timur", "Necati",
-  "Rıza", "Kaya", "Semih", "Doğukan", "Salih", "Yavuz", "Onat", "İbrahim", "Aras", "Mert",
-  "Can", "Deniz", "Burak", "Ozan", "Sinan", "Hakan", "Levent", "Murat", "Okan", "Tuna",
-  "Cihan", "Ege", "Mustafa", "Ali", "Hasan", "Enes", "Furkan", "Berat", "Çağrı", "Selim",
-  "Görkem", "Anıl", "Ufuk", "Sercan", "Erdem", "Tunahan", "Kadir", "Serdar", "Ünal", "Bülent",
-];
-
-/**
- * First names that appear in the older demo data but not in the pools above. They are
- * kept separate on purpose: adding one to the pools would shift every generated name
- * after it, and those names are already in a migration.
- */
-const extraFeminineNames = ["Aslı"];
-const extraMasculineNames = ["Aytekin"];
-
-const feminineLookup = new Set([...feminineNames, ...extraFeminineNames]);
-const masculineLookup = new Set([...masculineNames, ...extraMasculineNames]);
-
-/** True feminine, false masculine, null when the name is in neither list. */
-function looksFeminine(firstName: string): boolean | null {
-  if (feminineLookup.has(firstName)) return true;
-  if (masculineLookup.has(firstName)) return false;
-  return null;
-}
 
 const surnames = [
   "Yılmaz", "Kaya", "Demir", "Şahin", "Çelik", "Yıldız", "Yıldırım", "Öztürk", "Aydın", "Özdemir",
