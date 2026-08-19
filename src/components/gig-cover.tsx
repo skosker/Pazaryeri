@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { coverArt, COVER_VIEWBOX } from "@/lib/cover-art";
+import { coverArt } from "@/lib/cover-art";
 
 /**
- * The seller's uploaded cover when there is one, otherwise artwork drawn from the
- * category and the gig slug. Nothing is fetched for the generated case, so covers are
+ * The seller's uploaded cover when there is one, otherwise a cover composed from the
+ * category and the gig slug. Nothing is fetched for the composed case, so covers are
  * relevant to the category, distinct per listing and never wait on an image host.
+ *
+ * The emoji is sized in `cqh`, so it scales with whatever box the cover is placed in —
+ * the 12rem card thumbnail and the 18rem detail-page header both get the same
+ * proportions from one component.
  */
 export function GigCover({
   categoryIcon,
@@ -27,31 +31,32 @@ export function GigCover({
 
   return (
     <>
-      <div className="absolute inset-0" style={{ background: art.background }} aria-hidden>
-        <svg
-          className="h-full w-full"
-          viewBox={COVER_VIEWBOX}
-          preserveAspectRatio="xMidYMid slice"
+      <div
+        className="absolute inset-0 flex items-center justify-center overflow-hidden"
+        style={{ background: art.background, containerType: "size" }}
+        aria-hidden
+      >
+        <div
+          className="absolute inset-0"
+          style={{ backgroundImage: art.textureImage, backgroundSize: art.textureSize }}
+        />
+        {/* Soft halo so the emoji keeps its contrast whatever the gradient landed on. */}
+        <div
+          className="absolute"
+          style={{
+            width: "62cqh",
+            height: "62cqh",
+            borderRadius: "9999px",
+            background:
+              "radial-gradient(circle, rgba(255,255,255,0.30), rgba(255,255,255,0.06) 62%, transparent 72%)",
+          }}
+        />
+        <span
+          className="relative leading-none"
+          style={{ fontSize: "40cqh", filter: "drop-shadow(0 6px 14px rgba(15,23,42,0.35))" }}
         >
-          {art.prims.map((p, i) =>
-            p.t === "rect" ? (
-              <rect key={i} x={p.x} y={p.y} width={p.w} height={p.h} rx={p.rx} fill={p.fill} opacity={p.o ?? 1} />
-            ) : p.t === "circle" ? (
-              <circle key={i} cx={p.cx} cy={p.cy} r={p.r} fill={p.fill} opacity={p.o ?? 1} />
-            ) : (
-              <path
-                key={i}
-                d={p.d}
-                fill={p.fill ?? "none"}
-                stroke={p.stroke}
-                strokeWidth={p.sw}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                opacity={p.o ?? 1}
-              />
-            )
-          )}
-        </svg>
+          {art.glyph}
+        </span>
       </div>
 
       {showUpload && (
