@@ -9,6 +9,7 @@ const navItems = [
   { href: "/admin/kullanicilar", label: "Kullanıcılar" },
   { href: "/admin/ilanlar", label: "İlanlar" },
   { href: "/admin/kategoriler", label: "Kategoriler" },
+  { href: "/admin/kapaklar", label: "İlan Kapakları" },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
