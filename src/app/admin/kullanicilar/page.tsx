@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
 import { toggleSuspensionAction, changeUserRoleAction, toggleProFreelancerAction } from "./actions";
@@ -8,28 +9,54 @@ const roleLabel: Record<string, string> = {
   ADMIN: "Admin",
 };
 
-export default async function AdminUsersPage() {
+/**
+ * The generated showcase profiles outnumber the real accounts by a wide margin and
+ * nothing here applies to them — they cannot log in, order or be suspended — so the
+ * list holds real sign-ups by default and puts the rest behind a link.
+ */
+export default async function AdminUsersPage(props: PageProps<"/admin/kullanicilar">) {
   const admin = await requireAdmin();
+  const searchParams = await props.searchParams;
+  const showGenerated =
+    (Array.isArray(searchParams.uretilmis) ? searchParams.uretilmis[0] : searchParams.uretilmis) === "1";
 
-  const users = await prisma.user.findMany({
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      suspended: true,
-      isPro: true,
-      emailVerified: true,
-      createdAt: true,
-      _count: { select: { gigs: true, ordersMade: true } },
-    },
-  });
+  const [users, generatedCount] = await Promise.all([
+    prisma.user.findMany({
+      where: showGenerated ? {} : { synthetic: false },
+      orderBy: { createdAt: "desc" },
+      take: 200,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        suspended: true,
+        isPro: true,
+        synthetic: true,
+        emailVerified: true,
+        createdAt: true,
+        _count: { select: { gigs: true, ordersMade: true } },
+      },
+    }),
+    prisma.user.count({ where: { synthetic: true } }),
+  ]);
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-brand-navy">Kullanıcılar</h1>
-      <p className="mt-1 text-sm text-slate-500">{users.length} kayıtlı kullanıcı.</p>
+      <p className="mt-1 text-sm text-slate-500">
+        {showGenerated
+          ? `En son ${users.length} kullanıcı (üretilmiş profiller dahil).`
+          : `${users.length} kayıtlı kullanıcı${generatedCount > 0 ? ` · ${generatedCount} üretilmiş profil gizli` : ""}.`}
+        {generatedCount > 0 && (
+          <Link
+            href={showGenerated ? "/admin/kullanicilar" : "/admin/kullanicilar?uretilmis=1"}
+            className="ml-2 font-medium text-purple-700 hover:underline"
+          >
+            {showGenerated ? "Sadece gerçek hesaplar" : "Üretilmiş profilleri de göster"}
+          </Link>
+        )}
+      </p>
 
       <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
         <table className="w-full text-left text-sm">
@@ -46,7 +73,14 @@ export default async function AdminUsersPage() {
             {users.map((user) => (
               <tr key={user.id} className="border-b border-slate-100 last:border-0">
                 <td className="px-5 py-4">
-                  <p className="font-medium text-brand-navy">{user.name}</p>
+                  <p className="font-medium text-brand-navy">
+                    {user.name}
+                    {user.synthetic && (
+                      <span className="ml-1.5 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                        Üretilmiş
+                      </span>
+                    )}
+                  </p>
                   <p className="text-xs text-slate-400">{user.email}</p>
                 </td>
                 <td className="px-5 py-4 text-slate-600">

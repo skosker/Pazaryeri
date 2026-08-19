@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getGigsBySeller } from "@/lib/gigs";
 import { GigCard } from "@/components/gig-card";
 import { StarRating } from "@/components/star-rating";
+import { UserAvatar } from "@/components/user-avatar";
 
 function sellerLevelLabel(reviewCount: number) {
   if (reviewCount === 0) return "Yeni Satıcı";
@@ -21,6 +22,10 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
       name: true,
       title: true,
       bio: true,
+      image: true,
+      city: true,
+      age: true,
+      skills: true,
       isOnline: true,
       isPro: true,
       createdAt: true,
@@ -67,8 +72,8 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[300px_1fr]">
         <aside className="lg:sticky lg:top-20 lg:self-start">
           <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center">
-            <span className="relative mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-500 to-indigo-500 text-3xl font-bold text-white">
-              {freelancer.name.charAt(0)}
+            <span className="relative mx-auto block h-24 w-24">
+              <UserAvatar name={freelancer.name} image={freelancer.image} className="h-24 w-24 text-3xl" />
               {freelancer.isOnline && (
                 <span className="absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-500" />
               )}
@@ -104,6 +109,18 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
             </button>
 
             <dl className="mt-6 space-y-3 border-t border-slate-100 pt-5 text-left text-sm">
+              {freelancer.city && (
+                <div className="flex items-center justify-between">
+                  <dt className="text-slate-400">Şehir</dt>
+                  <dd className="font-semibold text-brand-navy">{freelancer.city}</dd>
+                </div>
+              )}
+              {freelancer.age !== null && (
+                <div className="flex items-center justify-between">
+                  <dt className="text-slate-400">Yaş</dt>
+                  <dd className="font-semibold text-brand-navy">{freelancer.age}</dd>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <dt className="text-slate-400">Tamamlanan Sipariş</dt>
                 <dd className="font-semibold text-brand-navy">{completedCount}</dd>
@@ -134,7 +151,29 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
             </section>
           )}
 
-          <section className={freelancer.bio ? "mt-10 border-t border-slate-100 pt-8" : ""}>
+          {freelancer.skills.length > 0 && (
+            <section className={freelancer.bio ? "mt-8" : ""}>
+              <h2 className="text-lg font-semibold text-brand-navy">Uzmanlık Alanları</h2>
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {freelancer.skills.map((skill) => (
+                  <li
+                    key={skill}
+                    className="rounded-full bg-purple-50 px-3 py-1.5 text-xs font-medium text-purple-700"
+                  >
+                    {skill}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <section
+            className={
+              freelancer.bio || freelancer.skills.length > 0
+                ? "mt-10 border-t border-slate-100 pt-8"
+                : ""
+            }
+          >
             <h2 className="text-lg font-semibold text-brand-navy">
               {freelancer.name} kullanıcısının ilanları
               {gigs.length > 0 && <span className="ml-1 font-normal text-slate-400">({gigs.length})</span>}

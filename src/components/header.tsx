@@ -28,6 +28,9 @@ export async function Header() {
 
         <nav className="hidden items-center gap-5 text-sm font-medium text-slate-600 md:flex">
           <CategoryMegaMenu categories={categories} subcategoriesByCategory={subcategoriesByCategory} />
+          <Link href="/freelancerlar" className="transition hover:text-brand-navy">
+            Freelancer Bul
+          </Link>
           <Link href="/nasil-calisir" className="transition hover:text-brand-navy">
             Nasıl Çalışır
           </Link>

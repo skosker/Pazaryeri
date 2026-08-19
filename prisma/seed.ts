@@ -3,6 +3,8 @@ import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import { generateBulkData } from "./bulk-gigs-data";
+import { generateSyntheticFreelancers } from "./synthetic-freelancers";
+import { syncSyntheticFreelancers } from "./sync-synthetic-freelancers";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -440,6 +442,14 @@ async function main() {
 
     await seedPackageLadder(gig.id, g.price, g.delivery);
   }
+
+  console.log("Seeding synthetic freelancer profiles...");
+
+  const synthetic = await syncSyntheticFreelancers(prisma, generateSyntheticFreelancers());
+  console.log(
+    `  ${synthetic.created} created, ${synthetic.updated} refreshed` +
+      (synthetic.skipped.length > 0 ? `, ${synthetic.skipped.length} real accounts left alone` : "")
+  );
 
   console.log("Seed complete.");
 }

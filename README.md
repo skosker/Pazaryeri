@@ -10,6 +10,7 @@
 - **Ödeme altyapısı**: iyzico Checkout Form entegrasyonu (gerçek API anahtarları tanımlandığında canlı çalışır). Anahtar tanımlı değilse otomatik olarak **mock ödeme modunda** çalışır, böylece iyzico hesabı olmadan da uçtan uca test edilebilir.
 - **Sipariş / escrow akışı**: Ödeme → satıcı işe başlar → teslim eder → alıcı onaylar (ödeme serbest bırakılır) → değerlendirme bırakılır.
 - **Panel**: Freelancer için ilan oluşturma ve gelen siparişler; alıcı için sipariş geçmişi.
+- **Yapay freelancer üretimi**: Pazaryerini dolduran 1000 farklı freelancer profili (isim, meslek, yaş, şehir, uzmanlık ve çizilmiş profil fotoğrafı) tek komutla üretilir. Ayrıntı için [Yapay freelancer üretimi](#yapay-freelancer-üretimi).
 
 ## Teknoloji
 
@@ -57,6 +58,9 @@ Veriyi tazelemek için tek başına seed yeterli:
 npm run db:seed
 ```
 
+Seed, 1000 yapay freelancer profilini de yazar; sadece onları tazelemek için
+`npm run freelancer:uret` yeterlidir (aşağıya bakın).
+
 ### 3. Geliştirme sunucusu
 
 ```bash
@@ -72,17 +76,55 @@ npm run dev
 | Alıcı | `buyer@profestia.dev` | `password123` |
 | Freelancer | `mert@profestia.dev` (veya diğer seed'lenen satıcılar) | `password123` |
 
+## Yapay freelancer üretimi
+
+Pazaryerinin dolu görünmesi için 1000 farklı freelancer profili üretilir. Her profilde
+**isim, meslek, yaş, şehir, uzmanlık listesi ve profil fotoğrafı** bulunur.
+
+```bash
+npm run freelancer:uret                 # 1000 profili oluşturur, var olanları tazeler
+npm run freelancer:uret -- --dry-run    # hiçbir şey yazmadan ne olacağını gösterir
+npm run freelancer:uret -- --adet=50    # daha küçük bir set
+npm run freelancer:uret -- --sql        # migration'a gömülecek SQL'i basar
+```
+
+Nasıl çalışıyor:
+
+- **Üreteç** (`prisma/synthetic-freelancers.ts`) veritabanına dokunmaz; her profil kendi
+  sırasından türetilir, yani üreteç ikinci kez çalıştığında aynı bin kişiyi üretir. 61
+  meslek on kategoriye sırayla dağıtılır, isim/yaş/şehir/uzmanlık ise e-postanın
+  hash'inden gelir. Şehirler ağırlıklı seçilir: kalabalık İstanbul'da toplanır, uzun
+  kuyruk Yalova'ya kadar incelir.
+- **Profil fotoğrafı** (`src/lib/avatar-art.ts`) çizilir, indirilmez: ten, saç, kıyafet,
+  gözlük ve sakal tohumun hash'inden seçilir ve `/api/avatar/[seed]` adresinden SVG
+  olarak servis edilir. Dış servise, API anahtarına ve profil başına depolamaya gerek
+  yok; `k-` / `e-` önekiyle çizim isme uyar.
+- **Yazma** (`prisma/sync-synthetic-freelancers.ts`) e-postaya göre eşleşir ve yalnızca
+  `synthetic` işaretli satırları günceller. Aynı e-postaya sahip gerçek bir hesap varsa
+  atlanır ve raporlanır — üretim tekrar çalıştığında gerçek bir kayıt ezilmez.
+- Üretilen hesapların parolası bilerek kullanılamaz durumdadır (`!showcase-profile-no-login`);
+  bunlar vitrin profilleridir, giriş yapılan hesaplar değil. Admin panelindeki kullanıcı
+  listesi varsayılan olarak sadece gerçek hesapları gösterir.
+- Profiller `/freelancerlar` sayfasında listelenir; meslek, şehir, uzmanlık ve isim
+  üzerinden filtrelenebilir.
+
 ## Proje yapısı
 
 ```
 prisma/schema.prisma        Veritabanı şeması
 prisma/seed.ts               Örnek veri
+prisma/synthetic-freelancers.ts       1000 yapay freelancer üreteci (isim, meslek, yaş, şehir, uzmanlık)
+prisma/sync-synthetic-freelancers.ts  Üretilen profilleri veritabanına yazar
+scripts/generate-freelancers.ts       `npm run freelancer:uret` komutu
 src/auth.ts                  NextAuth yapılandırması
 src/lib/                     Prisma client, iyzico client, iş mantığı (orders, gigs, validation)
 src/app/                     Next.js App Router sayfaları
   ├── giris, kayit           Kimlik doğrulama
   ├── kategoriler            Filtrelenebilir gig listesi
   ├── gig/[slug]              Gig detay + satın alma
+  ├── freelancerlar           Freelancer dizini (meslek/şehir/uzmanlık filtreleri)
+  ├── freelancer/[id]         Freelancer profili
+  ├── api/avatar/[seed]       Çizilen profil fotoğrafı (SVG)
   ├── odeme/[orderId]         iyzico ödeme sayfası (gerçek/mock)
   ├── siparis/[orderId]       Sipariş durumu, escrow onayı, değerlendirme
   └── panel                  Freelancer / alıcı paneli
