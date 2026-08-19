@@ -58,6 +58,7 @@ model User {
   ordersMade         Order[]             @relation("BuyerOrders")
   reviews            Review[]            @relation("BuyerReviews")
   verificationTokens VerificationToken[]
+  passwordResets     PasswordResetToken[]
 
   @@map("users")
 }
@@ -72,6 +73,28 @@ model VerificationToken {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("verification_tokens")
+}
+
+/**
+ * Password reset links. Kept apart from VerificationToken on purpose: those are handed
+ * out at signup and live for a day, and if one table served both, a stale sign-up link
+ * would be enough to set someone's password.
+ *
+ * Only the SHA-256 of the token is stored, so the rows are useless to anyone who reads
+ * the table — the usable half exists solely in the email that was sent.
+ */
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
 }
 
 model Category {

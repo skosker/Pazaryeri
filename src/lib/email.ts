@@ -46,6 +46,23 @@ export async function sendWelcomeVerificationEmail(params: {
   await sendEmail(params.to, "Profestia'ya hoş geldin — hesabını doğrula", html);
 }
 
+export async function sendPasswordResetEmail(params: {
+  to: string;
+  name: string;
+  resetUrl: string;
+}) {
+  const html = layout(
+    "Şifreni sıfırla",
+    `<p>Merhaba ${params.name}, Profestia hesabın için şifre sıfırlama isteği aldık.
+      Aşağıdaki butondan yeni şifreni belirleyebilirsin. Bağlantı <strong>1 saat</strong> geçerli.</p>
+     ${button(params.resetUrl, "Yeni Şifre Belirle")}
+     <p style="margin-top:16px;">Buton çalışmazsa şu linki tarayıcına yapıştır:<br/>${params.resetUrl}</p>
+     <p style="margin-top:16px;">Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin;
+      şifren değişmeden kalır.</p>`
+  );
+  await sendEmail(params.to, "Profestia şifre sıfırlama", html);
+}
+
 export async function sendOrderPaidEmails(params: {
   buyerEmail: string;
   buyerName: string;

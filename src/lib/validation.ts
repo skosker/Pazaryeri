@@ -1,13 +1,42 @@
 import { z } from "zod";
 
+/** One rule for every place a password is set, so they cannot drift apart. */
+const password = z.string().min(6, "Şifre en az 6 karakter olmalı");
+
 export const registerSchema = z.object({
   name: z.string().trim().min(2, "Ad Soyad en az 2 karakter olmalı"),
   email: z.string().trim().toLowerCase().email("Geçerli bir e-posta girin"),
-  password: z.string().min(6, "Şifre en az 6 karakter olmalı"),
+  password,
   role: z.enum(["BUYER", "FREELANCER"]),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Geçerli bir e-posta girin"),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    token: z.string().min(1, "Sıfırlama bağlantısı eksik"),
+    password,
+    passwordAgain: z.string(),
+  })
+  .refine((v) => v.password === v.passwordAgain, {
+    message: "Şifreler eşleşmiyor",
+    path: ["passwordAgain"],
+  });
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Mevcut şifreni gir"),
+    password,
+    passwordAgain: z.string(),
+  })
+  .refine((v) => v.password === v.passwordAgain, {
+    message: "Şifreler eşleşmiyor",
+    path: ["passwordAgain"],
+  });
 
 const tierFields = (label: string) => ({
   price: z.coerce.number().positive(`${label} paketin fiyatı 0'dan büyük olmalı`),

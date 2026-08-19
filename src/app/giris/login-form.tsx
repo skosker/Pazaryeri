@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { loginAction, type FormState } from "./actions";
 
@@ -41,7 +42,15 @@ export function LoginForm() {
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
-          Şifre
+          <span className="flex items-baseline justify-between gap-2">
+            Şifre
+            <Link
+              href="/sifremi-unuttum"
+              className="text-xs font-medium text-purple-700 hover:underline"
+            >
+              Şifremi unuttum
+            </Link>
+          </span>
           <input
             name="password"
             type="password"

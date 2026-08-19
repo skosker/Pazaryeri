@@ -22,6 +22,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     { href: "/panel/siparisler", label: isFreelancer ? "Siparişler" : "Siparişlerim" },
     ...(isFreelancer ? [{ href: "/panel/odeme-bilgileri", label: "Ödeme Bilgileri" }] : []),
     { href: "/panel/profil", label: "Profilim" },
+    { href: "/panel/sifre", label: "Şifre Değiştir" },
     ...(isBuyer && !isPro ? [{ href: "/panel/pro-ol", label: "Profestia Pro Ol" }] : []),
     ...(isBuyer ? [{ href: "/panel/freelancer-ol", label: "Freelancer Ol" }] : []),
   ];
