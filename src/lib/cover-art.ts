@@ -1,19 +1,16 @@
 /**
- * Gig cover artwork, composed per listing.
+ * The fallback gig cover, composed per listing when there is no photo to show.
  *
- * Three earlier routes failed. Keyword stock photos (loremflickr) resolved to a handful
- * of pictures per keyword, so unrelated listings shared the same photo. A large seeded
- * photo set (picsum) was unique but knew nothing about the category, so a landscape
- * ended up on a logo-design listing. Hand-drawn vector motifs were relevant and unique
- * but looked flat and unfinished on the card.
+ * Covers are photographs: sellers upload their own, and `scripts/fetch-cover-photos.ts`
+ * fills in the rest from a stock library. This module is what renders when neither is
+ * there — a listing created a minute ago, a photo run that has not been done yet, or a
+ * photo URL that fails to load.
  *
- * What is composed now is a cover in the site's own language: a deep two-tone gradient,
- * a faint geometric texture over it and the category emoji — the same emoji set the
- * category tiles use — set large in the middle. The gradient, its angle, the texture and
- * which emoji of the category's set appears all come from the gig slug, so no two
- * listings match, while the emoji keeps every cover unmistakably about its category.
- * Nothing is fetched, so covers never wait on an image host. A seller's uploaded cover
- * still takes precedence over all of this.
+ * It is a deep two-tone gradient, a faint geometric texture over it and an emoji set
+ * large in the middle. The gradient, its angle, the texture and the emoji all derive
+ * from the gig slug, so no two listings match and nothing is fetched. The emoji is
+ * chosen from the words in the slug rather than the category, so a guitar lesson gets a
+ * guitar — the same rule `photoQueryFor` uses to pick a search term.
  */
 
 function hash32(input: string) {
@@ -26,6 +23,18 @@ function hash32(input: string) {
   hash = Math.imul(hash, 0x7feb352d) >>> 0;
   hash ^= hash >>> 15;
   return hash >>> 0;
+}
+
+/**
+ * The slug as hyphen-delimited tokens, so a pattern can be required to start at a word
+ * boundary: a plain `includes` finds "api" inside "yapiyorum" and puts a plug socket on
+ * a coaching listing. The replace undoes the slugifier splitting a leading "İ" off into
+ * its own word, which is why "İnfografik" arrives as "i-nfografigi".
+ *
+ * Shared with the stock-photo search terms so both read a slug the same way.
+ */
+export function slugTokens(gigSlug: string) {
+  return `-${gigSlug.replace(/(^|-)i-(?=[a-z])/g, "$1i")}-`;
 }
 
 /** Deterministic 0..n-1 stream, so each design decision gets its own bits. */
@@ -285,11 +294,7 @@ export function coverArt(categoryIcon: string, gigSlug: string): CoverArt {
   ].join(", ");
 
   const texture = textures[r(textures.length)](r);
-  // Matched at a hyphen boundary rather than anywhere in the string: plain `includes`
-  // finds "api" inside "yapiyorum" and puts a plug socket on a coaching listing. The
-  // replace undoes the slugifier splitting a leading "İ" off its own word, which is why
-  // "İnfografik" arrives as "i-nfografigi".
-  const tokens = `-${gigSlug.replace(/(^|-)i-(?=[a-z])/g, "$1i")}-`;
+  const tokens = slugTokens(gigSlug);
   const topic = topics.find(([pattern]) => tokens.includes(`-${pattern}`));
   const set = topic ? topic[1] : glyphs[categoryIcon] ?? glyphs.sparkles;
 
