@@ -57,6 +57,11 @@ export function Footer() {
                   Hizmetler
                 </Link>
               </li>
+              <li>
+                <Link href="/freelancerlar" className="hover:text-brand-navy">
+                  Freelancer Bul
+                </Link>
+              </li>
             </ul>
           </div>
 

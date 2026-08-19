@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { getGigBySlug, getRelatedGigs } from "@/lib/gigs";
 import { GigCover } from "@/components/gig-cover";
+import { UserAvatar } from "@/components/user-avatar";
 import { StarRating } from "@/components/star-rating";
 import { GigCard } from "@/components/gig-card";
 import { OrderPanel } from "./order-panel";
@@ -68,8 +69,13 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
           <h1 className="text-2xl font-bold text-brand-navy sm:text-3xl">{gig.title}</h1>
 
           <Link href={`/freelancer/${gig.seller.id}`} className="mt-4 flex items-center gap-3 hover:opacity-80">
-            <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-sm font-semibold text-slate-600">
-              {gig.seller.name.charAt(0)}
+            <span className="relative block h-9 w-9 shrink-0">
+              <UserAvatar
+                name={gig.seller.name}
+                image={gig.seller.image}
+                className="h-9 w-9 text-sm"
+                fallbackClassName="bg-slate-200 text-slate-600"
+              />
               {gig.seller.isOnline && (
                 <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
               )}
@@ -108,8 +114,13 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
           <section className="mt-10 border-t border-slate-100 pt-8">
             <h2 className="text-lg font-semibold text-brand-navy">Satıcı hakkında</h2>
             <Link href={`/freelancer/${gig.seller.id}`} className="mt-4 flex items-start gap-4 hover:opacity-80">
-              <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-lg font-semibold text-slate-600">
-                {gig.seller.name.charAt(0)}
+              <span className="relative block h-14 w-14 shrink-0">
+                <UserAvatar
+                  name={gig.seller.name}
+                  image={gig.seller.image}
+                  className="h-14 w-14 text-lg"
+                  fallbackClassName="bg-slate-200 text-slate-600"
+                />
                 {gig.seller.isOnline && (
                   <span className="absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
                 )}
@@ -123,8 +134,23 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-slate-400">{gig.seller.title ?? "Freelancer"}</p>
+                <p className="text-sm text-slate-400">
+                  {gig.seller.title ?? "Freelancer"}
+                  {gig.seller.city && <span> · {gig.seller.city}</span>}
+                </p>
                 {gig.seller.bio && <p className="mt-2 max-w-xl text-sm text-slate-600">{gig.seller.bio}</p>}
+                {gig.seller.skills.length > 0 && (
+                  <ul className="mt-3 flex flex-wrap gap-1.5">
+                    {gig.seller.skills.map((skill) => (
+                      <li
+                        key={skill}
+                        className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600"
+                      >
+                        {skill}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </Link>
           </section>
