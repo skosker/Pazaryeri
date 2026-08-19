@@ -1,5 +1,9 @@
 import type { PrismaClient } from "../src/generated/prisma/client";
-import { SYNTHETIC_PASSWORD_HASH, type SyntheticFreelancer } from "./synthetic-freelancers";
+import {
+  SYNTHETIC_PASSWORD_HASH,
+  type ShowcaseProfile,
+  type SyntheticFreelancer,
+} from "./synthetic-freelancers";
 
 /**
  * Writes generated profiles into the database, shared by `prisma/seed.ts` and
@@ -26,6 +30,40 @@ function profileFields(person: SyntheticFreelancer) {
     isOnline: person.isOnline,
     isPro: person.isPro,
   };
+}
+
+/**
+ * Fills in the profile details of demo sellers that already exist (the named ones and
+ * fl1..fl200). Nothing is created here — the seed and the earlier migrations own those
+ * rows — and name, title and listings are left untouched. The rows are also flagged
+ * `synthetic`, which is what they are: showcase profiles, not sign-ups.
+ */
+export async function syncShowcaseFreelancers(
+  prisma: PrismaClient,
+  people: ShowcaseProfile[]
+): Promise<{ updated: number }> {
+  let updated = 0;
+
+  for (let i = 0; i < people.length; i += CHUNK) {
+    const results = await prisma.$transaction(
+      people.slice(i, i + CHUNK).map((person) =>
+        prisma.user.updateMany({
+          where: { email: person.email, role: "FREELANCER" },
+          data: {
+            city: person.city,
+            age: person.age,
+            skills: person.skills,
+            image: person.image,
+            bio: person.bio,
+            synthetic: true,
+          },
+        })
+      )
+    );
+    updated += results.reduce((sum, result) => sum + result.count, 0);
+  }
+
+  return { updated };
 }
 
 export async function syncSyntheticFreelancers(

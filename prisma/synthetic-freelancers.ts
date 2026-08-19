@@ -29,6 +29,23 @@ export type SyntheticFreelancer = {
   isPro: boolean;
 };
 
+/**
+ * The older demo sellers — the eight the seed writes by hand and fl1..fl200 from the
+ * bulk catalogue — already have a name, a title and listings, but none of the profile
+ * details this module produces. `describeShowcaseFreelancer` fills in the rest from the
+ * same pools so they do not sit next to the generated thousand looking half-finished.
+ * Their name and title are left alone: listings, reviews and the demo login table in the
+ * README all refer to them.
+ */
+export type ShowcaseProfile = {
+  email: string;
+  age: number;
+  city: string;
+  skills: string[];
+  image: string;
+  bio: string;
+};
+
 export const SYNTHETIC_FREELANCER_COUNT = 1000;
 
 /** These profiles are showcase content; nobody logs into them. */
@@ -374,6 +391,24 @@ const masculineNames = [
   "Görkem", "Anıl", "Ufuk", "Sercan", "Erdem", "Tunahan", "Kadir", "Serdar", "Ünal", "Bülent",
 ];
 
+/**
+ * First names that appear in the older demo data but not in the pools above. They are
+ * kept separate on purpose: adding one to the pools would shift every generated name
+ * after it, and those names are already in a migration.
+ */
+const extraFeminineNames = ["Aslı"];
+const extraMasculineNames = ["Aytekin"];
+
+const feminineLookup = new Set([...feminineNames, ...extraFeminineNames]);
+const masculineLookup = new Set([...masculineNames, ...extraMasculineNames]);
+
+/** True feminine, false masculine, null when the name is in neither list. */
+function looksFeminine(firstName: string): boolean | null {
+  if (feminineLookup.has(firstName)) return true;
+  if (masculineLookup.has(firstName)) return false;
+  return null;
+}
+
 const surnames = [
   "Yılmaz", "Kaya", "Demir", "Şahin", "Çelik", "Yıldız", "Yıldırım", "Öztürk", "Aydın", "Özdemir",
   "Arslan", "Doğan", "Kılıç", "Aslan", "Çetin", "Kara", "Koç", "Kurt", "Özkan", "Şimşek",
@@ -576,6 +611,81 @@ export function generateSyntheticFreelancers(
   }
 
   return people;
+}
+
+/**
+ * What the older demo titles correspond to in the catalogue above. A profession is named
+ * where one obviously matches; the rest are generic — an "Eğitmen" teaches anything — so
+ * one profession is drawn from the category instead, which keeps a single person's
+ * skills coherent rather than mixing guitar lessons with IELTS prep.
+ */
+const legacyTitles: Record<string, { category: string; profession?: string }> = {
+  "AI & Otomasyon Danışmanı": { category: "ai-otomasyon", profession: "Otomasyon Uzmanı" },
+  "Yazılım Geliştirici": { category: "yazilim-web" },
+  "Full Stack Geliştirici": { category: "yazilim-web", profession: "Full Stack Geliştirici" },
+  "Grafik Tasarımcı": { category: "grafik-tasarim", profession: "Grafik Tasarımcı" },
+  "Logo & Marka Tasarımcısı": { category: "grafik-tasarim", profession: "Logo & Marka Tasarımcısı" },
+  "Dijital Pazarlama Uzmanı": { category: "dijital-pazarlama", profession: "Dijital Pazarlama Uzmanı" },
+  "Sosyal Medya Uzmanı": { category: "dijital-pazarlama", profession: "Sosyal Medya Yöneticisi" },
+  "Reklam Yöneticisi": { category: "dijital-pazarlama", profession: "Google Ads Uzmanı" },
+  "Veri Analisti": { category: "veri-analitik", profession: "Veri Analisti" },
+  "İş Danışmanı": { category: "is-danismanlik", profession: "İş Danışmanı" },
+  "İçerik Yazarı": { category: "yazi-ceviri", profession: "İçerik Yazarı" },
+  "SEO İçerik Yazarı": { category: "yazi-ceviri", profession: "İçerik Yazarı" },
+  "Video Editörü": { category: "video-animasyon", profession: "Video Editörü" },
+  "Eğitmen": { category: "egitim-ders" },
+  "Ses Mühendisi": { category: "muzik-ses" },
+};
+
+function skillsForTitle(title: string, r: (n: number) => number) {
+  const mapping = legacyTitles[title];
+  const named = mapping?.profession ?? title;
+  const exact = professions.find((profession) => profession.title === named);
+  if (exact) return exact.skills;
+
+  if (!mapping) return null; // a title nobody in the catalogue does: leave skills empty
+  const inCategory = professions.filter((profession) => profession.categorySlug === mapping.category);
+  return inCategory[r(inCategory.length)].skills;
+}
+
+/**
+ * Fills in age, city, expertise, photo and bio for a demo seller that already exists.
+ * Deterministic from the e-mail, like the generated profiles, so re-running rewrites the
+ * same details instead of shuffling them.
+ */
+export function describeShowcaseFreelancer(seller: {
+  email: string;
+  name: string;
+  title: string;
+}): ShowcaseProfile {
+  // A separate namespace from the generated profiles: fl7 and uzman7 should not end up
+  // being the same person in a different shirt.
+  const r = reader(hash32(`vitrin:${seller.email}`));
+
+  const age = 22 + Math.min(r(37), r(37));
+  const city = pickCity(r);
+  const pool = skillsForTitle(seller.title, r);
+  const skills = pool ? pickSome(pool, 3 + r(3), r) : [];
+  const years = Math.max(1, Math.min(age - 21, 2 + r(13)));
+  const firstName = seller.name.split(" ")[0];
+
+  // Several of the bulk sellers share a display name ("Ahmet A." is both fl1 and fl121),
+  // so the local part of the address goes into the seed to keep the drawings apart.
+  const feminine = looksFeminine(firstName);
+  const prefix = feminine === null ? "" : feminine ? "k-" : "e-";
+  const handle = seller.email.split("@")[0];
+
+  return {
+    email: seller.email,
+    age,
+    city: city.name,
+    skills,
+    image: `/api/avatar/${prefix}${slugifyName(seller.name)}-${handle}`,
+    bio:
+      skills.length >= 2
+        ? buildBio(firstName, seller.title, years, city, skills, r)
+        : `${city.locative} yaşayan bir ${seller.title}. ${years} yıldır Profestia'da hizmet veriyorum.`,
+  };
 }
 
 /** ASCII form of a name, used to keep avatar URLs readable and path-safe. */

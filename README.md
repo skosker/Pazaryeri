@@ -107,6 +107,10 @@ Nasıl çalışıyor:
   listesi varsayılan olarak sadece gerçek hesapları gösterir.
 - Profiller `/freelancerlar` sayfasında listelenir; meslek, şehir, uzmanlık ve isim
   üzerinden filtrelenebilir.
+- Aynı çalıştırma, generatörden önce var olan 208 demo satıcıyı (isimli hesaplar ve
+  `fl1…fl200`) da tamamlar: isimleri, meslekleri ve ilanları olduğu gibi kalır, eksik
+  olan yaş/şehir/uzmanlık/fotoğraf aynı havuzlardan doldurulur
+  (`prisma/showcase-freelancers.ts`). Böylece dizinde yarım profil görünmez.
 
 ## Proje yapısı
 
@@ -114,6 +118,7 @@ Nasıl çalışıyor:
 prisma/schema.prisma        Veritabanı şeması
 prisma/seed.ts               Örnek veri
 prisma/synthetic-freelancers.ts       1000 yapay freelancer üreteci (isim, meslek, yaş, şehir, uzmanlık)
+prisma/showcase-freelancers.ts        Generatörden önceki demo satıcıların profilini tamamlar
 prisma/sync-synthetic-freelancers.ts  Üretilen profilleri veritabanına yazar
 scripts/generate-freelancers.ts       `npm run freelancer:uret` komutu
 src/auth.ts                  NextAuth yapılandırması
