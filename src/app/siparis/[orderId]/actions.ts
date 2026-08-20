@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { activeUser } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 import { reviewSchema } from "@/lib/validation";
 import {
@@ -13,10 +13,12 @@ import {
   OrderActionError,
 } from "@/lib/order-actions";
 
+// Read from the database rather than the session: an account suspended after signing
+// in still carries a valid-looking JWT, and these actions move money and order state.
 async function requireUser() {
-  const session = await auth();
-  if (!session?.user) redirect("/giris");
-  return session.user;
+  const user = await activeUser();
+  if (!user) redirect("/giris");
+  return user;
 }
 
 export async function startOrderAction(orderId: string) {

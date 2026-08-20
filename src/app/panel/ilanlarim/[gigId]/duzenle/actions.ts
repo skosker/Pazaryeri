@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/auth";
+import { activeUser, INACTIVE_MESSAGE } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 import { gigSchema } from "@/lib/validation";
 import { readGigForm, packageData, type TierInput } from "@/lib/gig-form";
@@ -17,14 +17,14 @@ export async function updateGigAction(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const session = await auth();
-  if (!session?.user) return { error: "Giriş yapmalısın" };
+  const seller = await activeUser();
+  if (!seller) return { error: INACTIVE_MESSAGE };
 
   const gig = await prisma.gig.findUnique({
     where: { id: gigId },
     include: { packages: true },
   });
-  if (!gig || gig.sellerId !== session.user.id) return { error: "Bu ilan sana ait değil" };
+  if (!gig || gig.sellerId !== seller.id) return { error: "Bu ilan sana ait değil" };
 
   const parsed = gigSchema.safeParse(readGigForm(formData));
 

@@ -1,16 +1,16 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { activeUser } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 
 export async function becomeProBuyerAction() {
-  const session = await auth();
-  if (!session?.user) redirect("/giris?callbackUrl=/panel/pro-ol");
-  if (session.user.role !== "BUYER") redirect("/panel");
+  const user = await activeUser();
+  if (!user) redirect("/giris?callbackUrl=/panel/pro-ol");
+  if (user.role !== "BUYER") redirect("/panel");
 
   await prisma.user.update({
-    where: { id: session.user.id },
+    where: { id: user.id },
     data: { isPro: true },
   });
 

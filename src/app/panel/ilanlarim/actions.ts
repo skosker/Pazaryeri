@@ -1,15 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@/auth";
+import { activeUser, INACTIVE_MESSAGE } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 
 async function requireGigOwner(gigId: string) {
-  const session = await auth();
-  if (!session?.user) throw new Error("Giriş yapmalısın");
+  const seller = await activeUser();
+  if (!seller) throw new Error(INACTIVE_MESSAGE);
 
   const gig = await prisma.gig.findUnique({ where: { id: gigId } });
-  if (!gig || gig.sellerId !== session.user.id) throw new Error("Bu ilan sana ait değil");
+  if (!gig || gig.sellerId !== seller.id) throw new Error("Bu ilan sana ait değil");
 
   return gig;
 }

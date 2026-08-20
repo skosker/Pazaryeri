@@ -1,17 +1,20 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { activeUser } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 import { PanelNav } from "./panel-nav";
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth();
-  if (!session?.user) redirect("/giris?callbackUrl=/panel");
+  // activeUser rather than the session: it reads the row, so a suspended account or one
+  // whose role has changed is turned away here instead of being shown a panel that its
+  // actions would then refuse.
+  const account = await activeUser();
+  if (!account) redirect("/giris?callbackUrl=/panel");
 
-  const isFreelancer = session.user.role === "FREELANCER";
-  const isBuyer = session.user.role === "BUYER";
+  const isFreelancer = account.role === "FREELANCER";
+  const isBuyer = account.role === "BUYER";
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: account.id },
     select: { isPro: true },
   });
   const isPro = user?.isPro ?? false;

@@ -2,7 +2,7 @@
 
 import { randomUUID } from "crypto";
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { activeUser } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 import { markOrderPaid } from "@/lib/order-actions";
 import { sendBankTransferAdminAlertEmail, sendBankTransferSellerInfoEmail } from "@/lib/email";
@@ -11,11 +11,11 @@ const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const adminEmail = process.env.ADMIN_EMAIL;
 
 export async function completeMockPayment(orderId: string) {
-  const session = await auth();
-  if (!session?.user) redirect(`/giris?callbackUrl=/odeme/${orderId}`);
+  const buyer = await activeUser();
+  if (!buyer) redirect(`/giris?callbackUrl=/odeme/${orderId}`);
 
   const order = await prisma.order.findUnique({ where: { id: orderId } });
-  if (!order || order.buyerId !== session.user.id) redirect("/panel");
+  if (!order || order.buyerId !== buyer.id) redirect("/panel");
   if (order.status !== "PENDING_PAYMENT") redirect(`/siparis/${orderId}`);
 
   await prisma.payment.upsert({
@@ -41,11 +41,11 @@ export async function completeMockPayment(orderId: string) {
 }
 
 export async function failMockPayment(orderId: string) {
-  const session = await auth();
-  if (!session?.user) redirect(`/giris?callbackUrl=/odeme/${orderId}`);
+  const buyer = await activeUser();
+  if (!buyer) redirect(`/giris?callbackUrl=/odeme/${orderId}`);
 
   const order = await prisma.order.findUnique({ where: { id: orderId } });
-  if (!order || order.buyerId !== session.user.id) redirect("/panel");
+  if (!order || order.buyerId !== buyer.id) redirect("/panel");
 
   await prisma.payment.upsert({
     where: { orderId },
@@ -66,14 +66,14 @@ export async function failMockPayment(orderId: string) {
 }
 
 export async function notifyBankTransfer(orderId: string) {
-  const session = await auth();
-  if (!session?.user) redirect(`/giris?callbackUrl=/odeme/${orderId}`);
+  const buyer = await activeUser();
+  if (!buyer) redirect(`/giris?callbackUrl=/odeme/${orderId}`);
 
   const order = await prisma.order.findUnique({
     where: { id: orderId },
     include: { gig: { include: { seller: true } }, buyer: true },
   });
-  if (!order || order.buyerId !== session.user.id) redirect("/panel");
+  if (!order || order.buyerId !== buyer.id) redirect("/panel");
   if (order.status !== "PENDING_PAYMENT") redirect(`/siparis/${orderId}`);
 
   await prisma.payment.upsert({

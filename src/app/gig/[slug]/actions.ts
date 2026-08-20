@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { activeUser } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 import { createOrder, OrderError } from "@/lib/orders";
 
@@ -9,8 +9,8 @@ export async function orderAction(formData: FormData) {
   const slug = String(formData.get("slug") ?? "");
   const packageId = String(formData.get("packageId") ?? "");
 
-  const session = await auth();
-  if (!session?.user) {
+  const buyer = await activeUser();
+  if (!buyer) {
     redirect(`/giris?callbackUrl=/gig/${slug}`);
   }
 
@@ -25,7 +25,7 @@ export async function orderAction(formData: FormData) {
   }
 
   try {
-    const order = await createOrder(session.user.id, packageId);
+    const order = await createOrder(buyer.id, packageId);
     redirect(`/odeme/${order.id}`);
   } catch (error) {
     if (error instanceof OrderError) {

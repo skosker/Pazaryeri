@@ -1,7 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { auth, updateSession } from "@/auth";
+import { updateSession } from "@/auth";
+import { activeUser, INACTIVE_MESSAGE } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 import { becomeFreelancerSchema } from "@/lib/validation";
 
@@ -11,9 +12,9 @@ export async function becomeFreelancerAction(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const session = await auth();
-  if (!session?.user) return { error: "Giriş yapmalısın" };
-  if (session.user.role !== "BUYER") return { error: "Bu işlem sadece alıcı hesapları için geçerli" };
+  const user = await activeUser();
+  if (!user) return { error: INACTIVE_MESSAGE };
+  if (user.role !== "BUYER") return { error: "Bu işlem sadece alıcı hesapları için geçerli" };
 
   const parsed = becomeFreelancerSchema.safeParse({
     title: formData.get("title"),
@@ -27,7 +28,7 @@ export async function becomeFreelancerAction(
   const { title, bio } = parsed.data;
 
   await prisma.user.update({
-    where: { id: session.user.id },
+    where: { id: user.id },
     data: { role: "FREELANCER", title, bio: bio || null },
   });
 

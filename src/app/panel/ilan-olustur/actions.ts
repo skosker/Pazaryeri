@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { activeUser } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 import { gigSchema } from "@/lib/validation";
 import { readGigForm, packageData } from "@/lib/gig-form";
@@ -26,8 +26,8 @@ export async function createGigAction(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const session = await auth();
-  if (!session?.user || session.user.role !== "FREELANCER") {
+  const seller = await activeUser();
+  if (!seller || seller.role !== "FREELANCER") {
     return { error: "Sadece freelancer hesapları ilan oluşturabilir" };
   }
 
@@ -60,7 +60,7 @@ export async function createGigAction(
       description,
       categoryId,
       coverImage: cover.coverImage ?? null,
-      sellerId: session.user.id,
+      sellerId: seller.id,
       packages: {
         create: [
           packageData("BASIC", basic),

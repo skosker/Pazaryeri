@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@/auth";
+import { activeUser, INACTIVE_MESSAGE } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 import { normalizeIban, validateTurkishIban } from "@/lib/iban";
 
@@ -11,9 +11,9 @@ export async function updatePayoutDetailsAction(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const session = await auth();
-  if (!session?.user) return { error: "Giriş yapmalısın" };
-  if (session.user.role !== "FREELANCER") {
+  const seller = await activeUser();
+  if (!seller) return { error: INACTIVE_MESSAGE };
+  if (seller.role !== "FREELANCER") {
     return { error: "Ödeme bilgisi yalnızca freelancer hesaplarında tutulur" };
   }
 
@@ -23,7 +23,7 @@ export async function updatePayoutDetailsAction(
   // Clearing both fields is allowed; the seller simply has no payout details on file.
   if (!iban && !holder) {
     await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: seller.id },
       data: { iban: null, ibanHolder: null },
     });
     revalidatePath("/panel/odeme-bilgileri");
@@ -35,7 +35,7 @@ export async function updatePayoutDetailsAction(
   if (holder.length < 3) return { error: "Hesap sahibinin adını yazın" };
 
   await prisma.user.update({
-    where: { id: session.user.id },
+    where: { id: seller.id },
     data: { iban: normalizeIban(iban), ibanHolder: holder },
   });
 
