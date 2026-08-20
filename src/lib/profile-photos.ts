@@ -33,29 +33,34 @@ type Bucket = "kadin" | "erkek";
  * worded to bring back head-and-shoulders shots: a full-body photo loses its face when a
  * round avatar crops it.
  *
- * The list is ordered by how local the results are. Turkish-language searches with the
- * Turkish locale come first, because the profiles carry Turkish names and a marketplace
- * that serves Turkey should look like it; broader Mediterranean and European terms follow
- * as a deeper pool, since Pexels does not hold twelve hundred Turkish portraits. Whatever
- * the searches do not cover keeps its drawn avatar.
+ * They ask for working-age people at work, which is what the profiles are: the generated
+ * ages run from 22 to 58 and cluster in the thirties, so a portrait of someone in their
+ * seventies contradicts the age printed next to it. Wording matters more than it looks —
+ * searching a stock library for a nationality returns documentary photography (village,
+ * folk dress, elderly faces), while searching for the job returns office portraits of the
+ * age the profiles claim.
+ *
+ * The Turkish locale is what keeps the results local; it comes first, and the broader
+ * English searches follow only as a deeper pool, since Pexels does not hold twelve hundred
+ * Turkish portraits. Whatever the searches do not cover keeps its drawn avatar.
  */
 const searches: { query: string; bucket: Bucket; locale: string }[] = [
-  { query: "türk kadın portre", bucket: "kadin", locale: "tr-TR" },
-  { query: "türk erkek portre", bucket: "erkek", locale: "tr-TR" },
-  { query: "kadın portre", bucket: "kadin", locale: "tr-TR" },
-  { query: "erkek portre", bucket: "erkek", locale: "tr-TR" },
-  { query: "iş kadını portre", bucket: "kadin", locale: "tr-TR" },
-  { query: "iş adamı portre", bucket: "erkek", locale: "tr-TR" },
-  { query: "genç kadın gülümseme", bucket: "kadin", locale: "tr-TR" },
-  { query: "genç erkek gülümseme", bucket: "erkek", locale: "tr-TR" },
-  { query: "ofiste kadın portre", bucket: "kadin", locale: "tr-TR" },
-  { query: "ofiste erkek portre", bucket: "erkek", locale: "tr-TR" },
-  { query: "turkish woman portrait", bucket: "kadin", locale: "en-US" },
-  { query: "turkish man portrait", bucket: "erkek", locale: "en-US" },
-  { query: "mediterranean woman portrait", bucket: "kadin", locale: "en-US" },
-  { query: "mediterranean man portrait", bucket: "erkek", locale: "en-US" },
-  { query: "european woman headshot", bucket: "kadin", locale: "en-US" },
-  { query: "european man headshot", bucket: "erkek", locale: "en-US" },
+  { query: "genç türk iş kadını portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "genç türk iş adamı portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "ofiste genç kadın portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "ofiste genç erkek portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "kadın girişimci portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "erkek girişimci portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "laptopla çalışan genç kadın", bucket: "kadin", locale: "tr-TR" },
+  { query: "laptopla çalışan genç erkek", bucket: "erkek", locale: "tr-TR" },
+  { query: "genç kadın gülümseyen portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "genç erkek gülümseyen portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "young businesswoman headshot", bucket: "kadin", locale: "en-US" },
+  { query: "young businessman headshot", bucket: "erkek", locale: "en-US" },
+  { query: "young female professional portrait", bucket: "kadin", locale: "en-US" },
+  { query: "young male professional portrait", bucket: "erkek", locale: "en-US" },
+  { query: "woman freelancer working portrait", bucket: "kadin", locale: "en-US" },
+  { query: "man freelancer working portrait", bucket: "erkek", locale: "en-US" },
 ];
 
 export type ProfilePhotoProgress = {

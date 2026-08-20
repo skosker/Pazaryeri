@@ -101,7 +101,10 @@ Nasıl çalışıyor:
   anahtarına ve profil başına depolamaya gerek yoktur. Üstüne, `PEXELS_API_KEY`
   tanımlıysa Pexels'ten **gerçek portre fotoğrafları** çekilebilir
   (`src/lib/profile-photos.ts`): aramalar Türkçe ve `locale=tr-TR` ile yapılır ki
-  sonuçlar Türkiye'deki insanlara benzesin, profilin ismine göre kadın/erkek ayrılır,
+  sonuçlar Türkiye'deki insanlara benzesin; terimler çalışan profesyonel portresini
+  hedefler, çünkü profillerin yaşı 22–58 ve stok sitelerde milliyet araması belgesel
+  fotoğrafçılığa (yaşlı, kırsal kareler) çıkar. Arama profilin ismine göre kadın/erkek
+  ayrılır,
   aynı fotoğraf iki profilde kullanılmaz, fotoğraf düşmeyen profil çizimle kalır. Çalıştırmak
   için admin panelinde **/admin/profil-fotograflari** ekranındaki düğme ya da:
 
@@ -122,8 +125,11 @@ Nasıl çalışıyor:
   üzerinden filtrelenebilir.
 - Aynı çalıştırma, generatörden önce var olan 208 demo satıcıyı (isimli hesaplar ve
   `fl1…fl200`) da tamamlar: isimleri, meslekleri ve ilanları olduğu gibi kalır, eksik
-  olan yaş/şehir/uzmanlık/fotoğraf aynı havuzlardan doldurulur
-  (`prisma/showcase-freelancers.ts`). Böylece dizinde yarım profil görünmez.
+  olan yaş/şehir/uzmanlık/fotoğraf doldurulur (`prisma/showcase-freelancers.ts`).
+  Uzmanlıkları katalogdan değil **kendi ilanlarının alt kategorilerinden** gelir, yani
+  profildeki etiketler altındaki ilanlarla aynı şeyi söyler.
+- Çekilmiş gerçek fotoğraflar korunur: üreteci yeniden çalıştırmak profil metnini
+  tazeler ama fotoğrafı çizime geri döndürmez.
 
 ## Proje yapısı
 

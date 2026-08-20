@@ -489,6 +489,16 @@ const professions = catalogue.flatMap((group) =>
   group.professions.map((profession) => ({ ...profession, categorySlug: group.categorySlug }))
 );
 
+/**
+ * "A", "A ve B", "A, B ve C" — Turkish list joining that stops at what there is, so a
+ * seller with two areas does not get one of them named twice.
+ */
+function listOf(items: string[], limit: number) {
+  const picked = items.slice(0, limit);
+  if (picked.length <= 1) return picked[0] ?? "";
+  return `${picked.slice(0, -1).join(", ")} ve ${picked[picked.length - 1]}`;
+}
+
 function buildBio(
   firstName: string,
   title: string,
@@ -497,12 +507,11 @@ function buildBio(
   skills: string[],
   r: (n: number) => number
 ) {
-  const [first, second, third] = skills;
   const templates = [
-    `Merhaba, ben ${firstName}. ${years} yıldır ${title} olarak çalışıyorum; özellikle ${first} ve ${second} işlerinde deneyimliyim. ${city.locative} yaşıyor, tüm Türkiye'ye uzaktan hizmet veriyorum.`,
-    `${title} olarak ${years} yıllık deneyimim var. En çok ${first}, ${second} ve ${third ?? first} işlerinde çalışıyorum. ${city.name} merkezli çalışıyor, verdiğim teslim tarihine sadık kalıyorum.`,
-    `${years} yıldır serbest çalışan bir ${title} olarak ${first} ve ${second} odaklı projeler üretiyorum. İşe başlamadan önce beklentini netleştirir, ilk taslağı hızlıca paylaşırım. Konum: ${city.name}.`,
-    `${city.locative} yaşıyorum ve ${years} yıldır ${title} olarak proje üretiyorum. ${first}, ${second} ve ${third ?? second} başta olmak üzere işin tamamını uçtan uca yönetiyorum.`,
+    `Merhaba, ben ${firstName}. ${years} yıldır ${title} olarak çalışıyorum; özellikle ${listOf(skills, 2)} işlerinde deneyimliyim. ${city.locative} yaşıyorum, tüm Türkiye'ye uzaktan hizmet veriyorum.`,
+    `${title} olarak ${years} yıllık deneyimim var. En çok ${listOf(skills, 3)} işlerinde çalışıyorum. ${city.name} merkezli çalışıyorum, verdiğim teslim tarihine sadık kalıyorum.`,
+    `${years} yıldır serbest çalışan bir ${title} olarak ${listOf(skills, 2)} odaklı projeler üretiyorum. İşe başlamadan önce beklentini netleştirir, ilk taslağı hızlıca paylaşırım. Konum: ${city.name}.`,
+    `${city.locative} yaşıyorum ve ${years} yıldır ${title} olarak proje üretiyorum. ${listOf(skills, 3)} başta olmak üzere işin tamamını uçtan uca yönetiyorum.`,
   ];
   return templates[r(templates.length)];
 }
@@ -608,11 +617,15 @@ function skillsForTitle(title: string, r: (n: number) => number) {
  * Deterministic from the e-mail, like the generated profiles, so re-running rewrites the
  * same details instead of shuffling them.
  */
-export function describeShowcaseFreelancer(seller: {
-  email: string;
-  name: string;
-  title: string;
-}): ShowcaseProfile {
+export function describeShowcaseFreelancer(
+  seller: { email: string; name: string; title: string },
+  /**
+   * What this seller actually lists, as the subcategory labels on their gigs. These win
+   * over the catalogue: a seller whose listings are all e-commerce should not have a
+   * profile claiming Kubernetes, and the visitor can see both on the same page.
+   */
+  offers: string[] = []
+): ShowcaseProfile {
   // A separate namespace from the generated profiles: fl7 and uzman7 should not end up
   // being the same person in a different shirt.
   const r = reader(hash32(`vitrin:${seller.email}`));
@@ -620,7 +633,8 @@ export function describeShowcaseFreelancer(seller: {
   const age = 22 + Math.min(r(37), r(37));
   const city = pickCity(r);
   const pool = skillsForTitle(seller.title, r);
-  const skills = pool ? pickSome(pool, 3 + r(3), r) : [];
+  const skills =
+    offers.length >= 2 ? offers.slice(0, 5) : pool ? pickSome(pool, 3 + r(3), r) : [];
   const years = Math.max(1, Math.min(age - 21, 2 + r(13)));
   const firstName = seller.name.split(" ")[0];
 
