@@ -529,6 +529,35 @@ const EXTRA_SELLERS_PER_CATEGORY = 6;
 // seller keeps the category it was generated into.
 const THIRD_SELLERS_PER_CATEGORY = 8;
 
+/**
+ * The seller for a gig, skipping anyone who already lists this subject.
+ *
+ * Picking the seller with `i % sellers.length` while the subject comes from
+ * `i % subjects.length` looks fair but is not: when the two counts share a divisor, a
+ * seller only ever lands on `subjects.length / gcd` of the subjects and gets the rest of
+ * their catalogue as the same subject with a different verb — "Ürün tanıtım videonuzu
+ * düzenliyorum / kurguluyorum / canlandırıyorum" all on one profile. Walking forward to
+ * the next seller who does not have the subject yet costs nothing and removes the whole
+ * class of repeats.
+ */
+function pickSeller(
+  sellers: BulkSeller[],
+  preferredIndex: number,
+  subjectIndex: number,
+  taken: Map<string, Set<number>>
+): BulkSeller {
+  for (let step = 0; step < sellers.length; step++) {
+    const seller = sellers[(preferredIndex + step) % sellers.length];
+    const own = taken.get(seller.email) ?? new Set<number>();
+    if (own.has(subjectIndex)) continue;
+    own.add(subjectIndex);
+    taken.set(seller.email, own);
+    return seller;
+  }
+  // Every seller in the category already lists it; keep the gig rather than drop it.
+  return sellers[preferredIndex % sellers.length];
+}
+
 function buildGig(
   cat: CategoryContent,
   subjectIndex: number,
@@ -589,6 +618,8 @@ export function generateBulkData(): {
     categoryContents.length * (SELLERS_PER_CATEGORY + EXTRA_SELLERS_PER_CATEGORY);
 
   for (const cat of categoryContents) {
+    // Which subjects each seller in this category already lists, across both waves.
+    const takenSubjects = new Map<string, Set<number>>();
     const catSellers: BulkSeller[] = [];
     for (let s = 0; s < SELLERS_PER_CATEGORY; s++) {
       const name = firstNames[sellerCounter % firstNames.length];
@@ -620,7 +651,7 @@ export function generateBulkData(): {
       const subjectVerbs = verbsFor(cat, cat.subjects[subjectIndex], "base");
       const verb = subjectVerbs[Math.floor(i / cat.subjects.length) % subjectVerbs.length];
       const subcategorySlug = catSubcategorySlugs.get(cat.subcategories[subjectIndex])!;
-      const seller = catSellers[i % catSellers.length];
+      const seller = pickSeller(catSellers, i % catSellers.length, subjectIndex, takenSubjects);
       gigs.push(buildGig(cat, subjectIndex, verb, i, seller, subcategorySlug, usedSlugs));
     }
 
@@ -652,7 +683,12 @@ export function generateBulkData(): {
       const subjectVerbs = verbsFor(cat, cat.subjects[subjectIndex], "extra");
       const verb = subjectVerbs[Math.floor(i / cat.subjects.length) % subjectVerbs.length];
       const subcategorySlug = catSubcategorySlugs.get(cat.subcategories[subjectIndex])!;
-      const seller = combinedSellers[i % combinedSellers.length];
+      const seller = pickSeller(
+        combinedSellers,
+        i % combinedSellers.length,
+        subjectIndex,
+        takenSubjects
+      );
       gigs.push(buildGig(cat, subjectIndex, verb, i, seller, subcategorySlug, usedSlugs));
     }
   }
