@@ -1,3 +1,4 @@
+import type { PrismaClient } from "../src/generated/prisma/client";
 import { generateBulkData } from "./bulk-gigs-data";
 import { describeShowcaseFreelancer, type ShowcaseProfile } from "./synthetic-freelancers";
 
@@ -20,8 +21,37 @@ export const DEMO_SELLERS = [
   { name: "Ayşe Ö.", email: "ayse@profestia.dev", title: "Veri Analisti" },
 ];
 
-/** Every pre-existing demo seller, with the profile details filled in. */
-export function showcaseFreelancers(): ShowcaseProfile[] {
+/**
+ * Every pre-existing demo seller, with the profile details filled in. `offersByEmail`
+ * carries what each one actually lists (their gigs' subcategories) so the expertise on
+ * the profile matches the listings underneath it; without it the details come from the
+ * catalogue alone, which is right for a database that has no listings yet.
+ */
+export function showcaseFreelancers(offersByEmail?: Map<string, string[]>): ShowcaseProfile[] {
   const bulk = generateBulkData().sellers;
-  return [...DEMO_SELLERS, ...bulk].map(describeShowcaseFreelancer);
+  return [...DEMO_SELLERS, ...bulk].map((seller) =>
+    describeShowcaseFreelancer(seller, offersByEmail?.get(seller.email) ?? [])
+  );
 }
+
+/** The listing labels of every showcase seller, keyed by e-mail. */
+export async function loadShowcaseOffers(prisma: PrismaClient): Promise<Map<string, string[]>> {
+  const gigs = await prisma.gig.findMany({
+    where: { published: true, subcategory: { isNot: null } },
+    select: {
+      seller: { select: { email: true } },
+      subcategory: { select: { name: true } },
+    },
+    orderBy: { slug: "asc" },
+  });
+
+  const offers = new Map<string, string[]>();
+  for (const gig of gigs) {
+    const name = gig.subcategory?.name;
+    if (!name) continue;
+    const current = offers.get(gig.seller.email) ?? [];
+    if (!current.includes(name)) offers.set(gig.seller.email, [...current, name]);
+  }
+  return offers;
+}
+

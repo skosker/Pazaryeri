@@ -25,11 +25,19 @@ function profileFields(person: SyntheticFreelancer) {
     city: person.city,
     age: person.age,
     skills: person.skills,
-    image: person.image,
     bio: person.bio,
     isOnline: person.isOnline,
     isPro: person.isPro,
   };
+}
+
+/**
+ * The drawn avatar is a starting point, not the last word: once a real photograph has
+ * been fetched for a profile (src/lib/profile-photos.ts) a re-run must leave it alone,
+ * or refreshing the profile details would quietly undo the whole photo run.
+ */
+function keepsCurrentPhoto(image: string | null) {
+  return image !== null && !image.startsWith("/api/avatar/");
 }
 
 /**
@@ -42,6 +50,12 @@ export async function syncShowcaseFreelancers(
   prisma: PrismaClient,
   people: ShowcaseProfile[]
 ): Promise<{ updated: number }> {
+  const existing = await prisma.user.findMany({
+    where: { email: { in: people.map((person) => person.email) } },
+    select: { email: true, image: true },
+  });
+  const photoByEmail = new Map(existing.map((user) => [user.email, user.image]));
+
   let updated = 0;
 
   for (let i = 0; i < people.length; i += CHUNK) {
@@ -53,9 +67,11 @@ export async function syncShowcaseFreelancers(
             city: person.city,
             age: person.age,
             skills: person.skills,
-            image: person.image,
             bio: person.bio,
             synthetic: true,
+            ...(keepsCurrentPhoto(photoByEmail.get(person.email) ?? null)
+              ? {}
+              : { image: person.image }),
           },
         })
       )
@@ -73,7 +89,7 @@ export async function syncSyntheticFreelancers(
 ): Promise<SyncResult> {
   const existing = await prisma.user.findMany({
     where: { email: { in: people.map((person) => person.email) } },
-    select: { email: true, synthetic: true },
+    select: { email: true, synthetic: true, image: true },
   });
   const byEmail = new Map(existing.map((user) => [user.email, user]));
 
@@ -91,6 +107,7 @@ export async function syncSyntheticFreelancers(
     await prisma.user.createMany({
       data: batch.map((person) => ({
         ...profileFields(person),
+        image: person.image,
         email: person.email,
         role: "FREELANCER" as const,
         passwordHash: SYNTHETIC_PASSWORD_HASH,
@@ -111,7 +128,12 @@ export async function syncSyntheticFreelancers(
         // this write, the row must still be one of ours.
         prisma.user.updateMany({
           where: { email: person.email, synthetic: true },
-          data: profileFields(person),
+          data: {
+            ...profileFields(person),
+            ...(keepsCurrentPhoto(byEmail.get(person.email)?.image ?? null)
+              ? {}
+              : { image: person.image }),
+          },
         })
       )
     );
