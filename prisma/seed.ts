@@ -4,7 +4,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import { generateBulkData } from "./bulk-gigs-data";
 import { generateSyntheticFreelancers } from "./synthetic-freelancers";
-import { DEMO_SELLERS, showcaseFreelancers } from "./showcase-freelancers";
+import { DEMO_SELLERS, loadShowcaseOffers, showcaseFreelancers } from "./showcase-freelancers";
 import { syncShowcaseFreelancers, syncSyntheticFreelancers } from "./sync-synthetic-freelancers";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
@@ -441,7 +441,10 @@ async function main() {
       (synthetic.skipped.length > 0 ? `, ${synthetic.skipped.length} real accounts left alone` : "")
   );
 
-  const showcase = await syncShowcaseFreelancers(prisma, showcaseFreelancers());
+  // Loaded after the listings above are in place, so the expertise on each showcase
+  // profile is what that seller actually lists.
+  const offers = await loadShowcaseOffers(prisma);
+  const showcase = await syncShowcaseFreelancers(prisma, showcaseFreelancers(offers));
   console.log(`  ${showcase.updated} older demo sellers completed`);
 
   console.log("Seed complete.");

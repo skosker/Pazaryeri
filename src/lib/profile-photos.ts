@@ -29,27 +29,38 @@ const SEARCH_ATTEMPTS = 3;
 type Bucket = "kadin" | "erkek";
 
 /**
- * Searches are interleaved by gender so a run that stops halfway has filled in both,
- * and worded to bring back head-and-shoulders shots: a full-body photo loses its face
- * when a round avatar crops it.
+ * Searches are interleaved by gender so a run that stops halfway has filled in both, and
+ * worded to bring back head-and-shoulders shots: a full-body photo loses its face when a
+ * round avatar crops it.
+ *
+ * They ask for working-age people at work, which is what the profiles are: the generated
+ * ages run from 22 to 58 and cluster in the thirties, so a portrait of someone in their
+ * seventies contradicts the age printed next to it. Wording matters more than it looks —
+ * searching a stock library for a nationality returns documentary photography (village,
+ * folk dress, elderly faces), while searching for the job returns office portraits of the
+ * age the profiles claim.
+ *
+ * The Turkish locale is what keeps the results local; it comes first, and the broader
+ * English searches follow only as a deeper pool, since Pexels does not hold twelve hundred
+ * Turkish portraits. Whatever the searches do not cover keeps its drawn avatar.
  */
-const searches: { query: string; bucket: Bucket }[] = [
-  { query: "woman portrait", bucket: "kadin" },
-  { query: "man portrait", bucket: "erkek" },
-  { query: "businesswoman headshot", bucket: "kadin" },
-  { query: "businessman headshot", bucket: "erkek" },
-  { query: "young woman smiling face", bucket: "kadin" },
-  { query: "young man smiling face", bucket: "erkek" },
-  { query: "professional woman portrait", bucket: "kadin" },
-  { query: "professional man portrait", bucket: "erkek" },
-  { query: "woman face close up", bucket: "kadin" },
-  { query: "man face close up", bucket: "erkek" },
-  { query: "woman office portrait", bucket: "kadin" },
-  { query: "man office portrait", bucket: "erkek" },
-  { query: "female student portrait", bucket: "kadin" },
-  { query: "male student portrait", bucket: "erkek" },
-  { query: "woman headshot studio", bucket: "kadin" },
-  { query: "man headshot studio", bucket: "erkek" },
+const searches: { query: string; bucket: Bucket; locale: string }[] = [
+  { query: "genç türk iş kadını portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "genç türk iş adamı portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "ofiste genç kadın portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "ofiste genç erkek portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "kadın girişimci portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "erkek girişimci portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "laptopla çalışan genç kadın", bucket: "kadin", locale: "tr-TR" },
+  { query: "laptopla çalışan genç erkek", bucket: "erkek", locale: "tr-TR" },
+  { query: "genç kadın gülümseyen portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "genç erkek gülümseyen portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "young businesswoman headshot", bucket: "kadin", locale: "en-US" },
+  { query: "young businessman headshot", bucket: "erkek", locale: "en-US" },
+  { query: "young female professional portrait", bucket: "kadin", locale: "en-US" },
+  { query: "young male professional portrait", bucket: "erkek", locale: "en-US" },
+  { query: "woman freelancer working portrait", bucket: "kadin", locale: "en-US" },
+  { query: "man freelancer working portrait", bucket: "erkek", locale: "en-US" },
 ];
 
 export type ProfilePhotoProgress = {
@@ -126,10 +137,17 @@ function isTransient(status: number) {
   return status === 429 || status >= 500;
 }
 
-async function searchPage(query: string, page: number, apiKey: string): Promise<Photo[]> {
+async function searchPage(
+  query: string,
+  page: number,
+  apiKey: string,
+  locale: string
+): Promise<Photo[]> {
+  // The locale is what makes a Turkish query search Turkish content rather than being
+  // read as an unfamiliar string.
   const url =
     `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}` +
-    `&per_page=${PER_PAGE}&page=${page}&orientation=portrait`;
+    `&per_page=${PER_PAGE}&page=${page}&orientation=portrait&locale=${locale}`;
 
   let lastStatus = 0;
 
@@ -224,7 +242,7 @@ export async function assignProfilePhotos({
   }
 
   for (; index < searches.length && queriesRun < maxQueries; index++) {
-    const { query, bucket } = searches[index];
+    const { query, bucket, locale } = searches[index];
     if (queue[bucket].length === 0) continue; // nobody left needing this kind of photo
 
     queriesRun += 1;
@@ -237,7 +255,7 @@ export async function assignProfilePhotos({
         let photo = pool.find((candidate) => !used.has(candidate.id));
 
         while (!photo && page <= MAX_PAGES_PER_QUERY) {
-          const fetched = await searchPage(query, page, apiKey);
+          const fetched = await searchPage(query, page, apiKey, locale);
           page += 1;
           if (fetched.length === 0) break;
           pool.push(...fetched);

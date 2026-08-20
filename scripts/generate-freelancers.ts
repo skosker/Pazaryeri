@@ -6,7 +6,7 @@ import {
   SYNTHETIC_PASSWORD_HASH,
   type SyntheticFreelancer,
 } from "../prisma/synthetic-freelancers";
-import { showcaseFreelancers } from "../prisma/showcase-freelancers";
+import { loadShowcaseOffers, showcaseFreelancers } from "../prisma/showcase-freelancers";
 import {
   syncShowcaseFreelancers,
   syncSyntheticFreelancers,
@@ -21,6 +21,7 @@ import type { ShowcaseProfile } from "../prisma/synthetic-freelancers";
  *   npm run freelancer:uret -- --adet=50     # daha küçük bir set
  *   npm run freelancer:uret -- --sql         # 1000 profilin migration SQL'ini basar
  *   npm run freelancer:uret -- --sql-vitrin  # eski demo satıcıların migration SQL'ini basar
+ *                                            # (ilanlara baktığı için veritabanı ister)
  *
  * The profiles are a pure function of their index (prisma/synthetic-freelancers.ts), so
  * running this twice updates the same thousand rows instead of adding a second thousand.
@@ -87,7 +88,10 @@ function printShowcaseSql(people: ShowcaseProfile[]) {
   );
   console.log('UPDATE "users" AS u SET');
   console.log(
-    '  "city" = v.city,\n  "age" = v.age,\n  "skills" = v.skills,\n  "image" = v.image,\n' +
+    '  "city" = v.city,\n  "age" = v.age,\n  "skills" = v.skills,\n' +
+      // Only fills a photo in where there is none: a profile that already has a real
+      // portrait from the photo run must not be pushed back to a drawn avatar.
+      '  "image" = COALESCE(u."image", v.image),\n' +
       '  "bio" = v.bio,\n  "synthetic" = true,\n  "updatedAt" = now()\nFROM (VALUES'
   );
   console.log(
@@ -114,7 +118,8 @@ async function run() {
   }
 
   if (asShowcaseSql) {
-    printShowcaseSql(showcaseFreelancers());
+    // Needs the database: what each showcase seller lists decides their expertise.
+    printShowcaseSql(showcaseFreelancers(await loadShowcaseOffers(prisma)));
     return;
   }
 
@@ -154,7 +159,10 @@ async function run() {
     );
   }
 
-  const showcase = await syncShowcaseFreelancers(prisma, showcaseFreelancers());
+  const showcase = await syncShowcaseFreelancers(
+    prisma,
+    showcaseFreelancers(await loadShowcaseOffers(prisma))
+  );
   console.log(`${showcase.updated} eski demo satıcı profili tamamlandı`);
 
   const total = await prisma.user.count({ where: { synthetic: true } });
