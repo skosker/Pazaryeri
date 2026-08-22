@@ -22,7 +22,7 @@ export function RolePicker() {
   return (
     <div className="text-center">
       <h1 className="text-2xl font-bold text-brand-navy sm:text-3xl">
-        Profestia&apos;ya hoş geldin
+        Prosinta&apos;ya hoş geldin
       </h1>
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">

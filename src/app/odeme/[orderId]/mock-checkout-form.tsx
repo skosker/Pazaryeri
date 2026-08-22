@@ -15,7 +15,7 @@ export function MockCheckoutForm({ orderId, amount }: { orderId: string; amount:
       </div>
 
       <h2 className="font-semibold text-brand-navy">Kart ile Öde</h2>
-      <p className="mt-1 text-sm text-slate-500">Profestia güvenceli ödeme altyapısı</p>
+      <p className="mt-1 text-sm text-slate-500">Prosinta güvenceli ödeme altyapısı</p>
 
       <div className="mt-4 space-y-3">
         <div className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">

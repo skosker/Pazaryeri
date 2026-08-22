@@ -75,7 +75,7 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-3xl font-extrabold tracking-tight text-brand-navy sm:text-4xl">
-              Neden <span className="text-purple-600">Profestia</span>?
+              Neden <span className="text-purple-600">Prosinta</span>?
             </h2>
             <p className="mt-4 text-slate-500">
               Yeteneklerini sergile, fırsatları yakala, geleceğini şekillendir.

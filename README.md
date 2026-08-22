@@ -1,4 +1,4 @@
-# Profestia
+# Prosinta
 
 "İşini bilen freelancer'larla projeni hayata geçir" — Türkçe bir hizmet pazaryeri (Fiverr benzeri) uygulaması. Next.js (App Router), PostgreSQL/Prisma, NextAuth ve iyzico ödeme altyapısı ile inşa edilmiş gerçek bir web uygulamasıdır.
 

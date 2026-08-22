@@ -62,7 +62,7 @@ export function initializeCheckoutForm(
       gsmNumber: "+905000000000",
       email: params.buyer.email,
       identityNumber: "11111111111",
-      registrationAddress: "Profestia, Türkiye",
+      registrationAddress: "Prosinta, Türkiye",
       ip: params.buyer.ip,
       city: "Istanbul",
       country: "Turkey",

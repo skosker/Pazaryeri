@@ -81,7 +81,7 @@ export default async function OrderDetailPage(props: PageProps<"/siparis/[orderI
       {order.status === "PENDING_VERIFICATION" && isSeller && !isAdmin && (
         <div className="mt-6 rounded-2xl border border-orange-200 bg-orange-50 p-5">
           <p className="text-sm text-orange-800">
-            {order.buyer.name}, bu sipariş için havale/EFT ile ödeme bildirdi. Ödeme Profestia
+            {order.buyer.name}, bu sipariş için havale/EFT ile ödeme bildirdi. Ödeme Prosinta
             ekibi tarafından kontrol ediliyor, onaylandığında haber verilecek.
           </p>
         </div>
@@ -138,7 +138,7 @@ export default async function OrderDetailPage(props: PageProps<"/siparis/[orderI
         <div className="mt-2 flex items-center justify-between text-sm">
           <span className="text-slate-500">Ödeme durumu</span>
           <span className="font-semibold text-brand-navy">
-            {order.escrowReleased ? "Satıcıya aktarıldı" : "Profestia güvencesinde bekletiliyor"}
+            {order.escrowReleased ? "Satıcıya aktarıldı" : "Prosinta güvencesinde bekletiliyor"}
           </span>
         </div>
       </div>

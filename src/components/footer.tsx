@@ -45,7 +45,7 @@ export function Footer() {
           </div>
 
           <div>
-            <p className="text-sm font-semibold text-brand-navy">Profestia</p>
+            <p className="text-sm font-semibold text-brand-navy">Prosinta</p>
             <ul className="mt-4 space-y-2.5 text-sm text-slate-500">
               <li>
                 <Link href="/kayit?role=FREELANCER" className="hover:text-brand-navy">
@@ -68,7 +68,7 @@ export function Footer() {
           <div>
             <p className="text-sm font-semibold text-brand-navy">Güvence</p>
             <ul className="mt-4 space-y-2.5 text-sm text-slate-500">
-              <li>Profestia güvencesiyle ödeme</li>
+              <li>Prosinta güvencesiyle ödeme</li>
               <li>İş onaylanmadan ödeme aktarılmaz</li>
               <li>7/24 destek</li>
             </ul>
@@ -76,8 +76,8 @@ export function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col gap-2 border-t border-slate-100 pt-6 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-          <span>© {new Date().getFullYear()} Profestia. Tüm hakları saklıdır.</span>
-          <span>Ödemeler Profestia güvencesiyle korunmaktadır.</span>
+          <span>© {new Date().getFullYear()} Prosinta. Tüm hakları saklıdır.</span>
+          <span>Ödemeler Prosinta güvencesiyle korunmaktadır.</span>
         </div>
       </div>
     </footer>

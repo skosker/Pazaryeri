@@ -335,7 +335,7 @@ async function main() {
         role: "FREELANCER",
         passwordHash: password,
         emailVerified: new Date(),
-        bio: `${s.title} olarak ${s.name.split(" ")[0]}, Profestia'da yıllardır profesyonel hizmet veriyor.`,
+        bio: `${s.title} olarak ${s.name.split(" ")[0]}, Prosinta'da yıllardır profesyonel hizmet veriyor.`,
       },
     });
   }
@@ -406,7 +406,7 @@ async function main() {
         role: "FREELANCER",
         passwordHash: password,
         emailVerified: new Date(),
-        bio: `${s.title} olarak ${s.name.split(" ")[0]}, Profestia'da profesyonel hizmet veriyor.`,
+        bio: `${s.title} olarak ${s.name.split(" ")[0]}, Prosinta'da profesyonel hizmet veriyor.`,
       },
     });
   }

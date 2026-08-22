@@ -648,6 +648,6 @@ export function describeShowcaseFreelancer(
     bio:
       skills.length >= 2
         ? buildBio(firstName, seller.title, years, city, skills, r)
-        : `${city.locative} yaşayan bir ${seller.title}. ${years} yıldır Profestia'da hizmet veriyorum.`,
+        : `${city.locative} yaşayan bir ${seller.title}. ${years} yıldır Prosinta'da hizmet veriyorum.`,
   };
 }

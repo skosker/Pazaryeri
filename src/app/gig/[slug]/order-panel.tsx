@@ -122,7 +122,7 @@ export function OrderPanel({
 
         <ul className="mt-5 space-y-2 border-t border-slate-100 pt-5 text-xs text-slate-500">
           <li className="flex items-start gap-2">
-            <CheckIcon /> Profestia güvencesiyle ödeme — iş onaylanmadan satıcıya aktarılmaz
+            <CheckIcon /> Prosinta güvencesiyle ödeme — iş onaylanmadan satıcıya aktarılmaz
           </li>
           <li className="flex items-start gap-2">
             <CheckIcon /> Kredi kartına 3 taksit imkanı

@@ -11,12 +11,12 @@ const buyerSteps = [
   {
     icon: "credit-card",
     title: "Paketi seç ve öde",
-    description: "Fiyat, teslim süresi ve revizyon hakkını incele. Profestia güvencesiyle ödemeni yap.",
+    description: "Fiyat, teslim süresi ve revizyon hakkını incele. Prosinta güvencesiyle ödemeni yap.",
   },
   {
     icon: "clock",
     title: "Satıcı işe başlar",
-    description: "Ödemen Profestia'da güvenle bekletilir, satıcı onaylayıp işe başlar.",
+    description: "Ödemen Prosinta'da güvenle bekletilir, satıcı onaylayıp işe başlar.",
   },
   {
     icon: "check-circle",
@@ -86,7 +86,7 @@ export default function HowItWorksPage() {
         <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 lg:px-8">
           <h1 className="text-3xl font-extrabold text-brand-navy sm:text-4xl">Nasıl Çalışır?</h1>
           <p className="mt-4 text-slate-500">
-            Profestia&apos;da hizmet almak ya da freelancer olarak çalışmaya başlamak dakikalar sürer.
+            Prosinta&apos;da hizmet almak ya da freelancer olarak çalışmaya başlamak dakikalar sürer.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -134,7 +134,7 @@ export default function HowItWorksPage() {
             <Faq
               icon="shield-check"
               q="Ödemem güvende mi?"
-              a="Evet. Ödemen Profestia güvencesiyle korunur ve iş teslim alınıp onaylanana kadar satıcıya aktarılmaz."
+              a="Evet. Ödemen Prosinta güvencesiyle korunur ve iş teslim alınıp onaylanana kadar satıcıya aktarılmaz."
             />
             <Faq
               icon="refresh"

@@ -17,7 +17,7 @@ export default async function ProOlPage() {
   return (
     <div className="max-w-xl">
       <div className="flex items-center gap-2">
-        <h1 className="text-2xl font-bold text-brand-navy">Profestia Pro Ol</h1>
+        <h1 className="text-2xl font-bold text-brand-navy">Prosinta Pro Ol</h1>
         <span className="rounded-full bg-amber-400 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-amber-950">
           Pro
         </span>
@@ -46,7 +46,7 @@ export default async function ProOlPage() {
             type="submit"
             className="brand-gradient w-full rounded-full px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
           >
-            Profestia Pro&apos;ya Geç
+            Prosinta Pro&apos;ya Geç
           </button>
         </form>
         <p className="mt-3 text-center text-xs text-slate-400">

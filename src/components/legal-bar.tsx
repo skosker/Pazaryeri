@@ -8,7 +8,7 @@ import Link from "next/link";
  */
 
 export const legalLinks = [
-  { href: "/hakkimizda", label: "Profestia Hakkında" },
+  { href: "/hakkimizda", label: "Prosinta Hakkında" },
   { href: "/uyelik-sozlesmesi", label: "Üyelik Sözleşmesi" },
   { href: "/kullanim-sartlari", label: "Kullanım Şartları" },
   { href: "/gizlilik-politikasi", label: "Gizlilik ve Kişisel Verilerin Korunması Politikası" },
@@ -31,7 +31,7 @@ export function LegalBar() {
           ))}
         </nav>
         <p className="shrink-0 text-slate-400">
-          Profestia Bilgi Teknolojileri Paz. ve Tic. A.Ş. © {new Date().getFullYear()}
+          Prosinta Bilgi Teknolojileri Paz. ve Tic. A.Ş. © {new Date().getFullYear()}
         </p>
       </div>
     </div>

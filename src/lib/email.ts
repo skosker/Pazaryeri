@@ -3,7 +3,7 @@ import { formatPrice } from "@/lib/format-price";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
-const FROM = process.env.RESEND_FROM_EMAIL ?? "Profestia <onboarding@resend.dev>";
+const FROM = process.env.RESEND_FROM_EMAIL ?? "Prosinta <onboarding@resend.dev>";
 
 async function sendEmail(to: string, subject: string, html: string) {
   if (!resend) {
@@ -21,10 +21,10 @@ async function sendEmail(to: string, subject: string, html: string) {
 function layout(title: string, body: string) {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
-      <p style="font-size: 20px; font-weight: 800; color: #12122b; margin-bottom: 24px;">Profestia</p>
+      <p style="font-size: 20px; font-weight: 800; color: #12122b; margin-bottom: 24px;">Prosinta</p>
       <h1 style="font-size: 18px; color: #12122b;">${title}</h1>
       <div style="color: #475569; font-size: 14px; line-height: 1.6;">${body}</div>
-      <p style="margin-top: 32px; font-size: 12px; color: #94a3b8;">Bu e-posta Profestia tarafından gönderilmiştir.</p>
+      <p style="margin-top: 32px; font-size: 12px; color: #94a3b8;">Bu e-posta Prosinta tarafından gönderilmiştir.</p>
     </div>
   `;
 }
@@ -40,11 +40,11 @@ export async function sendWelcomeVerificationEmail(params: {
 }) {
   const html = layout(
     `Hoş geldin, ${params.name}!`,
-    `<p>Profestia'ya kayıt olduğun için teşekkürler. Hesabını aktifleştirmek için aşağıdaki butona tıkla.</p>
+    `<p>Prosinta'ya kayıt olduğun için teşekkürler. Hesabını aktifleştirmek için aşağıdaki butona tıkla.</p>
      ${button(params.verifyUrl, "E-postamı Doğrula")}
      <p style="margin-top:16px;">Buton çalışmazsa şu linki tarayıcına yapıştır:<br/>${params.verifyUrl}</p>`
   );
-  await sendEmail(params.to, "Profestia'ya hoş geldin — hesabını doğrula", html);
+  await sendEmail(params.to, "Prosinta'ya hoş geldin — hesabını doğrula", html);
 }
 
 export async function sendPasswordResetEmail(params: {
@@ -54,14 +54,14 @@ export async function sendPasswordResetEmail(params: {
 }) {
   const html = layout(
     "Şifreni sıfırla",
-    `<p>Merhaba ${params.name}, Profestia hesabın için şifre sıfırlama isteği aldık.
+    `<p>Merhaba ${params.name}, Prosinta hesabın için şifre sıfırlama isteği aldık.
       Aşağıdaki butondan yeni şifreni belirleyebilirsin. Bağlantı <strong>1 saat</strong> geçerli.</p>
      ${button(params.resetUrl, "Yeni Şifre Belirle")}
      <p style="margin-top:16px;">Buton çalışmazsa şu linki tarayıcına yapıştır:<br/>${params.resetUrl}</p>
      <p style="margin-top:16px;">Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin;
       şifren değişmeden kalır.</p>`
   );
-  await sendEmail(params.to, "Profestia şifre sıfırlama", html);
+  await sendEmail(params.to, "Prosinta şifre sıfırlama", html);
 }
 
 export async function sendOrderPaidEmails(params: {
@@ -126,7 +126,7 @@ export async function sendBankTransferSellerInfoEmail(params: {
     layout(
       "Sipariş için ödeme bildirildi",
       `<p>Merhaba ${params.sellerName},</p>
-       <p><strong>${params.gigTitle}</strong> siparişi için alıcı havale/EFT ile ödeme yaptığını bildirdi. Ödeme Profestia ekibi tarafından kontrol ediliyor, onaylandığında sana haber vereceğiz.</p>
+       <p><strong>${params.gigTitle}</strong> siparişi için alıcı havale/EFT ile ödeme yaptığını bildirdi. Ödeme Prosinta ekibi tarafından kontrol ediliyor, onaylandığında sana haber vereceğiz.</p>
        ${button(params.orderUrl, "Siparişi Görüntüle")}`
     )
   );
