@@ -68,8 +68,16 @@ function layout(title: string, body: string) {
   `;
 }
 
+/**
+ * The solid `background-color` comes first and the gradient after it.
+ *
+ * Outlook drops `linear-gradient` entirely. With only the gradient declared, the button
+ * kept its white text on no background at all and disappeared — which is exactly what
+ * the verification mail looked like on Outlook mobile. Clients that understand gradients
+ * still paint one; the rest fall back to the solid purple.
+ */
 function button(href: string, label: string) {
-  return `<a href="${href}" style="display:inline-block;margin-top:16px;padding:10px 24px;border-radius:999px;background:linear-gradient(135deg,#d946ef,#9333ea,#4f46e5);color:#fff;text-decoration:none;font-weight:600;font-size:14px;">${label}</a>`;
+  return `<a href="${href}" style="display:inline-block;margin-top:16px;padding:12px 26px;border-radius:999px;background-color:#9333ea;background:linear-gradient(135deg,#d946ef,#9333ea,#4f46e5);color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;">${label}</a>`;
 }
 
 export async function sendWelcomeVerificationEmail(params: {
