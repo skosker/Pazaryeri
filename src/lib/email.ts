@@ -20,7 +20,8 @@ const REPLY_TO = process.env.RESEND_REPLY_TO ?? "destek@prosinta.com";
  */
 function toPlainText(html: string) {
   return html
-    .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gis, "$2: $1")
+    // [\s\S] rather than the /s flag: the project targets an older ES level than /s needs.
+    .replace(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, "$2: $1")
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/(p|h1|h2|div|li)>/gi, "\n")
     .replace(/<[^>]+>/g, "")
