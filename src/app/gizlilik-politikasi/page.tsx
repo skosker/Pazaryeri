@@ -3,9 +3,8 @@ import { LegalPage } from "@/components/legal-page";
 
 export const metadata: Metadata = { title: "Kişisel Verilerin Korunması Politikası" };
 
-// Başvuru kanalı destek@prosinta.com olarak yayımlandı. Künyedeki adres ve KEP adresi
-// hâlâ [●]: ikisi de KVKK başvurularında aranan bilgiler, şirket kaydı tamamlanınca
-// doldurulmalı.
+// Başvuru kanalı destek@prosinta.com olarak yayımlandı. Künyedeki KEP adresi hâlâ [●];
+// KVKK başvurularında aranan bilgilerden biri, KEP hesabı açılınca doldurulmalı.
 export default function GizlilikPolitikasiPage() {
   return (
     <LegalPage title="Kişisel Verilerin Korunması Politikası ve Aydınlatma Metni">
@@ -38,7 +37,7 @@ export default function GizlilikPolitikasiPage() {
       <ul>
         <li>Prosinta</li>
         <li>Prosinta Dijital Teknolojiler A.Ş.</li>
-        <li>Adres: [●]</li>
+        <li>Adres: Levent Mah. Karanfil Sk. No: 13, Beşiktaş / İstanbul</li>
         <li>E-posta: destek@prosinta.com</li>
         <li>KEP Adresi: [●]</li>
       </ul>
