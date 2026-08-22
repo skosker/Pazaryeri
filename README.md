@@ -100,11 +100,13 @@ Nasıl çalışıyor:
   seçilir, `/api/avatar/[seed]` adresinden SVG olarak servis edilir; dış servise, API
   anahtarına ve profil başına depolamaya gerek yoktur. Üstüne, `PEXELS_API_KEY`
   tanımlıysa Pexels'ten **gerçek portre fotoğrafları** çekilebilir
-  (`src/lib/profile-photos.ts`): aramalar Türkçe ve `locale=tr-TR` ile yapılır ki
-  sonuçlar Türkiye'deki insanlara benzesin; terimler çalışan profesyonel portresini
-  hedefler, çünkü profillerin yaşı 22–58 ve stok sitelerde milliyet araması belgesel
-  fotoğrafçılığa (yaşlı, kırsal kareler) çıkar. Arama profilin ismine göre kadın/erkek
-  ayrılır,
+  (`src/lib/profile-photos.ts`): API'de ülke filtresi yok, o yüzden yerellik tamamen
+  aramanın kendisinden gelir — hepsi Türkiye'yi hedefler (`locale=tr-TR` ile Türkçe
+  terimler, ardından Türkiye/İstanbul adı geçen İngilizce olanlar). Derinlik arama
+  sayısından gelir, sayfa sayısından değil: bir aramanın beşinci sayfası artık sorulan
+  şeye benzemez. Terimler çalışan profesyonel portresini hedefler, çünkü profillerin
+  yaşı 22–58 ve stok sitelerde milliyet araması belgesel fotoğrafçılığa (yaşlı, kırsal
+  kareler) çıkar. Arama profilin ismine göre kadın/erkek ayrılır,
   aynı fotoğraf iki profilde kullanılmaz, fotoğraf düşmeyen profil çizimle kalır. Çalıştırmak
   için admin panelinde **/admin/profil-fotograflari** ekranındaki düğme ya da:
 

@@ -42,7 +42,9 @@ export function UserAvatar({
       alt=""
       loading="lazy"
       onError={() => setFailed(true)}
-      className={`rounded-full bg-slate-100 object-cover ${className}`}
+      // Cropped towards the top rather than the middle: in a portrait the head sits in
+      // the upper part of the frame, so a centred crop shows a chest more often than a face.
+      className={`rounded-full bg-slate-100 object-cover object-[50%_22%] ${className}`}
     />
   );
 }
