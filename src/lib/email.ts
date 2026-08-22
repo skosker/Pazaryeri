@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { formatPrice } from "@/lib/format-price";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -78,7 +79,7 @@ export async function sendOrderPaidEmails(params: {
     layout(
       "Ödemen başarıyla alındı",
       `<p>Merhaba ${params.buyerName},</p>
-       <p><strong>${params.gigTitle}</strong> için <strong>${params.amount}₺</strong> tutarındaki ödemen alındı. Satıcı işe başladığında haber vereceğiz.</p>
+       <p><strong>${params.gigTitle}</strong> için <strong>${formatPrice(params.amount)}₺</strong> tutarındaki ödemen alındı. Satıcı işe başladığında haber vereceğiz.</p>
        ${button(params.orderUrl, "Siparişi Görüntüle")}`
     )
   );
@@ -89,7 +90,7 @@ export async function sendOrderPaidEmails(params: {
     layout(
       "Yeni sipariş!",
       `<p>Merhaba ${params.sellerName},</p>
-       <p><strong>${params.gigTitle}</strong> ilanın için yeni bir sipariş aldın (${params.amount}₺). İşe başlamak için siparişi onayla.</p>
+       <p><strong>${params.gigTitle}</strong> ilanın için yeni bir sipariş aldın (${formatPrice(params.amount)}₺). İşe başlamak için siparişi onayla.</p>
        ${button(params.orderUrl, "Siparişi Görüntüle")}`
     )
   );
@@ -107,7 +108,7 @@ export async function sendBankTransferAdminAlertEmail(params: {
     "Havale/EFT ödeme bildirimi — onay bekleniyor",
     layout(
       "Ödeme onayı bekleniyor",
-      `<p><strong>${params.buyerName}</strong>, <strong>${params.gigTitle}</strong> siparişi için <strong>${params.amount}₺</strong> tutarında havale/EFT yaptığını bildirdi. Şirket hesabını kontrol edip ödemeyi onayla.</p>
+      `<p><strong>${params.buyerName}</strong>, <strong>${params.gigTitle}</strong> siparişi için <strong>${formatPrice(params.amount)}₺</strong> tutarında havale/EFT yaptığını bildirdi. Şirket hesabını kontrol edip ödemeyi onayla.</p>
        ${button(params.orderUrl, "Ödemeyi Onayla")}`
     )
   );
@@ -180,7 +181,7 @@ export async function sendOrderCompletedEmail(params: {
     layout(
       "Ödeme aktarıldı",
       `<p>Merhaba ${params.sellerName},</p>
-       <p><strong>${params.gigTitle}</strong> siparişi alıcı tarafından onaylandı, <strong>${params.amount}₺</strong> tutarındaki ödeme sana aktarıldı.</p>
+       <p><strong>${params.gigTitle}</strong> siparişi alıcı tarafından onaylandı, <strong>${formatPrice(params.amount)}₺</strong> tutarındaki ödeme sana aktarıldı.</p>
        ${button(params.orderUrl, "Siparişi Görüntüle")}`
     )
   );

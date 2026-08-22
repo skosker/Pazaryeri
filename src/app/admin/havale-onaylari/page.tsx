@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listPendingBankTransfers } from "@/lib/order-actions";
+import { formatPrice } from "@/lib/format-price";
 
 export default async function BankTransferApprovalsPage() {
   const pending = await listPendingBankTransfers();
@@ -37,7 +38,7 @@ export default async function BankTransferApprovalsPage() {
                     </td>
                     <td className="px-5 py-4 text-slate-600">{order.buyer.name}</td>
                     <td className="px-5 py-4 text-slate-600">{order.gig.seller.name}</td>
-                    <td className="px-5 py-4 font-semibold text-brand-navy">{Number(order.amount)}₺</td>
+                    <td className="px-5 py-4 font-semibold text-brand-navy">{formatPrice(order.amount)}₺</td>
                     <td className="px-5 py-4 text-right">
                       <Link
                         href={`/siparis/${order.id}`}

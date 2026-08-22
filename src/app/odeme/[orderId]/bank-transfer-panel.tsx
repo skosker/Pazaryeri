@@ -3,6 +3,7 @@
 import { useTransition, useState } from "react";
 import { notifyBankTransfer } from "./actions";
 import { bankTransferInfo } from "@/lib/bank-transfer";
+import { formatPrice } from "@/lib/format-price";
 
 export function BankTransferPanel({ orderId, amount }: { orderId: string; amount: number }) {
   const [pending, startTransition] = useTransition();
@@ -54,7 +55,7 @@ export function BankTransferPanel({ orderId, amount }: { orderId: string; amount
 
       <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
         <span className="text-sm text-slate-500">Ödenecek tutar</span>
-        <span className="text-xl font-bold text-brand-navy">{amount}₺</span>
+        <span className="text-xl font-bold text-brand-navy">{formatPrice(amount)}₺</span>
       </div>
 
       <button

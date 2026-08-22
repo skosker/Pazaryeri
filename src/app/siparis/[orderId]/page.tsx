@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { getOrderForUser } from "@/lib/order-actions";
 import { orderStatusLabel, orderStatusColor } from "@/lib/order-status";
 import { ReviewForm } from "./review-form";
+import { formatPrice } from "@/lib/format-price";
 import {
   startOrderAction,
   deliverOrderAction,
@@ -128,7 +129,7 @@ export default async function OrderDetailPage(props: PageProps<"/siparis/[orderI
       <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6">
         <div className="flex items-center justify-between text-sm">
           <span className="text-slate-500">Tutar</span>
-          <span className="font-semibold text-brand-navy">{Number(order.amount)}₺</span>
+          <span className="font-semibold text-brand-navy">{formatPrice(order.amount)}₺</span>
         </div>
         <div className="mt-2 flex items-center justify-between text-sm">
           <span className="text-slate-500">Teslim süresi</span>

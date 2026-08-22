@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { CategoryIcon } from "@/components/category-icon";
 import { getCategoryAccent } from "@/lib/category-style";
+import { formatPrice } from "@/lib/format-price";
 
 type Category = { slug: string; name: string; icon: string };
 type Subcategory = { name: string; slug: string };
@@ -269,7 +270,7 @@ export function FilterBar({
           />
           <div className="mt-1 flex justify-between text-xs text-slate-400">
             <span>0₺</span>
-            <span className="font-medium text-brand-navy">{budget >= 3000 ? "3000₺+" : `${budget}₺`}</span>
+            <span className="font-medium text-brand-navy">{budget >= 3000 ? `${formatPrice(3000)}₺+` : `${formatPrice(budget)}₺`}</span>
           </div>
         </div>
       )}

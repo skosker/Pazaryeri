@@ -1,6 +1,7 @@
 import { listPendingPayouts, listRecentPaidPayouts } from "@/lib/payout-actions";
 import { formatIban } from "@/lib/iban";
 import { MarkPaidForm } from "./mark-paid";
+import { formatPrice } from "@/lib/format-price";
 
 export default async function PayoutsPage() {
   const [pending, paid] = await Promise.all([listPendingPayouts(), listRecentPaidPayouts()]);
@@ -18,7 +19,7 @@ export default async function PayoutsPage() {
 
       <div className="mt-6 flex flex-wrap gap-3 text-sm">
         <span className="rounded-xl bg-amber-50 px-4 py-2 text-amber-800">
-          Ödenecek: <strong>{total.toLocaleString("tr-TR")}₺</strong> ({pending.length} kayıt)
+          Ödenecek: <strong>{formatPrice(total)}₺</strong> ({pending.length} kayıt)
         </span>
         {blocked > 0 && (
           <span className="rounded-xl bg-red-50 px-4 py-2 text-red-700">
@@ -73,7 +74,7 @@ export default async function PayoutsPage() {
                         )}
                       </td>
                       <td className="px-5 py-4 font-semibold text-brand-navy">
-                        {Number(payout.net).toLocaleString("tr-TR")}₺
+                        {formatPrice(payout.net)}₺
                       </td>
                       <td className="px-5 py-4 text-right">
                         <MarkPaidForm payoutId={payout.id} disabled={!iban} />
@@ -98,7 +99,7 @@ export default async function PayoutsPage() {
                   <span className="ml-2 text-slate-400">{payout.order.gig.title}</span>
                 </span>
                 <span className="shrink-0 text-slate-500">
-                  {Number(payout.net).toLocaleString("tr-TR")}₺
+                  {formatPrice(payout.net)}₺
                   {payout.paidAt && ` · ${payout.paidAt.toLocaleDateString("tr-TR")}`}
                 </span>
               </li>
