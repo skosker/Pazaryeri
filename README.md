@@ -106,7 +106,11 @@ Nasıl çalışıyor:
   sayısından gelir, sayfa sayısından değil: bir aramanın beşinci sayfası artık sorulan
   şeye benzemez. Terimler çalışan profesyonel portresini hedefler, çünkü profillerin
   yaşı 22–58 ve stok sitelerde milliyet araması belgesel fotoğrafçılığa (yaşlı, kırsal
-  kareler) çıkar. Arama profilin ismine göre kadın/erkek ayrılır,
+  kareler) çıkar. Son eleme Pexels'in fotoğraf açıklamasıyla (`alt`) yapılır: kalabalık,
+  nesne, çocuk ya da "elderly/old" diye tanımlanan kareler hiçbir profile atanmaz ve
+  açıklama profilin ismiyle aynı cinsiyeti söylemiyorsa fotoğraf kullanılmaz — eleme
+  sonrası fotoğraf düşmeyen profil çizimle kalır. Arama profilin ismine göre kadın/erkek
+  ayrılır,
   aynı fotoğraf iki profilde kullanılmaz, fotoğraf düşmeyen profil çizimle kalır. Çalıştırmak
   için admin panelinde **/admin/profil-fotograflari** ekranındaki düğme ya da:
 
