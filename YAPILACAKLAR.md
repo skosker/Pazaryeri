@@ -22,9 +22,6 @@ Son güncelleme: 22 Ağustos 2026
       bu; kutu yoksa şifre sıfırlama maili hiçbir yere ulaşmaz ve şifre
       unutulursa tek çare Neon'un SQL editöründen elle müdahale olur.
 
-- [ ] **Vergi numarasını doğrula.** Künyede `731421416` yazıyor — dokuz hane.
-      Türkiye'de vergi kimlik numarası on hanelidir, bir hane eksik görünüyor.
-
 ## Yayın sonrası
 
 - [ ] **İlan kapak fotoğrafları:** `/admin/kapaklar` → "Eksik kapakları doldur".

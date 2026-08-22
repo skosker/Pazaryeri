@@ -62,7 +62,7 @@ export default function KullanimSartlariPage() {
         <li>Adres: Levent Mah. Karanfil Sk. No: 13, Beşiktaş / İstanbul</li>
         <li>Ticaret Sicil No: 1155314</li>
         <li>Vergi Dairesi: Beşiktaş</li>
-        <li>Vergi No: 731421416</li>
+        <li>Vergi No: 7331421416</li>
         <li>E-posta: destek@prosinta.com</li>
         <li>Yürürlük Tarihi: [●]</li>
       </ul>
