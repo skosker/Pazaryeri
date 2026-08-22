@@ -16,6 +16,11 @@ const emoji: Record<string, string> = {
 
 export const CATEGORY_EMOJI_KEYS = Object.keys(emoji);
 
+/** The glyph for a Category.icon value, for callers that need the character itself. */
+export function categoryEmoji(icon: string) {
+  return emoji[icon] ?? emoji.sparkles;
+}
+
 /**
  * `className` sets the type size (e.g. `text-lg`) rather than a box size, since the
  * glyph is text. Emoji ignore `currentColor`, so surrounding accent classes tint the

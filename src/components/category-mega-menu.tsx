@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CategoryIcon } from "@/components/category-icon";
+import { subcategoryEmoji } from "@/components/subcategory-icon";
 import { getCategoryAccent } from "@/lib/category-style";
 
 type Category = { slug: string; name: string; icon: string };
@@ -51,6 +52,7 @@ export function CategoryMegaMenu({
 
   if (pathname?.startsWith("/freelancer/")) return null;
 
+  const activeCategory = categories.find((c) => c.slug === active);
   const activeSubcategories = subcategoriesByCategory[active] ?? [];
 
   return (
@@ -101,7 +103,7 @@ export function CategoryMegaMenu({
 
           <div className="flex-1 p-5">
             <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
-              {categories.find((c) => c.slug === active)?.name}
+              {activeCategory?.name}
             </p>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1">
               {activeSubcategories.map((sc) => (
@@ -109,9 +111,12 @@ export function CategoryMegaMenu({
                   key={sc.slug}
                   href={`/kategoriler?kategori=${active}&alt=${sc.slug}`}
                   onClick={() => setOpen(false)}
-                  className="rounded-lg px-2 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50 hover:text-brand-navy"
+                  className="flex items-start gap-2 rounded-lg px-2 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50 hover:text-brand-navy"
                 >
-                  {sc.name}
+                  <span className="shrink-0 leading-6" aria-hidden>
+                    {subcategoryEmoji(sc.name, activeCategory?.icon ?? "sparkles")}
+                  </span>
+                  <span>{sc.name}</span>
                 </Link>
               ))}
             </div>
