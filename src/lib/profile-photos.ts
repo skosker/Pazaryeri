@@ -147,7 +147,35 @@ export async function profilePhotoProgress(): Promise<ProfilePhotoProgress> {
   return summarise(await loadProfiles(), false);
 }
 
-type Photo = { id: number; url: string };
+type Photo = { id: number; url: string; alt: string };
+
+/**
+ * Pexels describes every photo in English in its `alt` field ("Woman in White Long Sleeve
+ * Shirt", "Elderly Man Sitting on Bench"). The search itself cannot filter by who is in
+ * the picture, but this description can: it is the only thing that tells us a result for
+ * "genç kadın portre" is actually a man, a crowd, or somebody in their eighties.
+ *
+ * A photo has to say who it shows and match the profile's name. Anything that does not —
+ * an empty description, a group, an age that contradicts the profile — is left for another
+ * profile or skipped entirely; the drawn avatar is a better answer than a wrong photo.
+ */
+function fitsProfile(alt: string, bucket: Bucket) {
+  const text = alt.toLowerCase();
+  if (text.length === 0) return false;
+
+  // Not one person, or not a person at all.
+  if (/\b(group|crowd|team|couple|family|friends|children|kids|people)\b/.test(text)) return false;
+  if (/\b(child|baby|toddler|boy|girl)\b/.test(text)) return false;
+
+  // The profiles are 22 to 58; these describe someone well outside that.
+  if (/\b(elderly|senior|old|aged|grandmother|grandfather|granny)\b/.test(text)) return false;
+
+  // "woman" and "women" keep their own word boundaries, so \bman\b cannot match inside them.
+  const feminine = /\b(woman|women|female|lady|businesswoman)\b/.test(text);
+  const masculine = /\b(man|men|male|guy|gentleman|businessman)\b/.test(text);
+
+  return bucket === "kadin" ? feminine && !masculine : masculine && !feminine;
+}
 
 /** Their gateway hands out the odd 504; those are worth another go, a 401 is not. */
 function isTransient(status: number) {
@@ -180,9 +208,12 @@ async function searchPage(
     }
 
     if (response.ok) {
-      const body = (await response.json()) as { photos: { id: number; src: { large: string } }[] };
+      const body = (await response.json()) as {
+        photos: { id: number; alt?: string; src: { large: string } }[];
+      };
       return body.photos.map((photo) => ({
         id: photo.id,
+        alt: photo.alt ?? "",
         // The whole portrait, not a square cut from its middle: the CDN crops from the
         // centre and has no idea where the face is, so a full-length shot would come
         // back as a torso. UserAvatar crops towards the top instead, where heads are.
@@ -268,15 +299,18 @@ export async function assignProfilePhotos({
     let page = 1;
 
     try {
+      const usable = (candidate: Photo) =>
+        !used.has(candidate.id) && fitsProfile(candidate.alt, bucket);
+
       while (queue[bucket].length > 0) {
-        let photo = pool.find((candidate) => !used.has(candidate.id));
+        let photo = pool.find(usable);
 
         while (!photo && page <= MAX_PAGES_PER_QUERY) {
           const fetched = await searchPage(query, page, apiKey, locale);
           page += 1;
           if (fetched.length === 0) break;
           pool.push(...fetched);
-          photo = pool.find((candidate) => !used.has(candidate.id));
+          photo = pool.find(usable);
         }
 
         if (!photo) {
