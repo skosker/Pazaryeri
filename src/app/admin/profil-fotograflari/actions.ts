@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/require-admin";
 import {
   assignProfilePhotos,
   profilePhotoProgress,
+  resetProfilePhotos,
   type ProfilePhotoBatch,
 } from "@/lib/profile-photos";
 
@@ -38,4 +39,22 @@ export async function runProfilePhotoBatch(
 export async function readProfilePhotoProgress() {
   await requireAdmin();
   return profilePhotoProgress();
+}
+
+/**
+ * The way back: drops the fetched photographs and puts the drawn avatars on again. The
+ * photo run can be repeated afterwards, so nothing here is one-way.
+ */
+export async function resetProfilePhotosAction() {
+  await requireAdmin();
+
+  try {
+    const { reset } = await resetProfilePhotos();
+    return { ok: true as const, reset, progress: await profilePhotoProgress() };
+  } catch (error) {
+    return {
+      ok: false as const,
+      error: error instanceof Error ? error.message : "Beklenmeyen bir hata oldu",
+    };
+  }
 }
