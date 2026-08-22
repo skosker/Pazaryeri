@@ -22,7 +22,7 @@ export function Footer() {
   return (
     <footer className="border-t border-slate-200 bg-white">
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-10 sm:grid-cols-3">
           <div className="col-span-2 sm:col-span-1">
             <Logo />
             <p className="mt-4 max-w-xs text-sm text-slate-500">
@@ -64,20 +64,10 @@ export function Footer() {
               </li>
             </ul>
           </div>
-
-          <div>
-            <p className="text-sm font-semibold text-brand-navy">Güvence</p>
-            <ul className="mt-4 space-y-2.5 text-sm text-slate-500">
-              <li>Prosinta güvencesiyle ödeme</li>
-              <li>İş onaylanmadan ödeme aktarılmaz</li>
-              <li>7/24 destek</li>
-            </ul>
-          </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-2 border-t border-slate-100 pt-6 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-12 border-t border-slate-100 pt-6 text-xs text-slate-400">
           <span>© {new Date().getFullYear()} Prosinta. Tüm hakları saklıdır.</span>
-          <span>Ödemeler Prosinta güvencesiyle korunmaktadır.</span>
         </div>
       </div>
     </footer>

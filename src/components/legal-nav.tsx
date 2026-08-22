@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { legalLinks } from "@/components/legal-bar";
 
 /**
- * The same five pages the bottom bar lists, as a side menu on the pages themselves —
+ * The same pages the bottom bar lists, as a side menu on the pages themselves —
  * these documents refer to one another constantly, so jumping between them should not
  * mean scrolling to the very bottom of the page.
  */
