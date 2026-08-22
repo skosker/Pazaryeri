@@ -7,6 +7,11 @@
  * glasses and beard are all picked from the hash of the seed, which makes every profile
  * recognisably its own without fetching anything.
  *
+ * The style is a flat illustration rather than a cartoon: light falls from one side so
+ * the face has a shape, the eyes are almonds with a lid and an iris instead of dots, the
+ * mouth is a restrained line, and the palette is muted — the flat fills and the wide grin
+ * were what made the earlier version read as a caricature.
+ *
  * A seed starting with "k-" or "e-" asks for a feminine or masculine face, so the
  * picture matches the name the generator handed out; any other seed picks for itself.
  * Nothing from the seed is written into the markup — it only ever feeds the hash — so
@@ -40,23 +45,23 @@ function reader(seed: number) {
 }
 
 const backgrounds = [
-  ["#e0e7ff", "#a5b4fc"],
-  ["#fce7f3", "#f9a8d4"],
-  ["#ccfbf1", "#5eead4"],
-  ["#fef3c7", "#fcd34d"],
-  ["#dbeafe", "#93c5fd"],
-  ["#ede9fe", "#c4b5fd"],
-  ["#dcfce7", "#86efac"],
-  ["#ffe4e6", "#fda4af"],
-  ["#e2e8f0", "#94a3b8"],
-  ["#cffafe", "#67e8f9"],
+  ["#e7ebf2", "#cdd6e4"],
+  ["#eceae6", "#d9d3c9"],
+  ["#e4eceb", "#c9dcd8"],
+  ["#eee8e6", "#dbcac6"],
+  ["#e6e9ef", "#c8cfdd"],
+  ["#ebe9f0", "#d2cede"],
+  ["#e8ece7", "#ccd6c8"],
+  ["#f0ece6", "#ded2c2"],
+  ["#e5eaee", "#c6d2da"],
+  ["#eae7ec", "#d3ccd6"],
 ];
 
-const skins = ["#f7d5ba", "#f1c39d", "#e0aa7e", "#c98f64", "#a9714b", "#8a5a3b"];
+const skins = ["#f2d3bb", "#e8c1a3", "#d9a680", "#c08c63", "#a3714c", "#845737"];
 
-const hairColours = ["#231a15", "#3b2a1e", "#5a3a22", "#7b4a24", "#a9743c", "#d3a75c", "#9aa0a6", "#4a2b2b"];
+const hairColours = ["#241c17", "#33261c", "#4a3527", "#6b4b32", "#8a6440", "#b08b5e", "#8f9299", "#3a2622"];
 
-const clothes = ["#4f46e5", "#0ea5e9", "#0d9488", "#e11d48", "#d97706", "#7c3aed", "#1e293b", "#db2777", "#15803d"];
+const clothes = ["#3f4f6b", "#4a5b52", "#6b4f52", "#3d4450", "#5b5470", "#6d5f4a", "#2f3b45", "#7a5c58", "#455a64"];
 
 /** Darkens a #rrggbb colour by `amount` (0..1), for the neck shadow and collar. */
 function shade(hex: string, amount: number) {
@@ -160,53 +165,71 @@ export function avatarSvg(seed: string): string {
   const glasses = r(10) < 3;
   const smiling = r(4) > 0;
 
-  const skinShadow = shade(skin, 0.12);
-  const collar = shade(shirt, 0.22);
   const brow = shade(hairColour, 0.15);
 
   // The gradient id has to be unique: two avatars inlined in the same page would
   // otherwise share whichever gradient was defined first. Base36 of the hash keeps it
   // to [0-9a-z], so nothing from the seed reaches the markup as text.
-  const gradientId = `bg${hash32(seed).toString(36)}`;
+  const gradientId = `a${hash32(seed).toString(36)}`;
 
   const parts = [
-    `<defs><linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1">` +
-      `<stop offset="0%" stop-color="${bgFrom}"/><stop offset="100%" stop-color="${bgTo}"/></linearGradient></defs>`,
+    `<defs>` +
+      `<linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1">` +
+      `<stop offset="0%" stop-color="${bgFrom}"/><stop offset="100%" stop-color="${bgTo}"/></linearGradient>` +
+      // Light falls from the upper left, so the face carries a soft shadow on the other
+      // side instead of being one flat colour — that flatness is what reads as a cartoon.
+      `<linearGradient id="${gradientId}s" x1="0.15" y1="0" x2="0.9" y2="1">` +
+      `<stop offset="0%" stop-color="${shade(skin, -0.04)}"/>` +
+      `<stop offset="62%" stop-color="${skin}"/>` +
+      `<stop offset="100%" stop-color="${shade(skin, 0.14)}"/></linearGradient>` +
+      `<linearGradient id="${gradientId}h" x1="0.2" y1="0" x2="0.8" y2="1">` +
+      `<stop offset="0%" stop-color="${shade(hairColour, -0.12)}"/>` +
+      `<stop offset="100%" stop-color="${shade(hairColour, 0.18)}"/></linearGradient>` +
+      `</defs>`,
     `<rect width="160" height="160" fill="url(#${gradientId})"/>`,
     hair.back,
-    // Neck first: the shoulders are drawn over its lower half, the head over its top.
-    `<path d="M70 84 h20 v26 a10 10 0 0 1 -20 0 Z" fill="${skinShadow}"/>`,
+    `<path d="M70 84 h20 v26 a10 10 0 0 1 -20 0 Z" fill="${shade(skin, 0.16)}"/>`,
     `<path d="M20 160 C 20 126 46 110 80 110 C 114 110 140 126 140 160 Z" fill="${shirt}"/>`,
-    `<path d="M64 112 Q80 128 96 112 Q80 121 64 112 Z" fill="${collar}"/>`,
-    `<circle cx="53" cy="72" r="6" fill="${skin}"/><circle cx="107" cy="72" r="6" fill="${skin}"/>`,
-    `<ellipse cx="80" cy="68" rx="27" ry="31" fill="${skin}"/>`,
-    `<path d="M62 57 Q70 52 78 57" stroke="${brow}" stroke-width="3" fill="none" stroke-linecap="round"/>`,
-    `<path d="M82 57 Q90 52 98 57" stroke="${brow}" stroke-width="3" fill="none" stroke-linecap="round"/>`,
-    `<ellipse cx="70" cy="68" rx="2.8" ry="3.6" fill="#2b2320"/>`,
-    `<ellipse cx="90" cy="68" rx="2.8" ry="3.6" fill="#2b2320"/>`,
-    `<circle cx="71" cy="66.6" r="1" fill="#ffffff" opacity="0.85"/>`,
-    `<circle cx="91" cy="66.6" r="1" fill="#ffffff" opacity="0.85"/>`,
-    `<path d="M80 70 Q83 79 77.5 80" stroke="${shade(skin, 0.22)}" stroke-width="2" fill="none" stroke-linecap="round"/>`,
+    // The collar sits in the neck's shadow rather than being a bright band of its own.
+    `<path d="M64 112 Q80 128 96 112 Q80 121 64 112 Z" fill="${shade(shirt, 0.3)}"/>`,
+    `<ellipse cx="53" cy="73" rx="5.5" ry="7" fill="${shade(skin, 0.08)}"/>`,
+    `<ellipse cx="107" cy="73" rx="5.5" ry="7" fill="${shade(skin, 0.08)}"/>`,
+    `<ellipse cx="80" cy="69" rx="26" ry="31" fill="url(#${gradientId}s)"/>`,
+    // Cheek and jaw shading, kept very light: enough to give the face a shape.
+    `<ellipse cx="80" cy="96" rx="17" ry="7" fill="${shade(skin, 0.1)}" opacity="0.5"/>`,
+    `<path d="M63 59 Q70.5 55.5 78 58.5" stroke="${brow}" stroke-width="2.6" fill="none" stroke-linecap="round" opacity="0.9"/>`,
+    `<path d="M82 58.5 Q89.5 55.5 97 59" stroke="${brow}" stroke-width="2.6" fill="none" stroke-linecap="round" opacity="0.9"/>`,
+    // Almond eyes: a lid line over a small iris reads as a drawn eye, where a filled oval
+    // reads as a dot.
+    `<path d="M64 69 Q70.5 64.5 77 69 Q70.5 73.5 64 69 Z" fill="#ffffff" opacity="0.95"/>`,
+    `<path d="M83 69 Q89.5 64.5 96 69 Q89.5 73.5 83 69 Z" fill="#ffffff" opacity="0.95"/>`,
+    `<circle cx="70.5" cy="69" r="3" fill="#4a3b32"/>`,
+    `<circle cx="89.5" cy="69" r="3" fill="#4a3b32"/>`,
+    `<circle cx="70.5" cy="69" r="1.4" fill="#241c17"/>`,
+    `<circle cx="89.5" cy="69" r="1.4" fill="#241c17"/>`,
+    `<path d="M64 68.6 Q70.5 63.6 77 68.6" stroke="#3b2f28" stroke-width="1.7" fill="none" stroke-linecap="round"/>`,
+    `<path d="M83 68.6 Q89.5 63.6 96 68.6" stroke="#3b2f28" stroke-width="1.7" fill="none" stroke-linecap="round"/>`,
+    `<path d="M79 72 Q82.5 80 77.5 81.5" stroke="${shade(skin, 0.26)}" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.85"/>`,
   ];
 
   if (beard) {
     parts.push(
       `<path d="M53 70 C 54 96 66 108 80 108 C 94 108 106 96 107 70 C 103 90 95 96 80 96 ` +
-        `C 65 96 57 90 53 70 Z" fill="${hairColour}"/>`
+        `C 65 96 57 90 53 70 Z" fill="${shade(hairColour, -0.05)}" opacity="0.95"/>`
     );
   }
 
   parts.push(
     smiling
-      ? `<path d="M72 87 Q80 95 88 87" stroke="#a95a45" stroke-width="2.6" fill="none" stroke-linecap="round"/>`
-      : `<path d="M73 89 h14" stroke="#a95a45" stroke-width="2.6" fill="none" stroke-linecap="round"/>`
+      ? `<path d="M73 88 Q80 92.5 87 88" stroke="${shade("#b5766a", 0.05)}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`
+      : `<path d="M74 89 Q80 90.6 86 89" stroke="${shade("#b5766a", 0.05)}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`
   );
 
   parts.push(hair.front);
 
   if (glasses) {
     parts.push(
-      `<g fill="none" stroke="#334155" stroke-width="2.4">` +
+      `<g fill="none" stroke="#4a4038" stroke-width="1.9" opacity="0.9">` +
         `<rect x="60" y="61" width="19" height="15" rx="6"/>` +
         `<rect x="81" y="61" width="19" height="15" rx="6"/>` +
         `<path d="M79 68 h2"/><path d="M60 66 l-7 2"/><path d="M100 66 l7 2"/></g>`
