@@ -11,7 +11,7 @@ export const legalLinks = [
   { href: "/hakkimizda", label: "Prosinta Hakkında" },
   { href: "/uyelik-sozlesmesi", label: "Üyelik Sözleşmesi" },
   { href: "/kullanim-sartlari", label: "Kullanım Şartları" },
-  { href: "/gizlilik-politikasi", label: "Gizlilik ve Kişisel Verilerin Korunması Politikası" },
+  { href: "/gizlilik-politikasi", label: "Kişisel Verilerin Korunması Politikası" },
   { href: "/cerez-tercihleri", label: "Çerez Tercihleri" },
 ];
 
