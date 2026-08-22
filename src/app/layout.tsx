@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { siteUrl } from "@/lib/site-url";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/header";
@@ -16,9 +17,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Prosinta — AI Destekli Profesyonel Hizmet Platformu",
+  // metadataBase turns the relative URLs Next generates for Open Graph and canonical
+  // tags into absolute ones. Without it a link shared on WhatsApp or LinkedIn resolves
+  // against whatever host happens to render the preview.
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Prosinta — AI Destekli Profesyonel Hizmet Platformu",
+    template: "%s — Prosinta",
+  },
   description:
     "Grafik tasarımdan yazılıma, binlerce yetenekli freelancer arasından seç, dakikalar içinde işine başla.",
+  openGraph: {
+    type: "website",
+    locale: "tr_TR",
+    siteName: "Prosinta",
+    title: "Prosinta — AI Destekli Profesyonel Hizmet Platformu",
+    description:
+      "Grafik tasarımdan yazılıma, binlerce yetenekli freelancer arasından seç, dakikalar içinde işine başla.",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

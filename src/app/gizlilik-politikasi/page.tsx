@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
 
-export const metadata: Metadata = { title: "Kişisel Verilerin Korunması Politikası — Prosinta" };
+export const metadata: Metadata = { title: "Kişisel Verilerin Korunması Politikası" };
 
 // 11. maddedeki başvuru kanalı ile künyedeki adres, e-posta ve KEP adresi henüz
 // verilmedi. KVKK başvuru hakkının kullanılabilmesi için bu kanalın yayımlanması

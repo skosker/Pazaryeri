@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
 
 export const metadata: Metadata = {
-  title: "Hakkımızda — Prosinta",
+  title: "Hakkımızda",
   description:
     "Yetenekleri, fikirleri ve ihtiyaçları tek bir dijital platformda buluşturuyoruz. Yeni nesil çalışma dünyasına hoş geldiniz.",
 };

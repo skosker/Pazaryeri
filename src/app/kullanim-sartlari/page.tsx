@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
 
-export const metadata: Metadata = { title: "Kullanım Şartları — Prosinta" };
+export const metadata: Metadata = { title: "Kullanım Şartları" };
 
 // Künyedeki adres, MERSİS, vergi numarası, e-posta ve yürürlük tarihi henüz verilmedi.
 // 6563 sayılı Kanun bu bilgilerin yayımlanmasını arıyor, o yüzden sayfa bunlar

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
 
-export const metadata: Metadata = { title: "Üyelik Sözleşmesi — Prosinta" };
+export const metadata: Metadata = { title: "Üyelik Sözleşmesi" };
 
 // Metinde [ŞİRKET UNVANI] ve [PLATFORM ADI] yer tutucuları, alt bardaki unvanla aynı
 // olacak şekilde "Prosinta Bilgi Teknolojileri Paz. ve Tic. A.Ş." ve "Prosinta" ile

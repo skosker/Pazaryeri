@@ -3,7 +3,7 @@ import Link from "next/link";
 import { LegalPage } from "@/components/legal-page";
 import { CookiePreferences } from "./cookie-preferences";
 
-export const metadata: Metadata = { title: "Çerez Tercihleri — Prosinta" };
+export const metadata: Metadata = { title: "Çerez Tercihleri" };
 
 export default function CerezTercihleriPage() {
   return (
