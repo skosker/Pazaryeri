@@ -3,8 +3,8 @@ import { LegalPage } from "@/components/legal-page";
 
 export const metadata: Metadata = { title: "Kullanım Şartları" };
 
-// Künyedeki MERSİS numarası, vergi numarası ve yürürlük tarihi hâlâ [●] olarak duruyor;
-// 6563 sayılı Kanun bunların yayımlanmasını arıyor.
+// Künyede yalnızca yürürlük tarihi [●] olarak duruyor; 6563 sayılı Kanun onun da
+// yayımlanmasını arıyor.
 export default function KullanimSartlariPage() {
   return (
     <LegalPage title="Kullanım Şartları">
@@ -60,8 +60,9 @@ export default function KullanimSartlariPage() {
       <ul>
         <li>Prosinta Dijital Teknolojiler A.Ş.</li>
         <li>Adres: Levent Mah. Karanfil Sk. No: 13, Beşiktaş / İstanbul</li>
-        <li>MERSİS No: [●]</li>
-        <li>Vergi No: [●]</li>
+        <li>Ticaret Sicil No: 1155314</li>
+        <li>Vergi Dairesi: Beşiktaş</li>
+        <li>Vergi No: 731421416</li>
         <li>E-posta: destek@prosinta.com</li>
         <li>Yürürlük Tarihi: [●]</li>
       </ul>
