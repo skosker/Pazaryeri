@@ -34,9 +34,7 @@ export default function GizlilikPolitikasiPage() {
       <h2>12. Yürürlük</h2>
       <p>İşbu metin, yayımlandığı tarihte yürürlüğe girer. Prosinta, mevzuat ve hizmetlerindeki değişiklikler doğrultusunda metni güncelleyebilir.</p>
 
-      <h2>Künye</h2>
       <ul>
-        <li>Prosinta</li>
         <li>Prosinta Dijital Teknolojiler A.Ş.</li>
         <li>Adres: Levent Mah. Karanfil Sk. No: 13, Beşiktaş / İstanbul</li>
         <li>E-posta: destek@prosinta.com</li>
