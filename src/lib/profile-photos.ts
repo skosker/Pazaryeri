@@ -22,7 +22,7 @@ import { looksFeminine } from "@/lib/turkish-names";
 
 const PER_PAGE = 80;
 const MAX_PAGES_PER_QUERY = 5;
-const PHOTO_SIZE = 400; // avatars render at most ~96px, twice that covers retina
+const PHOTO_WIDTH = 400; // avatars render at most ~96px, twice that covers retina
 const UPDATE_CHUNK = 25;
 const SEARCH_ATTEMPTS = 3;
 
@@ -33,34 +33,36 @@ type Bucket = "kadin" | "erkek";
  * worded to bring back head-and-shoulders shots: a full-body photo loses its face when a
  * round avatar crops it.
  *
- * They ask for working-age people at work, which is what the profiles are: the generated
+ * They ask for working-age people, framed as portraits: the profiles are
  * ages run from 22 to 58 and cluster in the thirties, so a portrait of someone in their
  * seventies contradicts the age printed next to it. Wording matters more than it looks —
  * searching a stock library for a nationality returns documentary photography (village,
  * folk dress, elderly faces), while searching for the job returns office portraits of the
  * age the profiles claim.
  *
- * The Turkish locale is what keeps the results local; it comes first, and the broader
- * English searches follow only as a deeper pool, since Pexels does not hold twelve hundred
- * Turkish portraits. Whatever the searches do not cover keeps its drawn avatar.
+ * Locality comes from the search itself: the Turkish ones with the Turkish locale run
+ * first, and the English ones that follow name Turkey too rather than asking for portraits
+ * in general — that is the only lever a stock library gives, and it is the honest one.
+ * Pexels does not hold twelve hundred Turkish portraits, so the pool runs out; whatever
+ * the searches do not cover keeps its drawn avatar, which is the intended fallback.
  */
 const searches: { query: string; bucket: Bucket; locale: string }[] = [
   { query: "genç türk iş kadını portre", bucket: "kadin", locale: "tr-TR" },
   { query: "genç türk iş adamı portre", bucket: "erkek", locale: "tr-TR" },
-  { query: "ofiste genç kadın portre", bucket: "kadin", locale: "tr-TR" },
-  { query: "ofiste genç erkek portre", bucket: "erkek", locale: "tr-TR" },
-  { query: "kadın girişimci portre", bucket: "kadin", locale: "tr-TR" },
-  { query: "erkek girişimci portre", bucket: "erkek", locale: "tr-TR" },
-  { query: "laptopla çalışan genç kadın", bucket: "kadin", locale: "tr-TR" },
-  { query: "laptopla çalışan genç erkek", bucket: "erkek", locale: "tr-TR" },
-  { query: "genç kadın gülümseyen portre", bucket: "kadin", locale: "tr-TR" },
-  { query: "genç erkek gülümseyen portre", bucket: "erkek", locale: "tr-TR" },
-  { query: "young businesswoman headshot", bucket: "kadin", locale: "en-US" },
-  { query: "young businessman headshot", bucket: "erkek", locale: "en-US" },
-  { query: "young female professional portrait", bucket: "kadin", locale: "en-US" },
-  { query: "young male professional portrait", bucket: "erkek", locale: "en-US" },
-  { query: "woman freelancer working portrait", bucket: "kadin", locale: "en-US" },
-  { query: "man freelancer working portrait", bucket: "erkek", locale: "en-US" },
+  { query: "kadın portre yakın çekim", bucket: "kadin", locale: "tr-TR" },
+  { query: "erkek portre yakın çekim", bucket: "erkek", locale: "tr-TR" },
+  { query: "genç kadın portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "genç erkek portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "iş kadını portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "iş adamı portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "profesyonel kadın portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "profesyonel erkek portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "young turkish woman portrait", bucket: "kadin", locale: "en-US" },
+  { query: "young turkish man portrait", bucket: "erkek", locale: "en-US" },
+  { query: "turkish businesswoman headshot", bucket: "kadin", locale: "en-US" },
+  { query: "turkish businessman headshot", bucket: "erkek", locale: "en-US" },
+  { query: "istanbul woman portrait", bucket: "kadin", locale: "en-US" },
+  { query: "istanbul man portrait", bucket: "erkek", locale: "en-US" },
 ];
 
 export type ProfilePhotoProgress = {
@@ -166,10 +168,10 @@ async function searchPage(
       const body = (await response.json()) as { photos: { id: number; src: { large: string } }[] };
       return body.photos.map((photo) => ({
         id: photo.id,
-        // Their CDN crops in the query string, so ask for the square the avatar renders.
-        url:
-          `${photo.src.large.split("?")[0]}` +
-          `?auto=compress&cs=tinysrgb&fit=crop&w=${PHOTO_SIZE}&h=${PHOTO_SIZE}`,
+        // The whole portrait, not a square cut from its middle: the CDN crops from the
+        // centre and has no idea where the face is, so a full-length shot would come
+        // back as a torso. UserAvatar crops towards the top instead, where heads are.
+        url: `${photo.src.large.split("?")[0]}?auto=compress&cs=tinysrgb&w=${PHOTO_WIDTH}`,
       }));
     }
 
