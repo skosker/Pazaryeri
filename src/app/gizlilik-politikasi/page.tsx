@@ -3,12 +3,12 @@ import { LegalPage } from "@/components/legal-page";
 
 export const metadata: Metadata = { title: "Kişisel Verilerin Korunması Politikası" };
 
-// 11. maddedeki başvuru kanalı ile künyedeki adres, e-posta ve KEP adresi henüz
-// verilmedi. KVKK başvuru hakkının kullanılabilmesi için bu kanalın yayımlanması
-// gerektiğinden sayfa, bunlar doldurulana kadar taslak işaretiyle duruyor.
+// 11. maddedeki başvuru kanalı ile künyedeki adres, e-posta ve KEP adresi hâlâ [●]
+// olarak duruyor. KVKK başvuru hakkının fiilen kullanılabilmesi için bu kanalın
+// yayımlanması gerekiyor.
 export default function GizlilikPolitikasiPage() {
   return (
-    <LegalPage title="Kişisel Verilerin Korunması Politikası ve Aydınlatma Metni" draft>
+    <LegalPage title="Kişisel Verilerin Korunması Politikası ve Aydınlatma Metni">
       <h2>1. Veri Sorumlusu</h2>
       <p>İşbu metin, Prosinta platformunu işleten Prosinta Bilgi Teknolojileri Paz. ve Tic. A.Ş. (“Prosinta”) tarafından, 6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) kapsamında hazırlanmıştır.</p>
       <h2>2. İşlenen Kişisel Veriler</h2>

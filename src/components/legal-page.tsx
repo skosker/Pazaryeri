@@ -9,17 +9,11 @@ import { LegalNav } from "@/components/legal-nav";
 export function LegalPage({
   title,
   updatedAt,
-  draft,
   children,
 }: {
   title: string;
   /** Shown as "Son güncelleme"; leave out while the text is still being written. */
   updatedAt?: string;
-  /**
-   * Marks a text that is on the page but not finished — a contract missing its first
-   * clauses should not sit there looking final. Drop the flag when the text is complete.
-   */
-  draft?: boolean;
   children?: React.ReactNode;
 }) {
   return (
@@ -43,12 +37,6 @@ export function LegalPage({
           <h1 className="text-2xl font-bold text-brand-navy sm:text-3xl">{title}</h1>
           {updatedAt && (
             <p className="mt-2 text-xs text-slate-400">Son güncelleme: {updatedAt}</p>
-          )}
-
-          {draft && (
-            <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-              Bu metin hazırlanma aşamasındadır ve henüz tamamlanmamıştır.
-            </p>
           )}
 
           {children ? (

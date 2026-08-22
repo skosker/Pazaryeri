@@ -3,12 +3,11 @@ import { LegalPage } from "@/components/legal-page";
 
 export const metadata: Metadata = { title: "Kullanım Şartları" };
 
-// Künyedeki adres, MERSİS, vergi numarası, e-posta ve yürürlük tarihi henüz verilmedi.
-// 6563 sayılı Kanun bu bilgilerin yayımlanmasını arıyor, o yüzden sayfa bunlar
-// doldurulana kadar taslak işaretiyle duruyor.
+// Künyedeki adres, MERSİS, vergi numarası, e-posta ve yürürlük tarihi hâlâ [●] olarak
+// duruyor; 6563 sayılı Kanun bunların yayımlanmasını arıyor.
 export default function KullanimSartlariPage() {
   return (
-    <LegalPage title="Kullanım Şartları" draft>
+    <LegalPage title="Kullanım Şartları">
       <h2>1. GİRİŞ</h2>
       <p>İşbu “Site”, Prosinta Bilgi Teknolojileri Paz. ve Tic. A.Ş.’ye ait olup bundan böyle kısaca “Platform” olarak anılacaktır. Platform’da, Platform üzerinde, Platform içeriğinde ve işbu Kullanım Şartları’nda her türlü organizasyon, kullanım ve tasarruf yetkisi Platform’a aittir.</p>
       <p>Platform, 6563 sayılı Elektronik Ticaretin Düzenlenmesi Hakkında Kanun kapsamında Aracı Hizmet Sağlayıcı olarak faaliyet göstermektedir. Platform, kullanıcılar tarafından sağlanan içeriklerin, mal ve hizmetlerin hukuka uygunluğu konusunda mevzuatın kendisine yüklediği yükümlülükler saklı kalmak kaydıyla genel bir denetim yükümlülüğü altında değildir.</p>
