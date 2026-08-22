@@ -7,6 +7,7 @@ import Link from "next/link";
  * these links have to be reachable from everywhere.
  */
 
+/** Yan menü bu listenin tamamını gösterir; alt bar aşağıda bir kısmını eler. */
 export const legalLinks = [
   { href: "/hakkimizda", label: "Prosinta Hakkında" },
   { href: "/uyelik-sozlesmesi", label: "Üyelik Sözleşmesi" },
@@ -18,9 +19,13 @@ export const legalLinks = [
 export function LegalBar() {
   return (
     <div className="bg-brand-navy">
-      <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 text-xs text-slate-300 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-5 text-sm text-slate-300 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:px-8">
         <nav className="flex flex-wrap items-center gap-x-6 gap-y-2">
-          {legalLinks.map((link) => (
+          {/* Çerez tercihleri alt barda yer almıyor: sayfa duruyor ve KVKK metninden
+              erişilebiliyor, ama her sayfanın altında sıralanacak kadar öne çıkmıyor. */}
+          {legalLinks
+            .filter((link) => link.href !== "/cerez-tercihleri")
+            .map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -30,7 +35,7 @@ export function LegalBar() {
             </Link>
           ))}
         </nav>
-        <p className="shrink-0 text-slate-400">
+        <p className="shrink-0 text-sm text-slate-400">
           Prosinta Dijital Teknolojiler A.Ş. © {new Date().getFullYear()}
         </p>
       </div>

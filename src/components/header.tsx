@@ -32,7 +32,7 @@ export async function Header() {
             Freelancer Bul
           </Link>
           <Link href="/nasil-calisir" className="transition hover:text-brand-navy">
-            Nasıl Çalışır
+            Nasıl Çalışır?
           </Link>
         </nav>
 

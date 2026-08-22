@@ -50,7 +50,7 @@ export function MobileNav({
               Freelancer Bul
             </Link>
             <Link href="/nasil-calisir" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2.5 hover:bg-slate-50">
-              Nasıl Çalışır
+              Nasıl Çalışır?
             </Link>
             {!user && (
               <Link
