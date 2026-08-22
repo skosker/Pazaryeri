@@ -27,8 +27,7 @@ Son güncelleme: 22 Ağustos 2026
 - [ ] **İlan kapak fotoğrafları:** `/admin/kapaklar` → "Eksik kapakları doldur".
       Basılmadığı sürece kapaklar çizimli görünüyor.
 
-- [ ] **Künyede kalan alan:** Yürürlük Tarihi (`[●]`).
-      KEP adresi, hesap açılırsa KVKK künyesine eklenmeli.
+- [ ] **KEP adresi**, hesap açılırsa KVKK künyesine eklenmeli.
 
 - [ ] **DMARC'ı sıkılaştır.** Bir hafta gönderim geçtikten sonra Natro'daki
       `_dmarc` TXT kaydını `v=DMARC1; p=quarantine; rua=mailto:destek@prosinta.com`

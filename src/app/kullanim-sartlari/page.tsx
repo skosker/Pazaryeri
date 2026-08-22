@@ -3,8 +3,8 @@ import { LegalPage } from "@/components/legal-page";
 
 export const metadata: Metadata = { title: "Kullanım Şartları" };
 
-// Künyede yalnızca yürürlük tarihi [●] olarak duruyor; 6563 sayılı Kanun onun da
-// yayımlanmasını arıyor.
+// Künyede yürürlük tarihi bilinçli olarak yok; metnin kendisi "yayımlandığı tarihte
+// yürürlüğe girer" diyor.
 export default function KullanimSartlariPage() {
   return (
     <LegalPage title="Kullanım Şartları">
@@ -64,7 +64,6 @@ export default function KullanimSartlariPage() {
         <li>Vergi Dairesi: Beşiktaş</li>
         <li>Vergi No: 7331421416</li>
         <li>E-posta: destek@prosinta.com</li>
-        <li>Yürürlük Tarihi: [●]</li>
       </ul>
     </LegalPage>
   );
