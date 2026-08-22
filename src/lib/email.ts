@@ -5,6 +5,37 @@ const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KE
 
 const FROM = process.env.RESEND_FROM_EMAIL ?? "Prosinta <onboarding@resend.dev>";
 
+/** Replies go somewhere a person reads, which also reads as legitimate to spam filters. */
+const REPLY_TO = process.env.RESEND_REPLY_TO ?? "destek@prosinta.com";
+
+/**
+ * A readable plain-text version of the HTML body.
+ *
+ * An HTML-only message is one of the oldest spam signals there is: real senders offer
+ * both parts and bulk senders often do not. Deriving the text from the same markup keeps
+ * the two from drifting apart, which is its own signal when they disagree.
+ *
+ * Links are written out as "etiket: adres" because a text part that mentions a button
+ * the reader cannot press is worse than no text part at all.
+ */
+function toPlainText(html: string) {
+  return html
+    .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gis, "$2: $1")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|h1|h2|div|li)>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&#8203;/g, "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line, i, lines) => line !== "" || lines[i - 1] !== "")
+    .join("\n")
+    .trim();
+}
+
 async function sendEmail(to: string, subject: string, html: string) {
   if (!resend) {
     console.log(`[email:mock] to=${to} subject="${subject}"`);
@@ -12,7 +43,14 @@ async function sendEmail(to: string, subject: string, html: string) {
   }
 
   try {
-    await resend.emails.send({ from: FROM, to, subject, html });
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject,
+      html,
+      text: toPlainText(html),
+      replyTo: REPLY_TO,
+    });
   } catch (error) {
     console.error("Failed to send email", error);
   }
