@@ -10,7 +10,7 @@ export default function GizlilikPolitikasiPage() {
   return (
     <LegalPage title="Kişisel Verilerin Korunması Politikası ve Aydınlatma Metni">
       <h2>1. Veri Sorumlusu</h2>
-      <p>İşbu metin, Prosinta platformunu işleten Prosinta Bilgi Teknolojileri Paz. ve Tic. A.Ş. (“Prosinta”) tarafından, 6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) kapsamında hazırlanmıştır.</p>
+      <p>İşbu metin, Prosinta platformunu işleten Prosinta Dijital Teknolojiler A.Ş. (“Prosinta”) tarafından, 6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) kapsamında hazırlanmıştır.</p>
       <h2>2. İşlenen Kişisel Veriler</h2>
       <p>Üyelik ve platform kullanımı kapsamında; kimlik, iletişim, adres, hesap ve işlem bilgileri, ödeme bilgileri, profil bilgileri, mesajlaşma içerikleri, IP adresi, cihaz ve işlem kayıtları ile mevzuatın izin verdiği diğer veriler işlenebilir.</p>
       <h2>3. İşleme Amaçları</h2>
@@ -37,7 +37,7 @@ export default function GizlilikPolitikasiPage() {
       <h2>Künye</h2>
       <ul>
         <li>Prosinta</li>
-        <li>Prosinta Bilgi Teknolojileri Paz. ve Tic. A.Ş.</li>
+        <li>Prosinta Dijital Teknolojiler A.Ş.</li>
         <li>Adres: [●]</li>
         <li>E-posta: [●]</li>
         <li>KEP Adresi: [●]</li>

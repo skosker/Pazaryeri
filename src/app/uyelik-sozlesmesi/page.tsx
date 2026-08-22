@@ -4,12 +4,12 @@ import { LegalPage } from "@/components/legal-page";
 export const metadata: Metadata = { title: "Üyelik Sözleşmesi" };
 
 // Metinde [ŞİRKET UNVANI] ve [PLATFORM ADI] yer tutucuları, alt bardaki unvanla aynı
-// olacak şekilde "Prosinta Bilgi Teknolojileri Paz. ve Tic. A.Ş." ve "Prosinta" ile
+// olacak şekilde "Prosinta Dijital Teknolojiler A.Ş." ve "Prosinta" ile
 // dolduruldu; unvan farklıysa buradan düzeltilir.
 export default function UyelikSozlesmesiPage() {
   return (
     <LegalPage title="Üyelik Sözleşmesi">
-      <p>İşbu Kullanıcı Sözleşmesi (“Sözleşme”), Prosinta Bilgi Teknolojileri Paz. ve Tic. A.Ş. (“Şirket”) tarafından işletilen Prosinta internet sitesi, mobil uygulamaları ve bunlara bağlı dijital hizmetlerden (“Platform”) yararlanan gerçek veya tüzel kişiler (“Kullanıcı”) arasında elektronik ortamda kurulmuştur.</p>
+      <p>İşbu Kullanıcı Sözleşmesi (“Sözleşme”), Prosinta Dijital Teknolojiler A.Ş. (“Şirket”) tarafından işletilen Prosinta internet sitesi, mobil uygulamaları ve bunlara bağlı dijital hizmetlerden (“Platform”) yararlanan gerçek veya tüzel kişiler (“Kullanıcı”) arasında elektronik ortamda kurulmuştur.</p>
       <p>Platform’a üye olan veya Platform üzerinden herhangi bir hizmet kullanan Kullanıcı, işbu Sözleşme’yi okuduğunu, anladığını ve kabul ettiğini beyan eder.</p>
       <h2>MADDE 1 – TARAFLAR VE TANIMLAR</h2>
       <p>1.1. Platform: Şirket tarafından işletilen, hizmet sunan profesyoneller ile bu hizmetlere ihtiyaç duyan kişi ve işletmeleri dijital ortamda bir araya getiren çevrimiçi platformdur.</p>

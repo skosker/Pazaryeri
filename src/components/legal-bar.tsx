@@ -31,7 +31,7 @@ export function LegalBar() {
           ))}
         </nav>
         <p className="shrink-0 text-slate-400">
-          Prosinta Bilgi Teknolojileri Paz. ve Tic. A.Ş. © {new Date().getFullYear()}
+          Prosinta Dijital Teknolojiler A.Ş. © {new Date().getFullYear()}
         </p>
       </div>
     </div>

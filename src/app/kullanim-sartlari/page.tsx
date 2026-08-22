@@ -9,7 +9,7 @@ export default function KullanimSartlariPage() {
   return (
     <LegalPage title="Kullanım Şartları">
       <h2>1. GİRİŞ</h2>
-      <p>İşbu “Site”, Prosinta Bilgi Teknolojileri Paz. ve Tic. A.Ş.’ye ait olup bundan böyle kısaca “Platform” olarak anılacaktır. Platform’da, Platform üzerinde, Platform içeriğinde ve işbu Kullanım Şartları’nda her türlü organizasyon, kullanım ve tasarruf yetkisi Platform’a aittir.</p>
+      <p>İşbu “Site”, Prosinta Dijital Teknolojiler A.Ş.’ye ait olup bundan böyle kısaca “Platform” olarak anılacaktır. Platform’da, Platform üzerinde, Platform içeriğinde ve işbu Kullanım Şartları’nda her türlü organizasyon, kullanım ve tasarruf yetkisi Platform’a aittir.</p>
       <p>Platform, 6563 sayılı Elektronik Ticaretin Düzenlenmesi Hakkında Kanun kapsamında Aracı Hizmet Sağlayıcı olarak faaliyet göstermektedir. Platform, kullanıcılar tarafından sağlanan içeriklerin, mal ve hizmetlerin hukuka uygunluğu konusunda mevzuatın kendisine yüklediği yükümlülükler saklı kalmak kaydıyla genel bir denetim yükümlülüğü altında değildir.</p>
       <p>Platform, işbu Kullanım Şartları’nı mevzuata uygun olmak kaydıyla her zaman değiştirme, güncelleme veya yenileme hakkını saklı tutar. Güncellenen hükümler Platform’da yayımlandığı tarihte yürürlüğe girer.</p>
       <h2>2. KULLANIM ŞARTLARI</h2>
@@ -58,7 +58,7 @@ export default function KullanimSartlariPage() {
 
       <h2>Künye</h2>
       <ul>
-        <li>Prosinta Bilgi Teknolojileri Paz. ve Tic. A.Ş.</li>
+        <li>Prosinta Dijital Teknolojiler A.Ş.</li>
         <li>Adres: [●]</li>
         <li>MERSİS No: [●]</li>
         <li>Vergi No: [●]</li>
