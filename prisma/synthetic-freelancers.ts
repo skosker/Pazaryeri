@@ -12,7 +12,8 @@
  * the e-mail, so two people with the same profession still look nothing alike.
  */
 
-import { feminineNames, looksFeminine, masculineNames } from "../src/lib/turkish-names";
+import { drawnAvatarUrl } from "../src/lib/avatar-seed";
+import { feminineNames, masculineNames } from "../src/lib/turkish-names";
 
 export type SyntheticFreelancer = {
   email: string;
@@ -557,7 +558,7 @@ export function generateSyntheticFreelancers(
     // years behind them is 25: the range is what is left after school.
     const years = Math.max(1, Math.min(age - 21, 2 + r(13)));
 
-    const avatarSeed = `${feminine ? "k" : "e"}-${slugifyName(name)}-${index + 1}`;
+
 
     people.push({
       email,
@@ -566,7 +567,7 @@ export function generateSyntheticFreelancers(
       age,
       city: city.name,
       skills,
-      image: `/api/avatar/${avatarSeed}`,
+      image: drawnAvatarUrl(name, email),
       bio: buildBio(name.split(" ")[0], profession.title, years, city, skills, r),
       categorySlug: profession.categorySlug,
       isOnline: r(3) === 0,
@@ -638,35 +639,15 @@ export function describeShowcaseFreelancer(
   const years = Math.max(1, Math.min(age - 21, 2 + r(13)));
   const firstName = seller.name.split(" ")[0];
 
-  // Several of the bulk sellers share a display name ("Ahmet A." is both fl1 and fl121),
-  // so the local part of the address goes into the seed to keep the drawings apart.
-  const feminine = looksFeminine(firstName);
-  const prefix = feminine === null ? "" : feminine ? "k-" : "e-";
-  const handle = seller.email.split("@")[0];
-
   return {
     email: seller.email,
     age,
     city: city.name,
     skills,
-    image: `/api/avatar/${prefix}${slugifyName(seller.name)}-${handle}`,
+    image: drawnAvatarUrl(seller.name, seller.email),
     bio:
       skills.length >= 2
         ? buildBio(firstName, seller.title, years, city, skills, r)
         : `${city.locative} yaşayan bir ${seller.title}. ${years} yıldır Profestia'da hizmet veriyorum.`,
   };
-}
-
-/** ASCII form of a name, used to keep avatar URLs readable and path-safe. */
-function slugifyName(name: string) {
-  return name
-    .toLowerCase()
-    .replace(/ğ/g, "g")
-    .replace(/ü/g, "u")
-    .replace(/ş/g, "s")
-    .replace(/ı/g, "i")
-    .replace(/ö/g, "o")
-    .replace(/ç/g, "c")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
 }

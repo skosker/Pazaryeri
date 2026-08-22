@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { formatIban } from "@/lib/iban";
 import { PayoutForm } from "./payout-form";
+import { formatPrice } from "@/lib/format-price";
 
 const statusLabels = {
   PENDING: { label: "Ödeme bekliyor", tone: "bg-amber-50 text-amber-700" },
@@ -48,7 +49,7 @@ export default async function PayoutDetailsPage() {
           {pendingTotal > 0 && (
             <p className="text-sm text-slate-500">
               Ödeme bekleyen toplam:{" "}
-              <span className="font-semibold text-brand-navy">{pendingTotal.toLocaleString("tr-TR")}₺</span>
+              <span className="font-semibold text-brand-navy">{formatPrice(pendingTotal)}₺</span>
             </p>
           )}
         </div>
@@ -86,7 +87,7 @@ export default async function PayoutDetailsPage() {
                         </p>
                       </td>
                       <td className="px-5 py-4 font-semibold text-brand-navy">
-                        {Number(payout.net).toLocaleString("tr-TR")}₺
+                        {formatPrice(payout.net)}₺
                       </td>
                       <td className="px-5 py-4">
                         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${status.tone}`}>

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { togglePublishedAction, deleteGigAction } from "./actions";
+import { formatPrice } from "@/lib/format-price";
 
 export default async function AdminGigsPage() {
   const gigs = await prisma.gig.findMany({
@@ -39,7 +40,7 @@ export default async function AdminGigsPage() {
                 <td className="px-5 py-4 text-slate-600">{gig.seller.name}</td>
                 <td className="px-5 py-4 text-slate-500">{gig.category.name}</td>
                 <td className="px-5 py-4 font-semibold text-brand-navy">
-                  {gig.packages[0] ? Number(gig.packages[0].price) : 0}₺
+                  {formatPrice(gig.packages[0]?.price ?? 0)}₺
                 </td>
                 <td className="px-5 py-4">
                   {gig.published ? (

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { orderAction } from "./actions";
+import { formatPrice } from "@/lib/format-price";
 
 export type PackageOption = {
   id: string;
@@ -67,7 +68,7 @@ export function OrderPanel({
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-brand-navy">{pkg.name}</h2>
           <div className="text-right">
-            <span className="text-2xl font-extrabold text-brand-navy">{pkg.price}₺</span>
+            <span className="text-2xl font-extrabold text-brand-navy">{formatPrice(pkg.price)}₺</span>
             <p className="text-xs text-slate-400">KDV dahil</p>
           </div>
         </div>

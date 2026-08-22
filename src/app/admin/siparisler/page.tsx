@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import type { OrderStatus } from "@/generated/prisma/client";
+import { formatPrice } from "@/lib/format-price";
 
 const statusLabel: Record<OrderStatus, string> = {
   PENDING_PAYMENT: "Ödeme Bekliyor",
@@ -98,7 +99,7 @@ export default async function AdminOrdersPage(props: PageProps<"/admin/siparisle
                   <td className="px-5 py-4 text-slate-600">{order.buyer.name}</td>
                   <td className="px-5 py-4 text-slate-600">{order.gig.seller.name}</td>
                   <td className="px-5 py-4 font-semibold text-brand-navy">
-                    {Number(order.amount)}₺
+                    {formatPrice(order.amount)}₺
                   </td>
                   <td className="px-5 py-4">
                     <span

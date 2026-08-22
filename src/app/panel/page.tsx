@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { orderStatusLabel, orderStatusColor } from "@/lib/order-status";
+import { formatPrice } from "@/lib/format-price";
 
 export default async function PanelPage() {
   const session = await auth();
@@ -74,14 +75,14 @@ export default async function PanelPage() {
       <div className="mb-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
         {role === "FREELANCER" ? (
           <>
-            <StatCard label="Toplam Kazanç" value={`${sellerEarnings}₺`} />
+            <StatCard label="Toplam Kazanç" value={`${formatPrice(sellerEarnings)}₺`} />
             <StatCard label="Aktif Sipariş" value={String(sellerActiveCount)} />
             <StatCard label="Yayınlı İlan" value={String(myGigs.filter((g) => g.published).length)} />
             <StatCard label="Puan" value={avgRating ? `${avgRating.toFixed(1)} ★` : "—"} />
           </>
         ) : (
           <>
-            <StatCard label="Toplam Harcama" value={`${buyerSpent}₺`} />
+            <StatCard label="Toplam Harcama" value={`${formatPrice(buyerSpent)}₺`} />
             <StatCard label="Aktif Sipariş" value={String(buyerActiveCount)} />
             <StatCard label="Toplam Sipariş" value={String(ordersAsBuyer.length)} />
           </>
@@ -113,7 +114,7 @@ export default async function PanelPage() {
                   <p className="mt-2 text-sm text-slate-500">
                     Başlangıç{" "}
                     <span className="font-semibold text-brand-navy">
-                      {gig.packages[0] ? Number(gig.packages[0].price) : 0}₺
+                      {formatPrice(gig.packages[0]?.price ?? 0)}₺
                     </span>
                   </p>
                 </Link>
@@ -208,7 +209,7 @@ function OrderTable({
                 <p className="font-medium text-brand-navy">{row.title}</p>
                 {row.subtitle && <p className="text-xs text-slate-400">{row.subtitle}</p>}
               </td>
-              <td className="px-5 py-4 font-semibold text-brand-navy">{row.amount}₺</td>
+              <td className="px-5 py-4 font-semibold text-brand-navy">{formatPrice(row.amount)}₺</td>
               <td className="px-5 py-4">
                 <span className={`rounded-full px-3 py-1 text-xs font-semibold ${orderStatusColor[row.status]}`}>
                   {orderStatusLabel[row.status]}

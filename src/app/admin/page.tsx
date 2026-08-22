@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { listPendingBankTransfers } from "@/lib/order-actions";
+import { formatPrice } from "@/lib/format-price";
 
 export default async function AdminDashboardPage() {
   const [userCount, freelancerCount, gigCount, orderCount, pending, completedOrders] =
@@ -25,7 +26,7 @@ export default async function AdminDashboardPage() {
         <StatCard label="Freelancer" value={String(freelancerCount)} />
         <StatCard label="İlan" value={String(gigCount)} />
         <StatCard label="Sipariş" value={String(orderCount)} />
-        <StatCard label="Tamamlanan Ciro" value={`${totalRevenue}₺`} />
+        <StatCard label="Tamamlanan Ciro" value={`${formatPrice(totalRevenue)}₺`} />
       </div>
 
       <div className="mt-10">
@@ -54,7 +55,7 @@ export default async function AdminDashboardPage() {
                         Sipariş #{order.id.slice(-8).toUpperCase()} · {order.buyer.name}
                       </p>
                     </td>
-                    <td className="px-5 py-4 font-semibold text-brand-navy">{Number(order.amount)}₺</td>
+                    <td className="px-5 py-4 font-semibold text-brand-navy">{formatPrice(order.amount)}₺</td>
                     <td className="px-5 py-4 text-right">
                       <Link href={`/siparis/${order.id}`} className="font-semibold text-purple-700 hover:underline">
                         İncele

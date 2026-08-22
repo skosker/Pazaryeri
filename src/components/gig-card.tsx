@@ -4,6 +4,7 @@ import { GigCover } from "@/components/gig-cover";
 import { UserAvatar } from "@/components/user-avatar";
 import { getCategoryAccent } from "@/lib/category-style";
 import type { GigCardData } from "@/lib/gigs";
+import { formatPrice } from "@/lib/format-price";
 
 export function GigCard({ gig }: { gig: GigCardData }) {
   const accent = getCategoryAccent(gig.categorySlug);
@@ -62,7 +63,7 @@ export function GigCard({ gig }: { gig: GigCardData }) {
 
         <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-3">
           <span className="text-xs text-slate-400">Başlangıç fiyatı</span>
-          <span className="text-lg font-extrabold text-brand-navy">{gig.startingPrice}₺</span>
+          <span className="text-lg font-extrabold text-brand-navy">{formatPrice(gig.startingPrice)}₺</span>
         </div>
       </div>
     </Link>
