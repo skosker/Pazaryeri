@@ -3,9 +3,9 @@ import { LegalPage } from "@/components/legal-page";
 
 export const metadata: Metadata = { title: "Kişisel Verilerin Korunması Politikası" };
 
-// 11. maddedeki başvuru kanalı ile künyedeki adres, e-posta ve KEP adresi hâlâ [●]
-// olarak duruyor. KVKK başvuru hakkının fiilen kullanılabilmesi için bu kanalın
-// yayımlanması gerekiyor.
+// Başvuru kanalı destek@prosinta.com olarak yayımlandı. Künyedeki adres ve KEP adresi
+// hâlâ [●]: ikisi de KVKK başvurularında aranan bilgiler, şirket kaydı tamamlanınca
+// doldurulmalı.
 export default function GizlilikPolitikasiPage() {
   return (
     <LegalPage title="Kişisel Verilerin Korunması Politikası ve Aydınlatma Metni">
@@ -30,7 +30,7 @@ export default function GizlilikPolitikasiPage() {
       <h2>10. İlgili Kişinin Hakları</h2>
       <p>KVKK’nın 11. maddesi kapsamında kullanıcı; kişisel verilerinin işlenip işlenmediğini öğrenme, bilgi talep etme, düzeltilmesini veya silinmesini isteme, işlenmesine itiraz etme ve kanunda belirtilen diğer haklarını kullanma hakkına sahiptir.</p>
       <h2>11. Başvuru</h2>
-      <p>KVKK kapsamındaki talepler, [KEP Adresi / E-posta Adresi / Şirket Adresi] üzerinden Prosinta’ya iletilebilir.</p>
+      <p>KVKK kapsamındaki talepler, destek@prosinta.com adresi üzerinden Prosinta’ya iletilebilir.</p>
       <h2>12. Yürürlük</h2>
       <p>İşbu metin, yayımlandığı tarihte yürürlüğe girer. Prosinta, mevzuat ve hizmetlerindeki değişiklikler doğrultusunda metni güncelleyebilir.</p>
 
@@ -39,7 +39,7 @@ export default function GizlilikPolitikasiPage() {
         <li>Prosinta</li>
         <li>Prosinta Dijital Teknolojiler A.Ş.</li>
         <li>Adres: [●]</li>
-        <li>E-posta: [●]</li>
+        <li>E-posta: destek@prosinta.com</li>
         <li>KEP Adresi: [●]</li>
       </ul>
     </LegalPage>
