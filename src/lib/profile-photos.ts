@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { PEXELS_HOST, RateLimitError } from "@/lib/cover-photos";
 import { looksFeminine } from "@/lib/turkish-names";
+import { drawnAvatarUrl } from "@/lib/avatar-seed";
 
 /**
  * Real portrait photographs for the generated freelancer profiles, from Pexels.
@@ -145,6 +146,36 @@ function summarise(profiles: ProfileRow[], force: boolean): ProfilePhotoProgress
 
 export async function profilePhotoProgress(): Promise<ProfilePhotoProgress> {
   return summarise(await loadProfiles(), false);
+}
+
+/**
+ * Puts every generated profile back on its drawn avatar, dropping the fetched
+ * photographs. This is the way back: the photo run can be repeated afterwards, and
+ * nothing here is lost that a re-run cannot fetch again.
+ *
+ * Only profiles this module owns are touched — a real seller's own upload is not a photo
+ * we fetched, and is left alone.
+ */
+export async function resetProfilePhotos(): Promise<{ reset: number }> {
+  const profiles = await prisma.user.findMany({
+    where: { role: "FREELANCER", synthetic: true },
+    select: { id: true, name: true, email: true, image: true },
+  });
+
+  const targets = profiles.filter((row) => row.image?.startsWith(PEXELS_HOST) || row.image === null);
+
+  for (let i = 0; i < targets.length; i += UPDATE_CHUNK) {
+    await prisma.$transaction(
+      targets.slice(i, i + UPDATE_CHUNK).map((row) =>
+        prisma.user.update({
+          where: { id: row.id },
+          data: { image: drawnAvatarUrl(row.name, row.email) },
+        })
+      )
+    );
+  }
+
+  return { reset: targets.length };
 }
 
 type Photo = { id: number; url: string; alt: string };

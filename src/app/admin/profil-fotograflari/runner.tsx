@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { runProfilePhotoBatch } from "./actions";
+import { resetProfilePhotosAction, runProfilePhotoBatch } from "./actions";
 import type { ProfilePhotoProgress } from "@/lib/profile-photos";
 
 /**
@@ -21,11 +21,34 @@ export function ProfilePhotoRunner({
   const [error, setError] = useState<string | null>(null);
   const [exhausted, setExhausted] = useState<string[]>([]);
   const [finished, setFinished] = useState(false);
+  const [reverted, setReverted] = useState<number | null>(null);
+
+  async function revert() {
+    if (!confirm("Bütün üretilmiş profiller çizilen avatara döndürülecek. Fotoğrafları sonra tekrar çekebilirsin. Devam edilsin mi?")) {
+      return;
+    }
+
+    setRunning(true);
+    setError(null);
+    setFinished(false);
+    setReverted(null);
+
+    const result = await resetProfilePhotosAction();
+    if (result.ok) {
+      setProgress(result.progress);
+      setReverted(result.reset);
+    } else {
+      setError(result.error);
+    }
+
+    setRunning(false);
+  }
 
   async function run(force: boolean) {
     setRunning(true);
     setError(null);
     setFinished(false);
+    setReverted(null);
     setExhausted([]);
 
     const dead = new Set<string>();
@@ -113,6 +136,14 @@ export function ProfilePhotoRunner({
         >
           Hepsini yeniden çek
         </button>
+        <button
+          type="button"
+          onClick={revert}
+          disabled={running || progress.withPhoto === 0}
+          className="rounded-full border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-400"
+        >
+          Çizimlere dön
+        </button>
       </div>
 
       {running && (
@@ -122,6 +153,13 @@ export function ProfilePhotoRunner({
       )}
 
       {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
+
+      {reverted !== null && !error && (
+        <p className="mt-4 rounded-lg bg-slate-50 px-4 py-3 text-sm text-slate-600">
+          {reverted} profil çizilen avatara döndürüldü. Fotoğrafları istediğin zaman
+          &quot;Eksik fotoğrafları doldur&quot; ile tekrar çekebilirsin.
+        </p>
+      )}
 
       {finished && !error && (
         <p className="mt-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">

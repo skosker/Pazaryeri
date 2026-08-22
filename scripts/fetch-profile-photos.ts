@@ -1,6 +1,10 @@
 import "dotenv/config";
 import { prisma } from "../src/lib/prisma";
-import { assignProfilePhotos, profilePhotoProgress } from "../src/lib/profile-photos";
+import {
+  assignProfilePhotos,
+  profilePhotoProgress,
+  resetProfilePhotos,
+} from "../src/lib/profile-photos";
 
 /**
  * Command-line front end for the profile-photo run. The same job is a button in the
@@ -9,13 +13,22 @@ import { assignProfilePhotos, profilePhotoProgress } from "../src/lib/profile-ph
  *
  *   npm run profil:fotograf              # fotoğrafı olmayan profilleri doldur
  *   npm run profil:fotograf -- --force   # hepsini yeniden çek
+ *   npm run profil:fotograf -- --sifirla # fotoğrafları bırakıp çizimlere dön
  *
  * Needs PEXELS_API_KEY (free, https://www.pexels.com/api/) and DATABASE_URL.
  */
 
 const force = process.argv.slice(2).includes("--force");
+const reset = process.argv.slice(2).includes("--sifirla");
 
 async function run() {
+  if (reset) {
+    const { reset: count } = await resetProfilePhotos();
+    console.log(`${count} profil çizilen avatara döndürüldü.`);
+    console.log("Fotoğrafları istediğin zaman tekrar çekebilirsin: npm run profil:fotograf");
+    return;
+  }
+
   const start = await profilePhotoProgress();
   console.log(`${start.total} üretilmiş profil · ${start.withPhoto} zaten fotoğraflı`);
 
