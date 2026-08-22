@@ -165,8 +165,6 @@ export function avatarSvg(seed: string): string {
   const glasses = r(10) < 3;
   const smiling = r(4) > 0;
 
-  const skinShadow = shade(skin, 0.12);
-  const collar = shade(shirt, 0.22);
   const brow = shade(hairColour, 0.15);
 
   // The gradient id has to be unique: two avatars inlined in the same page would
