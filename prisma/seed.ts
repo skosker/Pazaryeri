@@ -24,7 +24,7 @@ const categories = [
 
 const gigs = [
   {
-    seller: "elif@profestia.dev",
+    seller: "elif@demo.prosinta.com",
     category: "dijital-pazarlama",
     subcategory: "Sosyal Medya Yönetimi",
     title: "Sosyal medya içerik tasarımı yapıyorum",
@@ -35,7 +35,7 @@ const gigs = [
       "Instagram, Facebook ve LinkedIn hesabınız için markanıza özel, dikkat çekici sosyal medya içerikleri tasarlıyorum. Kaynak dosyalar ve 2 revizyon dahildir.",
   },
   {
-    seller: "mert@profestia.dev",
+    seller: "mert@demo.prosinta.com",
     category: "yazilim-web",
     subcategory: "Web Sitesi Geliştirme",
     title: "Kurumsal web siteniz için ön yüz geliştiriyorum",
@@ -46,7 +46,7 @@ const gigs = [
       "Next.js ve Tailwind CSS ile hızlı, mobil uyumlu ve SEO dostu kurumsal web siteleri geliştiriyorum. Modern, temiz ve sürdürülebilir kod.",
   },
   {
-    seller: "asli@profestia.dev",
+    seller: "asli@demo.prosinta.com",
     category: "yazi-ceviri",
     subcategory: "İçerik & Blog Yazarlığı",
     title: "SEO uyumlu blog yazıları ve içerik üretiyorum",
@@ -57,7 +57,7 @@ const gigs = [
       "Anahtar kelime araştırması yaparak Google'da üst sıralarda yer almanızı sağlayacak, akıcı ve özgün blog içerikleri yazıyorum.",
   },
   {
-    seller: "can@profestia.dev",
+    seller: "can@demo.prosinta.com",
     category: "grafik-tasarim",
     subcategory: "Kurumsal Kimlik",
     title: "Profesyonel logo ve marka kimliği tasarlıyorum",
@@ -68,7 +68,7 @@ const gigs = [
       "Markanızı yansıtan özgün logo tasarımı, renk paleti ve tipografi ile eksiksiz bir marka kimliği paketi hazırlıyorum.",
   },
   {
-    seller: "zeynep@profestia.dev",
+    seller: "zeynep@demo.prosinta.com",
     category: "video-animasyon",
     subcategory: "Sosyal Medya Video Kurgu",
     title: "Youtube ve reels için video kurgusu yapıyorum",
@@ -79,7 +79,7 @@ const gigs = [
       "Ham çekimlerinizi profesyonel geçişler, altyazı ve renk düzenlemesiyle akıcı bir kurguya dönüştürüyorum.",
   },
   {
-    seller: "burak@profestia.dev",
+    seller: "burak@demo.prosinta.com",
     category: "dijital-pazarlama",
     subcategory: "Sosyal Medya Reklamcılığı",
     title: "Google & Meta reklam kampanyanızı yönetiyorum",
@@ -90,7 +90,7 @@ const gigs = [
       "Bütçenizi verimli kullanarak dönüşüm odaklı Google Ads ve Meta Ads kampanyaları kurup optimize ediyorum.",
   },
   {
-    seller: "mert@profestia.dev",
+    seller: "mert@demo.prosinta.com",
     category: "yazilim-web",
     subcategory: "E-ticaret Geliştirme",
     title: "E-ticaret siteniz için ödeme entegrasyonu yapıyorum",
@@ -101,7 +101,7 @@ const gigs = [
       "iyzico, Stripe veya PayPal ile güvenli ödeme altyapısını sitenize sorunsuz şekilde entegre ediyorum.",
   },
   {
-    seller: "can@profestia.dev",
+    seller: "can@demo.prosinta.com",
     category: "grafik-tasarim",
     subcategory: "Sosyal Medya Tasarımları",
     title: "Ürün kataloğunuz için sosyal medya postu tasarlıyorum",
@@ -112,7 +112,7 @@ const gigs = [
       "Ürünlerinizi öne çıkaran, satış odaklı görsel post ve story tasarımları hazırlıyorum.",
   },
   {
-    seller: "asli@profestia.dev",
+    seller: "asli@demo.prosinta.com",
     category: "yazi-ceviri",
     subcategory: "Çeviri Hizmetleri",
     title: "İngilizce-Türkçe profesyonel çeviri yapıyorum",
@@ -123,7 +123,7 @@ const gigs = [
       "Teknik dokümanlar, web siteleri ve pazarlama metinlerinizi anlam bütünlüğünü koruyarak İngilizce-Türkçe çeviriyorum.",
   },
   {
-    seller: "zeynep@profestia.dev",
+    seller: "zeynep@demo.prosinta.com",
     category: "video-animasyon",
     subcategory: "Logo & Motion Animasyon",
     title: "2D logo animasyonu ve marka intro'su hazırlıyorum",
@@ -134,7 +134,7 @@ const gigs = [
       "Markanızın logosunu akıcı bir 2D animasyona dönüştürüp video içeriklerinizin başına eklenecek profesyonel bir intro hazırlıyorum.",
   },
   {
-    seller: "zeynep@profestia.dev",
+    seller: "zeynep@demo.prosinta.com",
     category: "muzik-ses",
     subcategory: "Podcast Prodüksiyonu",
     title: "Podcast ve video için ses miksajı ve düzenleme yapıyorum",
@@ -145,7 +145,7 @@ const gigs = [
       "Ham ses kayıtlarınızı gürültüden arındırıp seviye dengelemesi yaparak yayına hazır, temiz bir mikse dönüştürüyorum.",
   },
   {
-    seller: "elif@profestia.dev",
+    seller: "elif@demo.prosinta.com",
     category: "muzik-ses",
     subcategory: "Video & Sunum Müziği",
     title: "Sosyal medya videolarınız için müzik ve seslendirme buluyorum",
@@ -156,7 +156,7 @@ const gigs = [
       "İçeriğinizin tonuna uygun telifsiz müzik seçimi yapıyor, gerektiğinde kısa seslendirme kaydı da sağlıyorum.",
   },
   {
-    seller: "burak@profestia.dev",
+    seller: "burak@demo.prosinta.com",
     category: "is-danismanlik",
     subcategory: "Pazarlama & Marka Danışmanlığı",
     title: "Küçük işletmeler için pazarlama stratejisi danışmanlığı veriyorum",
@@ -167,7 +167,7 @@ const gigs = [
       "İşletmenizin hedef kitlesini, rakiplerini ve kanallarını analiz ederek uygulanabilir bir pazarlama yol haritası çıkarıyorum.",
   },
   {
-    seller: "mert@profestia.dev",
+    seller: "mert@demo.prosinta.com",
     category: "is-danismanlik",
     subcategory: "Süreç & Proje Yönetimi",
     title: "Yazılım projeniz için teknik danışmanlık ve kod incelemesi yapıyorum",
@@ -178,7 +178,7 @@ const gigs = [
       "Mevcut kod tabanınızı inceleyip mimari, performans ve güvenlik açısından somut iyileştirme önerileri sunuyorum.",
   },
   {
-    seller: "asli@profestia.dev",
+    seller: "asli@demo.prosinta.com",
     category: "egitim-ders",
     subcategory: "Tasarım & Dijital Beceri Eğitimi",
     title: "İçerik yazarlığı ve SEO üzerine birebir online ders veriyorum",
@@ -189,7 +189,7 @@ const gigs = [
       "SEO uyumlu içerik yazımının temellerini, anahtar kelime araştırmasını ve yazı planlamasını birebir canlı derste anlatıyorum.",
   },
   {
-    seller: "can@profestia.dev",
+    seller: "can@demo.prosinta.com",
     category: "egitim-ders",
     subcategory: "Tasarım & Dijital Beceri Eğitimi",
     title: "Grafik tasarım temelleri online eğitimi veriyorum",
@@ -200,7 +200,7 @@ const gigs = [
       "Tipografi, renk teorisi ve kompozisyon temellerini örneklerle anlatan, yeni başlayanlara yönelik birebir eğitim veriyorum.",
   },
   {
-    seller: "deniz@profestia.dev",
+    seller: "deniz@demo.prosinta.com",
     category: "ai-otomasyon",
     subcategory: "İş Akışı Otomasyonu (Zapier/Make/n8n)",
     title: "Zapier & Make ile iş süreçlerinizi otomatikleştiriyorum",
@@ -211,7 +211,7 @@ const gigs = [
       "Tekrar eden manuel işlerinizi Zapier veya Make üzerinde kurduğum otomasyon akışlarıyla ortadan kaldırıyorum.",
   },
   {
-    seller: "deniz@profestia.dev",
+    seller: "deniz@demo.prosinta.com",
     category: "ai-otomasyon",
     subcategory: "Chatbot Geliştirme",
     title: "ChatGPT/Claude entegrasyonlu AI chatbot geliştiriyorum",
@@ -222,7 +222,7 @@ const gigs = [
       "Web siteniz veya WhatsApp hattınız için müşteri sorularını yanıtlayan, kendi verilerinizle eğitilmiş bir AI chatbot geliştiriyorum.",
   },
   {
-    seller: "ayse@profestia.dev",
+    seller: "ayse@demo.prosinta.com",
     category: "veri-analitik",
     subcategory: "Satış & Pazarlama Analitiği",
     title: "İşletmeniz için satış ve pazarlama verilerini analiz ediyorum",
@@ -233,7 +233,7 @@ const gigs = [
       "Ham verilerinizi düzenleyip anlamlı içgörülere dönüştürerek karar alma sürecinize somut veri desteği sağlıyorum.",
   },
   {
-    seller: "ayse@profestia.dev",
+    seller: "ayse@demo.prosinta.com",
     category: "veri-analitik",
     subcategory: "Dashboard & Raporlama (Power BI/Excel)",
     title: "Excel/Power BI ile interaktif veri paneli (dashboard) hazırlıyorum",
@@ -346,11 +346,11 @@ async function main() {
   }
 
   const buyer = await prisma.user.upsert({
-    where: { email: "buyer@profestia.dev" },
+    where: { email: "buyer@demo.prosinta.com" },
     update: {},
     create: {
       name: "Demo Alıcı",
-      email: "buyer@profestia.dev",
+      email: "buyer@demo.prosinta.com",
       role: "BUYER",
       passwordHash: password,
       emailVerified: new Date(),

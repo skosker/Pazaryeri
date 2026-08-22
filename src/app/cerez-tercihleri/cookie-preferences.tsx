@@ -15,7 +15,7 @@ import { useState, useSyncExternalStore } from "react";
  * appears looks like the page changed its own mind.
  */
 
-const STORAGE_KEY = "profestia-cerez-tercihleri";
+const STORAGE_KEY = "prosinta-cerez-tercihleri";
 
 type Preferences = {
   performans: boolean;

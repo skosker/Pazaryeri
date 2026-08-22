@@ -11,14 +11,14 @@ import { describeShowcaseFreelancer, type ShowcaseProfile } from "./synthetic-fr
 
 /** Named demo sellers. The gig list in `seed.ts` refers to these by e-mail. */
 export const DEMO_SELLERS = [
-  { name: "Elif K.", email: "elif@profestia.dev", title: "Sosyal Medya Uzmanı" },
-  { name: "Mert A.", email: "mert@profestia.dev", title: "Full Stack Geliştirici" },
-  { name: "Aslı T.", email: "asli@profestia.dev", title: "SEO İçerik Yazarı" },
-  { name: "Can Y.", email: "can@profestia.dev", title: "Logo & Marka Tasarımcısı" },
-  { name: "Zeynep B.", email: "zeynep@profestia.dev", title: "Video Editörü" },
-  { name: "Burak S.", email: "burak@profestia.dev", title: "Reklam Yöneticisi" },
-  { name: "Deniz A.", email: "deniz@profestia.dev", title: "AI & Otomasyon Danışmanı" },
-  { name: "Ayşe Ö.", email: "ayse@profestia.dev", title: "Veri Analisti" },
+  { name: "Elif K.", email: "elif@demo.prosinta.com", title: "Sosyal Medya Uzmanı" },
+  { name: "Mert A.", email: "mert@demo.prosinta.com", title: "Full Stack Geliştirici" },
+  { name: "Aslı T.", email: "asli@demo.prosinta.com", title: "SEO İçerik Yazarı" },
+  { name: "Can Y.", email: "can@demo.prosinta.com", title: "Logo & Marka Tasarımcısı" },
+  { name: "Zeynep B.", email: "zeynep@demo.prosinta.com", title: "Video Editörü" },
+  { name: "Burak S.", email: "burak@demo.prosinta.com", title: "Reklam Yöneticisi" },
+  { name: "Deniz A.", email: "deniz@demo.prosinta.com", title: "AI & Otomasyon Danışmanı" },
+  { name: "Ayşe Ö.", email: "ayse@demo.prosinta.com", title: "Veri Analisti" },
 ];
 
 /**

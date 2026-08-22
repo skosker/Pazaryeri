@@ -56,7 +56,7 @@ export const SYNTHETIC_PASSWORD_HASH = "!showcase-profile-no-login";
 
 /** The addresses reserved for generated profiles: uzman1@… through uzman1000@…. */
 const SYNTHETIC_EMAIL_PREFIX = "uzman";
-const SYNTHETIC_EMAIL_DOMAIN = "profestia.dev";
+const SYNTHETIC_EMAIL_DOMAIN = "demo.prosinta.com";
 
 type Profession = {
   title: string;

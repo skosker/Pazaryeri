@@ -43,7 +43,7 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
         id: session.user.id,
         name: session.user.name ?? "Alıcı",
         surname: session.user.name?.split(" ").slice(-1)[0] ?? "Alıcı",
-        email: session.user.email ?? "buyer@profestia.dev",
+        email: session.user.email ?? "buyer@demo.prosinta.com",
         ip: "85.34.78.112",
       },
       item: {

@@ -624,7 +624,7 @@ export function generateBulkData(): {
     for (let s = 0; s < SELLERS_PER_CATEGORY; s++) {
       const name = firstNames[sellerCounter % firstNames.length];
       const initial = lastInitials[sellerCounter % lastInitials.length];
-      const email = `fl${sellerCounter + 1}@profestia.dev`;
+      const email = `fl${sellerCounter + 1}@demo.prosinta.com`;
       const seller = { email, name: `${name} ${initial}`, title: cat.sellerTitle };
       catSellers.push(seller);
       sellers.push(seller);
@@ -659,7 +659,7 @@ export function generateBulkData(): {
     for (let s = 0; s < EXTRA_SELLERS_PER_CATEGORY; s++) {
       const name = firstNames[extraSellerCounter % firstNames.length];
       const initial = lastInitials[extraSellerCounter % lastInitials.length];
-      const email = `fl${extraSellerCounter + 1}@profestia.dev`;
+      const email = `fl${extraSellerCounter + 1}@demo.prosinta.com`;
       const seller = { email, name: `${name} ${initial}`, title: cat.sellerTitle };
       catExtraSellers.push(seller);
       sellers.push(seller);
@@ -669,7 +669,7 @@ export function generateBulkData(): {
     for (let s = 0; s < THIRD_SELLERS_PER_CATEGORY; s++) {
       const name = firstNames[thirdSellerCounter % firstNames.length];
       const initial = lastInitials[thirdSellerCounter % lastInitials.length];
-      const email = `fl${thirdSellerCounter + 1}@profestia.dev`;
+      const email = `fl${thirdSellerCounter + 1}@demo.prosinta.com`;
       const seller = { email, name: `${name} ${initial}`, title: cat.sellerTitle };
       catThirdSellers.push(seller);
       sellers.push(seller);
