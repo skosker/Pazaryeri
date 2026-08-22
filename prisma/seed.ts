@@ -1,7 +1,6 @@
 import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import bcrypt from "bcryptjs";
 import { generateBulkData } from "./bulk-gigs-data";
 import { generateSyntheticFreelancers } from "./synthetic-freelancers";
 import { DEMO_SELLERS, loadShowcaseOffers, showcaseFreelancers } from "./showcase-freelancers";
@@ -299,10 +298,16 @@ async function seedPackageLadder(gigId: string, basePrice: number, baseDelivery:
 }
 
 
+const SHOWCASE_NO_LOGIN = "!demo-account-no-login";
+
 async function main() {
   console.log("Seeding...");
 
-  const password = await bcrypt.hash("password123", 10);
+  // Gösterim hesaplarına giriş şifresi verilmiyor. bcrypt formatında olmayan bir değer
+  // bcrypt.compare tarafından hata fırlatmadan reddedildiği için bu hesaplar sitede
+  // görünür kalır ama kimse onlarla oturum açamaz. Yerelde bir demo hesabına girmek
+  // gerekirse: npm run admin:sifre -- <e-posta> <şifre>
+  const password = SHOWCASE_NO_LOGIN;
   const { sellers: bulkSellers, subcategories: bulkSubcategories, gigs: bulkGigs } = generateBulkData();
 
   for (const c of categories) {
