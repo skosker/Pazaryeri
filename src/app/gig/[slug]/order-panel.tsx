@@ -124,17 +124,11 @@ export function OrderPanel({
           <li className="flex items-start gap-2">
             <CheckIcon /> Prosinta güvencesiyle ödeme — iş onaylanmadan satıcıya aktarılmaz
           </li>
-          <li className="flex items-start gap-2">
-            <CheckIcon /> Kredi kartına 3 taksit imkanı
-          </li>
-          <li className="flex items-start gap-2">
-            <CheckIcon /> 7/24 Türkçe destek
-          </li>
         </ul>
 
         <p className="mt-4 text-center text-[11px] text-slate-400">
           Devam ederek{" "}
-          <Link href="/kategoriler" className="underline">
+          <Link href="/kullanim-sartlari" className="underline">
             kullanım koşullarını
           </Link>{" "}
           kabul etmiş olursun.
