@@ -6,14 +6,6 @@ Son güncelleme: 22 Ağustos 2026
 
 ## Yayın öncesi kapatılması gerekenler
 
-- [ ] **`AUTH_SECRET` gerçek bir değer mi?** Vercel → Environment Variables.
-      Değer `replace-with-a-random-32-byte-secret` ise acil: bu metin depoda
-      herkese açık duruyor, bilen biri kendine ADMIN rolü yazan bir oturum
-      çerezi üretip panele girebilir. Yeni değer üretmek için tarayıcı
-      konsolunda (F12):
-      `crypto.getRandomValues(new Uint8Array(32)).reduce((s,b)=>s+b.toString(16).padStart(2,'0'),'')`
-      Değiştirince mevcut bütün oturumlar düşer.
-
 - [ ] **Posta kutusunu test et.** Natro paketi tek hesaba izin verdiği için gerçek
       kutu `info@prosinta.com`; `destek@` ve `admin@` onun takma adları olarak
       tanımlandı. Sitede "şifremi unuttum" akışını `admin@prosinta.com` ile
