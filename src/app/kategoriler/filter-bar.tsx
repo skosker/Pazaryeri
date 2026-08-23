@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { CategoryIcon } from "@/components/category-icon";
+import { subcategoryEmoji } from "@/components/subcategory-icon";
 import { getCategoryAccent } from "@/lib/category-style";
 import { formatPrice } from "@/lib/format-price";
 
@@ -244,6 +245,9 @@ export function FilterBar({
                           onChange={() => toggleSubcategory(sc.slug)}
                           className="h-3.5 w-3.5 rounded border-slate-300 text-purple-600 focus:ring-purple-400"
                         />
+                        <span className="shrink-0" aria-hidden>
+                          {subcategoryEmoji(sc.name, c.icon)}
+                        </span>
                         <span className="truncate">{sc.name}</span>
                       </label>
                     ))}
