@@ -14,13 +14,11 @@ Son güncelleme: 22 Ağustos 2026
       `crypto.getRandomValues(new Uint8Array(32)).reduce((s,b)=>s+b.toString(16).padStart(2,'0'),'')`
       Değiştirince mevcut bütün oturumlar düşer.
 
-- [ ] **`destek@prosinta.com` posta kutusunu aç** (Natro → Kurumsal E-Posta).
-      Bu adres Kullanım Şartları ve KVKK metninde yayımlandı; kutu yoksa gelen
-      başvurular kayboluyor. KVKK başvuru kanalı olarak da bu adres gösterildi.
-
-- [ ] **`admin@prosinta.com` posta kutusunu aç.** Admin hesabının giriş adresi
-      bu; kutu yoksa şifre sıfırlama maili hiçbir yere ulaşmaz ve şifre
-      unutulursa tek çare Neon'un SQL editöründen elle müdahale olur.
+- [ ] **Posta kutusunu test et.** Natro paketi tek hesaba izin verdiği için gerçek
+      kutu `info@prosinta.com`; `destek@` ve `admin@` onun takma adları olarak
+      tanımlandı. Sitede "şifremi unuttum" akışını `admin@prosinta.com` ile
+      çalıştır — mail `info@` kutusuna düşerse hem takma ad hem sıfırlama zinciri
+      doğrulanmış olur.
 
 ## Yayın sonrası
 
