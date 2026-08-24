@@ -26,8 +26,8 @@ export function Footer() {
           <div className="col-span-2 sm:col-span-1">
             <Logo />
             <p className="mt-4 max-w-xs text-sm text-slate-500">
-              Grafik tasarımdan yazılıma, binlerce yetenekli freelancer arasından seç, dakikalar
-              içinde işine başla.
+              İhtiyacın neyse, yeteneği burada. Binlerce profesyonel arasından doğru kişiyi
+              bul, işine hemen başla.
             </p>
           </div>
 
