@@ -3,17 +3,17 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
-import { BANK_ACCOUNT_ID } from "@/lib/bank-transfer";
 import { normalizeIban, validateTurkishIban } from "@/lib/iban";
 
 export type FormState = { error?: string; saved?: boolean };
 
 /**
- * Writes the account shown on the checkout page. The IBAN is validated with the same
+ * Adds a company account shown on the checkout page. The IBAN is validated with the same
  * check-digit test sellers' payout IBANs go through — a typo here sends every buyer's
- * money to the wrong place, or nowhere at all.
+ * money to the wrong place, or nowhere at all. A bank/IBAN pair already on file is
+ * rejected so the list does not fill up with duplicates.
  */
-export async function saveBankAccountAction(
+export async function addBankAccountAction(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
@@ -30,18 +30,25 @@ export async function saveBankAccountAction(
   if (ibanError) return { error: ibanError };
 
   const iban = normalizeIban(rawIban);
-  const data = { accountHolder, bankName, iban };
 
-  await prisma.bankAccount.upsert({
-    where: { id: BANK_ACCOUNT_ID },
-    create: { id: BANK_ACCOUNT_ID, ...data },
-    update: data,
-  });
+  const existing = await prisma.bankAccount.findFirst({ where: { iban } });
+  if (existing) return { error: "Bu IBAN zaten ekli" };
 
-  // The checkout page reads this row, so it has to be rebuilt before the next buyer
-  // lands on it.
+  await prisma.bankAccount.create({ data: { accountHolder, bankName, iban } });
+
   revalidatePath("/admin/banka");
+  // The checkout page lists these accounts, so it has to be rebuilt.
   revalidatePath("/odeme", "layout");
 
   return { saved: true };
+}
+
+/** Removes a company account. The checkout page stops showing it immediately. */
+export async function deleteBankAccountAction(id: string) {
+  await requireAdmin();
+
+  await prisma.bankAccount.delete({ where: { id } });
+
+  revalidatePath("/admin/banka");
+  revalidatePath("/odeme", "layout");
 }
