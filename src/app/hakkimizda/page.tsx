@@ -110,6 +110,16 @@ export default function HakkimizdaPage() {
       <p>
         <strong>Yeni nesil çalışma dünyasına hoş geldiniz.</strong>
       </p>
+
+      <h2>Künye</h2>
+      <ul>
+        <li>Prosinta Dijital Teknolojiler A.Ş.</li>
+        <li>Adres: Levent Mah. Karanfil Sk. No: 13, Beşiktaş / İstanbul</li>
+        <li>Ticaret Sicil No: 1155314</li>
+        <li>Vergi Dairesi: Beşiktaş</li>
+        <li>Vergi No: 7331421416</li>
+        <li>E-posta: destek@prosinta.com</li>
+      </ul>
     </LegalPage>
   );
 }
