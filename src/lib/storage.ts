@@ -31,6 +31,33 @@ export async function putImage(file: File): Promise<string> {
 }
 
 /**
+ * Stores an already-prepared image buffer and returns the URL to render it from — the
+ * same Blob-or-Postgres split as putImage, but for bytes we produced ourselves (an AI
+ * portrait fetched from a generation service) rather than a user's uploaded File.
+ */
+export async function putImageBuffer(
+  buffer: Buffer,
+  mimeType: string,
+  extension: string,
+  prefix = "portre"
+): Promise<string> {
+  if (usingBlobStorage()) {
+    const { put } = await import("@vercel/blob");
+    const blob = await put(`${prefix}/${crypto.randomUUID()}.${extension}`, buffer, {
+      access: "public",
+      contentType: mimeType,
+    });
+    return blob.url;
+  }
+
+  const image = await prisma.uploadedImage.create({
+    data: { mimeType, data: new Uint8Array(buffer), size: buffer.length },
+    select: { id: true },
+  });
+  return `/api/gorsel/${image.id}`;
+}
+
+/**
  * Drops a cover that is no longer referenced. Only Postgres-backed rows are
  * removed; Blob objects are left alone so a failed write cannot delete a live file.
  */
