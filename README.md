@@ -71,10 +71,25 @@ npm run dev
 
 ### Demo hesaplar (seed sonrası)
 
-| Rol | E-posta | Şifre |
+Seed'lenen gösterim hesaplarının (satıcılar ve `buyer@demo.prosinta.com`) **girişi
+bilerek kapalıdır**: `passwordHash` bcrypt formatında olmayan bir işarete (`!demo-account-no-login`)
+ayarlıdır, `bcrypt.compare` bunu sessizce reddeder. Hesaplar sitede görünür kalır (ilan,
+profil, yorum) ama kimse onlarla oturum açamaz — katalog gerçek kullanıcılara açıldığında
+`password123` gibi ortak bir şifreyle 179 hesaba girilmesini engellemek için.
+
+| Hesap | E-posta | Giriş |
 | --- | --- | --- |
-| Alıcı | `buyer@profestia.dev` | `password123` |
-| Freelancer | `mert@profestia.dev` (veya diğer seed'lenen satıcılar) | `password123` |
+| Admin | `admin@prosinta.com` | Şifreyi sen belirlersin: `npm run admin:sifre -- admin@prosinta.com '<şifre>'` |
+| Demo satıcı / alıcı | `mert@demo.prosinta.com`, `buyer@demo.prosinta.com` vb. | Kapalı |
+
+Yerelde bir demo hesabına girmen gerekirse aynı komutla ona da şifre verebilirsin:
+
+```bash
+npm run admin:sifre -- buyer@demo.prosinta.com '<şifre>'
+```
+
+> Not: `admin:sifre` hedef hesabı ADMIN rolüne çeker. Sadece giriş denemek için değil,
+> yönetici erişimi vermek istediğin hesapta kullan.
 
 ## Yapay freelancer üretimi
 
