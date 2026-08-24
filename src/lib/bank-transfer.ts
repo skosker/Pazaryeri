@@ -2,20 +2,20 @@ import { prisma } from "@/lib/prisma";
 import { formatIban } from "@/lib/iban";
 
 /**
- * The account a buyer paying by bank transfer is told to send money to.
+ * The company accounts a buyer paying by bank transfer can send money to.
  *
- * There is one of these for the whole platform, kept in a single `bank_accounts` row so
- * an admin can change it from /admin/banka without a deploy. The environment variables
- * below are the local-development escape hatch — with no row and no variables set, the
- * built-in values are the account the site actually uses.
+ * There can be several — an admin adds and removes them at /admin/banka — so a buyer can
+ * pick the one at their own bank and make a free, instant EFT. The environment variables
+ * below are the local-development escape hatch: with no rows and no variables set, the
+ * built-in values are shown as a single account.
  *
- * Read this on the server and pass the result down. It used to be a plain module-level
- * object read straight from `process.env`, which quietly broke once a client component
- * imported it: variables without the NEXT_PUBLIC_ prefix are not in the browser bundle,
- * so `process.env.BANK_IBAN` was `undefined` there and the fallback was all anyone saw.
+ * Read this on the server and pass the result down. It must not be imported by a client
+ * component: variables without the NEXT_PUBLIC_ prefix are not in the browser bundle, so
+ * `process.env.BANK_IBAN` would be `undefined` there and only the fallback would show.
  */
 
 export type BankTransferInfo = {
+  id: string;
   accountHolder: string;
   bankName: string;
   /** Grouped by four for display: "TR87 0006 …". */
@@ -23,20 +23,24 @@ export type BankTransferInfo = {
 };
 
 const fallback: BankTransferInfo = {
+  id: "fallback",
   accountHolder: process.env.BANK_ACCOUNT_HOLDER || "Prosinta Dijital Teknolojiler A.Ş.",
   bankName: process.env.BANK_NAME || "Garanti Bankası",
-  iban: process.env.BANK_IBAN || "TR87 0006 2000 7060 0006 2946 11",
+  iban: formatIban(process.env.BANK_IBAN || "TR870006200070600006294611"),
 };
 
-export const BANK_ACCOUNT_ID = "default";
+/**
+ * Every company account, oldest first. Falls back to a single built-in account when no
+ * rows exist yet, so the checkout page always has something to show.
+ */
+export async function getBankAccounts(): Promise<BankTransferInfo[]> {
+  const rows = await prisma.bankAccount.findMany({ orderBy: { createdAt: "asc" } });
+  if (rows.length === 0) return [fallback];
 
-export async function getBankTransferInfo(): Promise<BankTransferInfo> {
-  const row = await prisma.bankAccount.findUnique({ where: { id: BANK_ACCOUNT_ID } });
-  if (!row) return { ...fallback, iban: formatIban(fallback.iban) };
-
-  return {
+  return rows.map((row) => ({
+    id: row.id,
     accountHolder: row.accountHolder,
     bankName: row.bankName,
     iban: formatIban(row.iban),
-  };
+  }));
 }
