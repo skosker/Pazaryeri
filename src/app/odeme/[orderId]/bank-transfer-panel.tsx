@@ -2,15 +2,23 @@
 
 import { useTransition, useState } from "react";
 import { notifyBankTransfer } from "./actions";
-import { bankTransferInfo } from "@/lib/bank-transfer";
+import type { BankTransferInfo } from "@/lib/bank-transfer";
 import { formatPrice } from "@/lib/format-price";
 
-export function BankTransferPanel({ orderId, amount }: { orderId: string; amount: number }) {
+export function BankTransferPanel({
+  orderId,
+  amount,
+  bank,
+}: {
+  orderId: string;
+  amount: number;
+  bank: BankTransferInfo;
+}) {
   const [pending, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
 
   function copyIban() {
-    navigator.clipboard.writeText(bankTransferInfo.iban.replace(/\s/g, ""));
+    navigator.clipboard.writeText(bank.iban.replace(/\s/g, ""));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -20,23 +28,22 @@ export function BankTransferPanel({ orderId, amount }: { orderId: string; amount
       <h2 className="font-semibold text-brand-navy">Havale/EFT ile Öde</h2>
       <p className="mt-1 text-sm text-slate-500">
         Aşağıdaki hesaba ödemeyi yaptıktan sonra &quot;Ödeme Bildirimi Yap&quot; butonuna bas.
-        Açıklama kısmına sipariş numaranı yazmayı unutma.
       </p>
 
       <div className="mt-4 space-y-3 rounded-xl bg-slate-50 p-4 text-sm">
         <div className="flex items-center justify-between">
           <span className="text-slate-500">Hesap Sahibi</span>
-          <span className="font-medium text-brand-navy">{bankTransferInfo.accountHolder}</span>
+          <span className="font-medium text-brand-navy">{bank.accountHolder}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-slate-500">Banka</span>
-          <span className="font-medium text-brand-navy">{bankTransferInfo.bankName}</span>
+          <span className="font-medium text-brand-navy">{bank.bankName}</span>
         </div>
         <div className="flex items-center justify-between gap-3">
           <span className="shrink-0 text-slate-500">IBAN</span>
           <div className="flex items-center gap-2">
             <span className="font-mono text-xs font-medium text-brand-navy sm:text-sm">
-              {bankTransferInfo.iban}
+              {bank.iban}
             </span>
             <button
               type="button"
@@ -46,10 +53,6 @@ export function BankTransferPanel({ orderId, amount }: { orderId: string; amount
               {copied ? "Kopyalandı" : "Kopyala"}
             </button>
           </div>
-        </div>
-        <div className="flex items-center justify-between border-t border-slate-200 pt-3">
-          <span className="text-slate-500">Açıklama</span>
-          <span className="font-mono text-xs font-medium text-brand-navy">Sipariş {orderId.slice(-8)}</span>
         </div>
       </div>
 
