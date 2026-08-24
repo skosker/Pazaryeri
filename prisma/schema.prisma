@@ -297,3 +297,16 @@ model Payout {
   @@index([status])
   @@map("payouts")
 }
+
+/// Havale/EFT ile ödeyen alıcıya gösterilen hesap. Tek satır tutulur (id "default"):
+/// platformun tek bir tahsilat hesabı var, admin panelinden düzenlenir ve ödeme sayfası
+/// buradan okur. Satır yoksa ortam değişkenleri, o da yoksa koddaki değerler geçerlidir.
+model BankAccount {
+  id            String   @id @default("default")
+  accountHolder String
+  bankName      String
+  iban          String
+  updatedAt     DateTime @updatedAt
+
+  @@map("bank_accounts")
+}

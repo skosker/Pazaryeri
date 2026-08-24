@@ -7,7 +7,7 @@ import { MockCheckoutForm } from "./mock-checkout-form";
 import { IyzicoEmbed } from "./iyzico-embed";
 import { PaymentMethodTabs } from "./payment-method-tabs";
 import { BankTransferPanel } from "./bank-transfer-panel";
-import { bankTransferInfo } from "@/lib/bank-transfer";
+import { getBankTransferInfo } from "@/lib/bank-transfer";
 import type { Prisma } from "@/generated/prisma/client";
 
 export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">) {
@@ -26,6 +26,7 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
   if (order.status !== "PENDING_PAYMENT") redirect(`/siparis/${orderId}`);
 
   const amount = Number(order.amount);
+  const bank = await getBankTransferInfo();
   const errorMessage = searchParams.hata === "odeme-basarisiz" ? "Ödeme başarısız oldu, tekrar deneyin." : null;
 
   let checkoutFormContent: string | null = null;
@@ -89,7 +90,7 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
               <IyzicoEmbed checkoutFormContent={checkoutFormContent ?? ""} />
             )
           }
-          bankContent={<BankTransferPanel orderId={order.id} amount={amount} bank={bankTransferInfo} />}
+          bankContent={<BankTransferPanel orderId={order.id} amount={amount} bank={bank} />}
         />
       </div>
 
