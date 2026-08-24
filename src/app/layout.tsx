@@ -5,6 +5,7 @@ import "./globals.css";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { LegalBar } from "@/components/legal-bar";
+import { prisma } from "@/lib/prisma";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,7 +38,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // The footer's category list is read from the database rather than hard-coded, so it
+  // stays in step with what an admin adds or removes in /admin/kategoriler. A handful is
+  // enough for a footer; they follow the same order as everywhere else.
+  const categories = await prisma.category
+    .findMany({ orderBy: { order: "asc" }, take: 6, select: { name: true, slug: true } })
+    .catch(() => []);
+
   return (
     <html
       lang="tr"
@@ -46,7 +54,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <Header />
         <main className="flex-1">{children}</main>
-        <Footer />
+        <Footer categories={categories.map((c) => ({ label: c.name, slug: c.slug }))} />
         <LegalBar />
       </body>
     </html>
