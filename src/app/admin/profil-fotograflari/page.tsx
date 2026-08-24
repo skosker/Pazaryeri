@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { hasPexelsKey } from "@/lib/cover-photos";
 import { profilePhotoProgress } from "@/lib/profile-photos";
 import { ProfilePhotoRunner } from "./runner";
@@ -8,12 +9,24 @@ export default async function AdminProfilePhotosPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-brand-navy">Profil Fotoğrafları</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold text-brand-navy">Profil Fotoğrafları</h1>
+        {progress.withPhoto > 0 && (
+          <Link
+            href="/admin/profil-fotograflari/incele"
+            className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+          >
+            Fotoğrafları İncele ({progress.withPhoto})
+          </Link>
+        )}
+      </div>
       <p className="mt-2 max-w-2xl text-sm text-slate-500">
         Üretilmiş freelancer profillerine Pexels&apos;ten gerçek portre fotoğrafı atanır.
         Arama, profilin ismine göre kadın/erkek olarak ayrılır ve aynı fotoğraf iki profilde
         kullanılmaz. Gerçek kullanıcılara ve kendi yükledikleri görsellere dokunulmaz;
-        fotoğraf düşmeyen profiller çizilen avatarla görünmeye devam eder.
+        fotoğraf düşmeyen profiller çizilen avatarla görünmeye devam eder. Çekilen fotoğrafları
+        tek tek gözden geçirip uymayanları avatara döndürmek için{" "}
+        <span className="font-medium text-brand-navy">Fotoğrafları İncele</span>&apos;yi kullan.
       </p>
 
       {keyMissing ? (
