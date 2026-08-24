@@ -53,6 +53,8 @@ export type AiPortraitBatch = AiPortraitProgress & {
   nextIndex: number;
   /** Profiles whose generation failed this run; worth another sweep. */
   failed: number;
+  /** The last generation error's message, so the UI can show what actually went wrong. */
+  lastError: string | null;
   /** Set when the account's spending/rate limit stopped the run early. */
   rateLimited: string | null;
 };
@@ -151,27 +153,73 @@ async function generatePortrait(prompt: string, seed: number): Promise<Buffer> {
     cache: "no-store",
   });
 
+  // Read the body once as text so the real Replicate message can be surfaced whether the
+  // response is an error or a prediction object.
+  const raw = await response.text();
+  const parsed = safeJson(raw);
+  const detail =
+    (parsed && typeof parsed.detail === "string" && parsed.detail) ||
+    (parsed && typeof parsed.error === "string" && parsed.error) ||
+    raw.slice(0, 200);
+
   if (response.status === 429) {
     throw new RateLimitError(
       "Replicate istek/harcama sınırına takıldı. Üretilen portreler kaydedildi; bir süre sonra kaldığın yerden devam edebilirsin."
     );
   }
   if (response.status === 401 || response.status === 402 || response.status === 403) {
-    throw new Error(`Replicate anahtarı kabul edilmedi ya da bakiye yetersiz (${response.status}).`);
+    throw new Error(`Replicate reddetti (${response.status}): ${detail}`);
   }
   if (!response.ok) {
-    throw new Error(`Replicate ${response.status} — üretim başarısız.`);
+    throw new Error(`Replicate ${response.status}: ${detail}`);
   }
 
-  const body = (await response.json()) as { output?: string | string[]; error?: string };
-  if (body.error) throw new Error(`Replicate: ${body.error}`);
+  const prediction = parsed as {
+    output?: string | string[];
+    error?: string;
+    status?: string;
+    urls?: { get?: string };
+  } | null;
+  if (prediction?.error) throw new Error(`Replicate: ${prediction.error}`);
 
-  const url = Array.isArray(body.output) ? body.output[0] : body.output;
-  if (!url) throw new Error("Replicate boş sonuç döndü.");
+  // With Prefer: wait the prediction is usually finished, but a slow one can come back
+  // still processing — poll its own URL a few times before giving up.
+  let output = prediction?.output;
+  let pollUrl = prediction?.urls?.get;
+  for (let attempt = 0; !output && pollUrl && attempt < 10; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const poll = await fetch(pollUrl, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    const state = (await poll.json()) as {
+      output?: string | string[];
+      error?: string;
+      status?: string;
+      urls?: { get?: string };
+    };
+    if (state.error) throw new Error(`Replicate: ${state.error}`);
+    if (state.status === "failed" || state.status === "canceled") {
+      throw new Error(`Replicate üretimi ${state.status}.`);
+    }
+    output = state.output;
+    pollUrl = state.urls?.get;
+  }
+
+  const url = Array.isArray(output) ? output[0] : output;
+  if (!url) throw new Error("Replicate sonucu zamanında hazır olmadı.");
 
   const image = await fetch(url, { cache: "no-store" });
   if (!image.ok) throw new Error(`Üretilen görsel indirilemedi (${image.status}).`);
   return Buffer.from(await image.arrayBuffer());
+}
+
+function safeJson(text: string): Record<string, unknown> | null {
+  try {
+    return JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -195,6 +243,7 @@ export async function assignAiPortraits({
   let failed = 0;
   let index = startIndex;
   let rateLimited: RateLimitError | null = null;
+  let lastError: string | null = null;
 
   for (; index < targets.length && assigned + failed < batchSize; index++) {
     const row = targets[index];
@@ -216,6 +265,7 @@ export async function assignAiPortraits({
         rateLimited = error;
         break;
       }
+      lastError = error instanceof Error ? error.message : "Bilinmeyen üretim hatası";
       failed += 1;
     }
   }
@@ -225,6 +275,7 @@ export async function assignAiPortraits({
     ...after,
     assigned,
     failed,
+    lastError,
     nextIndex: index,
     rateLimited: rateLimited?.message ?? null,
   };

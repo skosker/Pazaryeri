@@ -78,6 +78,17 @@ export function AiPortraitRunner({
         break;
       }
 
+      // A whole round produced nothing but failures — a systemic problem (billing, token,
+      // a bad request). Stop and show the real reason instead of churning the whole list.
+      if (batch.assigned === 0 && batch.failed > 0) {
+        setError(
+          batch.lastError
+            ? `Üretim hatası: ${batch.lastError}`
+            : "Portreler üretilemedi. Replicate faturalandırma/anahtar ayarını kontrol et."
+        );
+        break;
+      }
+
       // The sweep reached the end of the target list.
       if (batch.assigned === 0 && batch.failed === 0) {
         setFinished(true);
