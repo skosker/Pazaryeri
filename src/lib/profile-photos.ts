@@ -183,6 +183,48 @@ export async function resetProfilePhotos(): Promise<{ reset: number }> {
   return { reset: targets.length };
 }
 
+export type PhotoProfile = { id: string; name: string; image: string };
+
+/**
+ * The generated profiles that currently carry a fetched photograph, for the admin review
+ * gallery. Only these are listed: a profile on its drawn avatar has nothing to review, and
+ * a real seller's own upload is never ours to touch. Oldest id first, so the grid order is
+ * stable between visits and a scan can be resumed where it left off.
+ */
+export async function listPhotoProfiles(): Promise<PhotoProfile[]> {
+  const profiles = await prisma.user.findMany({
+    where: { role: "FREELANCER", synthetic: true },
+    select: { id: true, name: true, image: true },
+    orderBy: { id: "asc" },
+  });
+
+  return profiles
+    .filter((row): row is PhotoProfile => !!row.image?.startsWith(PEXELS_HOST))
+    .map((row) => ({ id: row.id, name: row.name, image: row.image }));
+}
+
+/**
+ * Drops one profile's fetched photo back to its drawn avatar — the per-profile version of
+ * resetProfilePhotos, for when a reviewer spots a single photo that does not fit. Guarded
+ * the same way: only a synthetic profile still on one of our photos is changed, so a real
+ * upload or an already-reverted row is a no-op.
+ */
+export async function revertProfilePhoto(id: string): Promise<{ reverted: boolean }> {
+  const row = await prisma.user.findFirst({
+    where: { id, role: "FREELANCER", synthetic: true },
+    select: { id: true, name: true, email: true, image: true },
+  });
+
+  if (!row || !row.image?.startsWith(PEXELS_HOST)) return { reverted: false };
+
+  await prisma.user.update({
+    where: { id: row.id },
+    data: { image: drawnAvatarUrl(row.name, row.email) },
+  });
+
+  return { reverted: true };
+}
+
 type Photo = { id: number; url: string; alt: string };
 
 /**

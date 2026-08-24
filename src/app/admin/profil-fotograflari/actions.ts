@@ -1,10 +1,12 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/require-admin";
 import {
   assignProfilePhotos,
   profilePhotoProgress,
   resetProfilePhotos,
+  revertProfilePhoto,
   type ProfilePhotoBatch,
 } from "@/lib/profile-photos";
 
@@ -39,6 +41,16 @@ export async function runProfilePhotoBatch(
 export async function readProfilePhotoProgress() {
   await requireAdmin();
   return profilePhotoProgress();
+}
+
+/**
+ * Drops one profile's photo to its drawn avatar — the reviewer clicked "Avatara döndür" on
+ * a face that did not fit. The gallery page is rebuilt so the card disappears from it.
+ */
+export async function revertOneProfilePhotoAction(id: string) {
+  await requireAdmin();
+  await revertProfilePhoto(id);
+  revalidatePath("/admin/profil-fotograflari/incele");
 }
 
 /**
