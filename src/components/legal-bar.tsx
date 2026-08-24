@@ -17,7 +17,7 @@ export const legalLinks = [
 export function LegalBar() {
   return (
     <div className="bg-brand-navy">
-      <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-5 text-sm text-slate-300 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:px-8">
+      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-5 text-sm text-slate-300 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:px-8">
         <nav className="flex flex-wrap items-center gap-x-6 gap-y-2">
           {legalLinks.map((link) => (
             <Link
