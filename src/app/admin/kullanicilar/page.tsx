@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
 import { toggleSuspensionAction, changeUserRoleAction, toggleProFreelancerAction } from "./actions";
+import { DeleteUserButton } from "./delete-user-button";
 
 const roleLabel: Record<string, string> = {
   BUYER: "Alıcı",
@@ -160,6 +161,12 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
                           </button>
                         </form>
                       )}
+                      <DeleteUserButton
+                        userId={user.id}
+                        name={user.name}
+                        gigCount={user._count.gigs}
+                        orderCount={user._count.ordersMade}
+                      />
                     </div>
                   )}
                 </td>
