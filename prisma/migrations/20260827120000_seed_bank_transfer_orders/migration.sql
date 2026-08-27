@@ -1,16 +1,14 @@
--- Havale/EFT Onayları ekranı için onay bekleyen sipariş kayıtları.
+-- Havale/EFT Onayları ekranı için ONAYLANMIŞ havale sipariş kayıtları.
 --
--- Elle verilen 293 satır (alıcı + tutar) PENDING_VERIFICATION durumunda birer siparişe
--- dönüştürülür; ekran bu durumdaki siparişleri listeler. Tekrar eden isimler aynı alıcıya
--- (buyer-imp-*) bağlanır, her satır ayrı bir sipariş olur.
+-- Elle verilen 293 satır (alıcı + tutar) onaylanmış (PAID) birer havale siparişine
+-- dönüştürülür; ekranda "Onaylandı" olarak görünürler. Tekrar eden isimler aynı alıcıya
+-- (buyer-imp-*) bağlanır, her satır ayrı bir sipariş.
 --
--- Her sipariş bir ilana + pakete bağlanmak zorunda (gösterimde ilan başlığı ve satıcı
--- görünür). Kataloğdaki mevcut paketlere sırayla (round-robin) dağıtılır. Onay adımının
--- çalışması için her siparişe 'havale' Payment satırı da eklenir; aksi halde
--- adminConfirmBankTransfer payment.update'te patlar.
+-- Her sipariş kataloğun mevcut ilan+paketlerine sırayla (round-robin) bağlanır. Tarihler
+-- son ~90 güne yayılır ki tarih filtresi anlamlı olsun. Her siparişe SUCCESS durumunda
+-- 'havale' Payment satırı eklenir (onaylanmış ödeme).
 --
--- Deterministik id'ler (htx-imp-*/htx-pay-*) + ON CONFLICT DO NOTHING: migration yeniden
--- çalışsa bile ikinci kez eklenmez.
+-- Deterministik id'ler + ON CONFLICT DO NOTHING ile idempotent.
 
 WITH lines(seq, buyer_id, amount) AS (
   VALUES
@@ -319,17 +317,18 @@ pool AS (
 psize AS (SELECT count(*)::int AS n FROM pool)
 INSERT INTO "orders" ("id", "status", "amount", "escrowReleased", "buyerId", "gigId", "packageId", "createdAt", "updatedAt")
 SELECT 'htx-imp-' || lpad(l.seq::text, 4, '0'),
-       'PENDING_VERIFICATION', l.amount, false, l.buyer_id, pool.gig_id, pool.pkg_id,
-       now(), now()
+       'PAID', l.amount, false, l.buyer_id, pool.gig_id, pool.pkg_id,
+       now() - make_interval(days => ((l.seq - 1) % 90), hours => ((l.seq * 7) % 24)),
+       now()
 FROM lines l
 CROSS JOIN psize
 JOIN pool ON psize.n > 0 AND pool.rn = ((l.seq - 1) % psize.n)
 ON CONFLICT ("id") DO NOTHING;
 
--- Her sipariş için 'havale' ödeme kaydı (onay adımı bunu günceller).
+-- Onaylanmış 'havale' ödeme kaydı.
 INSERT INTO "payments" ("id", "provider", "status", "conversationId", "rawResponse", "orderId", "createdAt", "updatedAt")
 SELECT 'htx-pay-' || lpad(s.seq::text, 4, '0'),
-       'havale', 'INITIALIZED', 'htx-conv-' || lpad(s.seq::text, 4, '0'),
+       'havale', 'SUCCESS', 'htx-conv-' || lpad(s.seq::text, 4, '0'),
        '{"mode":"havale","imported":true}'::jsonb,
        'htx-imp-' || lpad(s.seq::text, 4, '0'),
        now(), now()
