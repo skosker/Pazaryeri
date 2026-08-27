@@ -35,6 +35,7 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
         isPro: true,
         synthetic: true,
         emailVerified: true,
+        importedOrderCount: true,
         createdAt: true,
         _count: { select: { gigs: true, ordersMade: true } },
       },
@@ -82,7 +83,9 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
                       </span>
                     )}
                   </p>
-                  <p className="text-xs text-slate-400">{user.email}</p>
+                  {user.importedOrderCount === null && (
+                    <p className="text-xs text-slate-400">{user.email}</p>
+                  )}
                 </td>
                 <td className="px-5 py-4 text-slate-600">
                   <span>{roleLabel[user.role] ?? user.role}</span>
@@ -108,7 +111,8 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
                   )}
                 </td>
                 <td className="px-5 py-4 text-slate-500">
-                  {user._count.gigs} ilan · {user._count.ordersMade} sipariş
+                  {user._count.gigs} ilan ·{" "}
+                  {user.importedOrderCount ?? user._count.ordersMade} sipariş
                 </td>
                 <td className="px-5 py-4">
                   {user.id === admin.id ? (
