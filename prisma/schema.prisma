@@ -316,3 +316,14 @@ model BankAccount {
 
   @@map("bank_accounts")
 }
+
+/// Freelancer hakediş IBAN kayıtları — yalnızca admin panelinde görüntülenir, herkese
+/// açık değildir. Ayrı bir tabloda tutulur ki dizinde/profillerde görünmesin.
+model FreelancerIban {
+  id        String   @id @default(cuid())
+  name      String
+  iban      String
+  createdAt DateTime @default(now())
+
+  @@map("freelancer_ibans")
+}

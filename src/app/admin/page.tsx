@@ -9,10 +9,13 @@ function toSingle(value: string | string[] | undefined): string {
   return Array.isArray(value) ? value[0] : value;
 }
 
-/** "YYYY-MM-DD" → Date, or undefined when empty/invalid. `end` pushes to the day's end. */
+/** "gg/aa/yyyy" (veya nokta) → Date; boş/geçersizde undefined. `end` günün sonuna çeker. */
 function parseDate(value: string, end = false): Date | undefined {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined;
-  const d = new Date(`${value}T${end ? "23:59:59.999" : "00:00:00"}`);
+  const m = value.trim().match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})$/);
+  if (!m) return undefined;
+  const [, dd, mm, yyyy] = m;
+  const iso = `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}T${end ? "23:59:59.999" : "00:00:00"}`;
+  const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? undefined : d;
 }
 
@@ -57,19 +60,23 @@ export default async function AdminDashboardPage(props: PageProps<"/admin">) {
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-500">Başlangıç</label>
           <input
-            type="date"
+            type="text"
+            inputMode="numeric"
             name="bas"
             defaultValue={bas}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-purple-400"
+            placeholder="gg/aa/yyyy"
+            className="w-36 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-purple-400"
           />
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-500">Bitiş</label>
           <input
-            type="date"
+            type="text"
+            inputMode="numeric"
             name="bit"
             defaultValue={bit}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-purple-400"
+            placeholder="gg/aa/yyyy"
+            className="w-36 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-purple-400"
           />
         </div>
         <button
