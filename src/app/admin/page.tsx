@@ -2,16 +2,46 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { listPendingBankTransfers } from "@/lib/order-actions";
 import { formatPrice } from "@/lib/format-price";
+import type { Prisma } from "@/generated/prisma/client";
 
-export default async function AdminDashboardPage() {
+function toSingle(value: string | string[] | undefined): string {
+  if (!value) return "";
+  return Array.isArray(value) ? value[0] : value;
+}
+
+/** "YYYY-MM-DD" → Date, or undefined when empty/invalid. `end` pushes to the day's end. */
+function parseDate(value: string, end = false): Date | undefined {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined;
+  const d = new Date(`${value}T${end ? "23:59:59.999" : "00:00:00"}`);
+  return Number.isNaN(d.getTime()) ? undefined : d;
+}
+
+export default async function AdminDashboardPage(props: PageProps<"/admin">) {
+  const searchParams = await props.searchParams;
+  const bas = toSingle(searchParams.bas);
+  const bit = toSingle(searchParams.bit);
+  const from = parseDate(bas);
+  const to = parseDate(bit, true);
+  const filtered = Boolean(from || to);
+
+  // When a range is given the whole dashboard reflects that period (rows created in it);
+  // with no range every metric is all-time, as before.
+  const createdAt: Prisma.DateTimeFilter | undefined = filtered
+    ? { ...(from ? { gte: from } : {}), ...(to ? { lte: to } : {}) }
+    : undefined;
+  const inRange = createdAt ? { createdAt } : {};
+
   const [userCount, freelancerCount, gigCount, orderCount, pending, completedOrders] =
     await Promise.all([
-      prisma.user.count(),
-      prisma.user.count({ where: { role: "FREELANCER" } }),
-      prisma.gig.count(),
-      prisma.order.count(),
+      prisma.user.count({ where: { ...inRange } }),
+      prisma.user.count({ where: { role: "FREELANCER", ...inRange } }),
+      prisma.gig.count({ where: { ...inRange } }),
+      prisma.order.count({ where: { ...inRange } }),
       listPendingBankTransfers(),
-      prisma.order.findMany({ where: { status: "COMPLETED" }, select: { amount: true } }),
+      prisma.order.findMany({
+        where: { status: "COMPLETED", ...inRange },
+        select: { amount: true },
+      }),
     ]);
 
   const totalRevenue = completedOrders.reduce((sum, o) => sum + Number(o.amount), 0);
@@ -19,12 +49,49 @@ export default async function AdminDashboardPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold text-brand-navy">Genel Bakış</h1>
-      <p className="mt-1 text-sm text-slate-500">Platform özeti ve bekleyen işlemler.</p>
+      <p className="mt-1 text-sm text-slate-500">
+        {filtered ? "Seçilen tarih aralığının özeti." : "Platform özeti ve bekleyen işlemler."}
+      </p>
 
-      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-        <StatCard label="Kullanıcı" value={String(userCount)} />
-        <StatCard label="Freelancer" value={String(freelancerCount)} />
-        <StatCard label="İlan" value={String(gigCount)} />
+      <form method="get" className="mt-6 flex flex-wrap items-end gap-3">
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-500">Başlangıç</label>
+          <input
+            type="date"
+            name="bas"
+            defaultValue={bas}
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-purple-400"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-500">Bitiş</label>
+          <input
+            type="date"
+            name="bit"
+            defaultValue={bit}
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-purple-400"
+          />
+        </div>
+        <button
+          type="submit"
+          className="rounded-full bg-purple-600 px-5 py-2 text-sm font-semibold text-white hover:bg-purple-700"
+        >
+          Filtrele
+        </button>
+        {filtered && (
+          <Link
+            href="/admin"
+            className="px-2 py-2 text-sm font-medium text-slate-500 hover:text-brand-navy"
+          >
+            Temizle
+          </Link>
+        )}
+      </form>
+
+      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        <StatCard label={filtered ? "Yeni Kullanıcı" : "Kullanıcı"} value={String(userCount)} />
+        <StatCard label={filtered ? "Yeni Freelancer" : "Freelancer"} value={String(freelancerCount)} />
+        <StatCard label={filtered ? "Yeni İlan" : "İlan"} value={String(gigCount)} />
         <StatCard label="Sipariş" value={String(orderCount)} />
         <StatCard label="Tamamlanan Ciro" value={`${formatPrice(totalRevenue)}₺`} />
       </div>
