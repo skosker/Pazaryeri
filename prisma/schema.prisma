@@ -57,6 +57,10 @@ model User {
   emailVerified DateTime?
   suspended     Boolean   @default(false)
   isOnline      Boolean   @default(false)
+  /// Yalnızca elle içe aktarılan alıcılar için: admin listesinde gösterilen sipariş
+  /// sayısı (ismin ham listede kaç kez geçtiği). Gerçek Order kaydı değildir; diğer
+  /// kullanıcılarda NULL kalır ve sipariş sayısı gerçek kayıtlardan gelir.
+  importedOrderCount Int?
   // Meaning depends on role: BUYER = Prosinta Pro member, FREELANCER = admin-verified Pro freelancer.
   isPro         Boolean   @default(false)
   createdAt     DateTime  @default(now())
