@@ -61,6 +61,12 @@ export async function getFeaturedGigs(limit = 6): Promise<GigCardData[]> {
   return gigs.map(toCardData);
 }
 
+/** 0 for a seller with a real photo, 1 for a drawn avatar (or none) — sorts real photos first. */
+function photoRank(card: GigCardData): number {
+  const image = card.seller.image;
+  return image && !image.startsWith("/api/avatar/") ? 0 : 1;
+}
+
 export type GigFilters = {
   categorySlugs?: string[];
   subcategorySlugs?: string[];
@@ -133,6 +139,11 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
   } else if (filters.sort === "fiyat-azalan") {
     cards = cards.sort((a, b) => b.startingPrice - a.startingPrice);
   }
+
+  // Satıcısı gerçek bir fotoğrafla (Pexels/AI portre/kendi yüklediği) görünenler önce,
+  // hâlâ çizilmiş avatarda kalanlar sona. JS'in sort'u kararlı olduğu için (Node/V8),
+  // bu ikinci geçiş yukarıdaki sıralamayı (fiyat/tarih) grup içinde bozmadan uygular.
+  cards = cards.sort((a, b) => photoRank(a) - photoRank(b));
 
   const total = cards.length;
   const pageSize = filters.pageSize ?? (total || 1);
