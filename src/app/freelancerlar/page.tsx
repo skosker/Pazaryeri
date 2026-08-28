@@ -101,11 +101,6 @@ export default async function FreelancerlarPage(props: PageProps<"/freelancerlar
                       )}
                     </div>
                     <p className="truncate text-sm text-slate-500">{freelancer.title ?? "Freelancer"}</p>
-                    <p className="mt-0.5 text-xs text-slate-400">
-                      {[freelancer.city, freelancer.age ? `${freelancer.age} yaş` : null]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
                   </div>
                 </div>
 
