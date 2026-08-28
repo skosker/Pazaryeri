@@ -28,7 +28,6 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
     select: {
       id: true,
       name: true,
-      email: true,
       role: true,
       suspended: true,
       isPro: true,
@@ -67,9 +66,6 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
                       </span>
                     )}
                   </p>
-                  {user.importedOrderCount === null && (
-                    <p className="text-xs text-slate-400">{user.email}</p>
-                  )}
                 </td>
                 <td className="px-5 py-4 text-slate-600">
                   <span>{roleLabel[user.role] ?? user.role}</span>
