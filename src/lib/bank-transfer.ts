@@ -30,11 +30,16 @@ const fallback: BankTransferInfo = {
 };
 
 /**
- * Every company account, oldest first. Falls back to a single built-in account when no
- * rows exist yet, so the checkout page always has something to show.
+ * Every active company account, oldest first — what the checkout page shows. A
+ * deactivated account (admin's "Pasife Al") is excluded here but not deleted, so it can
+ * be turned back on later without re-entering its details. Falls back to a single
+ * built-in account when no active rows exist, so checkout always has something to show.
  */
 export async function getBankAccounts(): Promise<BankTransferInfo[]> {
-  const rows = await prisma.bankAccount.findMany({ orderBy: { createdAt: "asc" } });
+  const rows = await prisma.bankAccount.findMany({
+    where: { active: true },
+    orderBy: { createdAt: "asc" },
+  });
   if (rows.length === 0) return [fallback];
 
   return rows.map((row) => ({
@@ -42,5 +47,20 @@ export async function getBankAccounts(): Promise<BankTransferInfo[]> {
     accountHolder: row.accountHolder,
     bankName: row.bankName,
     iban: formatIban(row.iban),
+  }));
+}
+
+export type AdminBankAccount = BankTransferInfo & { active: boolean };
+
+/** Every company account — active and inactive — for the /admin/banka management screen. */
+export async function getAllBankAccountsForAdmin(): Promise<AdminBankAccount[]> {
+  const rows = await prisma.bankAccount.findMany({ orderBy: { createdAt: "asc" } });
+
+  return rows.map((row) => ({
+    id: row.id,
+    accountHolder: row.accountHolder,
+    bankName: row.bankName,
+    iban: formatIban(row.iban),
+    active: row.active,
   }));
 }

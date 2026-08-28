@@ -52,3 +52,20 @@ export async function deleteBankAccountAction(id: string) {
   revalidatePath("/admin/banka");
   revalidatePath("/odeme", "layout");
 }
+
+/**
+ * Flips a company account between active and inactive. A pasife (inactive) account
+ * disappears from checkout immediately but keeps its details, so it can be turned back
+ * on later without re-entering the IBAN — the reversible alternative to deleting it.
+ */
+export async function toggleBankAccountActiveAction(id: string) {
+  await requireAdmin();
+
+  const account = await prisma.bankAccount.findUnique({ where: { id }, select: { active: true } });
+  if (!account) return;
+
+  await prisma.bankAccount.update({ where: { id }, data: { active: !account.active } });
+
+  revalidatePath("/admin/banka");
+  revalidatePath("/odeme", "layout");
+}

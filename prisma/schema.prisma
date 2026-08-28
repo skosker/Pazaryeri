@@ -311,6 +311,9 @@ model BankAccount {
   accountHolder String
   bankName      String
   iban          String
+  /// Pasife alınan hesap ödeme sayfasında gösterilmez ama silinmez — admin panelinde
+  /// kalır, istenirse tekrar aktif edilebilir.
+  active        Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
