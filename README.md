@@ -10,7 +10,7 @@
 - **Ödeme altyapısı**: iyzico Checkout Form entegrasyonu (gerçek API anahtarları tanımlandığında canlı çalışır). Anahtar tanımlı değilse otomatik olarak **mock ödeme modunda** çalışır, böylece iyzico hesabı olmadan da uçtan uca test edilebilir.
 - **Sipariş / escrow akışı**: Ödeme → satıcı işe başlar → teslim eder → alıcı onaylar (ödeme serbest bırakılır) → değerlendirme bırakılır.
 - **Panel**: Freelancer için ilan oluşturma ve gelen siparişler; alıcı için sipariş geçmişi.
-- **Yapay freelancer üretimi**: Pazaryerini dolduran 1000 farklı freelancer profili (isim, meslek, yaş, şehir, uzmanlık ve çizilmiş profil fotoğrafı) tek komutla üretilir. Ayrıntı için [Yapay freelancer üretimi](#yapay-freelancer-üretimi).
+- **Yapay freelancer üretimi**: Pazaryerini dolduran 4466 farklı freelancer profili (isim, meslek, yaş, şehir, uzmanlık ve çizilmiş profil fotoğrafı) tek komutla üretilir. Ayrıntı için [Yapay freelancer üretimi](#yapay-freelancer-üretimi).
 
 ## Teknoloji
 
@@ -58,7 +58,7 @@ Veriyi tazelemek için tek başına seed yeterli:
 npm run db:seed
 ```
 
-Seed, 1000 yapay freelancer profilini de yazar; sadece onları tazelemek için
+Seed, 4466 yapay freelancer profilini de yazar; sadece onları tazelemek için
 `npm run freelancer:uret` yeterlidir (aşağıya bakın).
 
 ### 3. Geliştirme sunucusu
@@ -93,11 +93,11 @@ npm run admin:sifre -- buyer@demo.prosinta.com '<şifre>'
 
 ## Yapay freelancer üretimi
 
-Pazaryerinin dolu görünmesi için 1000 farklı freelancer profili üretilir. Her profilde
+Pazaryerinin dolu görünmesi için 4466 farklı freelancer profili üretilir. Her profilde
 **isim, meslek, yaş, şehir, uzmanlık listesi ve profil fotoğrafı** bulunur.
 
 ```bash
-npm run freelancer:uret                 # 1000 profili oluşturur, var olanları tazeler
+npm run freelancer:uret                 # 4466 profili oluşturur, var olanları tazeler
 npm run freelancer:uret -- --dry-run    # hiçbir şey yazmadan ne olacağını gösterir
 npm run freelancer:uret -- --adet=50    # daha küçük bir set
 npm run freelancer:uret -- --sql        # migration'a gömülecek SQL'i basar
@@ -106,7 +106,7 @@ npm run freelancer:uret -- --sql        # migration'a gömülecek SQL'i basar
 Nasıl çalışıyor:
 
 - **Üreteç** (`prisma/synthetic-freelancers.ts`) veritabanına dokunmaz; her profil kendi
-  sırasından türetilir, yani üreteç ikinci kez çalıştığında aynı bin kişiyi üretir. 61
+  sırasından türetilir, yani üreteç ikinci kez çalıştığında aynı kişileri üretir. 61
   meslek on kategoriye sırayla dağıtılır, isim/yaş/şehir/uzmanlık ise e-postanın
   hash'inden gelir. Şehirler ağırlıklı seçilir: kalabalık İstanbul'da toplanır, uzun
   kuyruk Yalova'ya kadar incelir.
@@ -159,7 +159,7 @@ Nasıl çalışıyor:
 ```
 prisma/schema.prisma        Veritabanı şeması
 prisma/seed.ts               Örnek veri
-prisma/synthetic-freelancers.ts       1000 yapay freelancer üreteci (isim, meslek, yaş, şehir, uzmanlık)
+prisma/synthetic-freelancers.ts       4466 yapay freelancer üreteci (isim, meslek, yaş, şehir, uzmanlık)
 prisma/showcase-freelancers.ts        Generatörden önceki demo satıcıların profilini tamamlar
 prisma/sync-synthetic-freelancers.ts  Üretilen profilleri veritabanına yazar
 scripts/generate-freelancers.ts       `npm run freelancer:uret` komutu
