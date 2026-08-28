@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
 import { toggleSuspensionAction, changeUserRoleAction, toggleProFreelancerAction } from "./actions";
@@ -12,7 +11,8 @@ const roleLabel: Record<string, string> = {
 /**
  * The generated showcase profiles outnumber the real accounts by a wide margin and
  * nothing here applies to them — they cannot log in, order or be suspended — so the
- * list holds real sign-ups by default and puts the rest behind a link.
+ * list holds real sign-ups only. ?uretilmis=1 still includes them for the rare case
+ * where one needs looking at.
  */
 export default async function AdminUsersPage(props: PageProps<"/admin/kullanicilar">) {
   const admin = await requireAdmin();
@@ -20,43 +20,27 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
   const showGenerated =
     (Array.isArray(searchParams.uretilmis) ? searchParams.uretilmis[0] : searchParams.uretilmis) === "1";
 
-  const [users, generatedCount] = await Promise.all([
-    prisma.user.findMany({
-      where: showGenerated ? {} : { synthetic: false },
-      orderBy: { createdAt: "desc" },
-      take: 200,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        suspended: true,
-        isPro: true,
-        synthetic: true,
-        emailVerified: true,
-        createdAt: true,
-        _count: { select: { gigs: true, ordersMade: true } },
-      },
-    }),
-    prisma.user.count({ where: { synthetic: true } }),
-  ]);
+  const users = await prisma.user.findMany({
+    where: showGenerated ? {} : { synthetic: false },
+    orderBy: { createdAt: "desc" },
+    take: 200,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      suspended: true,
+      isPro: true,
+      synthetic: true,
+      emailVerified: true,
+      createdAt: true,
+      _count: { select: { gigs: true, ordersMade: true } },
+    },
+  });
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-brand-navy">Kullanıcılar</h1>
-      <p className="mt-1 text-sm text-slate-500">
-        {showGenerated
-          ? `En son ${users.length} kullanıcı (üretilmiş profiller dahil).`
-          : `${users.length} kayıtlı kullanıcı${generatedCount > 0 ? ` · ${generatedCount} üretilmiş profil gizli` : ""}.`}
-        {generatedCount > 0 && (
-          <Link
-            href={showGenerated ? "/admin/kullanicilar" : "/admin/kullanicilar?uretilmis=1"}
-            className="ml-2 font-medium text-purple-700 hover:underline"
-          >
-            {showGenerated ? "Sadece gerçek hesaplar" : "Üretilmiş profilleri de göster"}
-          </Link>
-        )}
-      </p>
 
       <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
         <table className="w-full text-left text-sm">
