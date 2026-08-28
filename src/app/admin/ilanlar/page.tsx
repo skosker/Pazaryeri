@@ -35,7 +35,9 @@ export default async function AdminGigsPage() {
               <tr key={gig.id} className="border-b border-slate-100 last:border-0">
                 <td className="px-5 py-4">
                   <p className="line-clamp-1 font-medium text-brand-navy">{gig.title}</p>
-                  <p className="text-xs text-slate-400">{gig._count.orders} sipariş</p>
+                  {gig._count.orders > 0 && (
+                    <p className="text-xs text-slate-400">{gig._count.orders} sipariş</p>
+                  )}
                 </td>
                 <td className="px-5 py-4 text-slate-600">{gig.seller.name}</td>
                 <td className="px-5 py-4 text-slate-500">{gig.category.name}</td>
