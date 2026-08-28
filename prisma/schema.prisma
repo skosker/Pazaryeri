@@ -327,3 +327,18 @@ model FreelancerIban {
 
   @@map("freelancer_ibans")
 }
+
+/// Freelancer'lara yapılan hakediş ödemeleri — yalnızca admin panelinde görünür. Payout
+/// modeli sipariş+satıcıya zorunlu bağlı olduğu için, dış (elle) ödemeler bu ayrı tabloda
+/// tutulur: ad, IBAN, tutar ve ödeme tarihi.
+model FreelancerPayout {
+  id        String   @id @default(cuid())
+  name      String
+  iban      String
+  amount    Decimal  @db.Decimal(12, 2)
+  paidAt    DateTime
+  createdAt DateTime @default(now())
+
+  @@index([paidAt])
+  @@map("freelancer_payouts")
+}

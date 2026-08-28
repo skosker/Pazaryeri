@@ -6,6 +6,7 @@ const navItems = [
   { href: "/admin/havale-onaylari", label: "Havale/EFT Onayları" },
   { href: "/admin/banka", label: "Banka Hesabı" },
   { href: "/admin/hakedisler", label: "Hakedişler" },
+  { href: "/admin/hakedis-odemeleri", label: "Hakediş Ödemeleri" },
   { href: "/admin/freelancer-ibanlari", label: "Freelancer IBAN’ları" },
   { href: "/admin/siparisler", label: "Siparişler" },
   { href: "/admin/kullanicilar", label: "Kullanıcılar" },
