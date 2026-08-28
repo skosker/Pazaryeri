@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listBankTransfers } from "@/lib/order-actions";
 import { formatPrice } from "@/lib/format-price";
+import { ImportTransfersForm } from "./import-form";
 
 const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
 
@@ -42,6 +43,10 @@ export default async function BankTransferApprovalsPage(
           ? `${pendingCount} tanesi onay bekliyor.`
           : "Onay bekleyen kayıt yok."}
       </p>
+
+      <div className="mt-6">
+        <ImportTransfersForm />
+      </div>
 
       <form method="get" className="mt-6 flex flex-wrap items-end gap-3">
         <div>
