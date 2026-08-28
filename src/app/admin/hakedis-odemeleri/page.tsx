@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { formatIban } from "@/lib/iban";
 import { formatPrice } from "@/lib/format-price";
 import type { Prisma } from "@/generated/prisma/client";
+import { ImportPayoutsForm } from "./import-form";
 
 const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
 
@@ -43,6 +44,10 @@ export default async function FreelancerPayoutsPage(props: PageProps<"/admin/hak
       <p className="mt-1 max-w-2xl text-sm text-slate-500">
         Freelancer&apos;lara yapılan hakediş ödemeleri. Yalnızca admin panelinde görünür.
       </p>
+
+      <div className="mt-6">
+        <ImportPayoutsForm />
+      </div>
 
       <form method="get" className="mt-6 flex flex-wrap items-end gap-3">
         <div>
