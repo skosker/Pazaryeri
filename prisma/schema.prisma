@@ -57,6 +57,10 @@ model User {
   emailVerified DateTime?
   suspended     Boolean   @default(false)
   isOnline      Boolean   @default(false)
+  /// Yalnızca elle içe aktarılan alıcılar için: admin listesinde gösterilen sipariş
+  /// sayısı (ismin ham listede kaç kez geçtiği). Gerçek Order kaydı değildir; diğer
+  /// kullanıcılarda NULL kalır ve sipariş sayısı gerçek kayıtlardan gelir.
+  importedOrderCount Int?
   // Meaning depends on role: BUYER = Prosinta Pro member, FREELANCER = admin-verified Pro freelancer.
   isPro         Boolean   @default(false)
   createdAt     DateTime  @default(now())
@@ -296,4 +300,45 @@ model Payout {
   @@index([sellerId])
   @@index([status])
   @@map("payouts")
+}
+
+/// Havale/EFT ile ödeyen alıcıya gösterilen şirket tahsilat hesapları. Birden çok olabilir:
+/// admin panelinden eklenip çıkarılır, ödeme sayfası hepsini listeler (alıcı kendi
+/// bankasına denk geleni seçip masrafsız EFT yapabilsin). Hiç satır yoksa ortam
+/// değişkenleri, o da yoksa koddaki değerler tek hesap olarak gösterilir.
+model BankAccount {
+  id            String   @id @default(cuid())
+  accountHolder String
+  bankName      String
+  iban          String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("bank_accounts")
+}
+
+/// Freelancer hakediş IBAN kayıtları — yalnızca admin panelinde görüntülenir, herkese
+/// açık değildir. Ayrı bir tabloda tutulur ki dizinde/profillerde görünmesin.
+model FreelancerIban {
+  id        String   @id @default(cuid())
+  name      String
+  iban      String
+  createdAt DateTime @default(now())
+
+  @@map("freelancer_ibans")
+}
+
+/// Freelancer'lara yapılan hakediş ödemeleri — yalnızca admin panelinde görünür. Payout
+/// modeli sipariş+satıcıya zorunlu bağlı olduğu için, dış (elle) ödemeler bu ayrı tabloda
+/// tutulur: ad, IBAN, tutar ve ödeme tarihi.
+model FreelancerPayout {
+  id        String   @id @default(cuid())
+  name      String
+  iban      String
+  amount    Decimal  @db.Decimal(12, 2)
+  paidAt    DateTime
+  createdAt DateTime @default(now())
+
+  @@index([paidAt])
+  @@map("freelancer_payouts")
 }

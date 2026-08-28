@@ -8,7 +8,7 @@ import Link from "next/link";
  */
 
 export const legalLinks = [
-  { href: "/hakkimizda", label: "Prosinta Hakkında" },
+  { href: "/hakkimizda", label: "Hakkımızda" },
   { href: "/uyelik-sozlesmesi", label: "Üyelik Sözleşmesi" },
   { href: "/kullanim-sartlari", label: "Kullanım Şartları" },
   { href: "/gizlilik-politikasi", label: "Kişisel Verilerin Korunması Politikası" },
@@ -17,7 +17,7 @@ export const legalLinks = [
 export function LegalBar() {
   return (
     <div className="bg-brand-navy">
-      <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-5 text-sm text-slate-300 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:px-8">
+      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-5 text-sm text-slate-300 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:px-8">
         <nav className="flex flex-wrap items-center gap-x-6 gap-y-2">
           {legalLinks.map((link) => (
             <Link

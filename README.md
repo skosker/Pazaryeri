@@ -10,7 +10,7 @@
 - **Ödeme altyapısı**: iyzico Checkout Form entegrasyonu (gerçek API anahtarları tanımlandığında canlı çalışır). Anahtar tanımlı değilse otomatik olarak **mock ödeme modunda** çalışır, böylece iyzico hesabı olmadan da uçtan uca test edilebilir.
 - **Sipariş / escrow akışı**: Ödeme → satıcı işe başlar → teslim eder → alıcı onaylar (ödeme serbest bırakılır) → değerlendirme bırakılır.
 - **Panel**: Freelancer için ilan oluşturma ve gelen siparişler; alıcı için sipariş geçmişi.
-- **Yapay freelancer üretimi**: Pazaryerini dolduran 1000 farklı freelancer profili (isim, meslek, yaş, şehir, uzmanlık ve çizilmiş profil fotoğrafı) tek komutla üretilir. Ayrıntı için [Yapay freelancer üretimi](#yapay-freelancer-üretimi).
+- **Yapay freelancer üretimi**: Pazaryerini dolduran 4466 farklı freelancer profili (isim, meslek, yaş, şehir, uzmanlık ve çizilmiş profil fotoğrafı) tek komutla üretilir. Ayrıntı için [Yapay freelancer üretimi](#yapay-freelancer-üretimi).
 
 ## Teknoloji
 
@@ -58,7 +58,7 @@ Veriyi tazelemek için tek başına seed yeterli:
 npm run db:seed
 ```
 
-Seed, 1000 yapay freelancer profilini de yazar; sadece onları tazelemek için
+Seed, 4466 yapay freelancer profilini de yazar; sadece onları tazelemek için
 `npm run freelancer:uret` yeterlidir (aşağıya bakın).
 
 ### 3. Geliştirme sunucusu
@@ -71,18 +71,33 @@ npm run dev
 
 ### Demo hesaplar (seed sonrası)
 
-| Rol | E-posta | Şifre |
+Seed'lenen gösterim hesaplarının (satıcılar ve `buyer@demo.prosinta.com`) **girişi
+bilerek kapalıdır**: `passwordHash` bcrypt formatında olmayan bir işarete (`!demo-account-no-login`)
+ayarlıdır, `bcrypt.compare` bunu sessizce reddeder. Hesaplar sitede görünür kalır (ilan,
+profil, yorum) ama kimse onlarla oturum açamaz — katalog gerçek kullanıcılara açıldığında
+`password123` gibi ortak bir şifreyle 179 hesaba girilmesini engellemek için.
+
+| Hesap | E-posta | Giriş |
 | --- | --- | --- |
-| Alıcı | `buyer@profestia.dev` | `password123` |
-| Freelancer | `mert@profestia.dev` (veya diğer seed'lenen satıcılar) | `password123` |
+| Admin | `admin@prosinta.com` | Şifreyi sen belirlersin: `npm run admin:sifre -- admin@prosinta.com '<şifre>'` |
+| Demo satıcı / alıcı | `mert@demo.prosinta.com`, `buyer@demo.prosinta.com` vb. | Kapalı |
+
+Yerelde bir demo hesabına girmen gerekirse aynı komutla ona da şifre verebilirsin:
+
+```bash
+npm run admin:sifre -- buyer@demo.prosinta.com '<şifre>'
+```
+
+> Not: `admin:sifre` hedef hesabı ADMIN rolüne çeker. Sadece giriş denemek için değil,
+> yönetici erişimi vermek istediğin hesapta kullan.
 
 ## Yapay freelancer üretimi
 
-Pazaryerinin dolu görünmesi için 1000 farklı freelancer profili üretilir. Her profilde
+Pazaryerinin dolu görünmesi için 4466 farklı freelancer profili üretilir. Her profilde
 **isim, meslek, yaş, şehir, uzmanlık listesi ve profil fotoğrafı** bulunur.
 
 ```bash
-npm run freelancer:uret                 # 1000 profili oluşturur, var olanları tazeler
+npm run freelancer:uret                 # 4466 profili oluşturur, var olanları tazeler
 npm run freelancer:uret -- --dry-run    # hiçbir şey yazmadan ne olacağını gösterir
 npm run freelancer:uret -- --adet=50    # daha küçük bir set
 npm run freelancer:uret -- --sql        # migration'a gömülecek SQL'i basar
@@ -91,7 +106,7 @@ npm run freelancer:uret -- --sql        # migration'a gömülecek SQL'i basar
 Nasıl çalışıyor:
 
 - **Üreteç** (`prisma/synthetic-freelancers.ts`) veritabanına dokunmaz; her profil kendi
-  sırasından türetilir, yani üreteç ikinci kez çalıştığında aynı bin kişiyi üretir. 61
+  sırasından türetilir, yani üreteç ikinci kez çalıştığında aynı kişileri üretir. 61
   meslek on kategoriye sırayla dağıtılır, isim/yaş/şehir/uzmanlık ise e-postanın
   hash'inden gelir. Şehirler ağırlıklı seçilir: kalabalık İstanbul'da toplanır, uzun
   kuyruk Yalova'ya kadar incelir.
@@ -101,15 +116,17 @@ Nasıl çalışıyor:
   anahtarına ve profil başına depolamaya gerek yoktur. Üstüne, `PEXELS_API_KEY`
   tanımlıysa Pexels'ten **gerçek portre fotoğrafları** çekilebilir
   (`src/lib/profile-photos.ts`): API'de ülke filtresi yok, o yüzden yerellik tamamen
-  aramanın kendisinden gelir — hepsi Türkiye'yi hedefler (`locale=tr-TR` ile Türkçe
-  terimler, ardından Türkiye/İstanbul adı geçen İngilizce olanlar). Derinlik arama
-  sayısından gelir, sayfa sayısından değil: bir aramanın beşinci sayfası artık sorulan
-  şeye benzemez. Terimler çalışan profesyonel portresini hedefler, çünkü profillerin
-  yaşı 22–58 ve stok sitelerde milliyet araması belgesel fotoğrafçılığa (yaşlı, kırsal
-  kareler) çıkar. Son eleme Pexels'in fotoğraf açıklamasıyla (`alt`) yapılır: kalabalık,
-  nesne, çocuk ya da "elderly/old" diye tanımlanan kareler hiçbir profile atanmaz ve
-  açıklama profilin ismiyle aynı cinsiyeti söylemiyorsa fotoğraf kullanılmaz — eleme
-  sonrası fotoğraf düşmeyen profil çizimle kalır. Arama profilin ismine göre kadın/erkek
+  aramanın kendisinden gelir. `locale` sorgunun **dilini** belirler, fotoğraftaki kişinin
+  ülkesini değil — `locale=tr-TR` altında "genç kadın portre" gibi genel bir arama da aynı
+  küresel stok havuzundan döner. Bu yüzden listedeki her arama Türkiye'yi ya da bir Türk
+  şehrini adıyla anar; "türk / istanbul / ankara / izmir / turkey" geçmeyen bir arama bu
+  listeye girmez. Derinlik arama sayısından gelir, sayfa sayısından değil: bir aramanın
+  beşinci sayfası artık sorulan şeye benzemez. Bedeli kapsama: Pexels'te bin iki yüz Türk
+  portresi yok, havuz profillerden önce tükenir ve kalan profiller çizimle kalır. Son eleme
+  Pexels'in fotoğraf açıklamasıyla (`alt`) yapılır: kalabalık, nesne, çocuk, "elderly/old"
+  diye tanımlanan kareler ve milliyet aramasının getirdiği belgesel/turistik kareler (yöresel
+  kıyafet, köy, pazar esnafı) hiçbir profile atanmaz; açıklama profilin ismiyle aynı cinsiyeti
+  söylemiyorsa fotoğraf kullanılmaz — eleme sonrası fotoğraf düşmeyen profil çizimle kalır. Arama profilin ismine göre kadın/erkek
   ayrılır,
   aynı fotoğraf iki profilde kullanılmaz, fotoğraf düşmeyen profil çizimle kalır. Çalıştırmak
   için admin panelinde **/admin/profil-fotograflari** ekranındaki düğme ya da:
@@ -142,7 +159,7 @@ Nasıl çalışıyor:
 ```
 prisma/schema.prisma        Veritabanı şeması
 prisma/seed.ts               Örnek veri
-prisma/synthetic-freelancers.ts       1000 yapay freelancer üreteci (isim, meslek, yaş, şehir, uzmanlık)
+prisma/synthetic-freelancers.ts       4466 yapay freelancer üreteci (isim, meslek, yaş, şehir, uzmanlık)
 prisma/showcase-freelancers.ts        Generatörden önceki demo satıcıların profilini tamamlar
 prisma/sync-synthetic-freelancers.ts  Üretilen profilleri veritabanına yazar
 scripts/generate-freelancers.ts       `npm run freelancer:uret` komutu

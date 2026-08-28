@@ -4,13 +4,19 @@ import { requireAdmin } from "@/lib/require-admin";
 const navItems = [
   { href: "/admin", label: "Genel Bakış" },
   { href: "/admin/havale-onaylari", label: "Havale/EFT Onayları" },
+  { href: "/admin/banka", label: "Banka Hesabı" },
   { href: "/admin/hakedisler", label: "Hakedişler" },
+  { href: "/admin/hakedis-odemeleri", label: "Hakediş Ödemeleri" },
+  { href: "/admin/freelancer-ibanlari", label: "Freelancer IBAN’ları" },
   { href: "/admin/siparisler", label: "Siparişler" },
   { href: "/admin/kullanicilar", label: "Kullanıcılar" },
   { href: "/admin/ilanlar", label: "İlanlar" },
   { href: "/admin/kategoriler", label: "Kategoriler" },
   { href: "/admin/kapaklar", label: "İlan Kapakları" },
   { href: "/admin/profil-fotograflari", label: "Profil Fotoğrafları" },
+  // Geçici olarak menüden gizli — rota ve işlevsellik dokunulmadan duruyor, sadece
+  // görünürlük kapalı. Tekrar görünür yapılması istenirse bu satırı geri ekle:
+  // { href: "/admin/ai-portreler", label: "AI Portreler" },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

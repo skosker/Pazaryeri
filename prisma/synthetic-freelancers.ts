@@ -49,7 +49,7 @@ export type ShowcaseProfile = {
   bio: string;
 };
 
-export const SYNTHETIC_FREELANCER_COUNT = 1000;
+export const SYNTHETIC_FREELANCER_COUNT = 4466;
 
 /** These profiles are showcase content; nobody logs into them. */
 export const SYNTHETIC_PASSWORD_HASH = "!showcase-profile-no-login";
@@ -68,7 +68,7 @@ type CategoryProfessions = {
   professions: Profession[];
 };
 
-const catalogue: CategoryProfessions[] = [
+export const catalogue: CategoryProfessions[] = [
   {
     categorySlug: "ai-otomasyon",
     professions: [
@@ -365,7 +365,7 @@ const catalogue: CategoryProfessions[] = [
   },
 ];
 
-const surnames = [
+export const surnames = [
   "Yılmaz", "Kaya", "Demir", "Şahin", "Çelik", "Yıldız", "Yıldırım", "Öztürk", "Aydın", "Özdemir",
   "Arslan", "Doğan", "Kılıç", "Aslan", "Çetin", "Kara", "Koç", "Kurt", "Özkan", "Şimşek",
   "Polat", "Korkmaz", "Erdoğan", "Bulut", "Aksoy", "Güneş", "Türk", "Aktaş", "Bozkurt", "Karaca",
@@ -388,7 +388,7 @@ const surnames = [
  * freelance work sits in each city, so the generated crowd clusters in İstanbul and
  * thins out towards Yalova instead of spreading evenly over 50 cities.
  */
-const cities = [
+export const cities = [
   { name: "İstanbul", locative: "İstanbul'da", weight: 220 },
   { name: "Ankara", locative: "Ankara'da", weight: 110 },
   { name: "İzmir", locative: "İzmir'de", weight: 90 },
@@ -441,7 +441,7 @@ const cities = [
   { name: "Kırklareli", locative: "Kırklareli'nde", weight: 4 },
 ];
 
-function hash32(input: string) {
+export function hash32(input: string) {
   let hash = 0x811c9dc5;
   for (let i = 0; i < input.length; i++) {
     hash ^= input.charCodeAt(i);
@@ -454,7 +454,7 @@ function hash32(input: string) {
 }
 
 /** Deterministic 0..n-1 stream, so each decision about a profile gets its own bits. */
-function reader(seed: number) {
+export function reader(seed: number) {
   let state = seed || 1;
   return (n: number) => {
     state ^= state << 13;
@@ -466,7 +466,7 @@ function reader(seed: number) {
 }
 
 /** Picks `count` distinct entries, keeping the pool's own order. */
-function pickSome<T>(pool: readonly T[], count: number, r: (n: number) => number): T[] {
+export function pickSome<T>(pool: readonly T[], count: number, r: (n: number) => number): T[] {
   const remaining = [...pool];
   const picked: T[] = [];
   for (let i = 0; i < count && remaining.length > 0; i++) {
@@ -477,7 +477,7 @@ function pickSome<T>(pool: readonly T[], count: number, r: (n: number) => number
 
 const cityWeightTotal = cities.reduce((sum, city) => sum + city.weight, 0);
 
-function pickCity(r: (n: number) => number) {
+export function pickCity(r: (n: number) => number) {
   let draw = r(cityWeightTotal);
   for (const city of cities) {
     draw -= city.weight;
@@ -486,7 +486,7 @@ function pickCity(r: (n: number) => number) {
   return cities[0];
 }
 
-const professions = catalogue.flatMap((group) =>
+export const professions = catalogue.flatMap((group) =>
   group.professions.map((profession) => ({ ...profession, categorySlug: group.categorySlug }))
 );
 
@@ -494,13 +494,13 @@ const professions = catalogue.flatMap((group) =>
  * "A", "A ve B", "A, B ve C" — Turkish list joining that stops at what there is, so a
  * seller with two areas does not get one of them named twice.
  */
-function listOf(items: string[], limit: number) {
+export function listOf(items: string[], limit: number) {
   const picked = items.slice(0, limit);
   if (picked.length <= 1) return picked[0] ?? "";
   return `${picked.slice(0, -1).join(", ")} ve ${picked[picked.length - 1]}`;
 }
 
-function buildBio(
+export function buildBio(
   firstName: string,
   title: string,
   years: number,

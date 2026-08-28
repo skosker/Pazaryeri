@@ -56,6 +56,31 @@ export async function listPendingBankTransfers() {
   });
 }
 
+/**
+ * Every bank-transfer order — those still awaiting approval and those already approved —
+ * for the admin Havale/EFT screen, optionally narrowed to a date range. A transfer is a
+ * bank transfer if its payment went through the "havale" provider; the status column then
+ * says whether it is still pending or has been approved.
+ */
+export async function listBankTransfers(opts?: { from?: Date; to?: Date }) {
+  const createdAt =
+    opts?.from || opts?.to
+      ? {
+          ...(opts.from ? { gte: opts.from } : {}),
+          ...(opts.to ? { lte: opts.to } : {}),
+        }
+      : undefined;
+
+  return prisma.order.findMany({
+    where: {
+      payment: { provider: "havale" },
+      ...(createdAt ? { createdAt } : {}),
+    },
+    include: orderDetailInclude,
+    orderBy: { createdAt: "desc" },
+  });
+}
+
 export async function markOrderPaid(orderId: string) {
   const order = await prisma.order.findUnique({
     where: { id: orderId },

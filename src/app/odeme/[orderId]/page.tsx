@@ -1,5 +1,4 @@
 import { randomUUID } from "crypto";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -8,6 +7,7 @@ import { MockCheckoutForm } from "./mock-checkout-form";
 import { IyzicoEmbed } from "./iyzico-embed";
 import { PaymentMethodTabs } from "./payment-method-tabs";
 import { BankTransferPanel } from "./bank-transfer-panel";
+import { getBankAccounts } from "@/lib/bank-transfer";
 import type { Prisma } from "@/generated/prisma/client";
 
 export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">) {
@@ -26,6 +26,7 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
   if (order.status !== "PENDING_PAYMENT") redirect(`/siparis/${orderId}`);
 
   const amount = Number(order.amount);
+  const bankAccounts = await getBankAccounts();
   const errorMessage = searchParams.hata === "odeme-basarisiz" ? "Ödeme başarısız oldu, tekrar deneyin." : null;
 
   let checkoutFormContent: string | null = null;
@@ -73,13 +74,6 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
-      <nav className="mb-6 text-sm text-slate-400">
-        <Link href={`/gig/${order.gig.slug}`} className="hover:text-brand-navy">
-          {order.gig.title}
-        </Link>{" "}
-        / <span className="text-slate-500">Ödeme</span>
-      </nav>
-
       <h1 className="text-2xl font-bold text-brand-navy">Siparişi Tamamla</h1>
       <p className="mt-1 text-sm text-slate-500">{order.package.name} · {order.gig.title}</p>
 
@@ -96,7 +90,7 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
               <IyzicoEmbed checkoutFormContent={checkoutFormContent ?? ""} />
             )
           }
-          bankContent={<BankTransferPanel orderId={order.id} amount={amount} />}
+          bankContent={<BankTransferPanel orderId={order.id} amount={amount} accounts={bankAccounts} />}
         />
       </div>
 

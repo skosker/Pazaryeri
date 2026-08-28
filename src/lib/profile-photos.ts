@@ -37,48 +37,53 @@ type Bucket = "kadin" | "erkek";
  * worded to bring back head-and-shoulders shots: a full-body photo loses its face when a
  * round avatar crops it.
  *
- * They ask for working-age people, framed as portraits: the profiles are
- * ages run from 22 to 58 and cluster in the thirties, so a portrait of someone in their
- * seventies contradicts the age printed next to it. Wording matters more than it looks —
- * searching a stock library for a nationality returns documentary photography (village,
- * folk dress, elderly faces), while searching for the job returns office portraits of the
- * age the profiles claim.
+ * They ask for working-age people, framed as portraits: the profiles' ages run from 22 to
+ * 58 and cluster in the thirties, so a portrait of someone in their seventies contradicts
+ * the age printed next to it.
  *
- * Locality comes from the search itself — the API has no country filter — so every search
- * here is aimed at Turkey: Turkish wording under the Turkish locale first, then English
- * ones that still name Turkey or İstanbul. None of them ask for portraits in general.
- * Depth comes from the number of searches rather than from paging deeper into any one of
- * them, because page five of a search no longer resembles what was asked for.
+ * Every search names Turkey or a Turkish city, and that is the whole point of the list.
+ * `locale` sets the language the query is read in, not the country of the people in the
+ * results: a generic search like "genç kadın portre" under tr-TR still comes back from the
+ * same global stock pool, which is overwhelmingly not Turkish. Generic wording was where
+ * the foreign-looking faces were coming from, so none of it survives here — a search that
+ * does not say "türk", "istanbul", "ankara", "izmir" or "turkey" does not belong in this
+ * list. Depth comes from the number of searches rather than from paging deeper into any
+ * one of them, because page five of a search no longer resembles what was asked for.
  *
- * Pexels does not hold twelve hundred Turkish portraits, so the pool runs out before the
- * profiles do; whatever is left keeps its drawn avatar, which is the intended fallback and
- * looks like nobody in particular.
+ * The cost is coverage. Pexels does not hold twelve hundred Turkish portraits — nowhere
+ * near — so the pool runs out long before the profiles do, and every profile past that
+ * point keeps its drawn avatar. That is the intended trade: an illustrated avatar belongs
+ * to nobody, whereas a Dutch stock portrait next to the name Elif Yılmaz is simply wrong.
  */
 const searches: { query: string; bucket: Bucket; locale: string }[] = [
+  { query: "türk kadın portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "türk erkek portre", bucket: "erkek", locale: "tr-TR" },
   { query: "genç türk iş kadını portre", bucket: "kadin", locale: "tr-TR" },
   { query: "genç türk iş adamı portre", bucket: "erkek", locale: "tr-TR" },
-  { query: "kadın portre yakın çekim", bucket: "kadin", locale: "tr-TR" },
-  { query: "erkek portre yakın çekim", bucket: "erkek", locale: "tr-TR" },
-  { query: "genç kadın portre", bucket: "kadin", locale: "tr-TR" },
-  { query: "genç erkek portre", bucket: "erkek", locale: "tr-TR" },
-  { query: "iş kadını portre", bucket: "kadin", locale: "tr-TR" },
-  { query: "iş adamı portre", bucket: "erkek", locale: "tr-TR" },
-  { query: "profesyonel kadın portre", bucket: "kadin", locale: "tr-TR" },
-  { query: "profesyonel erkek portre", bucket: "erkek", locale: "tr-TR" },
-  { query: "kadın mühendis portre", bucket: "kadin", locale: "tr-TR" },
-  { query: "erkek mühendis portre", bucket: "erkek", locale: "tr-TR" },
-  { query: "kadın öğretmen portre", bucket: "kadin", locale: "tr-TR" },
-  { query: "erkek öğretmen portre", bucket: "erkek", locale: "tr-TR" },
-  { query: "kadın tasarımcı portre", bucket: "kadin", locale: "tr-TR" },
-  { query: "erkek tasarımcı portre", bucket: "erkek", locale: "tr-TR" },
-  { query: "gülümseyen kadın portre", bucket: "kadin", locale: "tr-TR" },
-  { query: "gülümseyen erkek portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "türk kadın yakın çekim portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "türk erkek yakın çekim portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "istanbul kadın portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "istanbul erkek portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "gülümseyen türk kadın portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "gülümseyen türk erkek portre", bucket: "erkek", locale: "tr-TR" },
+  { query: "türk kadın ofis portre", bucket: "kadin", locale: "tr-TR" },
+  { query: "türk erkek ofis portre", bucket: "erkek", locale: "tr-TR" },
   { query: "young turkish woman portrait", bucket: "kadin", locale: "en-US" },
   { query: "young turkish man portrait", bucket: "erkek", locale: "en-US" },
   { query: "turkish businesswoman headshot", bucket: "kadin", locale: "en-US" },
   { query: "turkish businessman headshot", bucket: "erkek", locale: "en-US" },
+  { query: "turkish woman headshot", bucket: "kadin", locale: "en-US" },
+  { query: "turkish man headshot", bucket: "erkek", locale: "en-US" },
   { query: "istanbul woman portrait", bucket: "kadin", locale: "en-US" },
   { query: "istanbul man portrait", bucket: "erkek", locale: "en-US" },
+  { query: "istanbul businesswoman", bucket: "kadin", locale: "en-US" },
+  { query: "istanbul businessman", bucket: "erkek", locale: "en-US" },
+  { query: "ankara woman portrait", bucket: "kadin", locale: "en-US" },
+  { query: "ankara man portrait", bucket: "erkek", locale: "en-US" },
+  { query: "izmir woman portrait", bucket: "kadin", locale: "en-US" },
+  { query: "izmir man portrait", bucket: "erkek", locale: "en-US" },
+  { query: "turkey woman portrait", bucket: "kadin", locale: "en-US" },
+  { query: "turkey man portrait", bucket: "erkek", locale: "en-US" },
 ];
 
 export type ProfilePhotoProgress = {
@@ -178,6 +183,48 @@ export async function resetProfilePhotos(): Promise<{ reset: number }> {
   return { reset: targets.length };
 }
 
+export type PhotoProfile = { id: string; name: string; image: string };
+
+/**
+ * The generated profiles that currently carry a fetched photograph, for the admin review
+ * gallery. Only these are listed: a profile on its drawn avatar has nothing to review, and
+ * a real seller's own upload is never ours to touch. Oldest id first, so the grid order is
+ * stable between visits and a scan can be resumed where it left off.
+ */
+export async function listPhotoProfiles(): Promise<PhotoProfile[]> {
+  const profiles = await prisma.user.findMany({
+    where: { role: "FREELANCER", synthetic: true },
+    select: { id: true, name: true, image: true },
+    orderBy: { id: "asc" },
+  });
+
+  return profiles
+    .filter((row): row is PhotoProfile => !!row.image?.startsWith(PEXELS_HOST))
+    .map((row) => ({ id: row.id, name: row.name, image: row.image }));
+}
+
+/**
+ * Drops one profile's fetched photo back to its drawn avatar — the per-profile version of
+ * resetProfilePhotos, for when a reviewer spots a single photo that does not fit. Guarded
+ * the same way: only a synthetic profile still on one of our photos is changed, so a real
+ * upload or an already-reverted row is a no-op.
+ */
+export async function revertProfilePhoto(id: string): Promise<{ reverted: boolean }> {
+  const row = await prisma.user.findFirst({
+    where: { id, role: "FREELANCER", synthetic: true },
+    select: { id: true, name: true, email: true, image: true },
+  });
+
+  if (!row || !row.image?.startsWith(PEXELS_HOST)) return { reverted: false };
+
+  await prisma.user.update({
+    where: { id: row.id },
+    data: { image: drawnAvatarUrl(row.name, row.email) },
+  });
+
+  return { reverted: true };
+}
+
 type Photo = { id: number; url: string; alt: string };
 
 /**
@@ -200,6 +247,14 @@ function fitsProfile(alt: string, bucket: Bucket) {
 
   // The profiles are 22 to 58; these describe someone well outside that.
   if (/\b(elderly|senior|old|aged|grandmother|grandfather|granny)\b/.test(text)) return false;
+
+  // Searching a stock library for a nationality also brings back documentary and tourism
+  // work — folk dress, village scenes, a vendor at a bazaar. Those are photographs of
+  // Turkey rather than portraits of the working professional the profile claims to be.
+  if (/\b(traditional|folk|folkloric|costume|village|peasant|nomad|dervish|ottoman)\b/.test(text))
+    return false;
+  if (/\b(vendor|merchant|seller|bazaar|market|shopkeeper|tourist|refugee)\b/.test(text))
+    return false;
 
   // "woman" and "women" keep their own word boundaries, so \bman\b cannot match inside them.
   const feminine = /\b(woman|women|female|lady|businesswoman)\b/.test(text);
