@@ -504,15 +504,14 @@ export function buildBio(
   firstName: string,
   title: string,
   years: number,
-  city: { name: string; locative: string },
   skills: string[],
   r: (n: number) => number
 ) {
   const templates = [
-    `Merhaba, ben ${firstName}. ${years} yıldır ${title} olarak çalışıyorum; özellikle ${listOf(skills, 2)} işlerinde deneyimliyim. ${city.locative} yaşıyorum, tüm Türkiye'ye uzaktan hizmet veriyorum.`,
-    `${title} olarak ${years} yıllık deneyimim var. En çok ${listOf(skills, 3)} işlerinde çalışıyorum. ${city.name} merkezli çalışıyorum, verdiğim teslim tarihine sadık kalıyorum.`,
-    `${years} yıldır serbest çalışan bir ${title} olarak ${listOf(skills, 2)} odaklı projeler üretiyorum. İşe başlamadan önce beklentini netleştirir, ilk taslağı hızlıca paylaşırım. Konum: ${city.name}.`,
-    `${city.locative} yaşıyorum ve ${years} yıldır ${title} olarak proje üretiyorum. ${listOf(skills, 3)} başta olmak üzere işin tamamını uçtan uca yönetiyorum.`,
+    `Merhaba, ben ${firstName}. ${years} yıldır ${title} olarak çalışıyorum; özellikle ${listOf(skills, 2)} işlerinde deneyimliyim. Tüm Türkiye'ye uzaktan hizmet veriyorum.`,
+    `${title} olarak ${years} yıllık deneyimim var. En çok ${listOf(skills, 3)} işlerinde çalışıyorum. Verdiğim teslim tarihine sadık kalıyorum.`,
+    `${years} yıldır serbest çalışan bir ${title} olarak ${listOf(skills, 2)} odaklı projeler üretiyorum. İşe başlamadan önce beklentini netleştirir, ilk taslağı hızlıca paylaşırım.`,
+    `${years} yıldır ${title} olarak proje üretiyorum, tamamen uzaktan çalışıyorum. ${listOf(skills, 3)} başta olmak üzere işin tamamını uçtan uca yönetiyorum.`,
   ];
   return templates[r(templates.length)];
 }
@@ -568,7 +567,7 @@ export function generateSyntheticFreelancers(
       city: city.name,
       skills,
       image: drawnAvatarUrl(name, email),
-      bio: buildBio(name.split(" ")[0], profession.title, years, city, skills, r),
+      bio: buildBio(name.split(" ")[0], profession.title, years, skills, r),
       categorySlug: profession.categorySlug,
       isOnline: r(3) === 0,
       isPro: r(9) === 0,
@@ -647,7 +646,7 @@ export function describeShowcaseFreelancer(
     image: drawnAvatarUrl(seller.name, seller.email),
     bio:
       skills.length >= 2
-        ? buildBio(firstName, seller.title, years, city, skills, r)
-        : `${city.locative} yaşayan bir ${seller.title}. ${years} yıldır Prosinta'da hizmet veriyorum.`,
+        ? buildBio(firstName, seller.title, years, skills, r)
+        : `${years} yıldır Prosinta'da hizmet veren bir ${seller.title}.`,
   };
 }

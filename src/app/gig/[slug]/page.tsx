@@ -134,10 +134,7 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-slate-400">
-                  {gig.seller.title ?? "Freelancer"}
-                  {gig.seller.city && <span> · {gig.seller.city}</span>}
-                </p>
+                <p className="text-sm text-slate-400">{gig.seller.title ?? "Freelancer"}</p>
                 {gig.seller.bio && <p className="mt-2 max-w-xl text-sm text-slate-600">{gig.seller.bio}</p>}
                 {gig.seller.skills.length > 0 && (
                   <ul className="mt-3 flex flex-wrap gap-1.5">

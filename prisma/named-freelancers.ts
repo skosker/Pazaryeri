@@ -374,7 +374,7 @@ export function generateNamedFreelancers(): NamedFreelancer[] {
     const city = pickCity(r);
     const skills = pickSome(profession.skills, 3 + r(3), r);
     const years = Math.max(1, Math.min(age - 21, 2 + r(13)));
-    const bio = buildBio(person.name.split(" ")[0], profession.title, years, city, skills, r);
+    const bio = buildBio(person.name.split(" ")[0], profession.title, years, skills, r);
 
     const standardPrice = bandPrice(profession.categorySlug, email);
     const gig = buildGig(

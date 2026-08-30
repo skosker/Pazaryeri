@@ -193,7 +193,6 @@ export async function getGigBySlug(slug: string) {
           title: true,
           bio: true,
           image: true,
-          city: true,
           skills: true,
           createdAt: true,
           isOnline: true,

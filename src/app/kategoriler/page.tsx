@@ -78,7 +78,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
     pageSize: PAGE_SIZE,
   };
 
-  const [categories, subcategories, { cards: gigs, total, page, pageCount }] = await Promise.all([
+  const [categories, subcategories, { cards: gigs, page, pageCount }] = await Promise.all([
     prisma.category.findMany({ orderBy: { order: "asc" }, select: { slug: true, name: true, icon: true } }),
     prisma.subcategory.findMany({
       orderBy: { name: "asc" },
@@ -125,9 +125,6 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
         )}
         <div>
           <h1 className="text-2xl font-bold text-brand-navy sm:text-3xl">{heading}</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            <span className="font-semibold text-brand-navy">{total}</span> hizmet listeleniyor
-          </p>
         </div>
       </div>
 
