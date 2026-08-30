@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { listGigs, type GigFilters } from "@/lib/gigs";
+import { listGigs, getCategoryFreelancerSummary, type GigFilters } from "@/lib/gigs";
 import { GigCard } from "@/components/gig-card";
 import { CategoryIcon } from "@/components/category-icon";
-import { getCategoryAccent } from "@/lib/category-style";
+import { UserAvatar } from "@/components/user-avatar";
 import { FilterBar } from "./filter-bar";
 import { SortSelect } from "./sort-select";
 
@@ -16,6 +16,13 @@ function toArray(value: string | string[] | undefined): string[] {
 function toSingle(value: string | string[] | undefined): string | undefined {
   if (!value) return undefined;
   return Array.isArray(value) ? value[0] : value;
+}
+
+/** A window of page numbers around the current one — dozens of pages will not fit in a row. */
+function pageWindow(page: number, pageCount: number) {
+  const start = Math.max(1, Math.min(page - 2, pageCount - 4));
+  const end = Math.min(pageCount, Math.max(page + 2, 5));
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
 }
 
 function buildHref(base: {
@@ -97,7 +104,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
   const singleCategory = selectedCategoryObjects.length === 1 ? selectedCategoryObjects[0] : null;
   const singleSubcategory =
     selectedSubcategoryObjects.length === 1 ? selectedSubcategoryObjects[0] : null;
-  const accent = singleCategory ? getCategoryAccent(singleCategory.slug) : null;
+  const categorySummary = singleCategory ? await getCategoryFreelancerSummary(singleCategory.slug) : null;
 
   const heading = q
     ? `"${q}" için sonuçlar`
@@ -117,16 +124,46 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
         <span className="text-slate-500">Kategoriler</span>
       </nav>
 
-      <div className="mb-6 flex items-center gap-3">
-        {accent && (
-          <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${accent.bg} ${accent.text}`}>
-            <CategoryIcon icon={singleCategory!.icon} className="text-2xl" />
-          </span>
-        )}
-        <div>
+      {singleCategory && categorySummary ? (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-slate-800 p-5 text-white">
+          <div className="flex items-center gap-4">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-white/10">
+              <CategoryIcon icon={singleCategory.icon} className="text-3xl" />
+            </span>
+            <div>
+              <h1 className="text-lg font-bold sm:text-xl">{singleCategory.name}</h1>
+              <p className="mt-0.5 text-sm text-slate-300">
+                Bu kategoride hizmet sunan{" "}
+                <span className="font-semibold text-white">
+                  {categorySummary.total.toLocaleString("tr-TR")}
+                </span>{" "}
+                freelancer var.
+              </p>
+            </div>
+          </div>
+          {categorySummary.sample.length > 0 && (
+            <div className="flex shrink-0 -space-x-3">
+              {categorySummary.sample.map((freelancer) => (
+                <UserAvatar
+                  key={freelancer.id}
+                  name={freelancer.name}
+                  image={freelancer.image}
+                  className="h-10 w-10 border-2 border-slate-800 text-sm"
+                />
+              ))}
+              {categorySummary.total > categorySummary.sample.length && (
+                <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-slate-800 bg-slate-600 text-xs font-bold">
+                  +{(categorySummary.total - categorySummary.sample.length).toLocaleString("tr-TR")}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="mb-6">
           <h1 className="text-2xl font-bold text-brand-navy sm:text-3xl">{heading}</h1>
         </div>
-      </div>
+      )}
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4">
         <FilterBar
@@ -216,7 +253,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
                 >
                   Önceki
                 </Link>
-                {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
+                {pageWindow(page, pageCount).map((n) => (
                   <Link
                     key={n}
                     href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, cevrimici, pro: proOnly, sayfa: n })}
@@ -227,6 +264,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
                     {n}
                   </Link>
                 ))}
+                <span className="text-xs text-slate-400">/ {pageCount}</span>
                 <Link
                   href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, cevrimici, pro: proOnly, sayfa: page + 1 })}
                   aria-disabled={page >= pageCount}
