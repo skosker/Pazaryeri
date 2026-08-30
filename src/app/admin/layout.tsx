@@ -9,10 +9,10 @@ const navGroups: { label: string | null; items: { href: string; label: string }[
     label: "Finans",
     items: [
       { href: "/admin/havale-onaylari", label: "Havale/EFT Onayları" },
-      { href: "/admin/banka", label: "Banka Hesabı" },
       { href: "/admin/hakedisler", label: "Hakedişler" },
       { href: "/admin/hakedis-odemeleri", label: "Hakediş Ödemeleri" },
       { href: "/admin/freelancer-ibanlari", label: "Freelancer IBAN’ları" },
+      { href: "/admin/banka", label: "Şirket Banka Hesapları" },
     ],
   },
   {
@@ -50,7 +50,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             {navGroups.map((group) => (
               <div key={group.label ?? "genel-bakis"} className="flex gap-1 lg:flex-col lg:gap-1">
                 {group.label && (
-                  <p className="hidden px-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400 lg:block">
+                  <p className="hidden px-3 text-[11px] font-bold uppercase tracking-wide text-slate-700 lg:block">
                     {group.label}
                   </p>
                 )}
