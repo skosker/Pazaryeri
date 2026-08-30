@@ -11,10 +11,9 @@ type Category = { slug: string; name: string; icon: string };
 type Subcategory = { name: string; slug: string };
 
 const deliveryOptions = [
-  { value: "1", label: "1 gün" },
+  { value: "1", label: "24 saat" },
   { value: "3", label: "3 gün" },
   { value: "5", label: "5 gün" },
-  { value: "7", label: "1 Hafta" },
   { value: "10", label: "10 gün" },
   { value: "farketmez", label: "Farketmez" },
 ];
