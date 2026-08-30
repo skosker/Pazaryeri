@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { listGigs, getCategoryFreelancerSummary, type GigFilters } from "@/lib/gigs";
+import { listGigs, getCategoryFreelancerCount, type GigFilters } from "@/lib/gigs";
 import { GigCard } from "@/components/gig-card";
 import { CategoryIcon } from "@/components/category-icon";
-import { UserAvatar } from "@/components/user-avatar";
 import { FilterBar } from "./filter-bar";
 import { SortSelect } from "./sort-select";
 
@@ -104,7 +103,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
   const singleCategory = selectedCategoryObjects.length === 1 ? selectedCategoryObjects[0] : null;
   const singleSubcategory =
     selectedSubcategoryObjects.length === 1 ? selectedSubcategoryObjects[0] : null;
-  const categorySummary = singleCategory ? await getCategoryFreelancerSummary(singleCategory.slug) : null;
+  const categoryFreelancerCount = singleCategory ? await getCategoryFreelancerCount(singleCategory.slug) : null;
 
   const heading = q
     ? `"${q}" için sonuçlar`
@@ -124,40 +123,21 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
         <span className="text-slate-500">Kategoriler</span>
       </nav>
 
-      {singleCategory && categorySummary ? (
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-slate-800 p-5 text-white">
-          <div className="flex items-center gap-4">
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-white/10">
-              <CategoryIcon icon={singleCategory.icon} className="text-3xl" />
-            </span>
-            <div>
-              <h1 className="text-lg font-bold sm:text-xl">{singleCategory.name}</h1>
-              <p className="mt-0.5 text-sm text-slate-300">
-                Bu kategoride hizmet sunan{" "}
-                <span className="font-semibold text-white">
-                  {categorySummary.total.toLocaleString("tr-TR")}
-                </span>{" "}
-                freelancer var.
-              </p>
-            </div>
+      {singleCategory && categoryFreelancerCount !== null ? (
+        <div className="mb-6 flex items-center gap-4 rounded-2xl bg-brand-navy p-5 text-white">
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-white/10">
+            <CategoryIcon icon={singleCategory.icon} className="text-3xl" />
+          </span>
+          <div>
+            <h1 className="text-lg font-bold sm:text-xl">{singleCategory.name}</h1>
+            <p className="mt-0.5 text-sm text-slate-300">
+              Bu kategoride hizmet sunan{" "}
+              <span className="font-semibold text-white">
+                {categoryFreelancerCount.toLocaleString("tr-TR")}
+              </span>{" "}
+              freelancer var.
+            </p>
           </div>
-          {categorySummary.sample.length > 0 && (
-            <div className="flex shrink-0 -space-x-3">
-              {categorySummary.sample.map((freelancer) => (
-                <UserAvatar
-                  key={freelancer.id}
-                  name={freelancer.name}
-                  image={freelancer.image}
-                  className="h-10 w-10 border-2 border-slate-800 text-sm"
-                />
-              ))}
-              {categorySummary.total > categorySummary.sample.length && (
-                <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-slate-800 bg-slate-600 text-xs font-bold">
-                  +{(categorySummary.total - categorySummary.sample.length).toLocaleString("tr-TR")}
-                </span>
-              )}
-            </div>
-          )}
         </div>
       ) : (
         <div className="mb-6">
