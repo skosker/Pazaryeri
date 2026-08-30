@@ -182,6 +182,33 @@ export async function getGigsBySeller(sellerId: string): Promise<GigCardData[]> 
   return gigs.map(toCardData);
 }
 
+export type CategoryFreelancerSummary = {
+  total: number;
+  sample: { id: string; name: string; image: string | null }[];
+};
+
+/** How many freelancers list a gig in this category, plus a handful of them for an
+ * avatar row — the category banner's "X freelancer var" strip. */
+export async function getCategoryFreelancerSummary(categorySlug: string): Promise<CategoryFreelancerSummary> {
+  const where = {
+    role: "FREELANCER" as const,
+    suspended: false,
+    gigs: { some: { published: true, category: { slug: categorySlug } } },
+  };
+
+  const [total, sample] = await Promise.all([
+    prisma.user.count({ where }),
+    prisma.user.findMany({
+      where,
+      select: { id: true, name: true, image: true },
+      orderBy: [{ isOnline: "desc" }, { name: "asc" }],
+      take: 4,
+    }),
+  ]);
+
+  return { total, sample };
+}
+
 export async function getGigBySlug(slug: string) {
   const gig = await prisma.gig.findUnique({
     where: { slug },
