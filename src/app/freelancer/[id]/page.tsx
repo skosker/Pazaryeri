@@ -23,7 +23,6 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
       title: true,
       bio: true,
       image: true,
-      city: true,
       age: true,
       skills: true,
       isOnline: true,
@@ -109,12 +108,6 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
             </button>
 
             <dl className="mt-6 space-y-3 border-t border-slate-100 pt-5 text-left text-sm">
-              {freelancer.city && (
-                <div className="flex items-center justify-between">
-                  <dt className="text-slate-400">Şehir</dt>
-                  <dd className="font-semibold text-brand-navy">{freelancer.city}</dd>
-                </div>
-              )}
               {freelancer.age !== null && (
                 <div className="flex items-center justify-between">
                   <dt className="text-slate-400">Yaş</dt>
