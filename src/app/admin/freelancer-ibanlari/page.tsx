@@ -1,9 +1,21 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatIban } from "@/lib/iban";
 import { CopyIban } from "./copy-iban";
 
-export default async function FreelancerIbansPage() {
-  const list = await prisma.freelancerIban.findMany({ orderBy: { name: "asc" } });
+function toSingle(value: string | string[] | undefined): string {
+  if (!value) return "";
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function FreelancerIbansPage(props: PageProps<"/admin/freelancer-ibanlari">) {
+  const searchParams = await props.searchParams;
+  const q = toSingle(searchParams.ad).trim();
+
+  const list = await prisma.freelancerIban.findMany({
+    where: q ? { name: { contains: q, mode: "insensitive" } } : {},
+    orderBy: { name: "asc" },
+  });
 
   return (
     <div>
@@ -12,6 +24,33 @@ export default async function FreelancerIbansPage() {
         Freelancer hakediş IBAN&apos;ları. Bu liste yalnızca admin panelinde görünür; herkese
         açık dizinde ya da profillerde yer almaz.
       </p>
+
+      <form method="get" className="mt-6 flex flex-wrap items-end gap-3">
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-500">Ad Soyad</label>
+          <input
+            type="text"
+            name="ad"
+            defaultValue={q}
+            placeholder="Freelancer adı ara"
+            className="w-64 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-purple-400"
+          />
+        </div>
+        <button
+          type="submit"
+          className="rounded-full bg-purple-600 px-5 py-2 text-sm font-semibold text-white hover:bg-purple-700"
+        >
+          Ara
+        </button>
+        {q && (
+          <Link
+            href="/admin/freelancer-ibanlari"
+            className="px-2 py-2 text-sm font-medium text-slate-500 hover:text-brand-navy"
+          >
+            Temizle
+          </Link>
+        )}
+      </form>
 
       <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
         {list.length} kayıt
