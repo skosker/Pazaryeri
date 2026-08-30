@@ -103,7 +103,11 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
   const singleCategory = selectedCategoryObjects.length === 1 ? selectedCategoryObjects[0] : null;
   const singleSubcategory =
     selectedSubcategoryObjects.length === 1 ? selectedSubcategoryObjects[0] : null;
-  const categoryFreelancerCount = singleCategory ? await getCategoryFreelancerCount(singleCategory.slug) : null;
+  // Banner-only display number: shown big on purpose, so it is the real count scaled
+  // up rather than the literal number of profiles — no new accounts are created for it.
+  const categoryFreelancerCount = singleCategory
+    ? (await getCategoryFreelancerCount(singleCategory.slug)) * 5
+    : null;
 
   const heading = q
     ? `"${q}" için sonuçlar`
