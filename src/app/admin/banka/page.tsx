@@ -7,7 +7,7 @@ export default async function AdminBankAccountPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-brand-navy">Banka Hesapları</h1>
+      <h1 className="text-2xl font-bold text-brand-navy">Şirket Banka Hesapları</h1>
       <p className="mt-1 max-w-2xl text-sm text-slate-500">
         Havale/EFT ile ödeyen alıcıya ödeme sayfasında gösterilen şirket hesapları. Birden
         çok ekleyebilirsin; alıcı kendi bankasına denk geleni seçip masrafsız EFT yapar.
