@@ -170,7 +170,7 @@ export function FilterBar({
           </label>
         )}
         <label className="flex cursor-pointer items-center gap-2.5 text-sm text-slate-600">
-          Çevrimiçi freelancer&apos;ların ilanlarını göster
+          Online olan freelancer&apos;ların ilanlarını göster
           <span
             role="switch"
             aria-checked={onlineOnly}
