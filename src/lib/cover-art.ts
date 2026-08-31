@@ -56,26 +56,26 @@ function reader(seed: number) {
  */
 const glyphs: Record<string, string[]> = {
   // Yazılım & Web
-  code: ["💻", "🖥️", "⌨️", "🧑‍💻", "🌐", "📱", "⚙️", "🔧"],
+  code: ["💻", "🖥️", "⌨️", "🧑‍💻", "🌐", "📱", "⚙️", "🔧", "🧪", "🔌", "🛠️", "📦", "🧱", "🚀"],
   // Grafik & Tasarım
-  palette: ["🎨", "🖌️", "🖍️", "🧑‍🎨", "🖼️", "✏️", "🌈", "📐"],
+  palette: ["🎨", "🖌️", "🖍️", "🧑‍🎨", "🖼️", "✏️", "🌈", "📐", "🎭", "🧵", "🖊️", "🪄", "🧿", "📸"],
   // Yazı & Çeviri
-  pen: ["✍️", "📝", "📖", "🖋️", "📰", "🔤", "📄", "💬"],
+  pen: ["✍️", "📝", "📖", "🖋️", "📰", "🔤", "📄", "💬", "📓", "🗒️", "🧾", "📕", "🌍", "🗣️"],
   // Video & Animasyon
-  video: ["🎬", "🎥", "📹", "🎞️", "📽️", "🎦", "✂️", "🍿"],
+  video: ["🎬", "🎥", "📹", "🎞️", "📽️", "🎦", "✂️", "🍿", "🎙️", "📺", "🎚️", "🕹️", "🌀"],
   // Dijital Pazarlama
-  megaphone: ["📣", "📢", "🚀", "🎯", "📈", "💡", "🔍", "🏷️"],
+  megaphone: ["📣", "📢", "🚀", "🎯", "📈", "💡", "🔍", "🏷️", "📊", "⭐", "🧲", "📧", "🛒"],
   // Müzik & Ses
-  music: ["🎵", "🎧", "🎤", "🎹", "🎸", "🥁", "🎼", "🔊"],
+  music: ["🎵", "🎧", "🎤", "🎹", "🎸", "🥁", "🎼", "🔊", "🎻", "🎺", "📻", "🔔", "🗣️"],
   // İş & Danışmanlık
-  briefcase: ["💼", "🤝", "📋", "🏢", "📑", "💰", "🗂️", "⚖️"],
+  briefcase: ["💼", "🤝", "📋", "🏢", "📑", "💰", "🗂️", "⚖️", "📊", "🧾", "📈", "🏦", "🧭"],
   // Eğitim & Ders
-  book: ["🎓", "📚", "📖", "🧑‍🏫", "🏫", "🧮", "✏️", "🔬"],
+  book: ["🎓", "📚", "📖", "🧑‍🏫", "🏫", "🧮", "✏️", "🔬", "🧘", "🎸", "🎹", "📝", "🌱"],
   // AI & Otomasyon
-  cpu: ["🤖", "🧠", "⚡", "🔗", "🧩", "🛰️", "⚙️", "🪄"],
+  cpu: ["🤖", "🧠", "⚡", "🔗", "🧩", "🛰️", "⚙️", "🪄", "💬", "🔮", "🛠️", "🔁", "🧬"],
   // Veri & Analitik
-  chart: ["📊", "📈", "🗄️", "🔢", "📉", "🧮", "🗃️", "🔎"],
-  sparkles: ["✨", "💡", "🌟", "🎯", "🧭", "🪄"],
+  chart: ["📊", "📈", "🗄️", "🔢", "📉", "🧮", "🗃️", "🔎", "📐", "🧾", "🗺️", "📋"],
+  sparkles: ["✨", "💡", "🌟", "🎯", "🧭", "🪄", "🔥", "🌈"],
 };
 
 /**
@@ -142,6 +142,7 @@ const topics: [string, string[]][] = [
   ["bakim", ["🔧"]],
   // AI & otomasyon
   ["yapay-zeka", ["🤖", "🧠", "🪄"]],
+  ["prompt", ["🪄", "💬", "🧠"]],
   ["chatbot", ["💬", "🤖"]],
   ["otomasyon", ["⚙️", "🤖", "🔁", "🛠️"]],
   ["veri-girisi", ["⌨️"]],
@@ -294,7 +295,10 @@ export function coverArt(categoryIcon: string, gigSlug: string): CoverArt {
   ].join(", ");
 
   const texture = textures[r(textures.length)](r);
-  const tokens = slugTokens(gigSlug);
+  // "hizmet"/"hizmeti" ("service") is boilerplate in nearly every listing's title —
+  // stripped before matching so it can never trip the "hiz" (speed) topic, which
+  // otherwise put a lightning bolt on almost every cover regardless of category.
+  const tokens = slugTokens(gigSlug).replace(/-hizmeti?-/g, "-");
   const topic = topics.find(([pattern]) => tokens.includes(`-${pattern}`));
   const set = topic ? topic[1] : glyphs[categoryIcon] ?? glyphs.sparkles;
 
