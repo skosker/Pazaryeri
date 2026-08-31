@@ -67,6 +67,14 @@ function photoRank(card: GigCardData): number {
   return image && !image.startsWith("/api/avatar/") ? 0 : 1;
 }
 
+/** 0 for a gig with a real cover (uploaded or fetched), 1 for the generated
+ * gradient-and-icon fallback — those draw from a small per-category icon pool, so with
+ * enough listings the same icon repeats; sorting them to the back keeps a search page
+ * from opening on several that look alike. */
+function coverRank(card: GigCardData): number {
+  return card.coverImage ? 0 : 1;
+}
+
 export type GigFilters = {
   categorySlugs?: string[];
   subcategorySlugs?: string[];
@@ -144,6 +152,11 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
   // hâlâ çizilmiş avatarda kalanlar sona. JS'in sort'u kararlı olduğu için (Node/V8),
   // bu ikinci geçiş yukarıdaki sıralamayı (fiyat/tarih) grup içinde bozmadan uygular.
   cards = cards.sort((a, b) => photoRank(a) - photoRank(b));
+
+  // Gerçek kapak fotoğrafı olan ilanlar önce, üretilmiş gradyan+ikon kapakta kalanlar en
+  // sona — bu üçüncü geçiş de kararlı olduğu için önceki iki sıralamayı grup içinde
+  // bozmuyor.
+  cards = cards.sort((a, b) => coverRank(a) - coverRank(b));
 
   const total = cards.length;
   const pageSize = filters.pageSize ?? (total || 1);
