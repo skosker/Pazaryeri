@@ -9,6 +9,7 @@ import Link from "next/link";
 
 export const legalLinks = [
   { href: "/hakkimizda", label: "Hakkımızda" },
+  { href: "/destek", label: "Destek" },
   { href: "/uyelik-sozlesmesi", label: "Üyelik Sözleşmesi" },
   { href: "/kullanim-sartlari", label: "Kullanım Şartları" },
   { href: "/gizlilik-politikasi", label: "Kişisel Verilerin Korunması Politikası" },
