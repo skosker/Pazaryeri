@@ -11,10 +11,9 @@ function toSingle(value: string | string[] | undefined): string {
   return Array.isArray(value) ? value[0] : value;
 }
 
-function buildHref(params: { q: string; city: string; title: string; onlineOnly: boolean; page?: number }) {
+function buildHref(params: { q: string; title: string; onlineOnly: boolean; page?: number }) {
   const search = new URLSearchParams();
   if (params.q) search.set("q", params.q);
-  if (params.city) search.set("sehir", params.city);
   if (params.title) search.set("meslek", params.title);
   if (params.onlineOnly) search.set("cevrimici", "1");
   if (params.page && params.page > 1) search.set("sayfa", String(params.page));
@@ -33,17 +32,16 @@ export default async function FreelancerlarPage(props: PageProps<"/freelancerlar
   const searchParams = await props.searchParams;
 
   const q = toSingle(searchParams.q);
-  const city = toSingle(searchParams.sehir);
   const title = toSingle(searchParams.meslek);
   const onlineOnly = toSingle(searchParams.cevrimici) === "1";
   const page = Number(toSingle(searchParams.sayfa) || "1") || 1;
 
   const [{ cards, total, pageCount }, facets] = await Promise.all([
-    listFreelancers({ q, city, title, onlineOnly, page, pageSize: PAGE_SIZE }),
+    listFreelancers({ q, title, onlineOnly, page, pageSize: PAGE_SIZE }),
     getFreelancerFacets(),
   ]);
 
-  const hrefBase = { q, city, title, onlineOnly };
+  const hrefBase = { q, title, onlineOnly };
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -57,11 +55,11 @@ export default async function FreelancerlarPage(props: PageProps<"/freelancerlar
 
       <h1 className="text-2xl font-bold text-brand-navy sm:text-3xl">Freelancer Bul</h1>
       <p className="mt-1 text-sm text-slate-500">
-        {total} freelancer · mesleğe, şehre ve uzmanlığa göre filtrele.
+        {total} freelancer · mesleğe ve uzmanlığa göre filtrele.
       </p>
 
       <div className="mt-6">
-        <FilterBar cities={facets.cities} titles={facets.titles} selected={{ q, city, title, onlineOnly }} />
+        <FilterBar titles={facets.titles} selected={{ q, title, onlineOnly }} />
       </div>
 
       {cards.length === 0 ? (

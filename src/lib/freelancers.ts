@@ -24,7 +24,6 @@ export type FreelancerCardData = {
 
 export type FreelancerFilters = {
   q?: string;
-  city?: string;
   title?: string;
   onlineOnly?: boolean;
   page?: number;
@@ -41,7 +40,6 @@ export type FreelancerListResult = {
 function buildWhere(filters: FreelancerFilters): Prisma.UserWhereInput {
   const where: Prisma.UserWhereInput = { role: "FREELANCER", suspended: false };
 
-  if (filters.city) where.city = filters.city;
   if (filters.title) where.title = filters.title;
   if (filters.onlineOnly) where.isOnline = true;
 
@@ -51,7 +49,6 @@ function buildWhere(filters: FreelancerFilters): Prisma.UserWhereInput {
       where.OR = [
         { name: { contains: q, mode: "insensitive" } },
         { title: { contains: q, mode: "insensitive" } },
-        { city: { contains: q, mode: "insensitive" } },
         // Skills are stored as whole labels, so this matches "Figma", not "fig".
         { skills: { has: q } },
       ];
@@ -141,27 +138,18 @@ export async function listFreelancers(filters: FreelancerFilters): Promise<Freel
   };
 }
 
-/** Cities and professions that actually have freelancers, for the filter menus. */
+/** Professions that actually have freelancers, for the filter menu. */
 export async function getFreelancerFacets() {
   const base: Prisma.UserWhereInput = { role: "FREELANCER", suspended: false };
 
-  const [cities, titles] = await Promise.all([
-    prisma.user.groupBy({
-      by: ["city"],
-      where: { ...base, city: { not: null } },
-      _count: { _all: true },
-      orderBy: { _count: { city: "desc" } },
-    }),
-    prisma.user.groupBy({
-      by: ["title"],
-      where: { ...base, title: { not: null } },
-      _count: { _all: true },
-      orderBy: { title: "asc" },
-    }),
-  ]);
+  const titles = await prisma.user.groupBy({
+    by: ["title"],
+    where: { ...base, title: { not: null } },
+    _count: { _all: true },
+    orderBy: { title: "asc" },
+  });
 
   return {
-    cities: cities.map((row) => ({ name: row.city as string, count: row._count._all })),
     titles: titles.map((row) => ({ name: row.title as string, count: row._count._all })),
   };
 }
