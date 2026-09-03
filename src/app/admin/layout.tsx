@@ -29,12 +29,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
             Admin Paneli
           </p>
-          <nav className="flex gap-1 overflow-x-auto lg:flex-col lg:overflow-visible">
+          {/* On a phone the twelve links are a horizontal strip that scrolls. Each one
+              has to keep its label on a single line: without whitespace-nowrap the long
+              ones ("Havale/EFT Onayları") break in two and the rows collide. The
+              negative margin lets the strip bleed to the screen edges so it reads as
+              scrollable rather than clipped. */}
+          <nav className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:flex-col lg:gap-1 lg:overflow-visible lg:px-0 lg:pb-0">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="shrink-0 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-brand-navy"
+                className="shrink-0 whitespace-nowrap rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-brand-navy lg:border-0"
               >
                 {item.label}
               </Link>
