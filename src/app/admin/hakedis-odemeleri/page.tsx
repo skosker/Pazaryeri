@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { formatIban } from "@/lib/iban";
 import { formatPrice } from "@/lib/format-price";
 import type { Prisma } from "@/generated/prisma/client";
+import { ImportPayoutsForm } from "./import-form";
+import { PayoutByFreelancerChart } from "./payout-chart";
 
 const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
 
@@ -44,6 +46,10 @@ export default async function FreelancerPayoutsPage(props: PageProps<"/admin/hak
         Freelancer&apos;lara yapılan hakediş ödemeleri. Yalnızca admin panelinde görünür.
       </p>
 
+      <div className="mt-6">
+        <ImportPayoutsForm />
+      </div>
+
       <form method="get" className="mt-6 flex flex-wrap items-end gap-3">
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-500">Başlangıç</label>
@@ -84,8 +90,9 @@ export default async function FreelancerPayoutsPage(props: PageProps<"/admin/hak
         <span className="rounded-xl bg-emerald-50 px-4 py-2 text-emerald-800">
           Toplam ödenen: <strong>{formatPrice(total)}₺</strong>
         </span>
-        <span className="rounded-xl bg-slate-100 px-4 py-2 text-slate-600">{list.length} kayıt</span>
       </div>
+
+      <PayoutByFreelancerChart payments={list.map((p) => ({ name: p.name, amount: Number(p.amount) }))} />
 
       <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
         <table className="w-full text-left text-sm">

@@ -5,6 +5,7 @@ import { getGigsBySeller } from "@/lib/gigs";
 import { GigCard } from "@/components/gig-card";
 import { StarRating } from "@/components/star-rating";
 import { UserAvatar } from "@/components/user-avatar";
+import { ReviewSummary } from "./review-summary";
 
 function sellerLevelLabel(reviewCount: number) {
   if (reviewCount === 0) return "Yeni Satıcı";
@@ -23,7 +24,6 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
       title: true,
       bio: true,
       image: true,
-      city: true,
       age: true,
       skills: true,
       isOnline: true,
@@ -109,12 +109,6 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
             </button>
 
             <dl className="mt-6 space-y-3 border-t border-slate-100 pt-5 text-left text-sm">
-              {freelancer.city && (
-                <div className="flex items-center justify-between">
-                  <dt className="text-slate-400">Şehir</dt>
-                  <dd className="font-semibold text-brand-navy">{freelancer.city}</dd>
-                </div>
-              )}
               {freelancer.age !== null && (
                 <div className="flex items-center justify-between">
                   <dt className="text-slate-400">Yaş</dt>
@@ -194,31 +188,24 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
 
           {freelancer.isPro && (
             <section className="mt-10 border-t border-slate-100 pt-8">
-              <h2 className="text-lg font-semibold text-brand-navy">
-                Değerlendirmeler
-                {reviewCount > 0 && <span className="ml-1 font-normal text-slate-400">({reviewCount})</span>}
-              </h2>
-
               {reviewCount === 0 ? (
-                <p className="mt-4 text-sm text-slate-400">Bu freelancer için henüz değerlendirme yapılmadı.</p>
+                <>
+                  <h2 className="text-lg font-semibold text-brand-navy">Beğeni ve Yorumlar</h2>
+                  <p className="mt-4 text-sm text-slate-400">Bu freelancer için henüz değerlendirme yapılmadı.</p>
+                </>
               ) : (
-                <ul className="mt-6 space-y-5">
-                  {reviews.map((review) => (
-                    <li key={review.id} className="border-b border-slate-100 pb-5">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-semibold text-brand-navy">{review.buyer.name}</p>
-                        <StarRating rating={review.rating} />
-                      </div>
-                      <Link
-                        href={`/gig/${review.gig.slug}`}
-                        className="mt-0.5 inline-block text-xs text-slate-400 hover:text-purple-700"
-                      >
-                        {review.gig.title}
-                      </Link>
-                      <p className="mt-1.5 text-sm text-slate-600">{review.comment}</p>
-                    </li>
-                  ))}
-                </ul>
+                <ReviewSummary
+                  total={reviewCount}
+                  average={rating ?? 0}
+                  reviews={reviews.map((review) => ({
+                    id: review.id,
+                    rating: review.rating,
+                    comment: review.comment,
+                    buyerName: review.buyer.name,
+                    gigTitle: review.gig.title,
+                    gigSlug: review.gig.slug,
+                  }))}
+                />
               )}
             </section>
           )}

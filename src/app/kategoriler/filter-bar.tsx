@@ -13,6 +13,8 @@ type Subcategory = { name: string; slug: string };
 const deliveryOptions = [
   { value: "1", label: "24 saat" },
   { value: "3", label: "3 gün" },
+  { value: "5", label: "5 gün" },
+  { value: "10", label: "10 gün" },
   { value: "farketmez", label: "Farketmez" },
 ];
 
@@ -168,7 +170,7 @@ export function FilterBar({
           </label>
         )}
         <label className="flex cursor-pointer items-center gap-2.5 text-sm text-slate-600">
-          Çevrimiçi freelancer&apos;ların ilanlarını göster
+          Online olan freelancer&apos;ların ilanlarını göster
           <span
             role="switch"
             aria-checked={onlineOnly}

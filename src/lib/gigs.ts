@@ -61,6 +61,20 @@ export async function getFeaturedGigs(limit = 6): Promise<GigCardData[]> {
   return gigs.map(toCardData);
 }
 
+/** 0 for a seller with a real photo, 1 for a drawn avatar (or none) — sorts real photos first. */
+function photoRank(card: GigCardData): number {
+  const image = card.seller.image;
+  return image && !image.startsWith("/api/avatar/") ? 0 : 1;
+}
+
+/** 0 for a gig with a real cover (uploaded or fetched), 1 for the generated
+ * gradient-and-icon fallback — those draw from a small per-category icon pool, so with
+ * enough listings the same icon repeats; sorting them to the back keeps a search page
+ * from opening on several that look alike. */
+function coverRank(card: GigCardData): number {
+  return card.coverImage ? 0 : 1;
+}
+
 export type GigFilters = {
   categorySlugs?: string[];
   subcategorySlugs?: string[];
@@ -134,6 +148,16 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
     cards = cards.sort((a, b) => b.startingPrice - a.startingPrice);
   }
 
+  // Satıcısı gerçek bir fotoğrafla (Pexels/AI portre/kendi yüklediği) görünenler önce,
+  // hâlâ çizilmiş avatarda kalanlar sona. JS'in sort'u kararlı olduğu için (Node/V8),
+  // bu ikinci geçiş yukarıdaki sıralamayı (fiyat/tarih) grup içinde bozmadan uygular.
+  cards = cards.sort((a, b) => photoRank(a) - photoRank(b));
+
+  // Gerçek kapak fotoğrafı olan ilanlar önce, üretilmiş gradyan+ikon kapakta kalanlar en
+  // sona — bu üçüncü geçiş de kararlı olduğu için önceki iki sıralamayı grup içinde
+  // bozmuyor.
+  cards = cards.sort((a, b) => coverRank(a) - coverRank(b));
+
   const total = cards.length;
   const pageSize = filters.pageSize ?? (total || 1);
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
@@ -171,6 +195,18 @@ export async function getGigsBySeller(sellerId: string): Promise<GigCardData[]> 
   return gigs.map(toCardData);
 }
 
+/** How many freelancers list a gig in this category — the category banner's "X
+ * freelancer var" strip. */
+export async function getCategoryFreelancerCount(categorySlug: string): Promise<number> {
+  return prisma.user.count({
+    where: {
+      role: "FREELANCER",
+      suspended: false,
+      gigs: { some: { published: true, category: { slug: categorySlug } } },
+    },
+  });
+}
+
 export async function getGigBySlug(slug: string) {
   const gig = await prisma.gig.findUnique({
     where: { slug },
@@ -182,7 +218,6 @@ export async function getGigBySlug(slug: string) {
           title: true,
           bio: true,
           image: true,
-          city: true,
           skills: true,
           createdAt: true,
           isOnline: true,

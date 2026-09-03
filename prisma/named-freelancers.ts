@@ -229,6 +229,19 @@ export const categoryPriceBands: Record<string, { min: number; max: number }> = 
 
 const coverColors = ["rose", "sky", "violet", "amber", "emerald", "indigo"];
 
+/**
+ * Draws a standard-package price from a category's usual range, deterministic from a
+ * seed key. Used for every generated gig regardless of kind, so a "named" freelancer's
+ * listing and a "bump" one in the same profession land in the same price neighbourhood —
+ * a payout or any other real-world number that has nothing to do with what the gig
+ * itself is worth never becomes its listed price.
+ */
+function bandPrice(categorySlug: string, seedKey: string): number {
+  const band = categoryPriceBands[categorySlug] ?? { min: 1000, max: 8000 };
+  const r = reader(hash32(`band:${seedKey}`));
+  return band.min + r(band.max - band.min);
+}
+
 /** Rounds to a "clean" price the way a person would actually type one in. */
 function roundPrice(value: number) {
   if (value < 2000) return Math.round(value / 10) * 10;
@@ -361,8 +374,9 @@ export function generateNamedFreelancers(): NamedFreelancer[] {
     const city = pickCity(r);
     const skills = pickSome(profession.skills, 3 + r(3), r);
     const years = Math.max(1, Math.min(age - 21, 2 + r(13)));
-    const bio = buildBio(person.name.split(" ")[0], profession.title, years, city, skills, r);
+    const bio = buildBio(person.name.split(" ")[0], profession.title, years, skills, r);
 
+    const standardPrice = bandPrice(profession.categorySlug, email);
     const gig = buildGig(
       email,
       index,
@@ -370,7 +384,7 @@ export function generateNamedFreelancers(): NamedFreelancer[] {
       skills,
       years,
       profession.categorySlug,
-      person.amount,
+      standardPrice,
       `frl-${index + 1}`
     );
 

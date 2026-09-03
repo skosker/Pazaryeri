@@ -1,15 +1,13 @@
-import { getBankAccounts } from "@/lib/bank-transfer";
-import { addBankAccountAction, deleteBankAccountAction } from "./actions";
+import { getAllBankAccountsForAdmin } from "@/lib/bank-transfer";
+import { addBankAccountAction, deleteBankAccountAction, toggleBankAccountActiveAction } from "./actions";
 import { AddBankAccountForm } from "./bank-account-form";
 
 export default async function AdminBankAccountPage() {
-  const accounts = await getBankAccounts();
-  // A single built-in fallback (no rows yet) is not a real, deletable row.
-  const persisted = accounts.filter((account) => account.id !== "fallback");
+  const persisted = await getAllBankAccountsForAdmin();
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-brand-navy">Banka Hesapları</h1>
+      <h1 className="text-2xl font-bold text-brand-navy">Şirket Banka Hesapları</h1>
       <p className="mt-1 max-w-2xl text-sm text-slate-500">
         Havale/EFT ile ödeyen alıcıya ödeme sayfasında gösterilen şirket hesapları. Birden
         çok ekleyebilirsin; alıcı kendi bankasına denk geleni seçip masrafsız EFT yapar.
@@ -39,26 +37,55 @@ export default async function AdminBankAccountPage() {
                   <th className="px-5 py-3 font-medium">Hesap Sahibi</th>
                   <th className="px-5 py-3 font-medium">Banka</th>
                   <th className="px-5 py-3 font-medium">IBAN</th>
+                  <th className="px-5 py-3 font-medium">Durum</th>
                   <th className="px-5 py-3 font-medium text-right">İşlem</th>
                 </tr>
               </thead>
               <tbody>
                 {persisted.map((account) => (
-                  <tr key={account.id} className="border-b border-slate-100 last:border-0">
+                  <tr
+                    key={account.id}
+                    className={`border-b border-slate-100 last:border-0 ${account.active ? "" : "opacity-60"}`}
+                  >
                     <td className="px-5 py-3 font-medium text-brand-navy">
                       {account.accountHolder}
                     </td>
                     <td className="px-5 py-3 text-slate-600">{account.bankName}</td>
                     <td className="px-5 py-3 font-mono text-xs text-slate-600">{account.iban}</td>
-                    <td className="px-5 py-3 text-right">
-                      <form action={deleteBankAccountAction.bind(null, account.id)}>
-                        <button
-                          type="submit"
-                          className="rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
-                        >
-                          Kaldır
-                        </button>
-                      </form>
+                    <td className="px-5 py-3">
+                      {account.active ? (
+                        <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                          Aktif
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
+                          Pasif
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="flex justify-end gap-2">
+                        <form action={toggleBankAccountActiveAction.bind(null, account.id)}>
+                          <button
+                            type="submit"
+                            className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                              account.active
+                                ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                            }`}
+                          >
+                            {account.active ? "Pasife Al" : "Aktif Et"}
+                          </button>
+                        </form>
+                        <form action={deleteBankAccountAction.bind(null, account.id)}>
+                          <button
+                            type="submit"
+                            className="rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
+                          >
+                            Kaldır
+                          </button>
+                        </form>
+                      </div>
                     </td>
                   </tr>
                 ))}

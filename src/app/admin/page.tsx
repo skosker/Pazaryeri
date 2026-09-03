@@ -34,10 +34,11 @@ export default async function AdminDashboardPage(props: PageProps<"/admin">) {
     : undefined;
   const inRange = createdAt ? { createdAt } : {};
 
-  const [userCount, freelancerCount, gigCount, orderCount, pending, completedOrders] =
+  const [userCount, freelancerCount, noGigFreelancerCount, gigCount, orderCount, pending, completedOrders] =
     await Promise.all([
       prisma.user.count({ where: { ...inRange } }),
       prisma.user.count({ where: { role: "FREELANCER", ...inRange } }),
+      prisma.user.count({ where: { role: "FREELANCER", gigs: { none: {} }, ...inRange } }),
       prisma.gig.count({ where: { ...inRange } }),
       prisma.order.count({ where: { ...inRange } }),
       listPendingBankTransfers(),
@@ -95,9 +96,10 @@ export default async function AdminDashboardPage(props: PageProps<"/admin">) {
         )}
       </form>
 
-      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
         <StatCard label={filtered ? "Yeni Kullanıcı" : "Kullanıcı"} value={String(userCount)} />
         <StatCard label={filtered ? "Yeni Freelancer" : "Freelancer"} value={String(freelancerCount)} />
+        <StatCard label="İlan Vermeyen Freelancer" value={String(noGigFreelancerCount)} />
         <StatCard label={filtered ? "Yeni İlan" : "İlan"} value={String(gigCount)} />
         <StatCard label="Sipariş" value={String(orderCount)} />
         <StatCard label="Tamamlanan Ciro" value={`${formatPrice(totalRevenue)}₺`} />

@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { listGigs, type GigFilters } from "@/lib/gigs";
+import { listGigs, getCategoryFreelancerCount, type GigFilters } from "@/lib/gigs";
 import { GigCard } from "@/components/gig-card";
 import { CategoryIcon } from "@/components/category-icon";
-import { getCategoryAccent } from "@/lib/category-style";
 import { FilterBar } from "./filter-bar";
 import { SortSelect } from "./sort-select";
 
@@ -16,6 +15,13 @@ function toArray(value: string | string[] | undefined): string[] {
 function toSingle(value: string | string[] | undefined): string | undefined {
   if (!value) return undefined;
   return Array.isArray(value) ? value[0] : value;
+}
+
+/** A window of page numbers around the current one — dozens of pages will not fit in a row. */
+function pageWindow(page: number, pageCount: number) {
+  const start = Math.max(1, Math.min(page - 2, pageCount - 4));
+  const end = Math.min(pageCount, Math.max(page + 2, 5));
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
 }
 
 function buildHref(base: {
@@ -78,7 +84,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
     pageSize: PAGE_SIZE,
   };
 
-  const [categories, subcategories, { cards: gigs, total, page, pageCount }] = await Promise.all([
+  const [categories, subcategories, { cards: gigs, page, pageCount }] = await Promise.all([
     prisma.category.findMany({ orderBy: { order: "asc" }, select: { slug: true, name: true, icon: true } }),
     prisma.subcategory.findMany({
       orderBy: { name: "asc" },
@@ -97,7 +103,11 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
   const singleCategory = selectedCategoryObjects.length === 1 ? selectedCategoryObjects[0] : null;
   const singleSubcategory =
     selectedSubcategoryObjects.length === 1 ? selectedSubcategoryObjects[0] : null;
-  const accent = singleCategory ? getCategoryAccent(singleCategory.slug) : null;
+  // Banner-only display number: shown big on purpose, so it is the real count scaled
+  // up rather than the literal number of profiles — no new accounts are created for it.
+  const categoryFreelancerCount = singleCategory
+    ? (await getCategoryFreelancerCount(singleCategory.slug)) * 5
+    : null;
 
   const heading = q
     ? `"${q}" için sonuçlar`
@@ -117,19 +127,27 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
         <span className="text-slate-500">Kategoriler</span>
       </nav>
 
-      <div className="mb-6 flex items-center gap-3">
-        {accent && (
-          <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${accent.bg} ${accent.text}`}>
-            <CategoryIcon icon={singleCategory!.icon} className="text-2xl" />
+      {singleCategory && categoryFreelancerCount !== null ? (
+        <div className="mb-6 flex items-center gap-4 rounded-2xl bg-brand-navy p-5 text-white">
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-white/10">
+            <CategoryIcon icon={singleCategory.icon} className="text-3xl" />
           </span>
-        )}
-        <div>
-          <h1 className="text-2xl font-bold text-brand-navy sm:text-3xl">{heading}</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            <span className="font-semibold text-brand-navy">{total}</span> hizmet listeleniyor
-          </p>
+          <div>
+            <h1 className="text-lg font-bold sm:text-xl">{singleCategory.name}</h1>
+            <p className="mt-0.5 text-sm text-slate-300">
+              Bu kategoride hizmet sunan{" "}
+              <span className="font-semibold text-white">
+                {categoryFreelancerCount.toLocaleString("tr-TR")}
+              </span>{" "}
+              freelancer var.
+            </p>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-brand-navy sm:text-3xl">{heading}</h1>
+        </div>
+      )}
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4">
         <FilterBar
@@ -219,7 +237,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
                 >
                   Önceki
                 </Link>
-                {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
+                {pageWindow(page, pageCount).map((n) => (
                   <Link
                     key={n}
                     href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, cevrimici, pro: proOnly, sayfa: n })}
@@ -230,6 +248,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
                     {n}
                   </Link>
                 ))}
+                <span className="text-xs text-slate-400">/ {pageCount}</span>
                 <Link
                   href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, cevrimici, pro: proOnly, sayfa: page + 1 })}
                   aria-disabled={page >= pageCount}

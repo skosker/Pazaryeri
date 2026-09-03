@@ -8,13 +8,11 @@ import { useState } from "react";
  * so a filter never lands the visitor on page 12 of a three-page result.
  */
 export function FilterBar({
-  cities,
   titles,
   selected,
 }: {
-  cities: { name: string; count: number }[];
   titles: { name: string; count: number }[];
-  selected: { q: string; city: string; title: string; onlineOnly: boolean };
+  selected: { q: string; title: string; onlineOnly: boolean };
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -46,22 +44,13 @@ export function FilterBar({
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="İsim, meslek, şehir veya uzmanlık ara"
+          placeholder="İsim, meslek veya uzmanlık ara"
           className="w-full text-sm text-slate-600 outline-none placeholder:text-slate-400"
         />
         <button type="submit" className="text-sm font-semibold text-purple-700">
           Ara
         </button>
       </form>
-
-      <select value={selected.city} onChange={(e) => apply({ sehir: e.target.value })} className={selectClass}>
-        <option value="">Tüm şehirler</option>
-        {cities.map((city) => (
-          <option key={city.name} value={city.name}>
-            {city.name} ({city.count})
-          </option>
-        ))}
-      </select>
 
       <select value={selected.title} onChange={(e) => apply({ meslek: e.target.value })} className={selectClass}>
         <option value="">Tüm meslekler</option>

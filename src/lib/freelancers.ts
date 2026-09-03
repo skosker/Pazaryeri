@@ -24,7 +24,6 @@ export type FreelancerCardData = {
 
 export type FreelancerFilters = {
   q?: string;
-  city?: string;
   title?: string;
   onlineOnly?: boolean;
   page?: number;
@@ -41,7 +40,6 @@ export type FreelancerListResult = {
 function buildWhere(filters: FreelancerFilters): Prisma.UserWhereInput {
   const where: Prisma.UserWhereInput = { role: "FREELANCER", suspended: false };
 
-  if (filters.city) where.city = filters.city;
   if (filters.title) where.title = filters.title;
   if (filters.onlineOnly) where.isOnline = true;
 
@@ -51,7 +49,6 @@ function buildWhere(filters: FreelancerFilters): Prisma.UserWhereInput {
       where.OR = [
         { name: { contains: q, mode: "insensitive" } },
         { title: { contains: q, mode: "insensitive" } },
-        { city: { contains: q, mode: "insensitive" } },
         // Skills are stored as whole labels, so this matches "Figma", not "fig".
         { skills: { has: q } },
       ];
@@ -61,39 +58,50 @@ function buildWhere(filters: FreelancerFilters): Prisma.UserWhereInput {
   return where;
 }
 
+/** 0 for a freelancer with a real photo, 1 for a drawn avatar (or none) — mirrors
+ * gigs.ts's photoRank, so a listing that still has the auto-drawn placeholder sinks to
+ * the back of the directory the same way it already does among a category's gig cards. */
+function photoRank(image: string | null): number {
+  return image && !image.startsWith("/api/avatar/") ? 0 : 1;
+}
+
 export async function listFreelancers(filters: FreelancerFilters): Promise<FreelancerListResult> {
   const pageSize = filters.pageSize ?? 24;
   const page = Math.max(1, filters.page ?? 1);
   const where = buildWhere(filters);
 
-  const [total, rows] = await Promise.all([
-    prisma.user.count({ where }),
-    prisma.user.findMany({
-      where,
-      select: {
-        id: true,
-        name: true,
-        title: true,
-        city: true,
-        age: true,
-        skills: true,
-        image: true,
-        isOnline: true,
-        isPro: true,
-        _count: { select: { gigs: true } },
-      },
-      // Whoever is available right now comes first — the same signal the gig cards
-      // show — then alphabetical, with the id as a tie-break so paging never repeats or
-      // drops somebody between two pages. Pro is a badge here, not a ranking, which is
-      // how the gig list treats it too.
-      orderBy: [{ isOnline: "desc" }, { name: "asc" }, { id: "asc" }],
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-    }),
-  ]);
+  const rows = await prisma.user.findMany({
+    where,
+    select: {
+      id: true,
+      name: true,
+      title: true,
+      city: true,
+      age: true,
+      skills: true,
+      image: true,
+      isOnline: true,
+      isPro: true,
+      _count: { select: { gigs: true } },
+    },
+    // Whoever is available right now comes first — the same signal the gig cards
+    // show — then alphabetical, with the id as a tie-break so paging never repeats or
+    // drops somebody between two pages. Pro is a badge here, not a ranking, which is
+    // how the gig list treats it too.
+    orderBy: [{ isOnline: "desc" }, { name: "asc" }, { id: "asc" }],
+  });
+
+  // Still-drawn-avatar profiles sink to the very back of the whole directory, not just
+  // their own page. A stable sort (Node/V8) keeps the ordering above intact within each
+  // of the two groups this splits the list into.
+  rows.sort((a, b) => photoRank(a.image) - photoRank(b.image));
+
+  const total = rows.length;
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+  const paged = rows.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize);
 
   const reviews = await prisma.review.findMany({
-    where: { gig: { sellerId: { in: rows.map((row) => row.id) } } },
+    where: { gig: { sellerId: { in: paged.map((row) => row.id) } } },
     select: { rating: true, gig: { select: { sellerId: true } } },
   });
 
@@ -107,7 +115,7 @@ export async function listFreelancers(filters: FreelancerFilters): Promise<Freel
   }
 
   return {
-    cards: rows.map((row) => {
+    cards: paged.map((row) => {
       const rating = ratingsBySeller.get(row.id);
       return {
         id: row.id,
@@ -126,31 +134,22 @@ export async function listFreelancers(filters: FreelancerFilters): Promise<Freel
     }),
     total,
     page,
-    pageCount: Math.max(1, Math.ceil(total / pageSize)),
+    pageCount,
   };
 }
 
-/** Cities and professions that actually have freelancers, for the filter menus. */
+/** Professions that actually have freelancers, for the filter menu. */
 export async function getFreelancerFacets() {
   const base: Prisma.UserWhereInput = { role: "FREELANCER", suspended: false };
 
-  const [cities, titles] = await Promise.all([
-    prisma.user.groupBy({
-      by: ["city"],
-      where: { ...base, city: { not: null } },
-      _count: { _all: true },
-      orderBy: { _count: { city: "desc" } },
-    }),
-    prisma.user.groupBy({
-      by: ["title"],
-      where: { ...base, title: { not: null } },
-      _count: { _all: true },
-      orderBy: { title: "asc" },
-    }),
-  ]);
+  const titles = await prisma.user.groupBy({
+    by: ["title"],
+    where: { ...base, title: { not: null } },
+    _count: { _all: true },
+    orderBy: { title: "asc" },
+  });
 
   return {
-    cities: cities.map((row) => ({ name: row.city as string, count: row._count._all })),
     titles: titles.map((row) => ({ name: row.title as string, count: row._count._all })),
   };
 }
