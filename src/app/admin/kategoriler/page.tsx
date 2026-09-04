@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { CategoryIcon } from "@/components/category-icon";
+import { CategoryIcon, CATEGORY_EMOJI_KEYS } from "@/components/category-icon";
 import {
   createCategoryAction,
   updateCategoryAction,
@@ -7,17 +7,10 @@ import {
 } from "./actions";
 import { CreateCategoryForm } from "./create-category-form";
 
-const ICON_OPTIONS = [
-  "sparkles",
-  "palette",
-  "code",
-  "pen",
-  "video",
-  "megaphone",
-  "music",
-  "briefcase",
-  "book",
-];
+// Drawn from CategoryIcon's own emoji map, so a category using an icon this list once
+// left out (as "cpu" and "chart" were) can never again default to the wrong option —
+// the dropdown always covers everything CategoryIcon can actually render.
+const ICON_OPTIONS = CATEGORY_EMOJI_KEYS;
 
 export default async function AdminCategoriesPage() {
   const categories = await prisma.category.findMany({
@@ -46,12 +39,10 @@ export default async function AdminCategoriesPage() {
             </tr>
           </thead>
           <tbody>
-            {categories.map((category) => (
-              <tr key={category.id} className="border-b border-slate-100 last:border-0">
-                <form
-                  action={updateCategoryAction.bind(null, category.id)}
-                  className="contents"
-                >
+            {categories.map((category) => {
+              const formId = `kategori-form-${category.id}`;
+              return (
+                <tr key={category.id} className="border-b border-slate-100 last:border-0">
                   <td className="px-5 py-3">
                     <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-50 text-purple-700">
                       <CategoryIcon icon={category.icon} className="text-lg" />
@@ -59,6 +50,7 @@ export default async function AdminCategoriesPage() {
                   </td>
                   <td className="px-5 py-3">
                     <input
+                      form={formId}
                       name="name"
                       defaultValue={category.name}
                       className="w-full max-w-xs rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-brand-navy focus:border-purple-400 focus:outline-none"
@@ -68,6 +60,7 @@ export default async function AdminCategoriesPage() {
                   <td className="px-5 py-3">
                     <div className="flex items-center justify-end gap-2">
                       <select
+                        form={formId}
                         name="icon"
                         defaultValue={category.icon}
                         className="rounded-lg border border-slate-200 px-2 py-1.5 text-xs text-slate-600 focus:border-purple-400 focus:outline-none"
@@ -79,16 +72,23 @@ export default async function AdminCategoriesPage() {
                         ))}
                       </select>
                       <button
+                        form={formId}
                         type="submit"
                         className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
                       >
                         Kaydet
                       </button>
+                      {/* A <form> can't wrap these <td>s directly — <tr> only permits
+                          table cells as children, and browsers foster-parent anything
+                          else out of the row, which desyncs from React's hydration.
+                          Linking by the `form` attribute keeps one form per row without
+                          nesting it in the table structure. */}
+                      <form id={formId} action={updateCategoryAction.bind(null, category.id)} />
                     </div>
                   </td>
-                </form>
-              </tr>
-            ))}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
