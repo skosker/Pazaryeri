@@ -35,7 +35,7 @@ export default function IptalIadeKosullariPage() {
       <h2>6. İADE YÖNTEMİ VE SÜRESİ</h2>
       <p>İade edilecek tutar, ödemenin yapıldığı yönteme göre işleme alınır:</p>
       <ul>
-        <li><strong>Kredi/Banka Kartı:</strong> İyzico altyapısı üzerinden alınan ödemeler, aynı kart hesabına iade edilir. İadenin karta yansıma süresi, ilgili bankanın işlem sürelerine bağlı olarak değişebilir.</li>
+        <li><strong>Kredi/Banka Kartı:</strong> Kart ile alınan ödemeler, aynı kart hesabına iade edilir. İadenin karta yansıma süresi, ilgili bankanın işlem sürelerine bağlı olarak değişebilir.</li>
         <li><strong>Havale/EFT:</strong> Havale/EFT ile yapılan ödemelerde iade, Alıcı’nın bildirdiği IBAN’a Platform tarafından manuel olarak gönderilir.</li>
       </ul>
       <p>İade onaylandıktan sonra işlemin başlatılması makul süre içinde gerçekleştirilir; kartla yapılan ödemelerde nihai süre bankadan bankaya farklılık gösterebilir.</p>
