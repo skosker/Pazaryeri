@@ -12,6 +12,7 @@ export const legalLinks = [
   { href: "/destek", label: "Destek" },
   { href: "/uyelik-sozlesmesi", label: "Üyelik Sözleşmesi" },
   { href: "/kullanim-sartlari", label: "Kullanım Şartları" },
+  { href: "/iptal-iade-kosullari", label: "Sipariş İptal ve İade Koşulları" },
   { href: "/gizlilik-politikasi", label: "Kişisel Verilerin Korunması Politikası" },
 ];
 
