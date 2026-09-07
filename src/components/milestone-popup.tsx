@@ -86,8 +86,10 @@ export function MilestonePopup() {
             İki haftada 10.000 kullanıcıya ulaştık!
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-slate-500">
-            Bize gösterdiğiniz güven için teşekkür ederiz. Prosinta ailesine katılan her
-            freelancer ve işveren, bu yolculuğu daha da anlamlı kılıyor.
+            Bize gösterdiğiniz güven için teşekkür ederiz.
+            <br />
+            Prosinta ailesine katılan her freelancer ve işveren, bu yolculuğu daha da
+            anlamlı kılıyor.
           </p>
 
           <Button onClick={close} className="mt-7 w-full">
