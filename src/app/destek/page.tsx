@@ -14,7 +14,7 @@ const faqGroups: FaqGroup[] = [
       },
       {
         q: "Hangi ödeme yöntemlerini kullanabilirim?",
-        a: "Kart ile iyzico üzerinden anında ödeyebilir, ya da Havale/EFT yapıp bildirimini iletebilirsin — bildirim onaylandığında sipariş başlar.",
+        a: "Kart ile anında ödeyebilir, ya da Havale/EFT yapıp bildirimini iletebilirsin — bildirim onaylandığında sipariş başlar.",
       },
       {
         q: "Havale/EFT ile ödedim, siparişim ne zaman başlar?",
