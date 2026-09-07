@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
  * right after — the sanctioned way to adopt a client-only value without a hydration
  * mismatch or an effect that just mirrors state.
  */
-const DISMISS_KEY = "prosinta-milestone-5000-dismissed";
+const DISMISS_KEY = "prosinta-milestone-10000-dismissed";
 
 function subscribe() {
   return () => {};
@@ -83,7 +83,7 @@ export function MilestonePopup() {
           </span>
 
           <h2 id="milestone-title" className="mt-5 text-2xl font-extrabold text-brand-navy">
-            İlk haftamızda 5.000 üyeye ulaştık!
+            İki haftada 10.000 kullanıcıya ulaştık!
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-slate-500">
             Bize gösterdiğiniz güven için teşekkür ederiz. Prosinta ailesine katılan her
