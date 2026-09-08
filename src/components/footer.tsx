@@ -72,7 +72,7 @@ export function Footer({ categories }: { categories: FooterCategory[] }) {
           </span>
           {/* eslint-disable-next-line @next/next/no-img-element -- a static SVG trust
               badge, not a photo; next/image's optimizer offers nothing for a vector file. */}
-          <img src="/odeme-logolari.svg" alt="Mastercard, Visa, American Express, Troy" className="h-6 w-auto" />
+          <img src="/odeme-logolari.svg" alt="Mastercard, Visa" className="h-6 w-auto" />
         </div>
       </div>
     </footer>
