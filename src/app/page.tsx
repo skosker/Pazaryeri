@@ -125,6 +125,14 @@ export default function Home() {
               </svg>
             </Link>
           </div>
+
+          {/* The shared site Footer (with the same badge) is hidden on this page — see
+              Footer's hiddenOn — so the trust row is repeated here rather than left out. */}
+          <div className="mt-14 flex justify-center border-t border-slate-100 pt-10">
+            {/* eslint-disable-next-line @next/next/no-img-element -- a static SVG trust
+                badge, not a photo; next/image's optimizer offers nothing for a vector file. */}
+            <img src="/odeme-logolari.svg" alt="Mastercard, Visa" className="h-6 w-auto" />
+          </div>
         </div>
       </section>
     </div>
