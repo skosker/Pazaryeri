@@ -66,8 +66,13 @@ export function Footer({ categories }: { categories: FooterCategory[] }) {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-slate-100 pt-6 text-xs text-slate-400">
-          <span>© {new Date().getFullYear()} Prosinta. Tüm hakları saklıdır.</span>
+        <div className="mt-12 flex flex-col gap-4 border-t border-slate-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <span className="text-xs text-slate-400">
+            © {new Date().getFullYear()} Prosinta. Tüm hakları saklıdır.
+          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element -- a static SVG trust
+              badge, not a photo; next/image's optimizer offers nothing for a vector file. */}
+          <img src="/odeme-logolari.svg" alt="Mastercard, Visa, American Express, Troy" className="h-6 w-auto" />
         </div>
       </div>
     </footer>
