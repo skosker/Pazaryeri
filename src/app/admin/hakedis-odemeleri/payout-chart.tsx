@@ -31,7 +31,7 @@ export function PayoutByFreelancerChart({ payments }: { payments: { name: string
         <p className="text-sm font-semibold text-brand-navy">Freelancer Bazında Toplam Hakediş</p>
         <p className="mt-0.5 text-xs text-slate-400">
           {hiddenCount > 0
-            ? `En yüksek ${top.length} freelancer, tutara göre sıralı (${ranked.length} freelancer içinden).`
+            ? `En yüksek ${top.length} freelancer, tutara göre sıralı.`
             : "Tutara göre sıralı."}
         </p>
       </figcaption>
