@@ -17,12 +17,17 @@ function dayKey(d: Date) {
   return d.toISOString().slice(0, 10);
 }
 
-/** Monday of the ISO week `d` falls in, at UTC midnight. */
-function startOfWeek(d: Date) {
-  const date = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
-  const day = date.getUTCDay();
-  date.setUTCDate(date.getUTCDate() + (day === 0 ? -6 : 1 - day));
-  return date;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+function atMidnight(d: Date) {
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+}
+
+/** Which 7-day bucket `d` falls into, counting from `reportStart` — not calendar weeks,
+ * so the first bucket always starts on reportStart itself (1 Ağustos) instead of
+ * whatever Monday precedes it, which could land in July. */
+function weekIndexSince(d: Date, reportStart: Date) {
+  return Math.floor((atMidnight(d) - atMidnight(reportStart)) / (MS_PER_DAY * 7));
 }
 
 function monthKey(d: Date) {
@@ -35,7 +40,7 @@ function buildBreakdown<T extends { createdAt: Date; amount: unknown }>(
   end: Date
 ): { gunluk: PeriodRow[]; haftalik: PeriodRow[]; aylik: PeriodRow[] } {
   const byDay = new Map<string, { count: number; total: number }>();
-  const byWeek = new Map<string, { start: Date; count: number; total: number }>();
+  const byWeek = new Map<number, { count: number; total: number }>();
   const byMonth = new Map<string, { start: Date; count: number; total: number }>();
 
   for (const row of rows) {
@@ -47,12 +52,11 @@ function buildBreakdown<T extends { createdAt: Date; amount: unknown }>(
     dEntry.total += amount;
     byDay.set(dKey, dEntry);
 
-    const weekStart = startOfWeek(row.createdAt);
-    const wKey = dayKey(weekStart);
-    const wEntry = byWeek.get(wKey) ?? { start: weekStart, count: 0, total: 0 };
+    const wIndex = weekIndexSince(row.createdAt, start);
+    const wEntry = byWeek.get(wIndex) ?? { count: 0, total: 0 };
     wEntry.count += 1;
     wEntry.total += amount;
-    byWeek.set(wKey, wEntry);
+    byWeek.set(wIndex, wEntry);
 
     const mKey = monthKey(row.createdAt);
     const monthStart = new Date(Date.UTC(row.createdAt.getUTCFullYear(), row.createdAt.getUTCMonth(), 1));
@@ -69,11 +73,11 @@ function buildBreakdown<T extends { createdAt: Date; amount: unknown }>(
   }
 
   const haftalik: PeriodRow[] = [];
-  for (let w = startOfWeek(start); w <= end; w.setUTCDate(w.getUTCDate() + 7)) {
-    const weekEnd = new Date(w);
+  for (let weekStart = new Date(start); weekStart <= end; weekStart.setUTCDate(weekStart.getUTCDate() + 7)) {
+    const weekEnd = new Date(weekStart);
     weekEnd.setUTCDate(weekEnd.getUTCDate() + 6);
-    const entry = byWeek.get(dayKey(w)) ?? { count: 0, total: 0 };
-    haftalik.push({ label: `${dayLabelFmt.format(w)} – ${dayLabelFmt.format(weekEnd)}`, ...entry });
+    const entry = byWeek.get(weekIndexSince(weekStart, start)) ?? { count: 0, total: 0 };
+    haftalik.push({ label: `${dayLabelFmt.format(weekStart)} – ${dayLabelFmt.format(weekEnd)}`, ...entry });
   }
 
   const aylik: PeriodRow[] = [];
@@ -112,11 +116,18 @@ export default async function BankTransferApprovalsPage(
   const searchParams = await props.searchParams;
   const bas = toSingle(searchParams.bas);
   const bit = toSingle(searchParams.bit);
+  const durum = toSingle(searchParams.durum);
   const from = parseDate(bas);
   const to = parseDate(bit, true);
 
-  const transfers = await listBankTransfers({ from, to });
-  const pendingCount = transfers.filter((o) => o.status === "PENDING_VERIFICATION").length;
+  const allTransfers = await listBankTransfers({ from, to });
+  const pendingCount = allTransfers.filter((o) => o.status === "PENDING_VERIFICATION").length;
+  const transfers =
+    durum === "onaylandi"
+      ? allTransfers.filter((o) => APPROVED.has(o.status))
+      : durum === "incelenecek"
+        ? allTransfers.filter((o) => !APPROVED.has(o.status))
+        : allTransfers;
 
   const now = new Date();
   const reportRows = await listBankTransfers({ from: REPORT_START, to: now });
@@ -148,11 +159,7 @@ export default async function BankTransferApprovalsPage(
         <PeriodBreakdown {...breakdown} />
       </div>
 
-      <div className="mt-10">
-        <ImportTransfersForm />
-      </div>
-
-      <form method="get" className="mt-6 flex flex-wrap items-end gap-3">
+      <form method="get" className="mt-10 flex flex-wrap items-end gap-3">
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-500">Başlangıç</label>
           <input
@@ -175,13 +182,25 @@ export default async function BankTransferApprovalsPage(
             className="w-36 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-purple-400"
           />
         </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-500">Durum</label>
+          <select
+            name="durum"
+            defaultValue={durum}
+            className="w-40 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-purple-400"
+          >
+            <option value="">Tümü</option>
+            <option value="onaylandi">Onaylandı</option>
+            <option value="incelenecek">İncelenecek</option>
+          </select>
+        </div>
         <button
           type="submit"
           className="rounded-full bg-purple-600 px-5 py-2 text-sm font-semibold text-white hover:bg-purple-700"
         >
           Filtrele
         </button>
-        {(bas || bit) && (
+        {(bas || bit || durum) && (
           <Link
             href="/admin/havale-onaylari"
             className="px-2 py-2 text-sm font-medium text-slate-500 hover:text-brand-navy"
@@ -245,6 +264,10 @@ export default async function BankTransferApprovalsPage(
             </table>
           </div>
         )}
+      </div>
+
+      <div className="mt-10">
+        <ImportTransfersForm />
       </div>
     </div>
   );
