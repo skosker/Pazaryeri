@@ -52,7 +52,6 @@ export default async function AdminOrdersPage(props: PageProps<"/admin/siparisle
   return (
     <div>
       <h1 className="text-2xl font-bold text-brand-navy">Siparişler</h1>
-      <p className="mt-1 text-sm text-slate-500">{orders.length} sipariş gösteriliyor.</p>
 
       <div className="mt-6 flex flex-wrap gap-2">
         {tabs.map((tab) => (
