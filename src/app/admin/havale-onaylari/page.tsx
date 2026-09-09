@@ -130,7 +130,10 @@ export default async function BankTransferApprovalsPage(
         : allTransfers;
 
   const now = new Date();
-  const reportRows = await listBankTransfers({ from: REPORT_START, to: now });
+  // No `to: now` here on purpose: a row's time-of-day is a synthetic offset, not a real
+  // event time, so a transfer recorded "later today" than the current instant is still
+  // today's data — an upper bound on the exact moment would clip it out of today's row.
+  const reportRows = await listBankTransfers({ from: REPORT_START });
   const approvedCount = reportRows.filter((o) => APPROVED.has(o.status)).length;
   const reportTotal = reportRows.reduce((sum, o) => sum + Number(o.amount), 0);
   const breakdown = buildBreakdown(reportRows, REPORT_START, now);
