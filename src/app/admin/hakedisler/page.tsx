@@ -7,7 +7,6 @@ export default async function PayoutsPage() {
   const [pending, paid] = await Promise.all([listPendingPayouts(), listRecentPaidPayouts()]);
 
   const total = pending.reduce((sum, p) => sum + Number(p.net), 0);
-  const blocked = pending.filter((p) => !(p.iban ?? p.seller.iban)).length;
 
   return (
     <div>
@@ -21,11 +20,6 @@ export default async function PayoutsPage() {
         <span className="rounded-xl bg-amber-50 px-4 py-2 text-amber-800">
           Ödenecek: <strong>{formatPrice(total)}₺</strong> ({pending.length} kayıt)
         </span>
-        {blocked > 0 && (
-          <span className="rounded-xl bg-red-50 px-4 py-2 text-red-700">
-            {blocked} kayıt IBAN eksikliği nedeniyle ödenemiyor
-          </span>
-        )}
       </div>
 
       <div className="mt-8">
