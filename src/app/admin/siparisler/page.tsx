@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import type { OrderStatus } from "@/generated/prisma/client";
 import { formatPrice } from "@/lib/format-price";
 
+const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
+
 const statusLabel: Record<OrderStatus, string> = {
   PENDING_PAYMENT: "Ödeme Bekliyor",
   PENDING_VERIFICATION: "Havale Onayı Bekliyor",
@@ -73,6 +75,7 @@ export default async function AdminOrdersPage(props: PageProps<"/admin/siparisle
           <thead className="border-b border-slate-100 text-xs uppercase text-slate-400">
             <tr>
               <th className="px-5 py-3 font-medium">Sipariş</th>
+              <th className="px-5 py-3 font-medium">Tarih</th>
               <th className="px-5 py-3 font-medium">Alıcı</th>
               <th className="px-5 py-3 font-medium">Satıcı</th>
               <th className="px-5 py-3 font-medium">Tutar</th>
@@ -83,7 +86,7 @@ export default async function AdminOrdersPage(props: PageProps<"/admin/siparisle
           <tbody>
             {orders.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-5 py-10 text-center text-sm text-slate-400">
+                <td colSpan={7} className="px-5 py-10 text-center text-sm text-slate-400">
                   Bu durumda sipariş yok.
                 </td>
               </tr>
@@ -96,6 +99,7 @@ export default async function AdminOrdersPage(props: PageProps<"/admin/siparisle
                       Sipariş #{order.id.slice(-8).toUpperCase()}
                     </p>
                   </td>
+                  <td className="px-5 py-4 text-slate-500">{dateFmt.format(order.createdAt)}</td>
                   <td className="px-5 py-4 text-slate-600">{order.buyer.name}</td>
                   <td className="px-5 py-4 text-slate-600">{order.gig.seller.name}</td>
                   <td className="px-5 py-4 font-semibold text-brand-navy">

@@ -79,10 +79,6 @@ export default async function FreelancerPayoutsPage(props: PageProps<"/admin/hak
         Freelancer&apos;lara yapılan hakediş ödemeleri. Yalnızca admin panelinde görünür.
       </p>
 
-      <div className="mt-6">
-        <ImportPayoutsForm />
-      </div>
-
       <form method="get" className="mt-6 flex flex-wrap items-end gap-3">
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-500">Başlangıç</label>
@@ -186,6 +182,10 @@ export default async function FreelancerPayoutsPage(props: PageProps<"/admin/hak
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="mt-10">
+        <ImportPayoutsForm />
       </div>
     </div>
   );
