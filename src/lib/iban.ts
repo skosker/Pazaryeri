@@ -11,6 +11,18 @@ export function formatIban(value: string) {
   return normalizeIban(value).replace(/(.{4})/g, "$1 ").trim();
 }
 
+/** Country code, check digits and bank code stay visible (that much identifies which
+ * bank it is); the account number — everything from there on — is masked. Grouped by
+ * four like formatIban, so a masked IBAN lines up with a plain one: "TR12 0006 2*** ****
+ * **** **** **". */
+export function maskIban(value: string) {
+  const clean = normalizeIban(value);
+  const visibleLength = 9; // "TR" + 2 check digits + 5-digit bank code
+  const visible = clean.slice(0, visibleLength);
+  const masked = "*".repeat(Math.max(0, clean.length - visibleLength));
+  return (visible + masked).replace(/(.{4})/g, "$1 ").trim();
+}
+
 /**
  * Validates the ISO 13616 check digits: move the first four characters to the end,
  * map letters to numbers (A=10 … Z=35) and the whole thing read as an integer must
