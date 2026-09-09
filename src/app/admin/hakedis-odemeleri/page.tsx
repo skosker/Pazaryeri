@@ -1,12 +1,22 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { formatIban } from "@/lib/iban";
+import { maskIban } from "@/lib/iban";
 import { formatPrice } from "@/lib/format-price";
 import type { Prisma } from "@/generated/prisma/client";
 import { ImportPayoutsForm } from "./import-form";
 import { PayoutByFreelancerChart } from "./payout-chart";
 
 const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
+const dayLabelFmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "long", weekday: "short" });
+
+// Fixed reporting window for the day-by-day breakdown below — independent of the
+// Başlangıç/Bitiş filter above, which narrows the payments *table* instead.
+const DAILY_BREAKDOWN_START = new Date("2026-08-19T00:00:00");
+const DAILY_BREAKDOWN_END = new Date("2026-09-09T23:59:59.999");
+
+function dayKey(d: Date) {
+  return d.toISOString().slice(0, 10);
+}
 
 function toSingle(value: string | string[] | undefined): string {
   if (!value) return "";
@@ -38,6 +48,29 @@ export default async function FreelancerPayoutsPage(props: PageProps<"/admin/hak
     orderBy: [{ paidAt: "desc" }, { name: "asc" }],
   });
   const total = list.reduce((sum, p) => sum + Number(p.amount), 0);
+
+  const windowPayouts = await prisma.freelancerPayout.findMany({
+    where: { paidAt: { gte: DAILY_BREAKDOWN_START, lte: DAILY_BREAKDOWN_END } },
+    select: { paidAt: true, amount: true },
+  });
+  const byDay = new Map<string, { count: number; total: number }>();
+  for (const p of windowPayouts) {
+    const key = dayKey(p.paidAt);
+    const entry = byDay.get(key) ?? { count: 0, total: 0 };
+    entry.count += 1;
+    entry.total += Number(p.amount);
+    byDay.set(key, entry);
+  }
+  const dailyBreakdown: { date: Date; count: number; total: number }[] = [];
+  for (
+    let d = new Date(DAILY_BREAKDOWN_START);
+    d <= DAILY_BREAKDOWN_END;
+    d.setDate(d.getDate() + 1)
+  ) {
+    const date = new Date(d);
+    const entry = byDay.get(dayKey(date)) ?? { count: 0, total: 0 };
+    dailyBreakdown.push({ date, ...entry });
+  }
 
   return (
     <div>
@@ -94,6 +127,42 @@ export default async function FreelancerPayoutsPage(props: PageProps<"/admin/hak
 
       <PayoutByFreelancerChart payments={list.map((p) => ({ name: p.name, amount: Number(p.amount) }))} />
 
+      <div className="mt-10">
+        <h2 className="text-lg font-semibold text-brand-navy">
+          Günlük Ödemeler — 19 Ağustos – 9 Eylül 2026
+        </h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Bilgi amaçlıdır; yukarıdaki tarih filtresinden bağımsızdır.
+        </p>
+        <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+          <table className="w-full text-left text-sm">
+            <thead className="border-b border-slate-100 text-xs uppercase text-slate-400">
+              <tr>
+                <th className="px-5 py-3 font-medium">Tarih</th>
+                <th className="px-5 py-3 font-medium">Ödeme Sayısı</th>
+                <th className="px-5 py-3 font-medium text-right">Toplam</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dailyBreakdown.map((day) => (
+                <tr
+                  key={dayKey(day.date)}
+                  className={`border-b border-slate-100 last:border-0 ${day.count === 0 ? "text-slate-300" : ""}`}
+                >
+                  <td className="px-5 py-3 font-medium text-brand-navy">
+                    {dayLabelFmt.format(day.date)}
+                  </td>
+                  <td className="px-5 py-3 text-slate-500">{day.count}</td>
+                  <td className="px-5 py-3 text-right font-semibold text-brand-navy">
+                    {day.total > 0 ? `${formatPrice(day.total)}₺` : "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-slate-100 text-xs uppercase text-slate-400">
@@ -109,7 +178,7 @@ export default async function FreelancerPayoutsPage(props: PageProps<"/admin/hak
               <tr key={row.id} className="border-b border-slate-100 last:border-0">
                 <td className="px-5 py-4 font-medium text-brand-navy">{row.name}</td>
                 <td className="px-5 py-4 font-mono text-xs text-slate-600 sm:text-sm">
-                  {formatIban(row.iban)}
+                  {maskIban(row.iban)}
                 </td>
                 <td className="px-5 py-4 font-semibold text-brand-navy">{formatPrice(row.amount)}₺</td>
                 <td className="px-5 py-4 text-right text-slate-500">{dateFmt.format(row.paidAt)}</td>

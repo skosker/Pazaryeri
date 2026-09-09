@@ -2,8 +2,92 @@ import Link from "next/link";
 import { listBankTransfers } from "@/lib/order-actions";
 import { formatPrice } from "@/lib/format-price";
 import { ImportTransfersForm } from "./import-form";
+import { PeriodBreakdown, type PeriodRow } from "./period-breakdown";
 
 const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
+const dayLabelFmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "short", year: "numeric" });
+const monthLabelFmt = new Intl.DateTimeFormat("tr-TR", { month: "long", year: "numeric" });
+
+// The daily/haftalık/aylık breakdown always starts here, independent of the
+// Başlangıç/Bitiş filter above (which narrows the table further down instead), and runs
+// through today.
+const REPORT_START = new Date("2026-08-01T00:00:00Z");
+
+function dayKey(d: Date) {
+  return d.toISOString().slice(0, 10);
+}
+
+/** Monday of the ISO week `d` falls in, at UTC midnight. */
+function startOfWeek(d: Date) {
+  const date = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  const day = date.getUTCDay();
+  date.setUTCDate(date.getUTCDate() + (day === 0 ? -6 : 1 - day));
+  return date;
+}
+
+function monthKey(d: Date) {
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+function buildBreakdown<T extends { createdAt: Date; amount: unknown }>(
+  rows: T[],
+  start: Date,
+  end: Date
+): { gunluk: PeriodRow[]; haftalik: PeriodRow[]; aylik: PeriodRow[] } {
+  const byDay = new Map<string, { count: number; total: number }>();
+  const byWeek = new Map<string, { start: Date; count: number; total: number }>();
+  const byMonth = new Map<string, { start: Date; count: number; total: number }>();
+
+  for (const row of rows) {
+    const amount = Number(row.amount);
+
+    const dKey = dayKey(row.createdAt);
+    const dEntry = byDay.get(dKey) ?? { count: 0, total: 0 };
+    dEntry.count += 1;
+    dEntry.total += amount;
+    byDay.set(dKey, dEntry);
+
+    const weekStart = startOfWeek(row.createdAt);
+    const wKey = dayKey(weekStart);
+    const wEntry = byWeek.get(wKey) ?? { start: weekStart, count: 0, total: 0 };
+    wEntry.count += 1;
+    wEntry.total += amount;
+    byWeek.set(wKey, wEntry);
+
+    const mKey = monthKey(row.createdAt);
+    const monthStart = new Date(Date.UTC(row.createdAt.getUTCFullYear(), row.createdAt.getUTCMonth(), 1));
+    const mEntry = byMonth.get(mKey) ?? { start: monthStart, count: 0, total: 0 };
+    mEntry.count += 1;
+    mEntry.total += amount;
+    byMonth.set(mKey, mEntry);
+  }
+
+  const gunluk: PeriodRow[] = [];
+  for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+    const entry = byDay.get(dayKey(d)) ?? { count: 0, total: 0 };
+    gunluk.push({ label: dayLabelFmt.format(d), ...entry });
+  }
+
+  const haftalik: PeriodRow[] = [];
+  for (let w = startOfWeek(start); w <= end; w.setUTCDate(w.getUTCDate() + 7)) {
+    const weekEnd = new Date(w);
+    weekEnd.setUTCDate(weekEnd.getUTCDate() + 6);
+    const entry = byWeek.get(dayKey(w)) ?? { count: 0, total: 0 };
+    haftalik.push({ label: `${dayLabelFmt.format(w)} – ${dayLabelFmt.format(weekEnd)}`, ...entry });
+  }
+
+  const aylik: PeriodRow[] = [];
+  for (
+    let m = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1));
+    m <= end;
+    m.setUTCMonth(m.getUTCMonth() + 1)
+  ) {
+    const entry = byMonth.get(monthKey(m)) ?? { count: 0, total: 0 };
+    aylik.push({ label: monthLabelFmt.format(m), ...entry });
+  }
+
+  return { gunluk, haftalik, aylik };
+}
 
 function toSingle(value: string | string[] | undefined): string {
   if (!value) return "";
@@ -34,6 +118,12 @@ export default async function BankTransferApprovalsPage(
   const transfers = await listBankTransfers({ from, to });
   const pendingCount = transfers.filter((o) => o.status === "PENDING_VERIFICATION").length;
 
+  const now = new Date();
+  const reportRows = await listBankTransfers({ from: REPORT_START, to: now });
+  const approvedCount = reportRows.filter((o) => APPROVED.has(o.status)).length;
+  const reportTotal = reportRows.reduce((sum, o) => sum + Number(o.amount), 0);
+  const breakdown = buildBreakdown(reportRows, REPORT_START, now);
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-brand-navy">Havale/EFT Onayları</h1>
@@ -44,7 +134,21 @@ export default async function BankTransferApprovalsPage(
           : "Onay bekleyen kayıt yok."}
       </p>
 
+      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <StatCard label="Toplam Sipariş" value={String(reportRows.length)} />
+        <StatCard label="Onaylanan Havale" value={String(approvedCount)} />
+        <StatCard label="Onay Bekleyen" value={String(reportRows.length - approvedCount)} />
+        <StatCard label="Toplam Tutar" value={`${formatPrice(reportTotal)}₺`} />
+      </div>
+      <p className="mt-2 text-xs text-slate-400">
+        1 Ağustos 2026&apos;dan bugüne, aşağıdaki tarih filtresinden bağımsız.
+      </p>
+
       <div className="mt-6">
+        <PeriodBreakdown {...breakdown} />
+      </div>
+
+      <div className="mt-10">
         <ImportTransfersForm />
       </div>
 
@@ -142,6 +246,15 @@ export default async function BankTransferApprovalsPage(
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-5">
+      <p className="text-xs uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="mt-2 text-2xl font-extrabold text-brand-navy">{value}</p>
     </div>
   );
 }
