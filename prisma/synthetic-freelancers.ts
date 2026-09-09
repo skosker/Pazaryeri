@@ -49,7 +49,7 @@ export type ShowcaseProfile = {
   bio: string;
 };
 
-export const SYNTHETIC_FREELANCER_COUNT = 4466;
+export const SYNTHETIC_FREELANCER_COUNT = 13398;
 
 /** These profiles are showcase content; nobody logs into them. */
 export const SYNTHETIC_PASSWORD_HASH = "!showcase-profile-no-login";
