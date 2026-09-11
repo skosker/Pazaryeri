@@ -16,7 +16,7 @@ const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
  * email and the seller's IBAN — one prop-pass into a client component would serialise
  * all of that into the page source. Listing the fields keeps that from being possible.
  *
- * Payment is left out on the same grounds: its rawResponse is the whole iyzico payload,
+ * Payment is left out on the same grounds: its rawResponse is the whole PayTR payload,
  * and nothing that reads an order needs it.
  */
 const orderDetailInclude = {

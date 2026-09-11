@@ -3,7 +3,7 @@ import { normalizeCoverImage } from "@/lib/image-processing";
 
 /**
  * Uploads go to Vercel Blob when BLOB_READ_WRITE_TOKEN is set, and to Postgres
- * otherwise — the same "configure it or fall back" shape the iyzico and Resend
+ * otherwise — the same "configure it or fall back" shape the PayTR and Resend
  * integrations use, so the feature works with nothing but DATABASE_URL.
  */
 export function usingBlobStorage() {

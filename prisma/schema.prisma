@@ -220,7 +220,7 @@ model Order {
 
 model Payment {
   id             String        @id @default(cuid())
-  provider       String        @default("iyzico")
+  provider       String        @default("paytr")
   status         PaymentStatus @default(INITIALIZED)
   conversationId String        @unique
   token          String?

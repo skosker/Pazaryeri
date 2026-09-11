@@ -1,44 +1,65 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { retrieveCheckoutForm } from "@/lib/iyzico";
+import { verifyPaytrNotification, type PaytrNotification } from "@/lib/paytr";
 import { markOrderPaid } from "@/lib/order-actions";
-import type { Prisma } from "@/generated/prisma/client";
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-
+/**
+ * PayTR's async "bildirim" (notification) endpoint — configured once as the merchant's
+ * notification URL in the PayTR panel (Ayarlar → Bildirim URL), not passed per request.
+ * This is the only place an order is ever marked paid; merchant_ok_url/merchant_fail_url
+ * (see src/app/odeme/[orderId]/page.tsx) only redirect the buyer's browser and carry no
+ * proof of payment, so they must never trigger this side effect themselves.
+ *
+ * PayTR expects the literal text "OK" back — anything else (including a redirect or a
+ * JSON body) reads as a delivery failure and it retries the same notification on a
+ * schedule.
+ */
 export async function POST(request: Request) {
   const formData = await request.formData();
-  const token = formData.get("token");
+  const fields: PaytrNotification = {
+    merchant_oid: String(formData.get("merchant_oid") ?? ""),
+    status: String(formData.get("status") ?? ""),
+    total_amount: String(formData.get("total_amount") ?? ""),
+    hash: String(formData.get("hash") ?? ""),
+    failed_reason_code: formData.get("failed_reason_code")?.toString(),
+    failed_reason_msg: formData.get("failed_reason_msg")?.toString(),
+    test_mode: formData.get("test_mode")?.toString(),
+  };
 
-  if (typeof token !== "string" || !token) {
-    return NextResponse.redirect(`${appUrl}/panel`, 303);
+  if (!fields.merchant_oid || !fields.hash) {
+    return new NextResponse("OK");
   }
 
-  const payment = await prisma.payment.findFirst({ where: { token } });
+  if (!verifyPaytrNotification(fields)) {
+    // Wrong hash: either tampered or a stale merchant key. Ack anyway — PayTR would
+    // otherwise keep retrying a request that will never verify — but skip every
+    // downstream effect.
+    return new NextResponse("OK");
+  }
+
+  const payment = await prisma.payment.findFirst({
+    where: { conversationId: fields.merchant_oid },
+  });
   if (!payment) {
-    return NextResponse.redirect(`${appUrl}/panel`, 303);
+    return new NextResponse("OK");
   }
 
-  const result = await retrieveCheckoutForm(token, payment.conversationId);
-  const paymentStatus = result.paymentStatus;
-
-  if (paymentStatus === "SUCCESS") {
+  if (fields.status === "success") {
     await prisma.payment.update({
       where: { id: payment.id },
       data: {
         status: "SUCCESS",
-        paymentId: result.paymentId ? String(result.paymentId) : null,
-        rawResponse: result as unknown as Prisma.InputJsonValue,
+        paymentId: fields.merchant_oid,
+        rawResponse: fields,
       },
     });
     await markOrderPaid(payment.orderId);
-    return NextResponse.redirect(`${appUrl}/siparis/${payment.orderId}`, 303);
+  } else {
+    await prisma.payment.update({
+      where: { id: payment.id },
+      data: { status: "FAILED", rawResponse: fields },
+    });
   }
 
-  await prisma.payment.update({
-    where: { id: payment.id },
-    data: { status: "FAILED", rawResponse: result as unknown as Prisma.InputJsonValue },
-  });
-
-  return NextResponse.redirect(`${appUrl}/odeme/${payment.orderId}?hata=odeme-basarisiz`, 303);
+  return new NextResponse("OK");
 }
