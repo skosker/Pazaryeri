@@ -2,7 +2,7 @@
  * The public address of this deployment.
  *
  * Everything that has to produce an absolute URL — verification and password-reset
- * links, the iyzico callback, canonical tags, the sitemap — reads it from here rather
+ * links, the PayTR callback, canonical tags, the sitemap — reads it from here rather
  * than hard-coding a host, so pointing the site at a new domain is one environment
  * variable rather than a search across the codebase.
  *

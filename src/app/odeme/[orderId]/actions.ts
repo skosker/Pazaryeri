@@ -22,7 +22,7 @@ export async function completeMockPayment(orderId: string) {
     where: { orderId },
     create: {
       orderId,
-      provider: "iyzico-mock",
+      provider: "paytr-mock",
       status: "SUCCESS",
       conversationId: randomUUID(),
       paymentId: `mock_${randomUUID()}`,
@@ -51,7 +51,7 @@ export async function failMockPayment(orderId: string) {
     where: { orderId },
     create: {
       orderId,
-      provider: "iyzico-mock",
+      provider: "paytr-mock",
       status: "FAILED",
       conversationId: randomUUID(),
       rawResponse: { mode: "mock", paymentStatus: "FAILURE" },
