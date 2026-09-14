@@ -2,9 +2,21 @@ import { prisma } from "@/lib/prisma";
 import { togglePublishedAction, deleteGigAction } from "./actions";
 import { formatPrice } from "@/lib/format-price";
 
-export default async function AdminGigsPage() {
+/**
+ * The generated showcase sellers' gigs outnumber real listings by a wide margin (see
+ * the same note on /admin/kullanicilar) — an unfiltered, unbounded query here loaded
+ * every one of them into a single table on each request. ?uretilmis=1 still includes
+ * them for the rare case where one needs looking at.
+ */
+export default async function AdminGigsPage(props: PageProps<"/admin/ilanlar">) {
+  const searchParams = await props.searchParams;
+  const showGenerated =
+    (Array.isArray(searchParams.uretilmis) ? searchParams.uretilmis[0] : searchParams.uretilmis) === "1";
+
   const gigs = await prisma.gig.findMany({
+    where: showGenerated ? {} : { seller: { synthetic: false } },
     orderBy: { createdAt: "desc" },
+    take: 200,
     include: {
       seller: { select: { name: true } },
       category: { select: { name: true } },
