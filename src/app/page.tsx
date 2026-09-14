@@ -2,12 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { SearchBar } from "@/components/search-bar";
 import { LinkButton } from "@/components/ui/button";
-import { MilestonePopup } from "@/components/milestone-popup";
 
 export default function Home() {
   return (
     <div>
-      <MilestonePopup />
       <section className="relative overflow-hidden bg-brand-navy">
         <div
           aria-hidden
