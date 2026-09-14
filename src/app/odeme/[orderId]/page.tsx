@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { isMockPayment, getPaytrToken } from "@/lib/paytr";
+import { isMockPayment, isPaytrTestMode, getPaytrToken } from "@/lib/paytr";
 import { MockCheckoutForm } from "./mock-checkout-form";
 import { PaytrEmbed } from "./paytr-embed";
 import { PaymentMethodTabs } from "./payment-method-tabs";
@@ -42,7 +42,7 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
   let paytrToken: string | null = null;
   let tokenError: string | null = null;
 
-  if (!isMockPayment) {
+  if (!isMockPayment && !isPaytrTestMode) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
     // PayTR requires an alphanumeric merchant_oid; the cuid order id already is one,
     // but this strips anything that isn't just in case.
@@ -96,7 +96,7 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
       <div className="mt-6">
         <PaymentMethodTabs
           cardContent={
-            isMockPayment ? (
+            isPaytrTestMode ? undefined : isMockPayment ? (
               <MockCheckoutForm orderId={order.id} amount={amount} />
             ) : paytrToken ? (
               <PaytrEmbed token={paytrToken} />

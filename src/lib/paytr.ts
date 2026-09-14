@@ -17,6 +17,14 @@ function testMode() {
   return process.env.PAYTR_TEST_MODE === "0" ? "0" : "1";
 }
 
+/**
+ * True once real merchant credentials are configured but PAYTR_TEST_MODE hasn't been
+ * flipped to "0" yet — a real-looking PayTR card form that can't actually take anyone's
+ * money. Buyers shouldn't be offered it; the checkout page hides the card tab while
+ * this is true and it goes away on its own once PAYTR_TEST_MODE=0 is set for launch.
+ */
+export const isPaytrTestMode = !isMockPayment && testMode() === "1";
+
 type BasketItem = { name: string; price: number; quantity: number };
 
 type GetTokenParams = {
