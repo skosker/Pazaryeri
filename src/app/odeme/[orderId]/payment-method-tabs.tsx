@@ -6,10 +6,14 @@ export function PaymentMethodTabs({
   cardContent,
   bankContent,
 }: {
-  cardContent: ReactNode;
+  cardContent?: ReactNode;
   bankContent: ReactNode;
 }) {
   const [tab, setTab] = useState<"card" | "bank">("bank");
+
+  // No card method to offer (e.g. PayTR is still in test mode) — skip the switcher
+  // entirely rather than showing a single-option tab bar.
+  if (!cardContent) return <>{bankContent}</>;
 
   return (
     <div>
