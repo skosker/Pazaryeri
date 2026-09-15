@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { togglePublishedAction, deleteGigAction } from "./actions";
 import { formatPrice } from "@/lib/format-price";
+import { getCategoryPriceComparison } from "@/lib/price-stats";
 
 /**
  * The generated showcase sellers' gigs outnumber real listings by a wide margin (see
@@ -25,12 +26,63 @@ export default async function AdminGigsPage(props: PageProps<"/admin/ilanlar">) 
     },
   });
 
+  const categoryStats = await getCategoryPriceComparison();
+  const overallAvg =
+    categoryStats.length > 0
+      ? categoryStats.reduce((sum, row) => sum + row.avgPrice * row.gigCount, 0) /
+        categoryStats.reduce((sum, row) => sum + row.gigCount, 0)
+      : 0;
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-brand-navy">İlanlar</h1>
       <p className="mt-1 text-sm text-slate-500">{gigs.length} ilan.</p>
 
-      <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+      <h2 className="mt-10 text-lg font-bold text-brand-navy">Kategorilere Göre Fiyat Karşılaştırması</h2>
+      <p className="mt-1 text-sm text-slate-500">
+        Her ilanın en ucuz paket fiyatı üzerinden, kategoriye göre karşılaştırma. Üretilmiş
+        gösterim ilanları da dahildir.
+      </p>
+
+      <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+        <table className="w-full text-left text-sm">
+          <thead className="border-b border-slate-100 text-xs uppercase text-slate-400">
+            <tr>
+              <th className="px-5 py-3 font-medium">Kategori</th>
+              <th className="px-5 py-3 font-medium text-right">İlan Sayısı</th>
+              <th className="px-5 py-3 font-medium text-right">En Düşük</th>
+              <th className="px-5 py-3 font-medium text-right">Ortalama</th>
+              <th className="px-5 py-3 font-medium text-right">En Yüksek</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="border-b border-slate-100 bg-slate-50 font-semibold text-brand-navy">
+              <td className="px-5 py-3">Genel Ortalama</td>
+              <td className="px-5 py-3 text-right">
+                {categoryStats.reduce((sum, row) => sum + row.gigCount, 0)}
+              </td>
+              <td className="px-5 py-3 text-right text-slate-400">—</td>
+              <td className="px-5 py-3 text-right">{formatPrice(overallAvg)}₺</td>
+              <td className="px-5 py-3 text-right text-slate-400">—</td>
+            </tr>
+            {categoryStats.map((row) => (
+              <tr key={row.categoryId} className="border-b border-slate-100 last:border-0">
+                <td className="px-5 py-3 text-brand-navy">{row.categoryName}</td>
+                <td className="px-5 py-3 text-right text-slate-500">{row.gigCount}</td>
+                <td className="px-5 py-3 text-right text-slate-500">{formatPrice(row.minPrice)}₺</td>
+                <td className="px-5 py-3 text-right font-semibold text-brand-navy">
+                  {formatPrice(row.avgPrice)}₺
+                </td>
+                <td className="px-5 py-3 text-right text-slate-500">{formatPrice(row.maxPrice)}₺</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <h2 className="mt-10 text-lg font-bold text-brand-navy">İlan Listesi</h2>
+
+      <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-slate-100 text-xs uppercase text-slate-400">
             <tr>
