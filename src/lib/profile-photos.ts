@@ -183,13 +183,18 @@ export async function resetProfilePhotos(): Promise<{ reset: number }> {
   return { reset: targets.length };
 }
 
-export type PhotoProfile = { id: string; name: string; image: string };
+export type PhotoProfile = { id: string; name: string; image: string; duplicate: boolean };
 
 /**
  * The generated profiles that currently carry a fetched photograph, for the admin review
  * gallery. Only these are listed: a profile on its drawn avatar has nothing to review, and
- * a real seller's own upload is never ours to touch. Oldest id first, so the grid order is
- * stable between visits and a scan can be resumed where it left off.
+ * a real seller's own upload is never ours to touch.
+ *
+ * `duplicate` marks a profile whose exact photo URL is also sitting on another profile —
+ * two different reviewer runs can each dedupe correctly against what they see in the
+ * moment and still both land on the same photo if they don't overlap in time. Those are
+ * sorted to the front (stable within that: oldest id first), since they are the one
+ * category with a definite right answer rather than a judgment call.
  */
 export async function listPhotoProfiles(): Promise<PhotoProfile[]> {
   const profiles = await prisma.user.findMany({
@@ -198,9 +203,16 @@ export async function listPhotoProfiles(): Promise<PhotoProfile[]> {
     orderBy: { id: "asc" },
   });
 
-  return profiles
-    .filter((row): row is PhotoProfile => !!row.image?.startsWith(PEXELS_HOST))
-    .map((row) => ({ id: row.id, name: row.name, image: row.image }));
+  const withPhoto = profiles.filter(
+    (row): row is { id: string; name: string; image: string } => !!row.image?.startsWith(PEXELS_HOST)
+  );
+
+  const counts = new Map<string, number>();
+  for (const row of withPhoto) counts.set(row.image, (counts.get(row.image) ?? 0) + 1);
+
+  return withPhoto
+    .map((row) => ({ ...row, duplicate: (counts.get(row.image) ?? 0) > 1 }))
+    .sort((a, b) => Number(b.duplicate) - Number(a.duplicate));
 }
 
 /**
@@ -223,6 +235,75 @@ export async function revertProfilePhoto(id: string): Promise<{ reverted: boolea
   });
 
   return { reverted: true };
+}
+
+/**
+ * Fixes every exact duplicate at once: for each photo URL shared by more than one
+ * profile, the first (lowest id) keeps it and the rest go back to their drawn avatar —
+ * the bulk version of clicking "Avatara döndür" on every loser of a collision by hand.
+ */
+export async function revertDuplicatePhotos(): Promise<{ reverted: number }> {
+  const profiles = await prisma.user.findMany({
+    where: { role: "FREELANCER", synthetic: true },
+    select: { id: true, name: true, email: true, image: true },
+    orderBy: { id: "asc" },
+  });
+
+  const groups = new Map<string, typeof profiles>();
+  for (const row of profiles) {
+    if (!row.image?.startsWith(PEXELS_HOST)) continue;
+    const list = groups.get(row.image);
+    if (list) list.push(row);
+    else groups.set(row.image, [row]);
+  }
+
+  const targets = [...groups.values()].filter((list) => list.length > 1).flatMap((list) => list.slice(1));
+
+  for (let i = 0; i < targets.length; i += UPDATE_CHUNK) {
+    await prisma.$transaction(
+      targets.slice(i, i + UPDATE_CHUNK).map((row) =>
+        prisma.user.update({
+          where: { id: row.id },
+          data: { image: drawnAvatarUrl(row.name, row.email) },
+        })
+      )
+    );
+  }
+
+  return { reverted: targets.length };
+}
+
+/**
+ * Reverts every profile whose name is in the given list — for a reviewer who scans the
+ * gallery and calls out several names at once rather than clicking each card in turn.
+ * Matched case- and whitespace-insensitively; a name shared by more than one profile
+ * reverts all of them, since there is nothing else here to tell them apart.
+ */
+export async function revertProfilePhotosByName(names: string[]): Promise<{ reverted: number }> {
+  const wanted = new Set(names.map((name) => name.trim().toLocaleLowerCase("tr")).filter(Boolean));
+  if (wanted.size === 0) return { reverted: 0 };
+
+  const profiles = await prisma.user.findMany({
+    where: { role: "FREELANCER", synthetic: true },
+    select: { id: true, name: true, email: true, image: true },
+  });
+
+  const targets = profiles.filter(
+    (row) => row.image?.startsWith(PEXELS_HOST) && wanted.has(row.name.trim().toLocaleLowerCase("tr"))
+  );
+
+  for (let i = 0; i < targets.length; i += UPDATE_CHUNK) {
+    await prisma.$transaction(
+      targets.slice(i, i + UPDATE_CHUNK).map((row) =>
+        prisma.user.update({
+          where: { id: row.id },
+          data: { image: drawnAvatarUrl(row.name, row.email) },
+        })
+      )
+    );
+  }
+
+  return { reverted: targets.length };
 }
 
 type Photo = { id: number; url: string; alt: string };
