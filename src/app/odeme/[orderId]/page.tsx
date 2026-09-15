@@ -1,24 +1,12 @@
-import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { isMockPayment, isPaytrTestMode, getPaytrToken } from "@/lib/paytr";
+import { isMockPayment, isPaytrTestMode, getPaytrToken, clientIp } from "@/lib/paytr";
 import { MockCheckoutForm } from "./mock-checkout-form";
 import { PaytrEmbed } from "./paytr-embed";
 import { PaymentMethodTabs } from "./payment-method-tabs";
 import { BankTransferPanel } from "./bank-transfer-panel";
 import { getBankAccounts } from "@/lib/bank-transfer";
-
-/** The buyer's real IP — PayTR hashes it into the token request and can reject a
- * mismatched one, unlike iyzico's sandbox, which never checked the placeholder this
- * codebase used to send. `x-forwarded-for` can carry a proxy chain; the first entry is
- * the original client. */
-async function clientIp() {
-  const h = await headers();
-  const forwarded = h.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0].trim();
-  return h.get("x-real-ip") ?? "127.0.0.1";
-}
 
 export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">) {
   const { orderId } = await props.params;

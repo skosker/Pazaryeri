@@ -26,7 +26,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     ...(isFreelancer ? [{ href: "/panel/odeme-bilgileri", label: "Ödeme Bilgileri" }] : []),
     { href: "/panel/profil", label: "Profilim" },
     { href: "/panel/sifre", label: "Şifre Değiştir" },
-    ...(isBuyer && !isPro ? [{ href: "/panel/pro-ol", label: "Prosinta Pro Ol" }] : []),
+    ...((isBuyer || isFreelancer) && !isPro ? [{ href: "/panel/pro-ol", label: "Prosinta Pro Ol" }] : []),
     ...(isBuyer ? [{ href: "/panel/freelancer-ol", label: "Freelancer Ol" }] : []),
   ];
 
@@ -38,7 +38,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
               {isFreelancer ? "Freelancer Paneli" : "Alıcı Paneli"}
             </p>
-            {isBuyer && isPro && (
+            {(isBuyer || isFreelancer) && isPro && (
               <span className="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950">
                 Pro
               </span>

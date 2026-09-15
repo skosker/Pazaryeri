@@ -72,6 +72,7 @@ model User {
   reviews            Review[]            @relation("BuyerReviews")
   verificationTokens VerificationToken[]
   passwordResets     PasswordResetToken[]
+  proPurchases       ProPurchase[]
 
   @@index([role, synthetic])
   @@map("users")
@@ -233,6 +234,29 @@ model Payment {
   order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@map("payments")
+}
+
+/**
+ * A one-off Pro upgrade purchase — the same PayTR flow as Payment, but for a user
+ * account rather than an Order, so it is its own table instead of forcing Payment's
+ * required, unique orderId to become optional. The purchase's own id doubles as the
+ * PayTR merchant_oid (see src/lib/pro-purchase.ts), so there is no separate
+ * conversationId column to keep in step with it.
+ */
+model ProPurchase {
+  id          String        @id @default(cuid())
+  status      PaymentStatus @default(INITIALIZED)
+  amount      Decimal       @db.Decimal(10, 2)
+  token       String?
+  rawResponse Json?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("pro_purchases")
 }
 
 model Review {
