@@ -7,6 +7,8 @@ import {
   profilePhotoProgress,
   resetProfilePhotos,
   revertProfilePhoto,
+  revertDuplicatePhotos,
+  revertProfilePhotosByName,
   type ProfilePhotoBatch,
 } from "@/lib/profile-photos";
 
@@ -51,6 +53,32 @@ export async function revertOneProfilePhotoAction(id: string) {
   await requireAdmin();
   await revertProfilePhoto(id);
   revalidatePath("/admin/profil-fotograflari/incele");
+}
+
+/**
+ * Bulk-fixes every exact photo duplicate in one go — the "these two are the same photo"
+ * cases the reviewer keeps finding by eye.
+ */
+export async function revertDuplicatePhotosAction() {
+  await requireAdmin();
+  const { reverted } = await revertDuplicatePhotos();
+  revalidatePath("/admin/profil-fotograflari/incele");
+  return { reverted };
+}
+
+/**
+ * Reverts every profile named in the pasted list — for a reviewer who spots several bad
+ * faces while scanning and wants to clear them in one action instead of one click each.
+ */
+export async function revertProfilePhotosByNameAction(namesText: string) {
+  await requireAdmin();
+  const names = namesText
+    .split(/[,\n]/)
+    .map((name) => name.replace(/^[-*•]\s*/, "").trim())
+    .filter(Boolean);
+  const { reverted } = await revertProfilePhotosByName(names);
+  revalidatePath("/admin/profil-fotograflari/incele");
+  return { reverted };
 }
 
 /**
