@@ -1,10 +1,21 @@
 import crypto from "crypto";
+import { headers } from "next/headers";
 
 /**
  * PayTR iFrame API. No SDK — it's a plain form-encoded REST call plus an HMAC-SHA256
  * hash PayTR uses to authenticate both the token request and the async notification
  * that confirms payment (see verifyPaytrNotification). Docs: https://dev.paytr.com/
  */
+
+/** The buyer's real IP — PayTR hashes it into the token request and can reject a
+ * mismatched one. `x-forwarded-for` can carry a proxy chain; the first entry is the
+ * original client. */
+export async function clientIp() {
+  const h = await headers();
+  const forwarded = h.get("x-forwarded-for");
+  if (forwarded) return forwarded.split(",")[0].trim();
+  return h.get("x-real-ip") ?? "127.0.0.1";
+}
 
 export const isMockPayment =
   !process.env.PAYTR_MERCHANT_ID ||

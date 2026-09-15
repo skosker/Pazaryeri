@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyPaytrNotification, type PaytrNotification } from "@/lib/paytr";
 import { markOrderPaid } from "@/lib/order-actions";
+import { markProPurchasePaid } from "@/lib/pro-purchase";
 
 /**
  * PayTR's async "bildirim" (notification) endpoint — configured once as the merchant's
@@ -40,25 +41,44 @@ export async function POST(request: Request) {
   const payment = await prisma.payment.findFirst({
     where: { conversationId: fields.merchant_oid },
   });
-  if (!payment) {
+
+  if (payment) {
+    if (fields.status === "success") {
+      await prisma.payment.update({
+        where: { id: payment.id },
+        data: {
+          status: "SUCCESS",
+          paymentId: fields.merchant_oid,
+          rawResponse: fields,
+        },
+      });
+      await markOrderPaid(payment.orderId);
+    } else {
+      await prisma.payment.update({
+        where: { id: payment.id },
+        data: { status: "FAILED", rawResponse: fields },
+      });
+    }
+
     return new NextResponse("OK");
   }
 
-  if (fields.status === "success") {
-    await prisma.payment.update({
-      where: { id: payment.id },
-      data: {
-        status: "SUCCESS",
-        paymentId: fields.merchant_oid,
-        rawResponse: fields,
-      },
-    });
-    await markOrderPaid(payment.orderId);
-  } else {
-    await prisma.payment.update({
-      where: { id: payment.id },
-      data: { status: "FAILED", rawResponse: fields },
-    });
+  // Not an order's payment — check whether it is a Pro upgrade purchase instead. Its
+  // own id doubles as the merchant_oid (see src/lib/pro-purchase.ts).
+  const purchase = await prisma.proPurchase.findUnique({ where: { id: fields.merchant_oid } });
+  if (purchase) {
+    if (fields.status === "success") {
+      await prisma.proPurchase.update({
+        where: { id: purchase.id },
+        data: { rawResponse: fields },
+      });
+      await markProPurchasePaid(purchase.id);
+    } else {
+      await prisma.proPurchase.update({
+        where: { id: purchase.id },
+        data: { status: "FAILED", rawResponse: fields },
+      });
+    }
   }
 
   return new NextResponse("OK");
