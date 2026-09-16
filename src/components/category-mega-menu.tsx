@@ -89,7 +89,7 @@ export function CategoryMegaMenu({
                   onMouseEnter={() => setActive(c.slug)}
                   onClick={() => setOpen(false)}
                   className={`flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium transition ${
-                    isActive ? "bg-white text-brand-navy" : "text-slate-600 hover:bg-white/60"
+                    isActive ? "bg-purple-100 text-purple-700" : "text-slate-600 hover:bg-white/60"
                   }`}
                 >
                   <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${accent.bg} ${accent.text}`}>
