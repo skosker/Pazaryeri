@@ -194,10 +194,13 @@ export const NAMED_FREELANCER_PAYOUTS: { name: string; iban: string; amount: num
   { name: "Alperen Başkan", iban: "TR740015700000000113169462", amount: 4000.00 },
 ];
 
-/** ASCII, path/e-mail-safe form of a name (mirrors avatar-seed's slugifyName). */
+/** ASCII, path/e-mail-safe form of a name (mirrors avatar-seed's slugifyName). Uses the
+ * tr-TR locale explicitly: plain .toLowerCase() maps "İ" to "i" + a combining dot above
+ * (U+0307) instead of a plain "i", and that leftover combining mark isn't in [a-z0-9] so
+ * the catch-all replace below would turn it into a stray hyphen (e.g. "İşleri" -> "i-sleri"). */
 function slugify(name: string) {
   return name
-    .toLowerCase()
+    .toLocaleLowerCase("tr-TR")
     .replace(/ğ/g, "g")
     .replace(/ü/g, "u")
     .replace(/ş/g, "s")
@@ -247,6 +250,14 @@ function roundPrice(value: number) {
   if (value < 2000) return Math.round(value / 10) * 10;
   if (value < 20000) return Math.round(value / 50) * 50;
   return Math.round(value / 100) * 100;
+}
+
+/** Turkish sentence casing requires the first letter capitalised, but a template can
+ * open with a skill or brand name that is itself written lowercase (e.g. "iyzico
+ * Entegrasyonu") — a plain .toUpperCase() would also turn "i" into "I" instead of
+ * the correct Turkish "İ", so this goes through the tr-TR locale explicitly. */
+export function capitalizeFirst(text: string) {
+  return text.charAt(0).toLocaleUpperCase("tr-TR") + text.slice(1);
 }
 
 const gigTitleTemplates = [
@@ -303,8 +314,10 @@ export function buildGig(
   slugSuffix: string
 ): GeneratedGig {
   const r = reader(hash32(`gig:${seed}`));
-  const gigTitle = gigTitleTemplates[r(gigTitleTemplates.length)](title, skills);
-  const description = gigDescriptionTemplates[r(gigDescriptionTemplates.length)](title, skills, years);
+  const gigTitle = capitalizeFirst(gigTitleTemplates[r(gigTitleTemplates.length)](title, skills));
+  const description = capitalizeFirst(
+    gigDescriptionTemplates[r(gigDescriptionTemplates.length)](title, skills, years)
+  );
   const slug = `${slugify(gigTitle)}-${slugSuffix}`;
   const { delivery, revisions } = deliveryAndRevisions(standardPrice);
 

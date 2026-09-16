@@ -42,20 +42,19 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
         /{" "}
         <Link href={`/kategoriler?kategori=${gig.category.slug}`} className="hover:text-brand-navy">
           {gig.category.name}
-        </Link>{" "}
-        /{" "}
+        </Link>
         {gig.subcategory && (
           <>
+            {" "}
+            /{" "}
             <Link
               href={`/kategoriler?kategori=${gig.category.slug}&alt=${gig.subcategory.slug}`}
               className="hover:text-brand-navy"
             >
               {gig.subcategory.name}
-            </Link>{" "}
-            /{" "}
+            </Link>
           </>
         )}
-        <span className="text-slate-500">{gig.title}</span>
       </nav>
 
       {errorMessage && (
