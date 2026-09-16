@@ -30,3 +30,32 @@ export async function markProPurchasePaid(purchaseId: string) {
     prisma.user.update({ where: { id: purchase.userId }, data: { isPro: true } }),
   ]);
 }
+
+/**
+ * The buyer/freelancer declared a bank transfer for their Pro purchase — same shape as
+ * an order's Havale/EFT notification, but there is no separate "pending verification"
+ * status here: the purchase itself stays INITIALIZED with provider "havale" until an
+ * admin confirms it below.
+ */
+export async function notifyProBankTransfer(userId: string) {
+  const purchase = await findOrCreatePendingProPurchase(userId);
+  return prisma.proPurchase.update({ where: { id: purchase.id }, data: { provider: "havale" } });
+}
+
+export async function listPendingProBankTransfers() {
+  return prisma.proPurchase.findMany({
+    where: { provider: "havale", status: "INITIALIZED" },
+    include: { user: { select: { name: true, email: true, role: true } } },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function adminConfirmProBankTransfer(purchaseId: string, adminRole: string) {
+  if (adminRole !== "ADMIN") throw new ProPurchaseError("Yetkisiz işlem");
+
+  const purchase = await prisma.proPurchase.findUnique({ where: { id: purchaseId } });
+  if (!purchase) throw new ProPurchaseError("Satın alma bulunamadı");
+  if (purchase.status !== "INITIALIZED") throw new ProPurchaseError("Bu satın alma bu aşamada değil");
+
+  await markProPurchasePaid(purchaseId);
+}

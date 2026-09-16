@@ -3,11 +3,15 @@
 import { redirect } from "next/navigation";
 import { activeUser } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
-import { findOrCreatePendingProPurchase, markProPurchasePaid } from "@/lib/pro-purchase";
+import {
+  findOrCreatePendingProPurchase,
+  markProPurchasePaid,
+  notifyProBankTransfer,
+} from "@/lib/pro-purchase";
 
 export async function completeMockProPayment() {
   const user = await activeUser();
-  if (!user) redirect("/giris?callbackUrl=/panel/pro-ol");
+  if (!user) redirect("/giris?callbackUrl=/panel/pro-ol/odeme");
 
   const purchase = await findOrCreatePendingProPurchase(user.id);
   await markProPurchasePaid(purchase.id);
@@ -17,10 +21,17 @@ export async function completeMockProPayment() {
 
 export async function failMockProPayment() {
   const user = await activeUser();
-  if (!user) redirect("/giris?callbackUrl=/panel/pro-ol");
+  if (!user) redirect("/giris?callbackUrl=/panel/pro-ol/odeme");
 
   const purchase = await findOrCreatePendingProPurchase(user.id);
   await prisma.proPurchase.update({ where: { id: purchase.id }, data: { status: "FAILED" } });
 
-  redirect("/panel/pro-ol?hata=odeme-basarisiz");
+  redirect("/panel/pro-ol/odeme?hata=odeme-basarisiz");
+}
+
+export async function notifyProBankTransferAction() {
+  const user = await activeUser();
+  if (!user) redirect("/giris?callbackUrl=/panel/pro-ol/odeme");
+
+  await notifyProBankTransfer(user.id);
 }
