@@ -8,11 +8,9 @@ import { useState } from "react";
  * so a filter never lands the visitor on page 12 of a three-page result.
  */
 export function FilterBar({
-  titles,
   selected,
 }: {
-  titles: { name: string; count: number }[];
-  selected: { q: string; title: string; onlineOnly: boolean };
+  selected: { q: string; onlineOnly: boolean; proOnly: boolean };
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -28,9 +26,6 @@ export function FilterBar({
     const search = params.toString();
     router.push(search ? `${pathname}?${search}` : pathname);
   }
-
-  const selectClass =
-    "rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 outline-none focus:border-purple-400";
 
   return (
     <div className="flex flex-wrap items-center gap-3">
@@ -52,15 +47,6 @@ export function FilterBar({
         </button>
       </form>
 
-      <select value={selected.title} onChange={(e) => apply({ meslek: e.target.value })} className={selectClass}>
-        <option value="">Tüm meslekler</option>
-        {titles.map((title) => (
-          <option key={title.name} value={title.name}>
-            {title.name} ({title.count})
-          </option>
-        ))}
-      </select>
-
       <label className="flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600">
         <input
           type="checkbox"
@@ -69,6 +55,16 @@ export function FilterBar({
           className="h-4 w-4 accent-purple-600"
         />
         Sadece çevrimiçi
+      </label>
+
+      <label className="flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600">
+        <input
+          type="checkbox"
+          checked={selected.proOnly}
+          onChange={(e) => apply({ pro: e.target.checked ? "1" : "" })}
+          className="h-4 w-4 accent-purple-600"
+        />
+        Sadece Pro freelancer&apos;ları göster
       </label>
     </div>
   );

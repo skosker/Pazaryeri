@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { listFreelancers, getFreelancerFacets } from "@/lib/freelancers";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { listFreelancers } from "@/lib/freelancers";
 import { UserAvatar } from "@/components/user-avatar";
 import { StarRating } from "@/components/star-rating";
 import { FilterBar } from "./filter-bar";
@@ -11,11 +13,11 @@ function toSingle(value: string | string[] | undefined): string {
   return Array.isArray(value) ? value[0] : value;
 }
 
-function buildHref(params: { q: string; title: string; onlineOnly: boolean; page?: number }) {
+function buildHref(params: { q: string; onlineOnly: boolean; proOnly: boolean; page?: number }) {
   const search = new URLSearchParams();
   if (params.q) search.set("q", params.q);
-  if (params.title) search.set("meslek", params.title);
   if (params.onlineOnly) search.set("cevrimici", "1");
+  if (params.proOnly) search.set("pro", "1");
   if (params.page && params.page > 1) search.set("sayfa", String(params.page));
   const qs = search.toString();
   return qs ? `/freelancerlar?${qs}` : "/freelancerlar";
@@ -29,19 +31,25 @@ function pageWindow(page: number, pageCount: number) {
 }
 
 export default async function FreelancerlarPage(props: PageProps<"/freelancerlar">) {
+  const session = await auth();
+  if (!session?.user) redirect("/giris?callbackUrl=/freelancerlar");
+
   const searchParams = await props.searchParams;
 
   const q = toSingle(searchParams.q);
-  const title = toSingle(searchParams.meslek);
   const onlineOnly = toSingle(searchParams.cevrimici) === "1";
+  const proOnly = toSingle(searchParams.pro) === "1";
   const page = Number(toSingle(searchParams.sayfa) || "1") || 1;
 
-  const [{ cards, total, pageCount }, facets] = await Promise.all([
-    listFreelancers({ q, title, onlineOnly, page, pageSize: PAGE_SIZE }),
-    getFreelancerFacets(),
-  ]);
+  const { cards, total, pageCount } = await listFreelancers({
+    q,
+    onlineOnly,
+    proOnly,
+    page,
+    pageSize: PAGE_SIZE,
+  });
 
-  const hrefBase = { q, title, onlineOnly };
+  const hrefBase = { q, onlineOnly, proOnly };
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -54,12 +62,10 @@ export default async function FreelancerlarPage(props: PageProps<"/freelancerlar
       </nav>
 
       <h1 className="text-2xl font-bold text-brand-navy sm:text-3xl">Freelancer Bul</h1>
-      <p className="mt-1 text-sm text-slate-500">
-        {total} freelancer · mesleğe ve uzmanlığa göre filtrele.
-      </p>
+      <p className="mt-1 text-sm text-slate-500">{total} freelancer · uzmanlığa göre filtrele.</p>
 
       <div className="mt-6">
-        <FilterBar titles={facets.titles} selected={{ q, title, onlineOnly }} />
+        <FilterBar selected={{ q, onlineOnly, proOnly }} />
       </div>
 
       {cards.length === 0 ? (

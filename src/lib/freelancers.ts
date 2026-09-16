@@ -24,8 +24,8 @@ export type FreelancerCardData = {
 
 export type FreelancerFilters = {
   q?: string;
-  title?: string;
   onlineOnly?: boolean;
+  proOnly?: boolean;
   page?: number;
   pageSize?: number;
 };
@@ -40,8 +40,8 @@ export type FreelancerListResult = {
 function buildWhere(filters: FreelancerFilters): Prisma.UserWhereInput {
   const where: Prisma.UserWhereInput = { role: "FREELANCER", suspended: false };
 
-  if (filters.title) where.title = filters.title;
   if (filters.onlineOnly) where.isOnline = true;
+  if (filters.proOnly) where.isPro = true;
 
   if (filters.q) {
     const q = filters.q.trim();
@@ -135,21 +135,5 @@ export async function listFreelancers(filters: FreelancerFilters): Promise<Freel
     total,
     page,
     pageCount,
-  };
-}
-
-/** Professions that actually have freelancers, for the filter menu. */
-export async function getFreelancerFacets() {
-  const base: Prisma.UserWhereInput = { role: "FREELANCER", suspended: false };
-
-  const titles = await prisma.user.groupBy({
-    by: ["title"],
-    where: { ...base, title: { not: null } },
-    _count: { _all: true },
-    orderBy: { title: "asc" },
-  });
-
-  return {
-    titles: titles.map((row) => ({ name: row.title as string, count: row._count._all })),
   };
 }
