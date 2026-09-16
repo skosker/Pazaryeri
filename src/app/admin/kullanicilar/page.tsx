@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
 import { toggleSuspensionAction, changeUserRoleAction, toggleProFreelancerAction } from "./actions";
@@ -9,6 +10,13 @@ const roleLabel: Record<string, string> = {
   ADMIN: "Admin",
 };
 
+const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
+
+function toSingle(value: string | string[] | undefined): string {
+  if (!value) return "";
+  return Array.isArray(value) ? value[0] : value;
+}
+
 /**
  * The generated showcase profiles outnumber the real accounts by a wide margin and
  * nothing here applies to them — they cannot log in, order or be suspended — so the
@@ -18,11 +26,21 @@ const roleLabel: Record<string, string> = {
 export default async function AdminUsersPage(props: PageProps<"/admin/kullanicilar">) {
   const admin = await requireAdmin();
   const searchParams = await props.searchParams;
-  const showGenerated =
-    (Array.isArray(searchParams.uretilmis) ? searchParams.uretilmis[0] : searchParams.uretilmis) === "1";
+  const showGenerated = toSingle(searchParams.uretilmis) === "1";
+  const search = toSingle(searchParams.ara).trim();
 
   const users = await prisma.user.findMany({
-    where: showGenerated ? {} : { synthetic: false },
+    where: {
+      ...(showGenerated ? {} : { synthetic: false }),
+      ...(search
+        ? {
+            OR: [
+              { name: { contains: search, mode: "insensitive" } },
+              { email: { contains: search, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    },
     orderBy: { createdAt: "desc" },
     take: 200,
     select: {
@@ -43,7 +61,33 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
     <div>
       <h1 className="text-2xl font-bold text-brand-navy">Kullanıcılar</h1>
 
-      <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+      <form method="get" className="mt-4 flex flex-wrap items-center gap-3">
+        <input
+          type="text"
+          name="ara"
+          defaultValue={search}
+          placeholder="İsim veya e-posta ara…"
+          className="w-64 rounded-full border border-slate-300 px-4 py-2 text-sm outline-none focus:border-purple-400"
+        />
+        {showGenerated && <input type="hidden" name="uretilmis" value="1" />}
+        <button
+          type="submit"
+          className="rounded-full bg-purple-600 px-5 py-2 text-sm font-semibold text-white hover:bg-purple-700"
+        >
+          Ara
+        </button>
+        {search && (
+          <Link
+            href={showGenerated ? "/admin/kullanicilar?uretilmis=1" : "/admin/kullanicilar"}
+            className="text-sm font-medium text-slate-500 hover:text-brand-navy"
+          >
+            Temizle
+          </Link>
+        )}
+        <span className="ml-auto text-sm text-slate-400">{users.length} kullanıcı</span>
+      </form>
+
+      <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-slate-100 text-xs uppercase text-slate-400">
             <tr>
@@ -51,6 +95,7 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
               <th className="px-5 py-3 font-medium">Rol</th>
               <th className="px-5 py-3 font-medium">Durum</th>
               <th className="px-5 py-3 font-medium">İlan / Sipariş</th>
+              <th className="px-5 py-3 font-medium">Kayıt Tarihi</th>
               <th className="px-5 py-3 font-medium text-right">İşlem</th>
             </tr>
           </thead>
@@ -94,6 +139,7 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
                   {user._count.gigs} ilan ·{" "}
                   {user.importedOrderCount ?? user._count.ordersMade} sipariş
                 </td>
+                <td className="px-5 py-4 text-slate-500">{dateFmt.format(user.createdAt)}</td>
                 <td className="px-5 py-4">
                   {user.id === admin.id ? (
                     <p className="text-right text-xs text-slate-400">Bu sensin</p>
