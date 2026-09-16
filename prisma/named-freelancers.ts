@@ -292,7 +292,7 @@ export type GeneratedGig = {
 
 /** Builds one gig + its three packages for a profession/skill set, given a standard price
  * and a seed so two different freelancers in the same profession do not read identically. */
-function buildGig(
+export function buildGig(
   seed: string,
   index: number,
   title: string,
