@@ -88,6 +88,86 @@ const byName: Record<string, string> = {
   "Ses Efektleri & Mix": "🎚️",
   Seslendirme: "🗣️",
   "Video & Sunum Müziği": "🎵",
+
+  // Grafik Tasarım (ek)
+  "Karakter & Maskot Tasarımı": "🧸",
+  "Web & Mobil Arayüz (UI) Tasarımı": "🖥️",
+  "T-Shirt & Merchandise Tasarımı": "👕",
+  "Kitap & E-kitap Kapağı": "📕",
+  "Font & Tipografi Tasarımı": "🔤",
+  "NFT & Dijital Sanat": "🖼️",
+
+  // Yazılım & Web (ek)
+  "WordPress & Şablon Geliştirme": "🧩",
+  "Oyun Geliştirme": "🎮",
+  "Blockchain & Web3 Geliştirme": "⛓️",
+  "DevOps & Sunucu Yönetimi": "🖧",
+  "Siber Güvenlik & Sızma Testi": "🛡️",
+  "Tarayıcı Eklentisi Geliştirme": "🧷",
+
+  // Yazı & Çeviri (ek)
+  "Kitap & E-kitap Yazarlığı": "📖",
+  "Düzenleme & Redaksiyon": "🖊️",
+  "Hukuki Metin & Sözleşme Yazımı": "⚖️",
+  "Teknik Doküman Yazımı": "📐",
+  "Altyazı & Transkripsiyon": "💬",
+  "Akademik Makale Yazımı": "🎓",
+
+  // Video & Animasyon (ek)
+  "3D Animasyon": "🧊",
+  "Görsel Efekt (VFX) & Compositing": "🌪️",
+  "Drone Çekimi": "🚁",
+  "Oyun & Uygulama Tanıtım Videosu": "🕹️",
+  "Video Deşifre & Altyazı": "📝",
+  "Slayt Gösterisi Videosu": "🖼️",
+
+  // Dijital Pazarlama (ek)
+  "Influencer Pazarlama": "🤳",
+  "Affiliate & Ortaklık Pazarlaması": "🔗",
+  "Halkla İlişkiler (PR)": "📰",
+  "E-ticaret Pazaryeri Yönetimi": "🛍️",
+  "Video Reklam Pazarlaması": "📺",
+  "Yerel İşletme Pazarlaması": "📍",
+
+  // Müzik & Ses (ek)
+  "Mixing & Mastering": "🎚️",
+  "Sesli Kitap Prodüksiyonu": "🎧",
+  "Şarkı Sözü Yazarlığı": "📝",
+  "Enstrüman Kaydı": "🎸",
+  "DJ Drop & Radyo Jingle": "🎧",
+  "Nota Yazımı & Transkripsiyon": "🎼",
+
+  // İş & Danışmanlık (ek)
+  "Sanal Asistanlık": "🗒️",
+  "Hukuki Danışmanlık": "⚖️",
+  "Pazar Araştırması & Anket": "📋",
+  "Tedarik Zinciri & Lojistik Danışmanlığı": "🚚",
+  "Mülakat & Kariyer Koçluğu": "🎯",
+  "Muhasebe & Vergi Danışmanlığı": "🧾",
+
+  // Eğitim & Ders (ek)
+  "Sınav Hazırlık Koçluğu": "📝",
+  "Müzik Enstrümanı Dersleri": "🎹",
+  "Spor & Fitness Koçluğu": "🏋️",
+  "Çocuk & Erken Yaş Eğitimi": "🧒",
+  "Girişimcilik & Yatırım Eğitimi": "💡",
+  "Sertifikalı Online Kurslar": "🎓",
+
+  // AI & Otomasyon (ek)
+  "Yapay Zeka Model Eğitimi (Fine-tuning)": "🧠",
+  "AI Görsel & Video Üretimi": "🎨",
+  "RAG & Bilgi Tabanı Sistemleri": "📚",
+  "AI Ajan (Agent) Geliştirme": "🤖",
+  "Prompt Mühendisliği": "✨",
+  "Makine Öğrenmesi Danışmanlığı": "📉",
+
+  // Veri & Analitik (ek)
+  "Büyük Veri & Veri Mühendisliği": "🏗️",
+  "İstatistiksel Analiz & Modelleme": "📐",
+  "Veri Görselleştirme (Tableau/Looker)": "📊",
+  "A/B Test & Deney Tasarımı": "🧪",
+  "Veri Temizleme & Hazırlama": "🧹",
+  "CRM & Müşteri Segmentasyonu": "🧷",
 };
 
 /** Falls back to the parent category's emoji so a new subcategory is never iconless. */
