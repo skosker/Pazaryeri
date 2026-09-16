@@ -34,6 +34,15 @@ function monthKey(d: Date) {
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
 }
 
+/** Drops the leading empty periods (e.g. 1–18 Ağustos before any real transfer exists)
+ * so the table opens on the first period that actually happened, instead of a run of
+ * zero rows nobody needs to scroll past. A trailing gap is left alone — that is just
+ * today having no transfers yet, not padding. */
+function trimLeadingZeros(rows: PeriodRow[]): PeriodRow[] {
+  const firstNonZero = rows.findIndex((row) => row.count > 0);
+  return firstNonZero <= 0 ? rows : rows.slice(firstNonZero);
+}
+
 function buildBreakdown<T extends { createdAt: Date; amount: unknown }>(
   rows: T[],
   start: Date,
@@ -90,7 +99,11 @@ function buildBreakdown<T extends { createdAt: Date; amount: unknown }>(
     aylik.push({ label: monthLabelFmt.format(m), ...entry });
   }
 
-  return { gunluk, haftalik, aylik };
+  return {
+    gunluk: trimLeadingZeros(gunluk),
+    haftalik: trimLeadingZeros(haftalik),
+    aylik: trimLeadingZeros(aylik),
+  };
 }
 
 function toSingle(value: string | string[] | undefined): string {

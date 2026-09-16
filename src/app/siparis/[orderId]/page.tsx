@@ -10,6 +10,9 @@ import {
   deliverOrderAction,
   completeOrderAction,
   adminConfirmBankTransferAction,
+  cancelUnpaidOrderAction,
+  requestCancellationAction,
+  requestRevisionAction,
 } from "./actions";
 
 const timelineSteps = [
@@ -60,12 +63,22 @@ export default async function OrderDetailPage(props: PageProps<"/siparis/[orderI
       {order.status === "PENDING_PAYMENT" && isBuyer && (
         <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
           <p className="text-sm text-amber-800">Bu siparişin ödemesi henüz tamamlanmadı.</p>
-          <Link
-            href={`/odeme/${order.id}`}
-            className="brand-gradient mt-3 inline-block rounded-full px-5 py-2 text-sm font-semibold text-white hover:opacity-90"
-          >
-            Ödemeyi Tamamla
-          </Link>
+          <div className="mt-3 flex flex-wrap gap-3">
+            <Link
+              href={`/odeme/${order.id}`}
+              className="brand-gradient inline-block rounded-full px-5 py-2 text-sm font-semibold text-white hover:opacity-90"
+            >
+              Ödemeyi Tamamla
+            </Link>
+            <form action={cancelUnpaidOrderAction.bind(null, order.id)}>
+              <button
+                type="submit"
+                className="rounded-full border border-amber-300 px-5 py-2 text-sm font-semibold text-amber-800 hover:bg-amber-100"
+              >
+                Siparişi İptal Et
+              </button>
+            </form>
+          </div>
         </div>
       )}
 
@@ -75,6 +88,45 @@ export default async function OrderDetailPage(props: PageProps<"/siparis/[orderI
             Havale/EFT bildirimin alındı. Ekibimiz ödemeni kontrol edip onayladığında siparişin
             durumu güncellenecek.
           </p>
+          <form action={cancelUnpaidOrderAction.bind(null, order.id)}>
+            <button
+              type="submit"
+              className="mt-3 rounded-full border border-orange-300 px-5 py-2 text-sm font-semibold text-orange-800 hover:bg-orange-100"
+            >
+              Siparişi İptal Et
+            </button>
+          </form>
+        </div>
+      )}
+
+      {order.status === "PAID" && isBuyer && (
+        <div className="mt-6 rounded-2xl border border-sky-200 bg-sky-50 p-5">
+          {order.cancellationRequestedAt ? (
+            <p className="text-sm text-sky-800">
+              İptal talebin alındı, destek ekibimiz kısa süre içinde seninle iletişime geçecek.
+            </p>
+          ) : (
+            <>
+              <p className="text-sm text-sky-800">
+                Satıcı henüz işe başlamadı. Vazgeçmek istersen iptal talebinde bulunabilirsin;
+                ödemen ekibimizin onayıyla iade edilir.
+              </p>
+              <form action={requestCancellationAction.bind(null, order.id)}>
+                <button
+                  type="submit"
+                  className="mt-3 rounded-full border border-sky-300 px-5 py-2 text-sm font-semibold text-sky-800 hover:bg-sky-100"
+                >
+                  İptal Talebi Gönder
+                </button>
+              </form>
+            </>
+          )}
+        </div>
+      )}
+
+      {order.status === "CANCELLED" && (
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <p className="text-sm text-slate-600">Bu sipariş iptal edildi.</p>
         </div>
       )}
 
@@ -177,6 +229,39 @@ export default async function OrderDetailPage(props: PageProps<"/siparis/[orderI
           </form>
         )}
       </div>
+
+      {isBuyer && order.status === "DELIVERED" && (
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-6">
+          {order.revisionsUsed < order.package.revisionCount ? (
+            <form action={requestRevisionAction.bind(null, order.id)}>
+              <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
+                Teslimat beklentini karşılamadı mı?
+                <textarea
+                  name="note"
+                  required
+                  rows={3}
+                  placeholder="Neyin değişmesini istediğini yaz…"
+                  className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
+                />
+              </label>
+              <p className="mt-1.5 text-xs text-slate-400">
+                {order.package.revisionCount - order.revisionsUsed} ücretsiz revizyon hakkın kaldı.
+              </p>
+              <button
+                type="submit"
+                className="mt-3 rounded-full border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Revizyon Talep Et
+              </button>
+            </form>
+          ) : (
+            <p className="text-sm text-slate-500">
+              Bu paketteki ücretsiz revizyon hakların doldu. Ek bir revizyon için satıcıyla
+              doğrudan anlaşabilir ya da destek@prosinta.com üzerinden bize yazabilirsin.
+            </p>
+          )}
+        </div>
+      )}
 
       {isBuyer && order.status === "COMPLETED" && (
         <div className="mt-8">

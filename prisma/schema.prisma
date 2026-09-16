@@ -198,6 +198,12 @@ model Order {
   status          OrderStatus @default(PENDING_PAYMENT)
   amount          Decimal     @db.Decimal(10, 2)
   escrowReleased  Boolean     @default(false)
+  /// Free revisions used against the package's revisionCount (see buyerRequestRevision).
+  revisionsUsed   Int         @default(0)
+  /// Set when the buyer asks to cancel a PAID order — per the site's iptal/iade policy this
+  /// goes through support rather than an automatic refund, so it is a flag for that
+  /// conversation, not a status change.
+  cancellationRequestedAt DateTime?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 

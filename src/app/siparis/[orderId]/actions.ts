@@ -10,6 +10,9 @@ import {
   sellerDeliverOrder,
   buyerCompleteOrder,
   adminConfirmBankTransfer,
+  buyerCancelUnpaidOrder,
+  buyerRequestCancellation,
+  buyerRequestRevision,
   OrderActionError,
 } from "@/lib/order-actions";
 
@@ -55,6 +58,37 @@ export async function completeOrderAction(orderId: string) {
   const user = await requireUser();
   try {
     await buyerCompleteOrder(orderId, user.id);
+  } catch (error) {
+    if (!(error instanceof OrderActionError)) throw error;
+  }
+  revalidatePath(`/siparis/${orderId}`);
+}
+
+export async function cancelUnpaidOrderAction(orderId: string) {
+  const user = await requireUser();
+  try {
+    await buyerCancelUnpaidOrder(orderId, user.id);
+  } catch (error) {
+    if (!(error instanceof OrderActionError)) throw error;
+  }
+  revalidatePath(`/siparis/${orderId}`);
+}
+
+export async function requestCancellationAction(orderId: string) {
+  const user = await requireUser();
+  try {
+    await buyerRequestCancellation(orderId, user.id);
+  } catch (error) {
+    if (!(error instanceof OrderActionError)) throw error;
+  }
+  revalidatePath(`/siparis/${orderId}`);
+}
+
+export async function requestRevisionAction(orderId: string, formData: FormData) {
+  const user = await requireUser();
+  const note = String(formData.get("note") ?? "");
+  try {
+    await buyerRequestRevision(orderId, user.id, note);
   } catch (error) {
     if (!(error instanceof OrderActionError)) throw error;
   }
