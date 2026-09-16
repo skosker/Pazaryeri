@@ -141,64 +141,72 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
                 </td>
                 <td className="px-5 py-4 text-slate-500">{dateFmt.format(user.createdAt)}</td>
                 <td className="px-5 py-4">
-                  {user.id === admin.id ? (
-                    <p className="text-right text-xs text-slate-400">Bu sensin</p>
-                  ) : (
-                    <div className="flex flex-wrap items-center justify-end gap-2">
-                      <form
-                        action={changeUserRoleAction.bind(null, user.id)}
-                        className="flex items-center gap-1.5"
-                      >
-                        <select
-                          name="role"
-                          defaultValue={user.role}
-                          className="rounded-lg border border-slate-300 px-2 py-1.5 text-xs text-slate-600 focus:border-purple-400 focus:outline-none"
+                  <div className="flex flex-wrap items-center justify-end gap-2">
+                    <Link
+                      href={`/admin/kullanicilar/${user.id}`}
+                      className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                    >
+                      Detay
+                    </Link>
+                    {user.id === admin.id ? (
+                      <p className="text-xs text-slate-400">Bu sensin</p>
+                    ) : (
+                      <>
+                        <form
+                          action={changeUserRoleAction.bind(null, user.id)}
+                          className="flex items-center gap-1.5"
                         >
-                          <option value="BUYER">Alıcı</option>
-                          <option value="FREELANCER">Freelancer</option>
-                          <option value="ADMIN">Admin</option>
-                        </select>
-                        <button
-                          type="submit"
-                          className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-                        >
-                          Kaydet
-                        </button>
-                      </form>
-                      <form action={toggleSuspensionAction.bind(null, user.id)}>
-                        <button
-                          type="submit"
-                          className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                            user.suspended
-                              ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                              : "bg-red-50 text-red-600 hover:bg-red-100"
-                          }`}
-                        >
-                          {user.suspended ? "Askıyı Kaldır" : "Askıya Al"}
-                        </button>
-                      </form>
-                      {user.role === "FREELANCER" && (
-                        <form action={toggleProFreelancerAction.bind(null, user.id)}>
+                          <select
+                            name="role"
+                            defaultValue={user.role}
+                            className="rounded-lg border border-slate-300 px-2 py-1.5 text-xs text-slate-600 focus:border-purple-400 focus:outline-none"
+                          >
+                            <option value="BUYER">Alıcı</option>
+                            <option value="FREELANCER">Freelancer</option>
+                            <option value="ADMIN">Admin</option>
+                          </select>
+                          <button
+                            type="submit"
+                            className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                          >
+                            Kaydet
+                          </button>
+                        </form>
+                        <form action={toggleSuspensionAction.bind(null, user.id)}>
                           <button
                             type="submit"
                             className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                              user.isPro
-                                ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                                : "bg-amber-50 text-amber-700 hover:bg-amber-100"
+                              user.suspended
+                                ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                                : "bg-red-50 text-red-600 hover:bg-red-100"
                             }`}
                           >
-                            {user.isPro ? "Pro Kaldır" : "Pro Yap"}
+                            {user.suspended ? "Askıyı Kaldır" : "Askıya Al"}
                           </button>
                         </form>
-                      )}
-                      <DeleteUserButton
-                        userId={user.id}
-                        name={user.name}
-                        gigCount={user._count.gigs}
-                        orderCount={user._count.ordersMade}
-                      />
-                    </div>
-                  )}
+                        {user.role === "FREELANCER" && (
+                          <form action={toggleProFreelancerAction.bind(null, user.id)}>
+                            <button
+                              type="submit"
+                              className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                                user.isPro
+                                  ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                  : "bg-amber-50 text-amber-700 hover:bg-amber-100"
+                              }`}
+                            >
+                              {user.isPro ? "Pro Kaldır" : "Pro Yap"}
+                            </button>
+                          </form>
+                        )}
+                        <DeleteUserButton
+                          userId={user.id}
+                          name={user.name}
+                          gigCount={user._count.gigs}
+                          orderCount={user._count.ordersMade}
+                        />
+                      </>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
