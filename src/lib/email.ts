@@ -80,6 +80,15 @@ function button(href: string, label: string) {
   return `<a href="${href}" style="display:inline-block;margin-top:16px;padding:12px 26px;border-radius:999px;background-color:#9333ea;background:linear-gradient(135deg,#d946ef,#9333ea,#4f46e5);color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;">${label}</a>`;
 }
 
+/** For free-text a buyer or seller typed themselves, dropped into the HTML body below. */
+function escapeHtml(text: string) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 export async function sendWelcomeVerificationEmail(params: {
   to: string;
   name: string;
@@ -229,6 +238,63 @@ export async function sendOrderCompletedEmail(params: {
       "Ödeme aktarıldı",
       `<p>Merhaba ${params.sellerName},</p>
        <p><strong>${params.gigTitle}</strong> siparişi alıcı tarafından onaylandı, <strong>${formatPrice(params.amount)}₺</strong> tutarındaki ödeme sana aktarıldı.</p>
+       ${button(params.orderUrl, "Siparişi Görüntüle")}`
+    )
+  );
+}
+
+/** To the admin: a paid order's buyer wants out. Per the site's own iptal/iade policy,
+ * anything past PENDING_PAYMENT is handled by support rather than an automatic refund. */
+export async function sendCancellationRequestEmail(params: {
+  adminEmail: string;
+  buyerName: string;
+  gigTitle: string;
+  amount: number;
+  orderUrl: string;
+}) {
+  await sendEmail(
+    params.adminEmail,
+    "Sipariş iptal talebi",
+    layout(
+      "İptal talebi geldi",
+      `<p><strong>${params.buyerName}</strong>, ödemesi tamamlanmış <strong>${params.gigTitle}</strong> siparişi (${formatPrice(params.amount)}₺) için iptal talep etti. Satıcı henüz işe başlamadıysa iade sürecini destek@prosinta.com üzerinden yürüt.</p>
+       ${button(params.orderUrl, "Siparişi Görüntüle")}`
+    )
+  );
+}
+
+export async function sendCancellationRequestReceivedEmail(params: {
+  buyerEmail: string;
+  buyerName: string;
+  gigTitle: string;
+}) {
+  await sendEmail(
+    params.buyerEmail,
+    "İptal talebin alındı",
+    layout(
+      "İptal talebin alındı",
+      `<p>Merhaba ${params.buyerName},</p>
+       <p><strong>${params.gigTitle}</strong> siparişin için ilettiğin iptal talebi ekibimize ulaştı. Destek ekibimiz talebini inceleyip kısa süre içinde seninle iletişime geçecek.</p>`
+    )
+  );
+}
+
+/** To the seller: the buyer didn't accept the delivery and wants changes instead. */
+export async function sendRevisionRequestedEmail(params: {
+  sellerEmail: string;
+  sellerName: string;
+  gigTitle: string;
+  note: string;
+  orderUrl: string;
+}) {
+  await sendEmail(
+    params.sellerEmail,
+    "Alıcı revizyon istedi",
+    layout(
+      "Revizyon talebi",
+      `<p>Merhaba ${params.sellerName},</p>
+       <p><strong>${params.gigTitle}</strong> siparişinde alıcı teslimatı onaylamak yerine revizyon istedi:</p>
+       <p style="background:#f8fafc;border-radius:12px;padding:12px 16px;">${escapeHtml(params.note)}</p>
        ${button(params.orderUrl, "Siparişi Görüntüle")}`
     )
   );

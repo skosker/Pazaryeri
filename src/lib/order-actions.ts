@@ -4,7 +4,12 @@ import {
   sendOrderStartedEmail,
   sendOrderDeliveredEmail,
   sendOrderCompletedEmail,
+  sendCancellationRequestEmail,
+  sendCancellationRequestReceivedEmail,
+  sendRevisionRequestedEmail,
 } from "@/lib/email";
+
+const adminEmail = process.env.ADMIN_EMAIL;
 
 export class OrderActionError extends Error {}
 
@@ -23,7 +28,7 @@ const orderDetailInclude = {
   gig: {
     select: { slug: true, title: true, sellerId: true, seller: { select: { name: true } } },
   },
-  package: { select: { name: true, deliveryDays: true } },
+  package: { select: { name: true, deliveryDays: true, revisionCount: true } },
   buyer: { select: { name: true } },
   review: { select: { rating: true, comment: true } },
 } as const;
@@ -204,6 +209,91 @@ export async function buyerCompleteOrder(orderId: string, buyerId: string) {
     sellerName: order.gig.seller.name,
     gigTitle: order.gig.title,
     amount: Number(order.amount),
+    orderUrl: `${appUrl}/siparis/${orderId}`,
+  });
+
+  return updated;
+}
+
+/**
+ * The free, no-questions-asked cancellation window: per the site's iptal/iade policy,
+ * a buyer can walk away with no deduction while payment is still pending or being
+ * verified — nothing has actually been collected yet, so there is nothing to refund.
+ */
+export async function buyerCancelUnpaidOrder(orderId: string, buyerId: string) {
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!order || order.buyerId !== buyerId) throw new OrderActionError("Yetkisiz işlem");
+  if (order.status !== "PENDING_PAYMENT" && order.status !== "PENDING_VERIFICATION") {
+    throw new OrderActionError("Sipariş bu aşamada iptal edilemez");
+  }
+
+  return prisma.order.update({ where: { id: orderId }, data: { status: "CANCELLED" } });
+}
+
+/**
+ * Past PENDING_PAYMENT, money has actually been collected, so per policy this goes
+ * through support rather than an automatic refund — this only records the request and
+ * alerts the admin; the order itself stays PAID until support resolves it.
+ */
+export async function buyerRequestCancellation(orderId: string, buyerId: string) {
+  const order = await prisma.order.findUnique({ where: { id: orderId }, include: notificationSelect });
+  if (!order || order.buyerId !== buyerId) throw new OrderActionError("Yetkisiz işlem");
+  if (order.status !== "PAID") throw new OrderActionError("Sipariş bu aşamada iptal edilemez");
+  if (order.cancellationRequestedAt) return order;
+
+  const updated = await prisma.order.update({
+    where: { id: orderId },
+    data: { cancellationRequestedAt: new Date() },
+  });
+
+  if (adminEmail) {
+    await sendCancellationRequestEmail({
+      adminEmail,
+      buyerName: order.buyer.name,
+      gigTitle: order.gig.title,
+      amount: Number(order.amount),
+      orderUrl: `${appUrl}/siparis/${orderId}`,
+    });
+  }
+
+  await sendCancellationRequestReceivedEmail({
+    buyerEmail: order.buyer.email,
+    buyerName: order.buyer.name,
+    gigTitle: order.gig.title,
+  });
+
+  return updated;
+}
+
+/**
+ * The buyer's alternative to accepting a delivery: send it back to the seller instead,
+ * up to the package's included revisionCount. Consumes one of those free revisions and
+ * reopens the order rather than touching payment — nothing here moves money.
+ */
+export async function buyerRequestRevision(orderId: string, buyerId: string, note: string) {
+  const trimmedNote = note.trim();
+  if (!trimmedNote) throw new OrderActionError("Revizyon talebini açıklaman gerekiyor");
+
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { ...notificationSelect, package: { select: { revisionCount: true } } },
+  });
+  if (!order || order.buyerId !== buyerId) throw new OrderActionError("Yetkisiz işlem");
+  if (order.status !== "DELIVERED") throw new OrderActionError("Sipariş bu aşamada değil");
+  if (order.revisionsUsed >= order.package.revisionCount) {
+    throw new OrderActionError("Ücretsiz revizyon hakkın kalmadı");
+  }
+
+  const updated = await prisma.order.update({
+    where: { id: orderId },
+    data: { status: "IN_PROGRESS", revisionsUsed: { increment: 1 } },
+  });
+
+  await sendRevisionRequestedEmail({
+    sellerEmail: order.gig.seller.email,
+    sellerName: order.gig.seller.name,
+    gigTitle: order.gig.title,
+    note: trimmedNote,
     orderUrl: `${appUrl}/siparis/${orderId}`,
   });
 
