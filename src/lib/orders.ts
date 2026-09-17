@@ -9,6 +9,9 @@ export async function createOrder(buyerId: string, packageId: string) {
   });
 
   if (!pkg) throw new OrderError("Paket bulunamadı");
+  if (!pkg.gig.published) {
+    throw new OrderError("Bu ilan şu anda sipariş almıyor");
+  }
   if (pkg.gig.sellerId === buyerId) {
     throw new OrderError("Kendi hizmetinizi satın alamazsınız");
   }

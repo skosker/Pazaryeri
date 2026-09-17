@@ -9,7 +9,7 @@ export default async function ProfilPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { name: true, email: true, title: true, bio: true, role: true },
+    select: { name: true, email: true, title: true, bio: true, role: true, image: true, pendingImage: true },
   });
   if (!user) redirect("/giris");
 
@@ -31,6 +31,8 @@ export default async function ProfilPage() {
         <ProfileForm
           isFreelancer={isFreelancer}
           defaultValues={{ name: user.name, title: user.title ?? "", bio: user.bio ?? "" }}
+          image={user.image}
+          pending={Boolean(user.pendingImage)}
         />
       </div>
     </div>

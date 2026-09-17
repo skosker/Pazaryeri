@@ -53,7 +53,7 @@ export async function createGigAction(
     slug = `${baseSlug}-${attempt}`;
   }
 
-  const gig = await prisma.gig.create({
+  await prisma.gig.create({
     data: {
       slug,
       title,
@@ -61,6 +61,8 @@ export async function createGigAction(
       categoryId,
       coverImage: cover.coverImage ?? null,
       sellerId: seller.id,
+      published: false,
+      status: "PENDING",
       packages: {
         create: [
           packageData("BASIC", basic),
@@ -71,5 +73,5 @@ export async function createGigAction(
     },
   });
 
-  redirect(`/gig/${gig.slug}`);
+  redirect("/panel/ilanlarim?gonderildi=1");
 }

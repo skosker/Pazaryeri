@@ -45,6 +45,13 @@ model User {
   ibanHolder    String?
   bio           String?
   image         String?
+  // A freshly uploaded photo an automated check flagged as possibly inappropriate sits
+  // here — not in `image` — until an admin clears or rejects it, so the public-facing
+  // avatar never shows unreviewed content. NULL means there is nothing awaiting review;
+  // an upload the check does not flag (or cannot check, e.g. no API key configured)
+  // goes straight into `image` and never touches these two fields.
+  pendingImage    String?
+  photoFlagReason String?
   // Freelancer profile details: shown on the profile page and used by the directory
   // filters. Nullable because buyers and older accounts never filled them in.
   city          String?
@@ -140,15 +147,23 @@ model Subcategory {
 }
 
 model Gig {
-  id          String   @id @default(cuid())
-  slug        String   @unique
+  id          String    @id @default(cuid())
+  slug        String    @unique
   title       String
   description String
-  coverColor  String   @default("indigo") // gradient fallback shown when there is no cover
+  coverColor  String    @default("indigo") // gradient fallback shown when there is no cover
   coverImage  String? // seller-uploaded cover: a Blob CDN URL, or /api/gorsel/<id> when stored in Postgres
-  published   Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  published   Boolean   @default(true)
+  // Moderation state, separate from `published`: a freelancer can pause/resume an
+  // approved gig freely (that only touches `published`), but a brand-new submission
+  // starts PENDING and stays invisible everywhere `published: true` is required until
+  // an admin approves it. Defaults to APPROVED so every existing row and every
+  // generator/seed script that inserts a gig without mentioning this column keeps
+  // publishing immediately, exactly as before — only the real freelancer-facing
+  // "create gig" action opts a row into PENDING.
+  status      GigStatus @default(APPROVED)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   sellerId   String
   seller     User     @relation("SellerGigs", fields: [sellerId], references: [id], onDelete: Cascade)
@@ -166,6 +181,12 @@ model Gig {
   @@index([sellerId])
   @@index([subcategoryId])
   @@map("gigs")
+}
+
+enum GigStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum PackageTier {

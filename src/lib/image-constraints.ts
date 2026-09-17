@@ -8,12 +8,12 @@ export const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as 
 const readableTypes = "JPG, PNG veya WebP";
 
 /** Rejects anything the store should not accept. Returns null when the file is fine. */
-export function validateImage(file: File): { error: string } | null {
+export function validateImage(file: File, label = "Kapak görseli"): { error: string } | null {
   if (!ALLOWED_IMAGE_TYPES.includes(file.type as (typeof ALLOWED_IMAGE_TYPES)[number])) {
-    return { error: `Kapak görseli ${readableTypes} biçiminde olmalı` };
+    return { error: `${label} ${readableTypes} biçiminde olmalı` };
   }
   if (file.size > MAX_IMAGE_BYTES) {
-    return { error: `Kapak görseli en fazla ${MAX_IMAGE_BYTES / 1024 / 1024} MB olabilir` };
+    return { error: `${label} en fazla ${MAX_IMAGE_BYTES / 1024 / 1024} MB olabilir` };
   }
   return null;
 }

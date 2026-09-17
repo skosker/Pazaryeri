@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/require-admin";
+import { prisma } from "@/lib/prisma";
 import {
   assignProfilePhotos,
   profilePhotoProgress,
@@ -11,6 +12,28 @@ import {
   revertProfilePhotosByName,
   type ProfilePhotoBatch,
 } from "@/lib/profile-photos";
+
+/**
+ * A real user's upload the automated check flagged (see src/lib/photo-moderation.ts) —
+ * unrelated to the synthetic-pool sourcing below. Approving moves it into `image`;
+ * rejecting just drops it, leaving whatever photo (or none) the user had before.
+ */
+export async function approvePendingPhotoAction(userId: string) {
+  await requireAdmin();
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { pendingImage: true } });
+  if (!user?.pendingImage) return;
+  await prisma.user.update({
+    where: { id: userId },
+    data: { image: user.pendingImage, pendingImage: null, photoFlagReason: null },
+  });
+  revalidatePath("/admin/profil-fotograflari");
+}
+
+export async function rejectPendingPhotoAction(userId: string) {
+  await requireAdmin();
+  await prisma.user.update({ where: { id: userId }, data: { pendingImage: null, photoFlagReason: null } });
+  revalidatePath("/admin/profil-fotograflari");
+}
 
 // Every export in a "use server" module is reachable as its own endpoint, so each one
 // authorises itself.
