@@ -17,6 +17,9 @@ export default async function CreateGigPage() {
       <p className="mt-1 text-sm text-slate-500">
         Hizmetini tanımla, fiyat ve teslim süresini belirle.
       </p>
+      <p className="mt-2 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        Gönderdiğin ilan admin onayından geçtikten sonra yayına alınır.
+      </p>
 
       <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <GigForm categories={categories} action={createGigAction} />

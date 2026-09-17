@@ -16,7 +16,17 @@ async function requireGigOwner(gigId: string) {
 
 export async function toggleMyGigPublishedAction(gigId: string) {
   const gig = await requireGigOwner(gigId);
+  // Onay bekleyen veya reddedilmiş bir ilanı bu yoldan yayına almak admin onayını
+  // atlamak anlamına gelir — durdur/yayına al yalnızca zaten onaylanmış ilanlar için.
+  if (gig.status !== "APPROVED") return;
   await prisma.gig.update({ where: { id: gigId }, data: { published: !gig.published } });
+  revalidatePath("/panel/ilanlarim");
+}
+
+export async function resubmitMyGigAction(gigId: string) {
+  const gig = await requireGigOwner(gigId);
+  if (gig.status !== "REJECTED") return;
+  await prisma.gig.update({ where: { id: gigId }, data: { status: "PENDING" } });
   revalidatePath("/panel/ilanlarim");
 }
 

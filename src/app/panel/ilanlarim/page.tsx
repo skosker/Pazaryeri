@@ -2,13 +2,16 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { toggleMyGigPublishedAction, deleteMyGigAction } from "./actions";
+import { toggleMyGigPublishedAction, deleteMyGigAction, resubmitMyGigAction } from "./actions";
 import { formatPrice } from "@/lib/format-price";
 
-export default async function MyGigsPage() {
+export default async function MyGigsPage(props: PageProps<"/panel/ilanlarim">) {
   const session = await auth();
   if (!session?.user) redirect("/giris?callbackUrl=/panel/ilanlarim");
   if (session.user.role !== "FREELANCER") redirect("/panel");
+
+  const searchParams = await props.searchParams;
+  const justSubmitted = searchParams.gonderildi === "1";
 
   const gigs = await prisma.gig.findMany({
     where: { sellerId: session.user.id },
@@ -34,6 +37,12 @@ export default async function MyGigsPage() {
           + Yeni İlan Oluştur
         </Link>
       </div>
+
+      {justSubmitted && (
+        <p className="mb-6 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          İlanın admin onayına gönderildi. Onaylandığında yayına alınacak.
+        </p>
+      )}
 
       {gigs.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-400">
@@ -63,7 +72,15 @@ export default async function MyGigsPage() {
                     {formatPrice(gig.packages[0]?.price ?? 0)}₺
                   </td>
                   <td className="px-5 py-4">
-                    {gig.published ? (
+                    {gig.status === "PENDING" ? (
+                      <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                        Onay Bekliyor
+                      </span>
+                    ) : gig.status === "REJECTED" ? (
+                      <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
+                        Reddedildi
+                      </span>
+                    ) : gig.published ? (
                       <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                         Yayında
                       </span>
@@ -81,14 +98,26 @@ export default async function MyGigsPage() {
                       >
                         Düzenle
                       </Link>
-                      <form action={toggleMyGigPublishedAction.bind(null, gig.id)}>
-                        <button
-                          type="submit"
-                          className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-                        >
-                          {gig.published ? "Duraklat" : "Yayına Al"}
-                        </button>
-                      </form>
+                      {gig.status === "APPROVED" && (
+                        <form action={toggleMyGigPublishedAction.bind(null, gig.id)}>
+                          <button
+                            type="submit"
+                            className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                          >
+                            {gig.published ? "Duraklat" : "Yayına Al"}
+                          </button>
+                        </form>
+                      )}
+                      {gig.status === "REJECTED" && (
+                        <form action={resubmitMyGigAction.bind(null, gig.id)}>
+                          <button
+                            type="submit"
+                            className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                          >
+                            Tekrar Gönder
+                          </button>
+                        </form>
+                      )}
                       {gig._count.orders === 0 && (
                         <form action={deleteMyGigAction.bind(null, gig.id)}>
                           <button

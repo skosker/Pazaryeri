@@ -4,6 +4,18 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
 
+export async function approveGigAction(gigId: string) {
+  await requireAdmin();
+  await prisma.gig.update({ where: { id: gigId }, data: { status: "APPROVED", published: true } });
+  revalidatePath("/admin/ilanlar");
+}
+
+export async function rejectGigAction(gigId: string) {
+  await requireAdmin();
+  await prisma.gig.update({ where: { id: gigId }, data: { status: "REJECTED", published: false } });
+  revalidatePath("/admin/ilanlar");
+}
+
 export async function togglePublishedAction(gigId: string) {
   await requireAdmin();
 
