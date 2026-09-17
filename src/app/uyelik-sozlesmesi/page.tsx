@@ -42,7 +42,8 @@ export default function UyelikSozlesmesiPage() {
       <p>6.3. Hizmet Sağlayıcı, Platform üzerinden gerçekleştirdiği satışlara ilişkin bedellerin kendi adına ve hesabına Alıcı’dan tahsil edilmesi, tahsil edilen tutarların ilgili işlem kapsamında kendisine aktarılması ve bu süreçlerin Platform tarafından yürütülmesi konusunda Şirket’i, ilgili mevzuatın izin verdiği kapsam ve süre boyunca, yetkilendirir.</p>
       <p>6.4. Alıcı, Platform üzerinden yaptığı ödemenin, Hizmet Sağlayıcı’ya olan ödeme yükümlülüğünü yerine getirdiğini kabul eder.</p>
       <p>6.5. Şirket, hizmet bedelinden Platform komisyonu, ödeme kuruluşu/banka masrafları, iade tutarları, yasal kesintiler ve Kullanıcı’nın Platform’a olan borçlarını ilgili mevzuata ve Platform kurallarına uygun şekilde mahsup edebilir.</p>
-      <p>6.6. Şirket, şüpheli işlem, dolandırıcılık, chargeback, hukuki uyuşmazlık, resmi makam talebi veya mevzuattan kaynaklanan nedenlerle ilgili tutarı geçici olarak bloke edebilir veya aktarımı erteleyebilir.</p>
+      <p>6.6. Şirket, yalnızca Hizmet Sağlayıcı’dan Sipariş sonunda tahsil ettiği aracılık hizmet bedeli (Platform komisyonu) için fatura düzenler.</p>
+      <p>6.7. Şirket, şüpheli işlem, dolandırıcılık, chargeback, hukuki uyuşmazlık, resmi makam talebi veya mevzuattan kaynaklanan nedenlerle ilgili tutarı geçici olarak bloke edebilir veya aktarımı erteleyebilir.</p>
       <h2>MADDE 7 – PLATFORM DIŞI İŞLEM YASAĞI</h2>
       <p>7.1. Kullanıcılar, Platform üzerinden tanıştıkları kişi veya işletmelerle gerçekleştirilen hizmet ve ödeme ilişkilerini Platform dışına taşımamayı kabul eder.</p>
       <p>7.2. Platform üzerinden elde edilen iletişim bilgilerinin kullanılması suretiyle Platform komisyonunu veya ödeme sistemini bertaraf etmeye yönelik işlem yapılması yasaktır.</p>

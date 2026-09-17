@@ -28,6 +28,7 @@ export default function KullanimSartlariPage() {
       <p>Platform, 6493 sayılı Ödeme ve Menkul Kıymet Mutabakat Sistemleri, Ödeme Hizmetleri ve Elektronik Para Kuruluşları Hakkında Kanun’un 12 nci maddesinin ikinci fıkrasının (b) bendi uyarınca; Platform üzerinden gerçekleştirilen satışların bedellerine ilişkin tahsilat ve transferleri, gönderen veya Alıcı namına mal veya hizmet pazarlığına ya da alım satımına yetkili olan ticari temsilci sıfatıyla, mevzuatın izin verdiği kapsamda gerçekleştirebilir.</p>
       <p>Bu çerçevede Üye, Platform üzerinden gerçekleştireceği satışların bedelinin kendi adına ve hesabına tahsil edilmesi konusunda Platform’u süresiz ve geri dönülemez şekilde yetkilendirdiğini kabul ve taahhüt eder.</p>
       <p>Platform, tahsil edilen satış bedellerini; ilgili işlem, Platform hizmet bedelleri, komisyonlar, iadeler, iptaller, mahsuplar ve mevzuattan kaynaklanan kesintiler dikkate alınarak Üye’ye aktarabilir.</p>
+      <p>Platform, yalnızca Üye’den iş sonunda tahsil ettiği aracılık hizmet bedeli (komisyon) için fatura düzenler.</p>
       <p>Üye, ödeme ve transfer işlemlerinin gerçekleştirilebilmesi için Platform’a bildirdiği banka hesabı ve IBAN bilgilerinin doğru ve güncel olmasından sorumludur.</p>
       <h2>6. ÜYE YÜKÜMLÜLÜKLERİ</h2>
       <p>Üye, Platform üzerinde gerçekleştirdiği tüm işlemlerde yürürlükteki mevzuata, işbu Kullanım Şartları’na ve Platform kurallarına uygun hareket edeceğini kabul eder.</p>
