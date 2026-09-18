@@ -21,7 +21,7 @@ export default async function ResetPasswordPage(props: PageProps<"/sifre-sifirla
     <AuthShell>
       <h1 className="text-2xl font-bold text-brand-navy">Yeni Şifre Belirle</h1>
       <p className="mt-1 text-sm text-slate-500">
-        Hesabın için yeni bir şifre seç. En az 6 karakter olmalı.
+        Hesabın için yeni bir şifre seç. En az 6 karakter, büyük/küçük harf ve rakam içermeli.
       </p>
 
       <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

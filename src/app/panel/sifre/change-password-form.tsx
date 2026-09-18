@@ -33,7 +33,7 @@ export function ChangePasswordForm() {
           required
           minLength={6}
           autoComplete="new-password"
-          placeholder="En az 6 karakter"
+          placeholder="En az 6 karakter, büyük/küçük harf ve rakam"
           className={field}
         />
       </label>

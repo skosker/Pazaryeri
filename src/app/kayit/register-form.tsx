@@ -1,12 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { useActionState } from "react";
+import Link from "next/link";
 import { registerAction, type FormState } from "./actions";
 
 const initialState: FormState = {};
 
 export function RegisterForm({ role }: { role: "BUYER" | "FREELANCER" }) {
   const [state, formAction, pending] = useActionState(registerAction, initialState);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
@@ -46,9 +49,30 @@ export function RegisterForm({ role }: { role: "BUYER" | "FREELANCER" }) {
           required
           minLength={6}
           autoComplete="new-password"
-          placeholder="En az 6 karakter"
+          placeholder="En az 6 karakter, büyük/küçük harf ve rakam"
           className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
         />
+      </label>
+
+      <label className="flex items-start gap-2 text-sm text-slate-600">
+        <input
+          type="checkbox"
+          name="acceptedTerms"
+          required
+          checked={acceptedTerms}
+          onChange={(e) => setAcceptedTerms(e.target.checked)}
+          className="mt-0.5 h-4 w-4 rounded border-slate-300 text-purple-600 focus:ring-purple-400"
+        />
+        <span>
+          <Link href="/uyelik-sozlesmesi" target="_blank" className="font-semibold text-purple-700 hover:underline">
+            Üyelik Sözleşmesi
+          </Link>
+          &apos;ni ve{" "}
+          <Link href="/kullanim-sartlari" target="_blank" className="font-semibold text-purple-700 hover:underline">
+            Kullanım Şartları
+          </Link>
+          &apos;nı okudum, kabul ediyorum.
+        </span>
       </label>
 
       {state.error && (
@@ -59,7 +83,7 @@ export function RegisterForm({ role }: { role: "BUYER" | "FREELANCER" }) {
 
       <button
         type="submit"
-        disabled={pending}
+        disabled={pending || !acceptedTerms}
         className="brand-gradient mt-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
       >
         {pending ? "Hesap oluşturuluyor..." : "Kayıt Ol"}

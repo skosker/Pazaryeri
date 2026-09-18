@@ -1,13 +1,21 @@
 import { z } from "zod";
 
 /** One rule for every place a password is set, so they cannot drift apart. */
-const password = z.string().min(6, "Şifre en az 6 karakter olmalı");
+const password = z
+  .string()
+  .min(6, "Şifre en az 6 karakter olmalı")
+  .regex(/[a-z]/, "Şifre en az bir küçük harf içermeli")
+  .regex(/[A-Z]/, "Şifre en az bir büyük harf içermeli")
+  .regex(/[0-9]/, "Şifre en az bir rakam içermeli");
 
 export const registerSchema = z.object({
   name: z.string().trim().min(2, "Ad Soyad en az 2 karakter olmalı"),
   email: z.string().trim().toLowerCase().email("Geçerli bir e-posta girin"),
   password,
   role: z.enum(["BUYER", "FREELANCER"]),
+  acceptedTerms: z.boolean().refine((v) => v === true, {
+    message: "Üyelik Sözleşmesi'ni ve Kullanım Şartları'nı onaylamalısın",
+  }),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

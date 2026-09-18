@@ -20,6 +20,7 @@ export async function registerAction(
       email: String(email ?? ""),
       password: String(password ?? ""),
       role: role === "FREELANCER" ? "FREELANCER" : "BUYER",
+      acceptedTerms: formData.get("acceptedTerms") === "on",
     });
   } catch (error) {
     if (error instanceof RegisterError) {
