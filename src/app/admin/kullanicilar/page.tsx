@@ -12,9 +12,20 @@ const roleLabel: Record<string, string> = {
 
 const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
 
+const PAGE_SIZE = 50;
+
 function toSingle(value: string | string[] | undefined): string {
   if (!value) return "";
   return Array.isArray(value) ? value[0] : value;
+}
+
+function pageHref(page: number, search: string, showGenerated: boolean): string {
+  const params = new URLSearchParams();
+  if (search) params.set("ara", search);
+  if (showGenerated) params.set("uretilmis", "1");
+  if (page > 1) params.set("sayfa", String(page));
+  const qs = params.toString();
+  return qs ? `/admin/kullanicilar?${qs}` : "/admin/kullanicilar";
 }
 
 /**
@@ -28,21 +39,29 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
   const searchParams = await props.searchParams;
   const showGenerated = toSingle(searchParams.uretilmis) === "1";
   const search = toSingle(searchParams.ara).trim();
+  const page = Math.max(1, Number(toSingle(searchParams.sayfa)) || 1);
+
+  const where = {
+    ...(showGenerated ? {} : { synthetic: false }),
+    ...(search
+      ? {
+          OR: [
+            { name: { contains: search, mode: "insensitive" as const } },
+            { email: { contains: search, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+  };
+
+  const totalUsers = await prisma.user.count({ where });
+  const totalPages = Math.max(1, Math.ceil(totalUsers / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
 
   const users = await prisma.user.findMany({
-    where: {
-      ...(showGenerated ? {} : { synthetic: false }),
-      ...(search
-        ? {
-            OR: [
-              { name: { contains: search, mode: "insensitive" } },
-              { email: { contains: search, mode: "insensitive" } },
-            ],
-          }
-        : {}),
-    },
+    where,
     orderBy: { createdAt: "desc" },
-    take: 200,
+    skip: (currentPage - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
     select: {
       id: true,
       name: true,
@@ -84,7 +103,11 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
             Temizle
           </Link>
         )}
-        <span className="ml-auto text-sm text-slate-400">{users.length} kullanıcı</span>
+        <span className="ml-auto text-sm text-slate-400">
+          {totalUsers === 0
+            ? "0 kullanıcı"
+            : `${(currentPage - 1) * PAGE_SIZE + 1}-${(currentPage - 1) * PAGE_SIZE + users.length} / ${totalUsers} kullanıcı`}
+        </span>
       </form>
 
       <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
@@ -213,6 +236,38 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-center gap-3">
+          {currentPage > 1 ? (
+            <Link
+              href={pageHref(currentPage - 1, search, showGenerated)}
+              className="rounded-full border border-slate-300 px-4 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+            >
+              Önceki
+            </Link>
+          ) : (
+            <span className="rounded-full border border-slate-200 px-4 py-1.5 text-sm font-semibold text-slate-300">
+              Önceki
+            </span>
+          )}
+          <span className="text-sm text-slate-500">
+            Sayfa {currentPage} / {totalPages}
+          </span>
+          {currentPage < totalPages ? (
+            <Link
+              href={pageHref(currentPage + 1, search, showGenerated)}
+              className="rounded-full border border-slate-300 px-4 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+            >
+              Sonraki
+            </Link>
+          ) : (
+            <span className="rounded-full border border-slate-200 px-4 py-1.5 text-sm font-semibold text-slate-300">
+              Sonraki
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
