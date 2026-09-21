@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 
 const gigCardInclude = {
-  seller: { select: { id: true, name: true, image: true, isOnline: true, isPro: true } },
+  seller: { select: { id: true, name: true, image: true, isOnline: true, isPro: true, emailVerified: true } },
   category: { select: { name: true, slug: true, icon: true } },
   subcategory: { select: { name: true, slug: true } },
   packages: { orderBy: { price: "asc" as const }, take: 1 },
@@ -16,7 +16,15 @@ export type GigCardData = {
   title: string;
   coverColor: string;
   coverImage: string | null;
-  seller: { id: string; name: string; image: string | null; isOnline: boolean; isPro: boolean };
+  featured: boolean;
+  seller: {
+    id: string;
+    name: string;
+    image: string | null;
+    isOnline: boolean;
+    isPro: boolean;
+    emailVerified: boolean;
+  };
   categoryName: string;
   categorySlug: string;
   categoryIcon: string;
@@ -39,7 +47,8 @@ function toCardData(gig: RawGig): GigCardData {
     title: gig.title,
     coverColor: gig.coverColor,
     coverImage: gig.coverImage,
-    seller: gig.seller,
+    featured: gig.featured,
+    seller: { ...gig.seller, emailVerified: Boolean(gig.seller.emailVerified) },
     categoryName: gig.category.name,
     categorySlug: gig.category.slug,
     categoryIcon: gig.category.icon,
@@ -136,8 +145,11 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
     };
   }
 
-  const orderBy: Prisma.GigOrderByWithRelationInput =
-    filters.sort === "yeni" ? { createdAt: "desc" } : { createdAt: "desc" };
+  // "Editör Seçkisi" gigs lead the default feed; every other sort mode (including "yeni")
+  // is an explicit choice the buyer made, so it is respected as-is without featured
+  // jumping the queue.
+  const orderBy: Prisma.GigOrderByWithRelationInput[] =
+    filters.sort && filters.sort !== "uygun" ? [{ createdAt: "desc" }] : [{ featured: "desc" }, { createdAt: "desc" }];
 
   const gigs = await prisma.gig.findMany({
     where,
@@ -227,6 +239,7 @@ export async function getGigBySlug(slug: string) {
           createdAt: true,
           isOnline: true,
           isPro: true,
+          emailVerified: true,
         },
       },
       category: { select: { name: true, slug: true, icon: true } },

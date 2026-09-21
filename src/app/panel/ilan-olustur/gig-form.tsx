@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { CoverImageField } from "@/components/cover-image-field";
+import { PortfolioImagesField } from "@/components/portfolio-images-field";
 import type { FormState } from "./actions";
 
 const initialState: FormState = {};
@@ -18,6 +19,7 @@ type GigFormValues = {
   categoryId?: string;
   description?: string;
   coverImage?: string | null;
+  portfolioImages?: string[];
   basic?: TierValues;
   standard?: TierValues;
   premium?: TierValues;
@@ -68,9 +70,14 @@ export function GigForm({
           required
           minLength={10}
           defaultValue={defaultValues?.title}
-          placeholder="ör. Sosyal medya içerik tasarımı yapıyorum"
+          placeholder="ör. Markanız için 14 günde ses tonu rehberi"
           className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
         />
+        <span className="text-xs font-normal text-slate-400">
+          Ne yaptığını değil, alıcının eline neyi kaç günde geçireceğini yaz: &quot;X için Y,
+          Z günde&quot; gibi somut bir sonuç, &quot;... olarak çalışıyorum&quot; gibi genel bir
+          tanımdan daha çok tıklanır.
+        </span>
       </label>
 
       <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
@@ -104,6 +111,8 @@ export function GigForm({
       </label>
 
       <CoverImageField currentUrl={defaultValues?.coverImage} />
+
+      <PortfolioImagesField currentUrls={defaultValues?.portfolioImages} />
 
       <div>
         <h3 className="font-semibold text-brand-navy">Paketler</h3>

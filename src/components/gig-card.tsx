@@ -22,6 +22,11 @@ export function GigCard({ gig }: { gig: GigCardData }) {
           imageClassName="transition duration-500 group-hover:scale-110"
         />
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/40 to-transparent" />
+        {gig.featured && (
+          <span className="absolute left-3 top-3 rounded-full bg-brand-navy/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
+            ✦ Editör Seçkisi
+          </span>
+        )}
         <div className="absolute bottom-3 left-3 flex items-center gap-2">
           <span className="relative block h-8 w-8">
             <UserAvatar
@@ -34,7 +39,14 @@ export function GigCard({ gig }: { gig: GigCardData }) {
               <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
             )}
           </span>
-          <span className="text-sm font-medium text-white drop-shadow">{gig.seller.name}</span>
+          <span className="flex items-center gap-1 text-sm font-medium text-white drop-shadow">
+            {gig.seller.name}
+            {gig.seller.emailVerified && (
+              <span title="E-posta doğrulandı" className="text-emerald-400">
+                ✓
+              </span>
+            )}
+          </span>
           {gig.seller.isPro && (
             <span className="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950 shadow-sm">
               Pro

@@ -1,5 +1,11 @@
 import { prisma } from "@/lib/prisma";
-import { togglePublishedAction, deleteGigAction, approveGigAction, rejectGigAction } from "./actions";
+import {
+  togglePublishedAction,
+  deleteGigAction,
+  approveGigAction,
+  rejectGigAction,
+  toggleFeaturedAction,
+} from "./actions";
 import { formatPrice } from "@/lib/format-price";
 import { getCategoryPriceComparison } from "@/lib/price-stats";
 
@@ -177,7 +183,10 @@ export default async function AdminGigsPage(props: PageProps<"/admin/ilanlar">) 
             {gigs.map((gig) => (
               <tr key={gig.id} className="border-b border-slate-100 last:border-0">
                 <td className="px-5 py-4">
-                  <p className="line-clamp-1 font-medium text-brand-navy">{gig.title}</p>
+                  <p className="line-clamp-1 font-medium text-brand-navy">
+                    {gig.featured && <span title="Editör Seçkisi">✦ </span>}
+                    {gig.title}
+                  </p>
                   {gig._count.orders > 0 && (
                     <p className="text-xs text-slate-400">{gig._count.orders} sipariş</p>
                   )}
@@ -208,6 +217,14 @@ export default async function AdminGigsPage(props: PageProps<"/admin/ilanlar">) 
                 </td>
                 <td className="px-5 py-4">
                   <div className="flex justify-end gap-2">
+                    <form action={toggleFeaturedAction.bind(null, gig.id)}>
+                      <button
+                        type="submit"
+                        className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                      >
+                        {gig.featured ? "Seçkiden Kaldır" : "Öne Çıkar"}
+                      </button>
+                    </form>
                     <form action={togglePublishedAction.bind(null, gig.id)}>
                       <button
                         type="submit"

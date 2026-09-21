@@ -47,6 +47,7 @@ export default async function EditGigPage(props: PageProps<"/panel/ilanlarim/[gi
             categoryId: gig.categoryId,
             description: gig.description,
             coverImage: gig.coverImage,
+            portfolioImages: gig.portfolioImages,
             basic: tierValues("BASIC"),
             standard: tierValues("STANDARD"),
             premium: tierValues("PREMIUM"),
