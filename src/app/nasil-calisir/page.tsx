@@ -5,23 +5,23 @@ import { StepIcon } from "./step-icon";
 const buyerSteps = [
   {
     icon: "search",
-    title: "Hizmeti bul",
+    title: "Hizmeti Bul",
     description: "Kategorilere göz at ya da aradığın hizmeti ara, filtrelerle en uygun ilanı bul.",
   },
   {
     icon: "credit-card",
-    title: "Paketi seç ve öde",
+    title: "Paketi Seç ve Öde",
     description: "Fiyat, teslim süresi ve revizyon hakkını incele. Prosinta güvencesiyle ödemeni yap.",
   },
   {
     icon: "clock",
-    title: "Ödemen sen onaylayana kadar Prosinta'da bekler",
+    title: "Ödemen Sen Onaylayana Kadar Prosinta'da Bekler",
     description: "Satıcı siparişi onaylayıp işe başlar; ödemen bu sürede güvenle Prosinta'da tutulur.",
     diagram: true,
   },
   {
     icon: "check-circle",
-    title: "Teslim al ve onayla",
+    title: "Teslim Al ve Onayla",
     description: "İş teslim edildiğinde inceler, onaylarsın. Onayınla ödeme satıcıya aktarılır.",
   },
 ];
@@ -29,22 +29,22 @@ const buyerSteps = [
 const sellerSteps = [
   {
     icon: "user-plus",
-    title: "Freelancer olarak kayıt ol",
+    title: "Freelancer Olarak Kayıt Ol",
     description: "Ücretsiz hesap oluştur, profilini tamamla.",
   },
   {
     icon: "megaphone",
-    title: "İlanını yayınla",
+    title: "İlanını Yayınla",
     description: "Hizmetini, fiyatını ve teslim süreni belirleyerek ilk ilanını oluştur.",
   },
   {
     icon: "bell",
-    title: "Sipariş al",
+    title: "Sipariş Al",
     description: "Alıcı ödemeyi yapınca bildirim alır, siparişi onaylayıp işe başlarsın.",
   },
   {
     icon: "banknote",
-    title: "Teslim et, ödemeni al",
+    title: "Teslim Et, Ödemeni Al",
     description: "İşi teslim et, alıcı onayladığında ödeme hesabına aktarılır.",
   },
 ];
@@ -108,29 +108,14 @@ function EscrowFlowDiagram() {
 export default function HowItWorksPage() {
   return (
     <div>
-      <section className="bg-gradient-to-b from-purple-50 via-white to-white">
-        <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-extrabold text-brand-navy sm:text-4xl">Nasıl Çalışır?</h1>
-          <p className="mt-4 text-slate-500">
-            Prosinta&apos;da hizmet almak ya da freelancer olarak çalışmaya başlamak dakikalar sürer.
-          </p>
-
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <TrustBadge icon="shield-check" label="Güvenli ödeme" />
-            <TrustBadge icon="refresh" label="Revizyon hakkı" />
-            <TrustBadge icon="clock" label="Net teslim süresi" />
-          </div>
-        </div>
-      </section>
-
       <section className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8">
         {/* Both cards are columns whose step list grows, so the two buttons line up
             even though the columns hold different amounts of text. */}
         <div className="flex flex-col rounded-3xl border border-slate-200 bg-white p-8">
           <span className="w-fit rounded-full bg-purple-50 px-3.5 py-1.5 text-sm font-semibold text-purple-700">
-            Alıcılar için
+            Alıcılar İçin
           </span>
-          <h2 className="mt-3 text-xl font-bold text-brand-navy">Hizmet almak</h2>
+          <h2 className="mt-3 text-xl font-bold text-brand-navy">Hizmet Almak</h2>
           <div className="mt-6 flex-1">
             <StepList steps={buyerSteps} accent="purple" />
           </div>
@@ -141,9 +126,9 @@ export default function HowItWorksPage() {
 
         <div className="flex flex-col rounded-3xl border border-slate-200 bg-white p-8">
           <span className="w-fit rounded-full bg-indigo-50 px-3.5 py-1.5 text-sm font-semibold text-indigo-700">
-            Freelancer&apos;lar için
+            Freelancer&apos;lar İçin
           </span>
-          <h2 className="mt-3 text-xl font-bold text-brand-navy">Hizmet vermek</h2>
+          <h2 className="mt-3 text-xl font-bold text-brand-navy">Hizmet Vermek</h2>
           <div className="mt-6 flex-1">
             <StepList steps={sellerSteps} accent="indigo" />
           </div>
@@ -155,35 +140,49 @@ export default function HowItWorksPage() {
 
       <section className="border-t border-slate-100 bg-white">
         <div className="mx-auto max-w-5xl px-4 py-16 text-center sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-brand-navy">Merak edilenler</h2>
+          <h2 className="text-2xl font-bold text-brand-navy">Merak Edilenler</h2>
           <div className="mt-8 grid grid-cols-1 gap-6 text-left sm:grid-cols-2">
             <Faq
               icon="shield-check"
-              q="Ödemem güvende mi?"
+              q="Ödemem Güvende Mi?"
               a="Evet. Ödemen Prosinta güvencesiyle korunur ve iş teslim alınıp onaylanana kadar satıcıya aktarılmaz."
             />
             <Faq
               icon="refresh"
-              q="İşten memnun kalmazsam ne olur?"
+              q="İşten Memnun Kalmazsam Ne Olur?"
               a="Teslimatı onaylamadan önce paketinde belirtilen revizyon hakkını kullanarak değişiklik isteyebilirsin."
             />
             <Faq
               icon="gift"
-              q="Freelancer olmak ücretli mi?"
+              q="Freelancer Olmak Ücretli Mi?"
               a="Hayır, kayıt olmak ve ilan yayınlamak tamamen ücretsizdir."
             />
             <Faq
               icon="clock"
-              q="Ne kadar sürede teslim alırım?"
+              q="Ne Kadar Sürede Teslim Alırım?"
               a="Her ilanda satıcının belirlediği teslim süresi net olarak yazar, sipariş vermeden önce görebilirsin."
             />
           </div>
           <p className="mt-10 text-sm text-slate-500">
             Başka sorun mu var?{" "}
             <Link href="/" className="font-semibold text-purple-700 hover:underline">
-              Ana sayfaya dön
+              Ana Sayfaya Dön
             </Link>
           </p>
+        </div>
+      </section>
+
+      <section className="border-t border-slate-100 bg-gradient-to-b from-purple-50 via-white to-white">
+        <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 lg:px-8">
+          <p className="text-slate-500">
+            Prosinta&apos;da hizmet almak ya da freelancer olarak çalışmaya başlamak dakikalar sürer.
+          </p>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <TrustBadge icon="shield-check" label="Güvenli Ödeme" />
+            <TrustBadge icon="refresh" label="Revizyon Hakkı" />
+            <TrustBadge icon="clock" label="Net Teslim Süresi" />
+          </div>
         </div>
       </section>
     </div>
