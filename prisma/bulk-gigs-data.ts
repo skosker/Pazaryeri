@@ -602,6 +602,21 @@ function buildGig(
   };
 }
 
+/**
+ * Slug + every verb phrase a category's gigs can end in, for matching an existing gig's
+ * title back to its subject by stripping the verb off the end. Matching on the verb list
+ * rather than `subjects` survives a subject's own wording changing later (as
+ * grafik-tasarim's did — "Ambalajınızı" is now "Ambalaj tasarımınızı" — while its verbs
+ * stayed put), since the migration text this feeds off of predates any such rewrite.
+ */
+export const categoryContentsForCollapse = categoryContents.map((c) => {
+  const verbs = new Set([...c.verbs, ...c.extraVerbs]);
+  for (const override of Object.values(c.verbOverrides ?? {})) {
+    for (const v of [...override.verbs, ...override.extraVerbs]) verbs.add(v);
+  }
+  return { slug: c.slug, verbs: [...verbs].sort((a, b) => b.length - a.length) };
+});
+
 export function generateBulkData(): {
   sellers: BulkSeller[];
   subcategories: BulkSubcategory[];
