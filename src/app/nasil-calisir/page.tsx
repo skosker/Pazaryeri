@@ -15,8 +15,9 @@ const buyerSteps = [
   },
   {
     icon: "clock",
-    title: "Satıcı işe başlar",
-    description: "Ödemen Prosinta'da güvenle bekletilir, satıcı onaylayıp işe başlar.",
+    title: "Ödemen sen onaylayana kadar Prosinta'da bekler",
+    description: "Satıcı siparişi onaylayıp işe başlar; ödemen bu sürede güvenle Prosinta'da tutulur.",
+    diagram: true,
   },
   {
     icon: "check-circle",
@@ -52,7 +53,7 @@ function StepList({
   steps,
   accent,
 }: {
-  steps: { icon: string; title: string; description: string }[];
+  steps: { icon: string; title: string; description: string; diagram?: boolean }[];
   accent: "purple" | "indigo";
 }) {
   const badgeColor = accent === "purple" ? "bg-purple-50 text-purple-700" : "bg-indigo-50 text-indigo-700";
@@ -72,10 +73,35 @@ function StepList({
           <div>
             <p className="font-semibold text-brand-navy">{step.title}</p>
             <p className="mt-1 text-sm text-slate-500">{step.description}</p>
+            {step.diagram && <EscrowFlowDiagram />}
           </div>
         </li>
       ))}
     </ol>
+  );
+}
+
+/** The escrow mechanic in one glance: money moves to Prosinta first, sits there while
+ * the work happens, and only reaches the seller once the buyer approves delivery. */
+function EscrowFlowDiagram() {
+  const nodes = [
+    { icon: "credit-card", label: "Sen Ödersin" },
+    { icon: "shield-check", label: "Prosinta'da Bekler" },
+    { icon: "check-circle", label: "Onayınla Satıcıya Geçer" },
+  ];
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-1.5" aria-hidden>
+      {nodes.map((node, i) => (
+        <div key={node.label} className="flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-purple-100 bg-purple-50/60 px-3 py-1.5 text-xs font-medium text-brand-navy">
+            <StepIcon name={node.icon} className="text-sm text-purple-600" />
+            {node.label}
+          </span>
+          {i < nodes.length - 1 && <span className="text-purple-300">→</span>}
+        </div>
+      ))}
+    </div>
   );
 }
 
