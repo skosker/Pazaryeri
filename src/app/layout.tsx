@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   // against whatever host happens to render the preview.
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Prosinta — AI Destekli Profesyonel Hizmet Platformu",
+    default: "Prosinta — Profesyonel Hizmet Platformu",
     template: "%s — Prosinta",
   },
   description:
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "tr_TR",
     siteName: "Prosinta",
-    title: "Prosinta — AI Destekli Profesyonel Hizmet Platformu",
+    title: "Prosinta — Profesyonel Hizmet Platformu",
     description:
       "Grafik tasarımdan yazılıma, binlerce yetenekli freelancer arasından seç, dakikalar içinde işine başla.",
   },
