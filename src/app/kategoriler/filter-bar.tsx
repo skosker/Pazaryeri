@@ -5,7 +5,6 @@ import { useRouter, usePathname } from "next/navigation";
 import { CategoryIcon } from "@/components/category-icon";
 import { subcategoryEmoji } from "@/components/subcategory-icon";
 import { getCategoryAccent } from "@/lib/category-style";
-import { formatPrice } from "@/lib/format-price";
 
 type Category = { slug: string; name: string; icon: string };
 type Subcategory = { name: string; slug: string };
@@ -23,7 +22,8 @@ export function FilterBar({
   subcategoriesByCategory,
   selectedCategories,
   selectedSubcategories,
-  initialBudget,
+  initialBudgetMin,
+  initialBudgetMax,
   initialDelivery,
   initialOnlineOnly,
   isProBuyer,
@@ -33,7 +33,8 @@ export function FilterBar({
   subcategoriesByCategory: Record<string, Subcategory[]>;
   selectedCategories: string[];
   selectedSubcategories: string[];
-  initialBudget: number;
+  initialBudgetMin?: number;
+  initialBudgetMax?: number;
   initialDelivery: string;
   initialOnlineOnly: boolean;
   isProBuyer?: boolean;
@@ -46,7 +47,10 @@ export function FilterBar({
   const [openPanel, setOpenPanel] = useState<"kategori" | "butce" | "sure" | null>(null);
   const [selected, setSelected] = useState(selectedCategories);
   const [selectedSub, setSelectedSub] = useState(selectedSubcategories);
-  const [budget, setBudget] = useState(initialBudget);
+  const [budgetMin, setBudgetMin] = useState<number | undefined>(initialBudgetMin);
+  const [budgetMax, setBudgetMax] = useState<number | undefined>(initialBudgetMax);
+  const [minInput, setMinInput] = useState(initialBudgetMin?.toString() ?? "");
+  const [maxInput, setMaxInput] = useState(initialBudgetMax?.toString() ?? "");
   const [delivery, setDelivery] = useState(initialDelivery);
   const [onlineOnly, setOnlineOnly] = useState(initialOnlineOnly);
   const [proOnly, setProOnly] = useState(initialProOnly ?? false);
@@ -72,7 +76,8 @@ export function FilterBar({
   function applyParams(next: {
     kategori?: string[];
     alt?: string[];
-    butce?: number;
+    butceMin?: number | null;
+    butceMax?: number | null;
     sure?: string;
     cevrimici?: boolean;
     proOnly?: boolean;
@@ -85,9 +90,13 @@ export function FilterBar({
     params.delete("alt");
     (next.alt ?? selectedSub).forEach((slug) => params.append("alt", slug));
 
-    const budgetValue = next.butce ?? budget;
-    if (budgetValue < 3000) params.set("butce", String(budgetValue));
-    else params.delete("butce");
+    const minValue = next.butceMin !== undefined ? next.butceMin : budgetMin;
+    if (minValue) params.set("butceMin", String(minValue));
+    else params.delete("butceMin");
+
+    const maxValue = next.butceMax !== undefined ? next.butceMax : budgetMax;
+    if (maxValue) params.set("butceMax", String(maxValue));
+    else params.delete("butceMax");
 
     const deliveryValue = next.sure ?? delivery;
     if (deliveryValue !== "farketmez") params.set("sure", deliveryValue);
@@ -117,8 +126,26 @@ export function FilterBar({
     applyParams({ alt: next });
   }
 
+  function applyBudget() {
+    const min = minInput.trim() === "" ? null : Number(minInput);
+    const max = maxInput.trim() === "" ? null : Number(maxInput);
+    setBudgetMin(min ?? undefined);
+    setBudgetMax(max ?? undefined);
+    applyParams({ butceMin: min, butceMax: max });
+    setOpenPanel(null);
+  }
+
+  function clearBudget() {
+    setMinInput("");
+    setMaxInput("");
+    setBudgetMin(undefined);
+    setBudgetMax(undefined);
+    applyParams({ butceMin: null, butceMax: null });
+    setOpenPanel(null);
+  }
+
   const categoryCount = selected.length + selectedSub.length;
-  const budgetActive = budget < 3000;
+  const budgetActive = budgetMin !== undefined || budgetMax !== undefined;
   const deliveryActive = delivery !== "farketmez";
 
   return (
@@ -262,21 +289,50 @@ export function FilterBar({
       )}
 
       {openPanel === "butce" && (
-        <div className="absolute left-0 top-full z-30 mt-2 w-72 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl shadow-slate-200/60">
-          <input
-            type="range"
-            min={0}
-            max={3000}
-            step={50}
-            value={budget}
-            onChange={(e) => setBudget(Number(e.target.value))}
-            onMouseUp={() => applyParams({})}
-            onTouchEnd={() => applyParams({})}
-            className="w-full accent-purple-600"
-          />
-          <div className="mt-1 flex justify-between text-xs text-slate-400">
-            <span>0₺</span>
-            <span className="font-medium text-brand-navy">{budget >= 3000 ? `${formatPrice(3000)}₺+` : `${formatPrice(budget)}₺`}</span>
+        <div className="absolute left-0 top-full z-30 mt-2 w-80 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl shadow-slate-200/60">
+          <div className="grid grid-cols-2 gap-3">
+            <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
+              Min. Fiyat
+              <input
+                type="number"
+                min={0}
+                inputMode="numeric"
+                value={minInput}
+                onChange={(e) => setMinInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && applyBudget()}
+                placeholder="hepsi (TL)"
+                className="rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-purple-400"
+              />
+            </label>
+            <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
+              Maks. Fiyat
+              <input
+                type="number"
+                min={0}
+                inputMode="numeric"
+                value={maxInput}
+                onChange={(e) => setMaxInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && applyBudget()}
+                placeholder="hepsi (TL)"
+                className="rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-purple-400"
+              />
+            </label>
+          </div>
+          <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4">
+            <button
+              type="button"
+              onClick={clearBudget}
+              className="text-sm font-medium text-slate-500 hover:text-slate-700"
+            >
+              Temizle
+            </button>
+            <button
+              type="button"
+              onClick={applyBudget}
+              className="rounded-full bg-brand-navy px-5 py-2 text-sm font-semibold text-white hover:opacity-90"
+            >
+              Uygula
+            </button>
           </div>
         </div>
       )}

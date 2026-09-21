@@ -79,6 +79,7 @@ export type GigFilters = {
   categorySlugs?: string[];
   subcategorySlugs?: string[];
   q?: string;
+  minPrice?: number;
   maxPrice?: number;
   maxDeliveryDays?: number;
   onlineSellersOnly?: boolean;
@@ -120,10 +121,14 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
     ];
   }
 
-  if (filters.maxPrice || filters.maxDeliveryDays) {
+  if (filters.minPrice || filters.maxPrice || filters.maxDeliveryDays) {
+    const price: Prisma.DecimalFilter = {};
+    if (filters.minPrice) price.gte = filters.minPrice;
+    if (filters.maxPrice) price.lte = filters.maxPrice;
+
     where.packages = {
       some: {
-        ...(filters.maxPrice ? { price: { lte: filters.maxPrice } } : {}),
+        ...(Object.keys(price).length ? { price } : {}),
         ...(filters.maxDeliveryDays
           ? { deliveryDays: { lte: filters.maxDeliveryDays } }
           : {}),
