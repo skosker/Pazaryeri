@@ -121,13 +121,11 @@ export default async function FreelancerlarPage(props: PageProps<"/freelancerlar
                   </ul>
                 )}
 
-                <div className="mt-auto flex items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs text-slate-400">
-                  {freelancer.rating !== null ? (
+                <div className="mt-auto flex items-center gap-2 border-t border-slate-100 pt-3 text-xs text-slate-400">
+                  {freelancer.rating !== null && (
                     <StarRating rating={freelancer.rating} count={freelancer.reviewCount} />
-                  ) : (
-                    <span>Henüz değerlendirme yok</span>
                   )}
-                  <span className="shrink-0">{freelancer.gigCount} ilan</span>
+                  <span className="ml-auto shrink-0">{freelancer.gigCount} ilan</span>
                 </div>
               </Link>
             ))}
