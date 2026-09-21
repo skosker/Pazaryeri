@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { StarRating } from "@/components/star-rating";
 import { GigCover } from "@/components/gig-cover";
 import { UserAvatar } from "@/components/user-avatar";
 import { getCategoryAccent } from "@/lib/category-style";
@@ -21,62 +20,72 @@ export function GigCard({ gig }: { gig: GigCardData }) {
           coverImage={gig.coverImage}
           imageClassName="transition duration-500 group-hover:scale-110"
         />
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/40 to-transparent" />
         {gig.featured && (
           <span className="absolute left-3 top-3 rounded-full bg-brand-navy/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
             ✦ Editör Seçkisi
           </span>
         )}
-        <div className="absolute bottom-3 left-3 flex items-center gap-2">
-          <span className="relative block h-8 w-8">
-            <UserAvatar
-              name={gig.seller.name}
-              image={gig.seller.image}
-              className="h-8 w-8 border-2 border-white text-xs shadow-sm"
-              fallbackClassName="bg-slate-200 text-slate-600"
-            />
-            {gig.seller.isOnline && (
-              <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
-            )}
+        {gig.rating !== null && (
+          <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-brand-navy shadow-sm">
+            <svg className="h-3.5 w-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 1.5l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3.1-5.4 3.1 1.3-6-4.6-4.1 6.1-.6L10 1.5z" />
+            </svg>
+            {gig.rating.toFixed(2)}
+            <span className="font-normal text-slate-400">({gig.reviewCount})</span>
           </span>
-          <span className="flex items-center gap-1 text-sm font-medium text-white drop-shadow">
-            {gig.seller.name}
-            {gig.seller.emailVerified && (
-              <span title="E-posta doğrulandı" className="text-emerald-400">
-                ✓
-              </span>
-            )}
-          </span>
-          {gig.seller.isPro && (
-            <span className="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950 shadow-sm">
-              Pro
-            </span>
-          )}
-        </div>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col p-4">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="relative block h-8 w-8 shrink-0">
+              <UserAvatar
+                name={gig.seller.name}
+                image={gig.seller.image}
+                className="h-8 w-8 text-xs"
+                fallbackClassName="bg-slate-200 text-slate-600"
+              />
+              {gig.seller.isOnline && (
+                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
+              )}
+            </span>
+            <div className="min-w-0">
+              <p className="flex items-center gap-1 truncate text-sm font-semibold text-brand-navy">
+                {gig.seller.name}
+                {gig.seller.emailVerified && (
+                  <span title="E-posta doğrulandı" className="text-emerald-500">
+                    ✓
+                  </span>
+                )}
+              </p>
+              {gig.seller.title && (
+                <p className="truncate text-xs text-slate-400">{gig.seller.title}</p>
+              )}
+            </div>
+          </div>
+          <div className="shrink-0 text-right">
+            <p className="text-base font-extrabold text-brand-navy">{formatPrice(gig.startingPrice)}₺</p>
+            <p className="text-[11px] text-slate-400">Başlangıç</p>
+          </div>
+        </div>
+
         <span
-          className={`inline-block w-fit rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${accent.bg} ${accent.text}`}
+          className={`mt-3 inline-block w-fit rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${accent.bg} ${accent.text}`}
         >
           {gig.categoryName}
         </span>
-        <h3 className="mt-1 line-clamp-2 font-medium text-brand-navy group-hover:text-purple-700">
+        <h3 className="mt-1.5 line-clamp-2 font-medium text-brand-navy group-hover:text-purple-700">
           {gig.title}
         </h3>
-
-        <div className="mt-2">
-          {gig.rating !== null ? (
-            <StarRating rating={gig.rating} count={gig.reviewCount} />
-          ) : (
-            <span className="text-sm text-slate-400">Henüz değerlendirme yok</span>
-          )}
-        </div>
-
-        <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-3">
-          <span className="text-xs text-slate-400">Başlangıç fiyatı</span>
-          <span className="text-lg font-extrabold text-brand-navy">{formatPrice(gig.startingPrice)}₺</span>
-        </div>
+        {gig.rating === null && (
+          <span className="mt-2 text-sm text-slate-400">Henüz değerlendirme yok</span>
+        )}
+        {gig.seller.isPro && (
+          <span className="mt-2 w-fit rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
+            Pro
+          </span>
+        )}
       </div>
     </Link>
   );

@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 
 const gigCardInclude = {
-  seller: { select: { id: true, name: true, image: true, isOnline: true, isPro: true, emailVerified: true } },
+  seller: { select: { id: true, name: true, title: true, image: true, isOnline: true, isPro: true, emailVerified: true } },
   category: { select: { name: true, slug: true, icon: true } },
   subcategory: { select: { name: true, slug: true } },
   packages: { orderBy: { price: "asc" as const }, take: 1 },
@@ -20,6 +20,7 @@ export type GigCardData = {
   seller: {
     id: string;
     name: string;
+    title: string | null;
     image: string | null;
     isOnline: boolean;
     isPro: boolean;
