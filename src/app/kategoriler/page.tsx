@@ -28,7 +28,8 @@ function buildHref(base: {
   categorySlugs: string[];
   subcategorySlugs: string[];
   q?: string;
-  butce?: string;
+  butceMin?: string;
+  butceMax?: string;
   sure?: string;
   sirala?: string;
   cevrimici?: boolean;
@@ -39,7 +40,8 @@ function buildHref(base: {
   base.categorySlugs.forEach((slug) => search.append("kategori", slug));
   base.subcategorySlugs.forEach((slug) => search.append("alt", slug));
   if (base.q) search.set("q", base.q);
-  if (base.butce) search.set("butce", base.butce);
+  if (base.butceMin) search.set("butceMin", base.butceMin);
+  if (base.butceMax) search.set("butceMax", base.butceMax);
   if (base.sure) search.set("sure", base.sure);
   if (base.sirala) search.set("sirala", base.sirala);
   if (base.cevrimici) search.set("cevrimici", "1");
@@ -57,7 +59,8 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
   const categorySlugs = toArray(searchParams.kategori);
   const subcategorySlugs = toArray(searchParams.alt);
   const q = toSingle(searchParams.q);
-  const butce = toSingle(searchParams.butce);
+  const butceMin = toSingle(searchParams.butceMin);
+  const butceMax = toSingle(searchParams.butceMax);
   const sure = toSingle(searchParams.sure);
   const sirala = toSingle(searchParams.sirala) as GigFilters["sort"];
   const cevrimici = toSingle(searchParams.cevrimici) === "1";
@@ -75,7 +78,8 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
     categorySlugs,
     subcategorySlugs,
     q,
-    maxPrice: butce ? Number(butce) : undefined,
+    minPrice: butceMin ? Number(butceMin) : undefined,
+    maxPrice: butceMax ? Number(butceMax) : undefined,
     maxDeliveryDays: sure && sure !== "farketmez" ? Number(sure) : undefined,
     onlineSellersOnly: cevrimici,
     proSellersOnly: proOnly,
@@ -155,7 +159,8 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
           subcategoriesByCategory={subcategoriesByCategory}
           selectedCategories={categorySlugs}
           selectedSubcategories={subcategorySlugs}
-          initialBudget={butce ? Number(butce) : 3000}
+          initialBudgetMin={butceMin ? Number(butceMin) : undefined}
+          initialBudgetMax={butceMax ? Number(butceMax) : undefined}
           initialDelivery={sure ?? "farketmez"}
           initialOnlineOnly={cevrimici}
           isProBuyer={isProBuyer}
@@ -172,7 +177,8 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
                 categorySlugs: categorySlugs.filter((s) => s !== c.slug),
                 subcategorySlugs,
                 q,
-                butce,
+                butceMin,
+                butceMax,
                 sure,
                 sirala,
                 cevrimici,
@@ -191,7 +197,8 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
                 categorySlugs,
                 subcategorySlugs: subcategorySlugs.filter((s) => s !== sc.slug),
                 q,
-                butce,
+                butceMin,
+                butceMax,
                 sure,
                 sirala,
                 cevrimici,
@@ -227,7 +234,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
             {pageCount > 1 && (
               <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
                 <Link
-                  href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, cevrimici, pro: proOnly, sayfa: page - 1 })}
+                  href={buildHref({ categorySlugs, subcategorySlugs, q, butceMin, butceMax, sure, sirala, cevrimici, pro: proOnly, sayfa: page - 1 })}
                   aria-disabled={page <= 1}
                   className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
                     page <= 1
@@ -240,7 +247,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
                 {pageWindow(page, pageCount).map((n) => (
                   <Link
                     key={n}
-                    href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, cevrimici, pro: proOnly, sayfa: n })}
+                    href={buildHref({ categorySlugs, subcategorySlugs, q, butceMin, butceMax, sure, sirala, cevrimici, pro: proOnly, sayfa: n })}
                     className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
                       n === page ? "bg-brand-navy text-white" : "text-slate-600 hover:bg-slate-100"
                     }`}
@@ -250,7 +257,7 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
                 ))}
                 <span className="text-xs text-slate-400">/ {pageCount}</span>
                 <Link
-                  href={buildHref({ categorySlugs, subcategorySlugs, q, butce, sure, sirala, cevrimici, pro: proOnly, sayfa: page + 1 })}
+                  href={buildHref({ categorySlugs, subcategorySlugs, q, butceMin, butceMax, sure, sirala, cevrimici, pro: proOnly, sayfa: page + 1 })}
                   aria-disabled={page >= pageCount}
                   className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
                     page >= pageCount
