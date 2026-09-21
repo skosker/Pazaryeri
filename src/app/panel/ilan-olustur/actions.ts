@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { gigSchema } from "@/lib/validation";
 import { readGigForm, packageData } from "@/lib/gig-form";
 import { readCoverFromForm } from "@/lib/gig-cover";
+import { readPortfolioFromForm } from "@/lib/gig-portfolio";
 
 export type FormState = { error?: string };
 
@@ -45,6 +46,9 @@ export async function createGigAction(
   const cover = await readCoverFromForm(formData);
   if (cover.error) return { error: cover.error };
 
+  const portfolio = await readPortfolioFromForm(formData, []);
+  if (portfolio.error) return { error: portfolio.error };
+
   const baseSlug = slugify(title);
   let slug = baseSlug;
   let attempt = 1;
@@ -60,6 +64,7 @@ export async function createGigAction(
       description,
       categoryId,
       coverImage: cover.coverImage ?? null,
+      portfolioImages: portfolio.portfolioImages ?? [],
       sellerId: seller.id,
       published: false,
       status: "PENDING",

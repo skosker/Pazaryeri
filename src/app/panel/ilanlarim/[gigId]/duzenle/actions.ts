@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { gigSchema } from "@/lib/validation";
 import { readGigForm, packageData, type TierInput } from "@/lib/gig-form";
 import { readCoverFromForm } from "@/lib/gig-cover";
+import { readPortfolioFromForm } from "@/lib/gig-portfolio";
 import { deleteImageIfLocal } from "@/lib/storage";
 import type { PackageTier } from "@/generated/prisma/client";
 
@@ -40,6 +41,9 @@ export async function updateGigAction(
   const cover = await readCoverFromForm(formData);
   if (cover.error) return { error: cover.error };
 
+  const portfolio = await readPortfolioFromForm(formData, gig.portfolioImages);
+  if (portfolio.error) return { error: portfolio.error };
+
   const tiers: [PackageTier, TierInput][] = [
     ["BASIC", basic],
     ["STANDARD", standard],
@@ -55,6 +59,9 @@ export async function updateGigAction(
         categoryId,
         // Left out when the seller did not touch the picker, so the cover survives.
         ...(cover.coverImage !== undefined ? { coverImage: cover.coverImage } : {}),
+        ...(portfolio.portfolioImages !== undefined
+          ? { portfolioImages: portfolio.portfolioImages }
+          : {}),
       },
     }),
     // Update the tier if the gig already has it, otherwise add it. Existing rows are
@@ -70,6 +77,10 @@ export async function updateGigAction(
   // The old file is only unreachable once the row above points elsewhere.
   if (cover.coverImage !== undefined && gig.coverImage !== cover.coverImage) {
     await deleteImageIfLocal(gig.coverImage);
+  }
+  if (portfolio.portfolioImages !== undefined) {
+    const dropped = gig.portfolioImages.filter((url) => !portfolio.portfolioImages!.includes(url));
+    await Promise.all(dropped.map((url) => deleteImageIfLocal(url)));
   }
 
   revalidatePath("/panel/ilanlarim");

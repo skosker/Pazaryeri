@@ -16,6 +16,16 @@ export async function rejectGigAction(gigId: string) {
   revalidatePath("/admin/ilanlar");
 }
 
+export async function toggleFeaturedAction(gigId: string) {
+  await requireAdmin();
+
+  const gig = await prisma.gig.findUnique({ where: { id: gigId } });
+  if (!gig) return;
+
+  await prisma.gig.update({ where: { id: gigId }, data: { featured: !gig.featured } });
+  revalidatePath("/admin/ilanlar");
+}
+
 export async function togglePublishedAction(gigId: string) {
   await requireAdmin();
 

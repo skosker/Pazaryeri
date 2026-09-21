@@ -65,6 +65,11 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px]">
         <div>
+          {gig.featured && (
+            <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-brand-navy px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+              ✦ Editör Seçkisi
+            </span>
+          )}
           <h1 className="text-2xl font-bold text-brand-navy sm:text-3xl">{gig.title}</h1>
 
           <Link href={`/freelancer/${gig.seller.id}`} className="mt-4 flex items-center gap-3 hover:opacity-80">
@@ -80,7 +85,14 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
               )}
             </span>
             <div>
-              <p className="text-sm font-semibold text-brand-navy">{gig.seller.name}</p>
+              <p className="flex items-center gap-1 text-sm font-semibold text-brand-navy">
+                {gig.seller.name}
+                {gig.seller.emailVerified && (
+                  <span title="E-posta doğrulandı" className="text-emerald-500">
+                    ✓
+                  </span>
+                )}
+              </p>
               <p className="text-xs text-slate-400">
                 {gig.seller.title ?? "Freelancer"}
               </p>
@@ -110,6 +122,23 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
             <p className="mt-2 whitespace-pre-line text-slate-600">{gig.description}</p>
           </section>
 
+          {gig.portfolioImages.length > 0 && (
+            <section className="mt-10 border-t border-slate-100 pt-8">
+              <h2 className="text-lg font-semibold text-brand-navy">Örnek İşler</h2>
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {gig.portfolioImages.map((url) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={url}
+                    src={url}
+                    alt=""
+                    className="aspect-square w-full rounded-xl border border-slate-200 object-cover"
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
           <section className="mt-10 border-t border-slate-100 pt-8">
             <h2 className="text-lg font-semibold text-brand-navy">Satıcı hakkında</h2>
             <Link href={`/freelancer/${gig.seller.id}`} className="mt-4 flex items-start gap-4 hover:opacity-80">
@@ -127,6 +156,11 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
               <div>
                 <div className="flex items-center gap-1.5">
                   <p className="font-semibold text-brand-navy">{gig.seller.name}</p>
+                  {gig.seller.emailVerified && (
+                    <span title="E-posta doğrulandı" className="text-emerald-500">
+                      ✓
+                    </span>
+                  )}
                   {gig.seller.isPro && (
                     <span className="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950">
                       Pro

@@ -33,50 +33,50 @@ enum PaymentStatus {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String
-  email         String    @unique
-  passwordHash  String
-  role          Role      @default(BUYER)
-  title         String? // e.g. "Grafik Tasarımcı" shown under name for freelancers
+  id                 String    @id @default(cuid())
+  name               String
+  email              String    @unique
+  passwordHash       String
+  role               Role      @default(BUYER)
+  title              String? // e.g. "Grafik Tasarımcı" shown under name for freelancers
   // Payout details. The holder name is stored separately because banks reject a
   // transfer when it does not match the account, and it is often not the display name.
-  iban          String?
-  ibanHolder    String?
-  bio           String?
-  image         String?
+  iban               String?
+  ibanHolder         String?
+  bio                String?
+  image              String?
   // A freshly uploaded photo an automated check flagged as possibly inappropriate sits
   // here — not in `image` — until an admin clears or rejects it, so the public-facing
   // avatar never shows unreviewed content. NULL means there is nothing awaiting review;
   // an upload the check does not flag (or cannot check, e.g. no API key configured)
   // goes straight into `image` and never touches these two fields.
-  pendingImage    String?
-  photoFlagReason String?
+  pendingImage       String?
+  photoFlagReason    String?
   // Freelancer profile details: shown on the profile page and used by the directory
   // filters. Nullable because buyers and older accounts never filled them in.
-  city          String?
-  age           Int?
+  city               String?
+  age                Int?
   /// Uzmanlık: what this freelancer actually does, a handful of short labels.
-  skills        String[]  @default([])
+  skills             String[]  @default([])
   /// Generated showcase profile rather than a real sign-up. The generator only ever
   /// writes rows carrying this flag, so re-running it cannot touch a real account.
-  synthetic     Boolean   @default(false)
-  emailVerified DateTime?
-  suspended     Boolean   @default(false)
-  isOnline      Boolean   @default(false)
+  synthetic          Boolean   @default(false)
+  emailVerified      DateTime?
+  suspended          Boolean   @default(false)
+  isOnline           Boolean   @default(false)
   /// Yalnızca elle içe aktarılan alıcılar için: admin listesinde gösterilen sipariş
   /// sayısı (ismin ham listede kaç kez geçtiği). Gerçek Order kaydı değildir; diğer
   /// kullanıcılarda NULL kalır ve sipariş sayısı gerçek kayıtlardan gelir.
   importedOrderCount Int?
   // Meaning depends on role: BUYER = Prosinta Pro member, FREELANCER = admin-verified Pro freelancer.
-  isPro         Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  isPro              Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
-  gigs               Gig[]               @relation("SellerGigs")
-  payouts            Payout[]            @relation("SellerPayouts")
-  ordersMade         Order[]             @relation("BuyerOrders")
-  reviews            Review[]            @relation("BuyerReviews")
+  gigs               Gig[]                @relation("SellerGigs")
+  payouts            Payout[]             @relation("SellerPayouts")
+  ordersMade         Order[]              @relation("BuyerOrders")
+  reviews            Review[]             @relation("BuyerReviews")
   verificationTokens VerificationToken[]
   passwordResets     PasswordResetToken[]
   proPurchases       ProPurchase[]
@@ -101,7 +101,6 @@ model VerificationToken {
  * Password reset links. Kept apart from VerificationToken on purpose: those are handed
  * out at signup and live for a day, and if one table served both, a stale sign-up link
  * would be enough to set someone's password.
- *
  * Only the SHA-256 of the token is stored, so the rows are useless to anyone who reads
  * the table — the usable half exists solely in the email that was sent.
  */
@@ -126,8 +125,8 @@ model Category {
   icon  String @default("sparkles")
   order Int    @default(0)
 
-  gigs           Gig[]
-  subcategories  Subcategory[]
+  gigs          Gig[]
+  subcategories Subcategory[]
 
   @@map("categories")
 }
@@ -147,13 +146,19 @@ model Subcategory {
 }
 
 model Gig {
-  id          String    @id @default(cuid())
-  slug        String    @unique
-  title       String
-  description String
-  coverColor  String    @default("indigo") // gradient fallback shown when there is no cover
-  coverImage  String? // seller-uploaded cover: a Blob CDN URL, or /api/gorsel/<id> when stored in Postgres
-  published   Boolean   @default(true)
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  title           String
+  description     String
+  coverColor      String    @default("indigo") // gradient fallback shown when there is no cover
+  coverImage      String? // seller-uploaded cover: a Blob CDN URL, or /api/gorsel/<id> when stored in Postgres
+  /// "Örnek işler": a handful of the seller's own past-work images, shown on the gig page.
+  /// Same URL shape as coverImage. Most useful before a gig has any reviews.
+  portfolioImages String[]  @default([])
+  published       Boolean   @default(true)
+  /// Admin-curated "Editör Seçkisi" badge — set by hand from /admin/ilanlar, not earned
+  /// automatically, so it stays meaningful rather than something every gig ends up with.
+  featured        Boolean   @default(false)
   // Moderation state, separate from `published`: a freelancer can pause/resume an
   // approved gig freely (that only touches `published`), but a brand-new submission
   // starts PENDING and stays invisible everywhere `published: true` is required until
@@ -161,9 +166,9 @@ model Gig {
   // generator/seed script that inserts a gig without mentioning this column keeps
   // publishing immediately, exactly as before — only the real freelancer-facing
   // "create gig" action opts a row into PENDING.
-  status      GigStatus @default(APPROVED)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  status          GigStatus @default(APPROVED)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   sellerId   String
   seller     User     @relation("SellerGigs", fields: [sellerId], references: [id], onDelete: Cascade)
@@ -215,18 +220,18 @@ model Package {
 }
 
 model Order {
-  id              String      @id @default(cuid())
-  status          OrderStatus @default(PENDING_PAYMENT)
-  amount          Decimal     @db.Decimal(10, 2)
-  escrowReleased  Boolean     @default(false)
+  id                      String      @id @default(cuid())
+  status                  OrderStatus @default(PENDING_PAYMENT)
+  amount                  Decimal     @db.Decimal(10, 2)
+  escrowReleased          Boolean     @default(false)
   /// Free revisions used against the package's revisionCount (see buyerRequestRevision).
-  revisionsUsed   Int         @default(0)
+  revisionsUsed           Int         @default(0)
   /// Set when the buyer asks to cancel a PAID order — per the site's iptal/iade policy this
   /// goes through support rather than an automatic refund, so it is a flag for that
   /// conversation, not a status change.
   cancellationRequestedAt DateTime?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
 
   buyerId String
   buyer   User   @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
@@ -317,7 +322,6 @@ model UploadedImage {
 
   @@map("uploaded_images")
 }
-
 
 enum PayoutStatus {
   PENDING
