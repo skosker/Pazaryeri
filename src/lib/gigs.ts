@@ -71,20 +71,6 @@ export async function getFeaturedGigs(limit = 6): Promise<GigCardData[]> {
   return gigs.map(toCardData);
 }
 
-/** 0 for a seller with a real photo, 1 for a drawn avatar (or none) — sorts real photos first. */
-function photoRank(card: GigCardData): number {
-  const image = card.seller.image;
-  return image && !image.startsWith("/api/avatar/") ? 0 : 1;
-}
-
-/** 0 for a gig with a real cover (uploaded or fetched), 1 for the generated
- * gradient-and-icon fallback — those draw from a small per-category icon pool, so with
- * enough listings the same icon repeats; sorting them to the back keeps a search page
- * from opening on several that look alike. */
-function coverRank(card: GigCardData): number {
-  return card.coverImage ? 0 : 1;
-}
-
 export type GigFilters = {
   categorySlugs?: string[];
   subcategorySlugs?: string[];
@@ -104,6 +90,18 @@ export type GigListResult = {
   total: number;
   page: number;
   pageCount: number;
+};
+
+/** Just enough to reproduce listGigs' full sort (price, real-photo, real-cover) without
+ * pulling every matching gig's description, images, category, packages and reviews over
+ * the wire — with ~13k+ gigs in the catalogue, fetching the full payload for every
+ * loosely-filtered browse is what was driving the site over its database's monthly data
+ * transfer allowance. Only the current page's ids get the full `gigCardInclude` fetch. */
+type SortableGig = {
+  id: string;
+  coverImage: string | null;
+  sellerImage: string | null;
+  startingPrice: number;
 };
 
 export async function listGigs(filters: GigFilters): Promise<GigListResult> {
@@ -152,38 +150,58 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
   const orderBy: Prisma.GigOrderByWithRelationInput[] =
     filters.sort && filters.sort !== "uygun" ? [{ createdAt: "desc" }] : [{ featured: "desc" }, { createdAt: "desc" }];
 
-  const gigs = await prisma.gig.findMany({
+  const thin = await prisma.gig.findMany({
     where,
-    include: gigCardInclude,
     orderBy,
+    select: {
+      id: true,
+      coverImage: true,
+      seller: { select: { image: true } },
+      packages: { orderBy: { price: "asc" }, take: 1, select: { price: true } },
+    },
   });
 
-  let cards = gigs.map(toCardData);
+  let sortable: SortableGig[] = thin.map((g) => ({
+    id: g.id,
+    coverImage: g.coverImage,
+    sellerImage: g.seller.image,
+    startingPrice: g.packages[0] ? Number(g.packages[0].price) : 0,
+  }));
 
   if (filters.sort === "fiyat-artan") {
-    cards = cards.sort((a, b) => a.startingPrice - b.startingPrice);
+    sortable = sortable.sort((a, b) => a.startingPrice - b.startingPrice);
   } else if (filters.sort === "fiyat-azalan") {
-    cards = cards.sort((a, b) => b.startingPrice - a.startingPrice);
+    sortable = sortable.sort((a, b) => b.startingPrice - a.startingPrice);
   }
 
   // Satıcısı gerçek bir fotoğrafla (Pexels/AI portre/kendi yüklediği) görünenler önce,
   // hâlâ çizilmiş avatarda kalanlar sona. JS'in sort'u kararlı olduğu için (Node/V8),
   // bu ikinci geçiş yukarıdaki sıralamayı (fiyat/tarih) grup içinde bozmadan uygular.
-  cards = cards.sort((a, b) => photoRank(a) - photoRank(b));
+  sortable = sortable.sort((a, b) => {
+    const rank = (image: string | null) => (image && !image.startsWith("/api/avatar/") ? 0 : 1);
+    return rank(a.sellerImage) - rank(b.sellerImage);
+  });
 
   // Gerçek kapak fotoğrafı olan ilanlar önce, üretilmiş gradyan+ikon kapakta kalanlar en
   // sona — bu üçüncü geçiş de kararlı olduğu için önceki iki sıralamayı grup içinde
   // bozmuyor.
-  cards = cards.sort((a, b) => coverRank(a) - coverRank(b));
+  sortable = sortable.sort((a, b) => (a.coverImage ? 0 : 1) - (b.coverImage ? 0 : 1));
 
-  const total = cards.length;
+  const total = sortable.length;
   const pageSize = filters.pageSize ?? (total || 1);
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const page = Math.min(Math.max(1, filters.page ?? 1), pageCount);
   const start = (page - 1) * pageSize;
-  const paged = filters.pageSize ? cards.slice(start, start + pageSize) : cards;
+  const pageIds = (filters.pageSize ? sortable.slice(start, start + pageSize) : sortable).map((s) => s.id);
 
-  return { cards: paged, total, page, pageCount };
+  const fullGigs = await prisma.gig.findMany({
+    where: { id: { in: pageIds } },
+    include: gigCardInclude,
+  });
+  const byId = new Map(fullGigs.map((g) => [g.id, g]));
+  const cards = pageIds.map((id) => byId.get(id)).filter((g): g is RawGig => Boolean(g)).map(toCardData);
+
+  return { cards, total, page, pageCount };
 }
 
 export async function getRelatedGigs(
