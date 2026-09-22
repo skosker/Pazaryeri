@@ -74,46 +74,46 @@ export default async function FreelancerlarPage(props: PageProps<"/freelancerlar
         </p>
       ) : (
         <>
-          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {cards.map((freelancer) => (
               <Link
                 key={freelancer.id}
                 href={`/freelancer/${freelancer.id}`}
-                className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-100/70"
+                className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-100/70"
               >
-                <div className="flex items-start gap-3">
-                  <span className="relative block h-14 w-14 shrink-0">
+                <div className="flex items-start gap-2.5">
+                  <span className="relative block h-11 w-11 shrink-0">
                     <UserAvatar
                       name={freelancer.name}
                       image={freelancer.image}
-                      className="h-14 w-14 text-lg"
+                      className="h-11 w-11 text-base"
                     />
                     {freelancer.isOnline && (
-                      <span className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500" />
+                      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
                     )}
                   </span>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
-                      <p className="truncate font-semibold text-brand-navy group-hover:text-purple-700">
+                      <p className="truncate text-sm font-semibold text-brand-navy group-hover:text-purple-700">
                         {freelancer.name}
                       </p>
                       {freelancer.isPro && (
-                        <span className="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950">
+                        <span className="rounded-full bg-amber-400 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950">
                           Pro
                         </span>
                       )}
                     </div>
-                    <p className="truncate text-sm text-slate-500">{freelancer.title ?? "Freelancer"}</p>
+                    <p className="truncate text-xs text-slate-500">{freelancer.title ?? "Freelancer"}</p>
                   </div>
                 </div>
 
                 {freelancer.skills.length > 0 && (
-                  <ul className="mt-4 flex flex-wrap gap-1.5">
-                    {freelancer.skills.slice(0, 4).map((skill) => (
+                  <ul className="mt-3 flex flex-wrap gap-1.5">
+                    {freelancer.skills.slice(0, 3).map((skill) => (
                       <li
                         key={skill}
-                        className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600"
+                        className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-medium text-slate-600"
                       >
                         {skill}
                       </li>
@@ -121,12 +121,11 @@ export default async function FreelancerlarPage(props: PageProps<"/freelancerlar
                   </ul>
                 )}
 
-                <div className="mt-auto flex items-center gap-2 border-t border-slate-100 pt-3 text-xs text-slate-400">
-                  {freelancer.rating !== null && (
+                {freelancer.rating !== null && (
+                  <div className="mt-auto flex items-center gap-2 border-t border-slate-100 pt-3 text-xs text-slate-400">
                     <StarRating rating={freelancer.rating} count={freelancer.reviewCount} />
-                  )}
-                  <span className="ml-auto shrink-0">{freelancer.gigCount} ilan</span>
-                </div>
+                  </div>
+                )}
               </Link>
             ))}
           </div>
