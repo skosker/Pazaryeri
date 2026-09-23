@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { splitPayout } from "@/lib/commission";
 import {
   sendOrderPaidEmails,
   sendOrderStartedEmail,
@@ -177,7 +178,9 @@ export async function buyerCompleteOrder(orderId: string, buyerId: string) {
   if (!order || order.buyerId !== buyerId) throw new OrderActionError("Yetkisiz işlem");
   if (order.status !== "DELIVERED") throw new OrderActionError("Sipariş bu aşamada değil");
 
-  const amount = order.amount;
+  // Orders that completed before the service fee was introduced keep a zero-fee payout
+  // row (the upsert never updates), so only new completions are split here.
+  const split = splitPayout(Number(order.amount));
 
   // The payout row is what the admin payout screen works from, so it has to appear in
   // the same transaction that releases the escrow — otherwise a crash in between would
@@ -195,9 +198,9 @@ export async function buyerCompleteOrder(orderId: string, buyerId: string) {
       create: {
         orderId,
         sellerId: order.gig.sellerId,
-        gross: amount,
-        commission: 0,
-        net: amount,
+        gross: split.gross,
+        commission: split.commission,
+        net: split.net,
         iban: order.gig.seller.iban,
         ibanHolder: order.gig.seller.ibanHolder,
       },
@@ -208,7 +211,7 @@ export async function buyerCompleteOrder(orderId: string, buyerId: string) {
     sellerEmail: order.gig.seller.email,
     sellerName: order.gig.seller.name,
     gigTitle: order.gig.title,
-    amount: Number(order.amount),
+    amount: split.net,
     orderUrl: `${appUrl}/siparis/${orderId}`,
   });
 
