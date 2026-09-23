@@ -1,23 +1,28 @@
 import { prisma } from "@/lib/prisma";
+import { getSettings } from "@/lib/settings";
 
 export class ProPurchaseError extends Error {}
 
-/** Prosinta Pro's one-time price, for both buyers and freelancers. */
-export const PRO_PRICE_TL = 1000;
 
 /**
  * The user's open purchase, reused across page loads instead of piling up an
  * abandoned row every time the Pro page is visited without paying.
  */
 export async function findOrCreatePendingProPurchase(userId: string) {
+  // Prosinta Pro's one-time price (for buyers and freelancers) is set at /admin/ayarlar.
+  const { proPriceTl } = await getSettings();
   const existing = await prisma.proPurchase.findFirst({
     where: { userId, status: "INITIALIZED" },
     orderBy: { createdAt: "desc" },
   });
-  if (existing) return existing;
+  if (existing) {
+    // An open purchase from before an admin changed the price follows the new price.
+    if (Number(existing.amount) === proPriceTl) return existing;
+    return prisma.proPurchase.update({ where: { id: existing.id }, data: { amount: proPriceTl } });
+  }
 
   return prisma.proPurchase.create({
-    data: { userId, amount: PRO_PRICE_TL },
+    data: { userId, amount: proPriceTl },
   });
 }
 

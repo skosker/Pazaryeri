@@ -2,22 +2,21 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { PRO_PRICE_TL } from "@/lib/pro-purchase";
 import { formatPrice } from "@/lib/format-price";
-import { MAX_PORTFOLIO_IMAGES, MAX_PORTFOLIO_IMAGES_PRO } from "@/lib/image-constraints";
+import { getSettings, type SiteSettings } from "@/lib/settings";
 
-const benefitsByRole: Record<"BUYER" | "FREELANCER", string[]> = {
+const benefitsByRole = (settings: SiteSettings): Record<"BUYER" | "FREELANCER", string[]> => ({
   BUYER: [
     "Kategoriler sayfasında “Sadece Pro freelancer'ları göster” filtresini kullan",
     "Panelinde Pro rozeti görünür",
   ],
   FREELANCER: [
     "İlanların aramalarda öne çıkar (varsayılan sıralamada Pro olmayanların önünde)",
-    `İlan başına ${MAX_PORTFOLIO_IMAGES} yerine ${MAX_PORTFOLIO_IMAGES_PRO} örnek iş görseli ekleyebilirsin`,
+    `İlan başına ${settings.portfolioImages} yerine ${settings.portfolioImagesPro} örnek iş görseli ekleyebilirsin`,
     "İlanlarında ve profilinde Pro rozeti görünür",
     "Alıcılar “Sadece Pro freelancer'ları göster” filtresiyle seni bulur",
   ],
-};
+});
 
 export default async function ProOlPage() {
   const session = await auth();
@@ -29,6 +28,7 @@ export default async function ProOlPage() {
   if (user.isPro) redirect("/panel");
 
   const role = session.user.role as "BUYER" | "FREELANCER";
+  const settings = await getSettings();
 
   return (
     <div className="max-w-xl">
@@ -39,11 +39,11 @@ export default async function ProOlPage() {
         </span>
       </div>
       <p className="mt-1 text-sm text-slate-500">
-        Tek seferlik {formatPrice(PRO_PRICE_TL)}₺ ile süresiz Prosinta Pro üyeliğine geç.
+        Tek seferlik {formatPrice(settings.proPriceTl)}₺ ile süresiz Prosinta Pro üyeliğine geç.
       </p>
 
       <ul className="mt-6 space-y-2 text-sm text-slate-600">
-        {benefitsByRole[role].map((benefit) => (
+        {benefitsByRole(settings)[role].map((benefit) => (
           <li key={benefit} className="flex items-start gap-2">
             <span className="mt-0.5 text-emerald-500">✓</span> {benefit}
           </li>

@@ -84,6 +84,7 @@ model User {
   verificationTokens    VerificationToken[]
   passwordResets        PasswordResetToken[]
   proPurchases          ProPurchase[]
+  gigBoosts             GigBoost[]
   conversationsAsBuyer  Conversation[]       @relation("BuyerConversations")
   conversationsAsSeller Conversation[]       @relation("SellerConversations")
   messagesSent          Message[]            @relation("SentMessages")
@@ -174,6 +175,9 @@ model Gig {
   // publishing immediately, exactly as before — only the real freelancer-facing
   // "create gig" action opts a row into PENDING.
   status          GigStatus @default(APPROVED)
+  /// Paid "Öne Çıkar": while this is in the future the gig leads the default listing with
+  /// a "Sponsorlu" label. Each paid GigBoost pushes it forward by its days.
+  sponsoredUntil  DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -188,6 +192,7 @@ model Gig {
   packages Package[]
   orders   Order[]
   reviews  Review[]
+  boosts   GigBoost[]
 
   @@index([categoryId])
   @@index([sellerId])
@@ -297,6 +302,31 @@ model ProPurchase {
 
   @@index([userId])
   @@map("pro_purchases")
+}
+
+/// One paid "Öne Çıkar" purchase for a gig — same payment shape as ProPurchase (its id
+/// is the PayTR merchant_oid; a bank transfer waits INITIALIZED with provider "havale"
+/// until an admin confirms it).
+model GigBoost {
+  id          String        @id @default(cuid())
+  provider    String        @default("paytr")
+  status      PaymentStatus @default(INITIALIZED)
+  amount      Decimal       @db.Decimal(10, 2)
+  days        Int
+  token       String?
+  rawResponse Json?
+  activatedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  gigId  String
+  gig    Gig    @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([gigId])
+  @@index([userId])
+  @@map("gig_boosts")
 }
 
 model Review {
@@ -454,4 +484,23 @@ model Message {
   @@index([conversationId, createdAt])
   @@index([senderId, createdAt])
   @@map("messages")
+}
+
+/// Campaign and membership settings edited at /admin/ayarlar. A single row (id 1); until
+/// an admin saves the form there is no row and the column defaults below apply.
+model SiteSettings {
+  id                 Int      @id @default(1)
+  proPriceTl         Decimal  @default(1000) @db.Decimal(10, 2)
+  portfolioImages    Int      @default(5)
+  portfolioImagesPro Int      @default(12)
+  boostEnabled       Boolean  @default(true)
+  boostPriceTl       Decimal  @default(1000) @db.Decimal(10, 2)
+  boostDays          Int      @default(30)
+  /// Hakedişten kesilen komisyon, yüzde olarak (2.5 = %2,5).
+  commissionPercent  Decimal  @default(2.5) @db.Decimal(5, 2)
+  founderEnabled     Boolean  @default(true)
+  founderLimit       Int      @default(100)
+  updatedAt          DateTime @updatedAt
+
+  @@map("site_settings")
 }

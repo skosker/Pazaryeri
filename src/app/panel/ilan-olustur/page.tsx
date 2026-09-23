@@ -3,16 +3,16 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { GigForm } from "./gig-form";
 import { createGigAction } from "./actions";
-import { portfolioLimit } from "@/lib/image-constraints";
+import { sellerPortfolioLimits } from "@/lib/gig-portfolio";
 
 export default async function CreateGigPage() {
   const session = await auth();
   if (!session?.user) redirect("/giris?callbackUrl=/panel/ilan-olustur");
   if (session.user.role !== "FREELANCER") redirect("/panel");
 
-  const [categories, user] = await Promise.all([
+  const [categories, portfolioLimits] = await Promise.all([
     prisma.category.findMany({ orderBy: { order: "asc" } }),
-    prisma.user.findUnique({ where: { id: session.user.id }, select: { isPro: true } }),
+    sellerPortfolioLimits(session.user.id),
   ]);
 
   return (
@@ -29,7 +29,7 @@ export default async function CreateGigPage() {
         <GigForm
           categories={categories}
           action={createGigAction}
-          portfolioLimit={portfolioLimit(Boolean(user?.isPro))}
+          portfolioLimits={portfolioLimits}
         />
       </div>
     </div>

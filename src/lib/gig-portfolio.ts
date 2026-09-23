@@ -1,11 +1,23 @@
 import { putImage } from "@/lib/storage";
-import { validateImage, MAX_PORTFOLIO_IMAGES, portfolioLimit } from "@/lib/image-constraints";
+import { validateImage, MAX_PORTFOLIO_IMAGES } from "@/lib/image-constraints";
 import { prisma } from "@/lib/prisma";
+import { getSettings } from "@/lib/settings";
+
+/** "Örnek işler" limits for this seller: theirs, and the Pro one to point them at. */
+export async function sellerPortfolioLimits(sellerId: string): Promise<{ max: number; proMax: number }> {
+  const [user, settings] = await Promise.all([
+    prisma.user.findUnique({ where: { id: sellerId }, select: { isPro: true } }),
+    getSettings(),
+  ]);
+  return {
+    max: user?.isPro ? settings.portfolioImagesPro : settings.portfolioImages,
+    proMax: settings.portfolioImagesPro,
+  };
+}
 
 /** How many "örnek işler" images this seller may keep on a gig (Pro gets more). */
 export async function sellerPortfolioLimit(sellerId: string): Promise<number> {
-  const user = await prisma.user.findUnique({ where: { id: sellerId }, select: { isPro: true } });
-  return portfolioLimit(Boolean(user?.isPro));
+  return (await sellerPortfolioLimits(sellerId)).max;
 }
 
 /**

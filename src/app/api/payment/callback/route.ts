@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { verifyPaytrNotification, type PaytrNotification } from "@/lib/paytr";
 import { markOrderPaid } from "@/lib/order-actions";
 import { markProPurchasePaid } from "@/lib/pro-purchase";
+import { markBoostPaid } from "@/lib/gig-boost";
 
 /**
  * PayTR's async "bildirim" (notification) endpoint — configured once as the merchant's
@@ -76,6 +77,21 @@ export async function POST(request: Request) {
     } else {
       await prisma.proPurchase.update({
         where: { id: purchase.id },
+        data: { status: "FAILED", rawResponse: fields },
+      });
+    }
+    return new NextResponse("OK");
+  }
+
+  // Or a paid "Öne Çıkar" for a gig — same merchant_oid convention (see src/lib/gig-boost.ts).
+  const boost = await prisma.gigBoost.findUnique({ where: { id: fields.merchant_oid } });
+  if (boost) {
+    if (fields.status === "success") {
+      await prisma.gigBoost.update({ where: { id: boost.id }, data: { rawResponse: fields } });
+      await markBoostPaid(boost.id);
+    } else if (boost.status !== "SUCCESS") {
+      await prisma.gigBoost.update({
+        where: { id: boost.id },
         data: { status: "FAILED", rawResponse: fields },
       });
     }

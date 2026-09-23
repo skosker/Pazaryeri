@@ -43,12 +43,18 @@ function AccountCard({ account }: { account: BankTransferInfo }) {
   );
 }
 
+/** Also used by "Öne Çıkar", which passes its own action and wording; Pro's are the default. */
 export function ProBankTransferPanel({
   amount,
   accounts,
+  onNotify = notifyProBankTransferAction,
+  activatesLabel = "Pro üyeliğin",
 }: {
   amount: number;
   accounts: BankTransferInfo[];
+  onNotify?: () => Promise<void>;
+  /** What the admin's confirmation switches on, e.g. "Pro üyeliğin" / "Öne Çıkarma". */
+  activatesLabel?: string;
 }) {
   const [pending, startTransition] = useTransition();
   const [done, setDone] = useState(false);
@@ -58,7 +64,7 @@ export function ProBankTransferPanel({
     return (
       <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
         <p className="text-sm text-slate-600">
-          Ödeme bildirimin alındı. Ekibimiz kontrol edip onayladığında Pro üyeliğin
+          Ödeme bildirimin alındı. Ekibimiz kontrol edip onayladığında {activatesLabel}{" "}
           aktif olacak.
         </p>
       </div>
@@ -91,7 +97,7 @@ export function ProBankTransferPanel({
         type="button"
         disabled={pending}
         onClick={() => startTransition(async () => {
-          await notifyProBankTransferAction();
+          await onNotify();
           setDone(true);
         })}
         className="brand-gradient mt-5 w-full rounded-full px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
@@ -100,7 +106,7 @@ export function ProBankTransferPanel({
       </button>
 
       <p className="mt-3 text-center text-xs text-slate-400">
-        Bildirim sonrası ekibimiz ödemeni kontrol edip onaylayacak, Pro üyeliğin
+        Bildirim sonrası ekibimiz ödemeni kontrol edip onaylayacak, {activatesLabel}{" "}
         etkinleşecek.
       </p>
     </div>
