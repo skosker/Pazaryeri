@@ -33,6 +33,9 @@ export default async function AdminDashboardPage(props: PageProps<"/admin">) {
     ? { ...(from ? { gte: from } : {}), ...(to ? { lte: to } : {}) }
     : undefined;
   const inRange = createdAt ? { createdAt } : {};
+  // Orders placed by showcase (synthetic) buyers exist only to give listings a review
+  // history; counting them would bury the real order count and revenue.
+  const realOrders = { ...inRange, buyer: { synthetic: false } };
 
   const [userCount, freelancerCount, noGigFreelancerCount, gigCount, orderCount, pending, completedOrders] =
     await Promise.all([
@@ -40,10 +43,10 @@ export default async function AdminDashboardPage(props: PageProps<"/admin">) {
       prisma.user.count({ where: { role: "FREELANCER", ...inRange } }),
       prisma.user.count({ where: { role: "FREELANCER", gigs: { none: {} }, ...inRange } }),
       prisma.gig.count({ where: { ...inRange } }),
-      prisma.order.count({ where: { ...inRange } }),
+      prisma.order.count({ where: realOrders }),
       listPendingBankTransfers(),
       prisma.order.findMany({
-        where: { status: "COMPLETED", ...inRange },
+        where: { status: "COMPLETED", ...realOrders },
         select: { amount: true },
       }),
     ]);
