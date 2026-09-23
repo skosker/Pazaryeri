@@ -2,11 +2,13 @@ import { listPendingPayouts, listRecentPaidPayouts } from "@/lib/payout-actions"
 import { formatIban } from "@/lib/iban";
 import { MarkPaidForm } from "./mark-paid";
 import { formatPrice } from "@/lib/format-price";
+import { COMMISSION_LABEL } from "@/lib/commission";
 
 export default async function PayoutsPage() {
   const [pending, paid] = await Promise.all([listPendingPayouts(), listRecentPaidPayouts()]);
 
   const total = pending.reduce((sum, p) => sum + Number(p.net), 0);
+  const commissionTotal = pending.reduce((sum, p) => sum + Number(p.commission), 0);
 
   return (
     <div>
@@ -20,6 +22,11 @@ export default async function PayoutsPage() {
         <span className="rounded-xl bg-amber-50 px-4 py-2 text-amber-800">
           Ödenecek: <strong>{formatPrice(total)}₺</strong> ({pending.length} kayıt)
         </span>
+        {commissionTotal > 0 && (
+          <span className="rounded-xl bg-emerald-50 px-4 py-2 text-emerald-800">
+            Bu hakedişlerden komisyon ({COMMISSION_LABEL}): <strong>{formatPrice(commissionTotal)}₺</strong>
+          </span>
+        )}
       </div>
 
       <div className="mt-8">
@@ -67,8 +74,13 @@ export default async function PayoutsPage() {
                           <span className="text-xs font-semibold text-red-600">IBAN girilmemiş</span>
                         )}
                       </td>
-                      <td className="px-5 py-4 font-semibold text-brand-navy">
-                        {formatPrice(payout.net)}₺
+                      <td className="px-5 py-4">
+                        <p className="font-semibold text-brand-navy">{formatPrice(payout.net)}₺</p>
+                        {Number(payout.commission) > 0 && (
+                          <p className="text-xs text-slate-400">
+                            Brüt {formatPrice(payout.gross)}₺ · Komisyon {formatPrice(payout.commission)}₺
+                          </p>
+                        )}
                       </td>
                       <td className="px-5 py-4 text-right">
                         <MarkPaidForm payoutId={payout.id} disabled={!iban} />
