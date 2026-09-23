@@ -78,9 +78,6 @@ export function GigCard({ gig }: { gig: GigCardData }) {
         <h3 className="mt-1.5 line-clamp-2 font-medium text-brand-navy group-hover:text-purple-700">
           {gig.title}
         </h3>
-        {gig.rating === null && (
-          <span className="mt-2 text-sm text-slate-400">Henüz değerlendirme yok</span>
-        )}
         {gig.seller.isPro && (
           <span className="mt-2 w-fit rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
             Pro
