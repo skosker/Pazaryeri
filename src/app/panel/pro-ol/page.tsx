@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { PRO_PRICE_TL } from "@/lib/pro-purchase";
 import { formatPrice } from "@/lib/format-price";
+import { MAX_PORTFOLIO_IMAGES, MAX_PORTFOLIO_IMAGES_PRO } from "@/lib/image-constraints";
 
 const benefitsByRole: Record<"BUYER" | "FREELANCER", string[]> = {
   BUYER: [
@@ -11,6 +12,8 @@ const benefitsByRole: Record<"BUYER" | "FREELANCER", string[]> = {
     "Panelinde Pro rozeti görünür",
   ],
   FREELANCER: [
+    "İlanların aramalarda öne çıkar (varsayılan sıralamada Pro olmayanların önünde)",
+    `İlan başına ${MAX_PORTFOLIO_IMAGES} yerine ${MAX_PORTFOLIO_IMAGES_PRO} örnek iş görseli ekleyebilirsin`,
     "İlanlarında ve profilinde Pro rozeti görünür",
     "Alıcılar “Sadece Pro freelancer'ları göster” filtresiyle seni bulur",
   ],

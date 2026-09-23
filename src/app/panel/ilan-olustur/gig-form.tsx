@@ -52,12 +52,14 @@ export function GigForm({
   defaultValues,
   submitLabel = "İlanı Yayınla",
   pendingLabel = "Yayınlanıyor...",
+  portfolioLimit,
 }: {
   categories: { id: string; name: string }[];
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   defaultValues?: GigFormValues;
   submitLabel?: string;
   pendingLabel?: string;
+  portfolioLimit?: number;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
 
@@ -112,7 +114,7 @@ export function GigForm({
 
       <CoverImageField currentUrl={defaultValues?.coverImage} />
 
-      <PortfolioImagesField currentUrls={defaultValues?.portfolioImages} />
+      <PortfolioImagesField currentUrls={defaultValues?.portfolioImages} maxImages={portfolioLimit} />
 
       <div>
         <h3 className="font-semibold text-brand-navy">Paketler</h3>

@@ -1,9 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ALLOWED_IMAGE_TYPES, MAX_IMAGE_BYTES, MAX_PORTFOLIO_IMAGES } from "@/lib/image-constraints";
+import Link from "next/link";
+import {
+  ALLOWED_IMAGE_TYPES,
+  MAX_IMAGE_BYTES,
+  MAX_PORTFOLIO_IMAGES,
+  MAX_PORTFOLIO_IMAGES_PRO,
+} from "@/lib/image-constraints";
 
-export function PortfolioImagesField({ currentUrls = [] }: { currentUrls?: string[] }) {
+export function PortfolioImagesField({
+  currentUrls = [],
+  maxImages = MAX_PORTFOLIO_IMAGES,
+}: {
+  currentUrls?: string[];
+  maxImages?: number;
+}) {
   const [removedUrls, setRemovedUrls] = useState<string[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -16,12 +28,12 @@ export function PortfolioImagesField({ currentUrls = [] }: { currentUrls?: strin
   }, []);
 
   const kept = currentUrls.filter((url) => !removedUrls.includes(url));
-  const remainingSlots = Math.max(0, MAX_PORTFOLIO_IMAGES - kept.length - newPreviews.length);
+  const remainingSlots = Math.max(0, maxImages - kept.length - newPreviews.length);
 
   function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
     newPreviews.forEach((url) => URL.revokeObjectURL(url));
-    setNewPreviews(files.slice(0, MAX_PORTFOLIO_IMAGES - kept.length).map((f) => URL.createObjectURL(f)));
+    setNewPreviews(files.slice(0, maxImages - kept.length).map((f) => URL.createObjectURL(f)));
   }
 
   function removeExisting(url: string) {
@@ -40,7 +52,15 @@ export function PortfolioImagesField({ currentUrls = [] }: { currentUrls?: strin
       <input type="hidden" name="removedPortfolio" value={removedUrls.join(",")} />
       <p className="text-xs font-normal text-slate-400">
         Yorumun henüz olmadığı ilanlarda alıcıya en çok güven veren şey daha önce yaptığın
-        işlerdir — en fazla {MAX_PORTFOLIO_IMAGES} görsel ekleyebilirsin.
+        işlerdir — en fazla {maxImages} görsel ekleyebilirsin.
+        {maxImages < MAX_PORTFOLIO_IMAGES_PRO && (
+          <>
+            {" "}
+            <Link href="/panel/pro-ol" className="font-medium text-purple-700 hover:underline">
+              Pro üyeler {MAX_PORTFOLIO_IMAGES_PRO} görsel ekleyebilir.
+            </Link>
+          </>
+        )}
       </p>
 
       {(kept.length > 0 || newPreviews.length > 0) && (

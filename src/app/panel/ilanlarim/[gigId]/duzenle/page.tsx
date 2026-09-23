@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { GigForm } from "@/app/panel/ilan-olustur/gig-form";
 import { updateGigAction } from "./actions";
+import { portfolioLimit } from "@/lib/image-constraints";
 
 export default async function EditGigPage(props: PageProps<"/panel/ilanlarim/[gigId]/duzenle">) {
   const { gigId } = await props.params;
@@ -10,12 +11,13 @@ export default async function EditGigPage(props: PageProps<"/panel/ilanlarim/[gi
   const session = await auth();
   if (!session?.user) redirect("/giris?callbackUrl=/panel/ilanlarim");
 
-  const [gig, categories] = await Promise.all([
+  const [gig, categories, user] = await Promise.all([
     prisma.gig.findUnique({
       where: { id: gigId },
       include: { packages: true },
     }),
     prisma.category.findMany({ orderBy: { order: "asc" } }),
+    prisma.user.findUnique({ where: { id: session.user.id }, select: { isPro: true } }),
   ]);
 
   if (!gig || gig.sellerId !== session.user.id) notFound();
@@ -42,6 +44,7 @@ export default async function EditGigPage(props: PageProps<"/panel/ilanlarim/[gi
           action={updateGigAction.bind(null, gig.id)}
           submitLabel="Değişiklikleri Kaydet"
           pendingLabel="Kaydediliyor..."
+          portfolioLimit={portfolioLimit(Boolean(user?.isPro))}
           defaultValues={{
             title: gig.title,
             categoryId: gig.categoryId,
