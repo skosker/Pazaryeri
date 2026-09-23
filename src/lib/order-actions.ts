@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { splitPayout } from "@/lib/commission";
+import { getSettings } from "@/lib/settings";
 import {
   sendOrderPaidEmails,
   sendOrderStartedEmail,
@@ -180,7 +181,8 @@ export async function buyerCompleteOrder(orderId: string, buyerId: string) {
 
   // Orders that completed before the service fee was introduced keep a zero-fee payout
   // row (the upsert never updates), so only new completions are split here.
-  const split = splitPayout(Number(order.amount));
+  const { commissionPercent } = await getSettings();
+  const split = splitPayout(Number(order.amount), commissionPercent);
 
   // The payout row is what the admin payout screen works from, so it has to appear in
   // the same transaction that releases the escrow — otherwise a crash in between would

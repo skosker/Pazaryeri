@@ -2,19 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import {
-  ALLOWED_IMAGE_TYPES,
-  MAX_IMAGE_BYTES,
-  MAX_PORTFOLIO_IMAGES,
-  MAX_PORTFOLIO_IMAGES_PRO,
-} from "@/lib/image-constraints";
+import { ALLOWED_IMAGE_TYPES, MAX_IMAGE_BYTES, MAX_PORTFOLIO_IMAGES } from "@/lib/image-constraints";
 
 export function PortfolioImagesField({
   currentUrls = [],
   maxImages = MAX_PORTFOLIO_IMAGES,
+  proMaxImages,
 }: {
   currentUrls?: string[];
   maxImages?: number;
+  /** The Pro limit, shown as an upgrade hint when it is higher than the seller's own. */
+  proMaxImages?: number;
 }) {
   const [removedUrls, setRemovedUrls] = useState<string[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
@@ -53,11 +51,11 @@ export function PortfolioImagesField({
       <p className="text-xs font-normal text-slate-400">
         Yorumun henüz olmadığı ilanlarda alıcıya en çok güven veren şey daha önce yaptığın
         işlerdir — en fazla {maxImages} görsel ekleyebilirsin.
-        {maxImages < MAX_PORTFOLIO_IMAGES_PRO && (
+        {proMaxImages !== undefined && maxImages < proMaxImages && (
           <>
             {" "}
             <Link href="/panel/pro-ol" className="font-medium text-purple-700 hover:underline">
-              Pro üyeler {MAX_PORTFOLIO_IMAGES_PRO} görsel ekleyebilir.
+              Pro üyeler {proMaxImages} görsel ekleyebilir.
             </Link>
           </>
         )}

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AuthShell } from "@/components/auth-shell";
 import { RegisterForm } from "./register-form";
 import { RolePicker } from "./role-picker";
-import { foundersRemaining } from "@/lib/founders";
+import { founderPlaces } from "@/lib/founders";
 import { FounderPromo } from "@/components/founder-promo";
 
 export default async function RegisterPage(props: PageProps<"/kayit">) {
@@ -19,7 +19,7 @@ export default async function RegisterPage(props: PageProps<"/kayit">) {
   }
 
   const sells = role === "FREELANCER";
-  const remaining = sells ? await foundersRemaining() : 0;
+  const places = sells ? await founderPlaces() : null;
 
   return (
     <AuthShell>
@@ -36,7 +36,7 @@ export default async function RegisterPage(props: PageProps<"/kayit">) {
           : "Hesabını oluştur, aradığın hizmeti bul ve işe hemen başla."}
       </p>
 
-      {sells && <FounderPromo remaining={remaining} className="mt-6" />}
+      {places && <FounderPromo {...places} className="mt-6" />}
 
       <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <RegisterForm role={role} />

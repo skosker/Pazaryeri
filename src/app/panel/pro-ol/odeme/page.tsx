@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { isMockPayment, isPaytrTestMode, getPaytrToken, clientIp } from "@/lib/paytr";
-import { findOrCreatePendingProPurchase, PRO_PRICE_TL } from "@/lib/pro-purchase";
+import { findOrCreatePendingProPurchase } from "@/lib/pro-purchase";
 import { getBankAccounts } from "@/lib/bank-transfer";
 import { formatPrice } from "@/lib/format-price";
 import { ProMockCheckoutForm } from "./pro-mock-checkout-form";
@@ -31,6 +31,7 @@ export default async function ProOdemePage(props: PageProps<"/panel/pro-ol/odeme
     getBankAccounts(),
   ]);
 
+  const price = Number(purchase.amount);
   let paytrToken: string | null = null;
   let tokenError: string | null = null;
 
@@ -41,12 +42,12 @@ export default async function ProOdemePage(props: PageProps<"/panel/pro-ol/odeme
       paytrToken = await getPaytrToken({
         merchantOid: purchase.id,
         email: user.email,
-        amount: PRO_PRICE_TL,
+        amount: price,
         userIp: await clientIp(),
         userName: user.name,
         userAddress: "Prosinta, Türkiye",
         userPhone: "05000000000",
-        basket: [{ name: "Prosinta Pro üyelik", price: PRO_PRICE_TL, quantity: 1 }],
+        basket: [{ name: "Prosinta Pro üyelik", price: price, quantity: 1 }],
         okUrl: `${appUrl}/panel`,
         failUrl: `${appUrl}/panel/pro-ol/odeme?hata=odeme-basarisiz`,
       });
@@ -63,7 +64,7 @@ export default async function ProOdemePage(props: PageProps<"/panel/pro-ol/odeme
   return (
     <div className="max-w-xl">
       <h1 className="text-2xl font-bold text-brand-navy">Pro Üyeliği Tamamla</h1>
-      <p className="mt-1 text-sm text-slate-500">Tek seferlik {formatPrice(PRO_PRICE_TL)}₺</p>
+      <p className="mt-1 text-sm text-slate-500">Tek seferlik {formatPrice(price)}₺</p>
 
       {(errorMessage || tokenError) && (
         <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
@@ -79,7 +80,7 @@ export default async function ProOdemePage(props: PageProps<"/panel/pro-ol/odeme
             // EFT is offered here too, so hiding the card tab has a real alternative next
             // to it, same as orders.
             isPaytrTestMode ? undefined : isMockPayment ? (
-              <ProMockCheckoutForm amount={PRO_PRICE_TL} />
+              <ProMockCheckoutForm amount={price} />
             ) : paytrToken ? (
               <PaytrEmbed token={paytrToken} />
             ) : (
@@ -88,7 +89,7 @@ export default async function ProOdemePage(props: PageProps<"/panel/pro-ol/odeme
               </p>
             )
           }
-          bankContent={<ProBankTransferPanel amount={PRO_PRICE_TL} accounts={bankAccounts} />}
+          bankContent={<ProBankTransferPanel amount={price} accounts={bankAccounts} />}
         />
       </div>
     </div>

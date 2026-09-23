@@ -2,7 +2,6 @@ import { listPendingPayouts, listRecentPaidPayouts } from "@/lib/payout-actions"
 import { formatIban } from "@/lib/iban";
 import { MarkPaidForm } from "./mark-paid";
 import { formatPrice } from "@/lib/format-price";
-import { COMMISSION_LABEL } from "@/lib/commission";
 
 export default async function PayoutsPage() {
   const [pending, paid] = await Promise.all([listPendingPayouts(), listRecentPaidPayouts()]);
@@ -24,7 +23,7 @@ export default async function PayoutsPage() {
         </span>
         {commissionTotal > 0 && (
           <span className="rounded-xl bg-emerald-50 px-4 py-2 text-emerald-800">
-            Bu hakedişlerden komisyon ({COMMISSION_LABEL}): <strong>{formatPrice(commissionTotal)}₺</strong>
+            Bu hakedişlerden komisyon: <strong>{formatPrice(commissionTotal)}₺</strong>
           </span>
         )}
       </div>

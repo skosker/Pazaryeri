@@ -1,14 +1,14 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { BecomeFreelancerForm } from "./become-freelancer-form";
-import { foundersRemaining } from "@/lib/founders";
+import { founderPlaces } from "@/lib/founders";
 import { FounderPromo } from "@/components/founder-promo";
 
 export default async function FreelancerOlPage() {
   const session = await auth();
   if (!session?.user) redirect("/giris?callbackUrl=/panel/freelancer-ol");
   if (session.user.role !== "BUYER") redirect("/panel");
-  const remaining = await foundersRemaining();
+  const places = await founderPlaces();
 
   return (
     <div className="max-w-xl">
@@ -27,7 +27,7 @@ export default async function FreelancerOlPage() {
         </li>
       </ul>
 
-      <FounderPromo remaining={remaining} className="mt-6" />
+      <FounderPromo {...places} className="mt-6" />
 
       <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <BecomeFreelancerForm />

@@ -4,6 +4,10 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { toggleMyGigPublishedAction, deleteMyGigAction, resubmitMyGigAction } from "./actions";
 import { formatPrice } from "@/lib/format-price";
+import { isSponsored } from "@/lib/gig-boost";
+import { getSettings } from "@/lib/settings";
+
+const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", timeZone: "Europe/Istanbul" });
 
 export default async function MyGigsPage(props: PageProps<"/panel/ilanlarim">) {
   const session = await auth();
@@ -12,7 +16,10 @@ export default async function MyGigsPage(props: PageProps<"/panel/ilanlarim">) {
 
   const searchParams = await props.searchParams;
   const justSubmitted = searchParams.gonderildi === "1";
+  const justBoosted = searchParams["one-cikarildi"] === "1";
+  const now = new Date();
 
+  const { boostEnabled, boostDays } = await getSettings();
   const gigs = await prisma.gig.findMany({
     where: { sellerId: session.user.id },
     orderBy: { createdAt: "desc" },
@@ -41,6 +48,13 @@ export default async function MyGigsPage(props: PageProps<"/panel/ilanlarim">) {
       {justSubmitted && (
         <p className="mb-6 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
           İlanın admin onayına gönderildi. Onaylandığında yayına alınacak.
+        </p>
+      )}
+
+      {justBoosted && (
+        <p className="mb-6 rounded-lg bg-purple-50 px-4 py-3 text-sm text-purple-800">
+          Ödemen onaylandığında ilanın {boostDays} gün boyunca öne çıkarılır ve &quot;Sponsorlu&quot;
+          etiketiyle en üstte gösterilir.
         </p>
       )}
 
@@ -81,9 +95,16 @@ export default async function MyGigsPage(props: PageProps<"/panel/ilanlarim">) {
                         Reddedildi
                       </span>
                     ) : gig.published ? (
-                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                        Yayında
-                      </span>
+                      <>
+                        <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                          Yayında
+                        </span>
+                        {isSponsored(gig.sponsoredUntil, now) && (
+                          <p className="mt-1.5 text-xs font-semibold text-purple-700">
+                            Sponsorlu · {dateFmt.format(gig.sponsoredUntil!)} tarihine kadar
+                          </p>
+                        )}
+                      </>
                     ) : (
                       <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
                         Duraklatıldı
@@ -98,6 +119,14 @@ export default async function MyGigsPage(props: PageProps<"/panel/ilanlarim">) {
                       >
                         Düzenle
                       </Link>
+                      {boostEnabled && gig.status === "APPROVED" && gig.published && (
+                        <Link
+                          href={`/panel/ilanlarim/${gig.id}/one-cikar`}
+                          className="brand-gradient rounded-full px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
+                        >
+                          {isSponsored(gig.sponsoredUntil, now) ? "Süreyi Uzat" : "Öne Çıkar"}
+                        </Link>
+                      )}
                       {gig.status === "APPROVED" && (
                         <form action={toggleMyGigPublishedAction.bind(null, gig.id)}>
                           <button

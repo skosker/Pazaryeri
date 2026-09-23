@@ -5,6 +5,8 @@ import { formatPrice } from "@/lib/format-price";
 import { ImportTransfersForm } from "./import-form";
 import { PeriodBreakdown, type PeriodRow } from "./period-breakdown";
 import { confirmProBankTransferAction } from "./pro-onay-actions";
+import { confirmBoostBankTransferAction } from "./one-cikar-onay-actions";
+import { listPendingBoostBankTransfers } from "@/lib/gig-boost";
 
 const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
 const dayLabelFmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "short", year: "numeric" });
@@ -135,9 +137,10 @@ export default async function BankTransferApprovalsPage(
   const from = parseDate(bas);
   const to = parseDate(bit, true);
 
-  const [allTransfers, pendingProTransfers] = await Promise.all([
+  const [allTransfers, pendingProTransfers, pendingBoostTransfers] = await Promise.all([
     listBankTransfers({ from, to }),
     listPendingProBankTransfers(),
+    listPendingBoostBankTransfers(),
   ]);
   const pendingCount = allTransfers.filter((o) => o.status === "PENDING_VERIFICATION").length;
   const transfers =
@@ -319,6 +322,55 @@ export default async function BankTransferApprovalsPage(
                     </td>
                     <td className="px-5 py-4 text-right">
                       <form action={confirmProBankTransferAction.bind(null, purchase.id)}>
+                        <button
+                          type="submit"
+                          className="rounded-full bg-purple-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-purple-700"
+                        >
+                          Onayla
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {pendingBoostTransfers.length > 0 && (
+        <div className="mt-10">
+          <h2 className="text-lg font-bold text-brand-navy">
+            Öne Çıkarma Havale Bildirimleri ({pendingBoostTransfers.length})
+          </h2>
+          <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-slate-100 text-xs uppercase text-slate-400">
+                <tr>
+                  <th className="px-5 py-3 font-medium">Freelancer</th>
+                  <th className="px-5 py-3 font-medium">İlan</th>
+                  <th className="px-5 py-3 font-medium">Tarih</th>
+                  <th className="px-5 py-3 font-medium">Tutar</th>
+                  <th className="px-5 py-3 font-medium text-right">İşlem</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingBoostTransfers.map((boost) => (
+                  <tr key={boost.id} className="border-b border-slate-100 last:border-0">
+                    <td className="px-5 py-4">
+                      <p className="font-medium text-brand-navy">{boost.user.name}</p>
+                      <p className="text-xs text-slate-400">{boost.user.email}</p>
+                    </td>
+                    <td className="px-5 py-4">
+                      <Link href={`/gig/${boost.gig.slug}`} className="text-slate-600 hover:underline">
+                        {boost.gig.title}
+                      </Link>
+                      <p className="text-xs text-slate-400">{boost.days} gün</p>
+                    </td>
+                    <td className="px-5 py-4 text-slate-500">{dateFmt.format(boost.createdAt)}</td>
+                    <td className="px-5 py-4 font-semibold text-brand-navy">{formatPrice(boost.amount)}₺</td>
+                    <td className="px-5 py-4 text-right">
+                      <form action={confirmBoostBankTransferAction.bind(null, boost.id)}>
                         <button
                           type="submit"
                           className="rounded-full bg-purple-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-purple-700"

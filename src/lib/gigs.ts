@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
+import { isSponsored } from "@/lib/gig-boost";
 
 const gigCardInclude = {
   seller: {
@@ -29,6 +30,7 @@ export type GigCardData = {
     emailVerified: boolean;
     founderNumber: number | null;
   };
+  sponsored: boolean;
   categoryName: string;
   categorySlug: string;
   categoryIcon: string;
@@ -52,6 +54,7 @@ function toCardData(gig: RawGig): GigCardData {
     coverColor: gig.coverColor,
     coverImage: gig.coverImage,
     featured: gig.featured,
+    sponsored: isSponsored(gig.sponsoredUntil),
     seller: { ...gig.seller, emailVerified: Boolean(gig.seller.emailVerified) },
     categoryName: gig.category.name,
     categorySlug: gig.category.slug,
@@ -106,6 +109,7 @@ type SortableGig = {
   sellerImage: string | null;
   founder: boolean;
   pro: boolean;
+  sponsored: boolean;
   startingPrice: number;
 };
 
@@ -161,6 +165,7 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
     select: {
       id: true,
       coverImage: true,
+      sponsoredUntil: true,
       seller: { select: { image: true, founderNumber: true, isPro: true } },
       packages: { orderBy: { price: "asc" }, take: 1, select: { price: true } },
     },
@@ -172,6 +177,7 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
     sellerImage: g.seller.image,
     founder: g.seller.founderNumber !== null,
     pro: g.seller.isPro,
+    sponsored: isSponsored(g.sponsoredUntil),
     startingPrice: g.packages[0] ? Number(g.packages[0].price) : 0,
   }));
 
@@ -200,6 +206,9 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
   if (!filters.sort || filters.sort === "uygun") {
     sortable = sortable.sort((a, b) => (a.pro ? 0 : 1) - (b.pro ? 0 : 1));
     sortable = sortable.sort((a, b) => (a.founder ? 0 : 1) - (b.founder ? 0 : 1));
+    // Paid "Öne Çıkar" leads above everything; the card says "Sponsorlu" so it is not
+    // mistaken for an organic ranking.
+    sortable = sortable.sort((a, b) => (a.sponsored ? 0 : 1) - (b.sponsored ? 0 : 1));
   }
 
   const total = sortable.length;

@@ -4,7 +4,16 @@ import { useTransition } from "react";
 import { completeMockProPayment, failMockProPayment } from "./actions";
 import { formatPrice } from "@/lib/format-price";
 
-export function ProMockCheckoutForm({ amount }: { amount: number }) {
+/** Also used by "Öne Çıkar", which passes its own actions; Pro's are the default. */
+export function ProMockCheckoutForm({
+  amount,
+  onComplete = completeMockProPayment,
+  onFail = failMockProPayment,
+}: {
+  amount: number;
+  onComplete?: () => Promise<void>;
+  onFail?: () => Promise<void>;
+}) {
   const [pending, startTransition] = useTransition();
 
   return (
@@ -54,7 +63,7 @@ export function ProMockCheckoutForm({ amount }: { amount: number }) {
       <button
         type="button"
         disabled={pending}
-        onClick={() => startTransition(() => completeMockProPayment())}
+        onClick={() => startTransition(() => onComplete())}
         className="brand-gradient mt-5 w-full rounded-full px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
       >
         {pending ? "İşleniyor..." : `${formatPrice(amount)}₺ Öde`}
@@ -63,7 +72,7 @@ export function ProMockCheckoutForm({ amount }: { amount: number }) {
       <button
         type="button"
         disabled={pending}
-        onClick={() => startTransition(() => failMockProPayment())}
+        onClick={() => startTransition(() => onFail())}
         className="mt-2 w-full rounded-full border border-slate-200 px-5 py-2.5 text-xs font-medium text-slate-400 hover:bg-slate-50"
       >
         Ödemeyi başarısız say (test)
