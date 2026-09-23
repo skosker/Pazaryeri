@@ -321,3 +321,22 @@ export async function sendNewMessageEmail(params: {
     )
   );
 }
+
+export async function sendFounderWelcomeEmail(params: {
+  to: string;
+  name: string;
+  founderNumber: number;
+  profileUrl: string;
+}) {
+  await sendEmail(
+    params.to,
+    `Tebrikler, Kurucu Freelancer #${params.founderNumber} oldun`,
+    layout(
+      "Kurucu Freelancer oldun",
+      `<p>Merhaba ${escapeHtml(params.name)},</p>
+       <p>İlk ilanın yayına alındı ve Prosinta'nın ilk 100 freelancer'ı arasına girdin: artık <strong>Kurucu Freelancer #${params.founderNumber}</strong>'sın.</p>
+       <p>Profilinde ve ilanlarında kalıcı Kurucu rozeti görünecek, ilanların arama sonuçlarında öne çıkacak.</p>
+       ${button(params.profileUrl, "Profilimi Gör")}`
+    )
+  );
+}

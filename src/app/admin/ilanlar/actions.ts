@@ -3,10 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
+import { grantFounderIfEligible } from "@/lib/founders";
 
 export async function approveGigAction(gigId: string) {
   await requireAdmin();
-  await prisma.gig.update({ where: { id: gigId }, data: { status: "APPROVED", published: true } });
+  const gig = await prisma.gig.update({
+    where: { id: gigId },
+    data: { status: "APPROVED", published: true },
+    select: { sellerId: true },
+  });
+  await grantFounderIfEligible(gig.sellerId);
   revalidatePath("/admin/ilanlar");
 }
 
@@ -33,6 +39,7 @@ export async function togglePublishedAction(gigId: string) {
   if (!gig) return;
 
   await prisma.gig.update({ where: { id: gigId }, data: { published: !gig.published } });
+  if (!gig.published) await grantFounderIfEligible(gig.sellerId);
   revalidatePath("/admin/ilanlar");
 }
 

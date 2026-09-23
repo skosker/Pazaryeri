@@ -8,6 +8,7 @@ import { GigCard } from "@/components/gig-card";
 import { StarRating } from "@/components/star-rating";
 import { UserAvatar } from "@/components/user-avatar";
 import { ReviewSummary } from "./review-summary";
+import { FounderBadge } from "@/components/founder-badge";
 
 function sellerLevelLabel(reviewCount: number) {
   if (reviewCount === 0) return "Yeni Satıcı";
@@ -30,6 +31,7 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
       skills: true,
       isOnline: true,
       isPro: true,
+      founderNumber: true,
       createdAt: true,
       role: true,
       suspended: true,
@@ -101,6 +103,7 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
                   Pro
                 </span>
               )}
+              {freelancer.founderNumber !== null && <FounderBadge number={freelancer.founderNumber} />}
             </div>
 
             {reviewCount > 0 && rating !== null && (

@@ -5,6 +5,7 @@ import { listFreelancers } from "@/lib/freelancers";
 import { UserAvatar } from "@/components/user-avatar";
 import { StarRating } from "@/components/star-rating";
 import { FilterBar } from "./filter-bar";
+import { FounderBadge } from "@/components/founder-badge";
 
 const PAGE_SIZE = 24;
 
@@ -102,6 +103,9 @@ export default async function FreelancerlarPage(props: PageProps<"/freelancerlar
                         <span className="rounded-full bg-amber-400 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950">
                           Pro
                         </span>
+                      )}
+                      {freelancer.founderNumber !== null && (
+                        <FounderBadge number={freelancer.founderNumber} compact />
                       )}
                     </div>
                     <p className="truncate text-xs text-slate-500">{freelancer.title ?? "Freelancer"}</p>
