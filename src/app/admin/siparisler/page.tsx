@@ -40,7 +40,12 @@ export default async function AdminOrdersPage(props: PageProps<"/admin/siparisle
   const activeStatus = tabs.some((t) => t.key === durum) ? durum : "TUMU";
 
   const orders = await prisma.order.findMany({
-    where: activeStatus === "TUMU" ? undefined : { status: activeStatus as OrderStatus },
+    // Showcase buyers' orders (seeded for the public review history) are not real
+    // business and would bury real orders in this newest-first list.
+    where: {
+      buyer: { synthetic: false },
+      ...(activeStatus === "TUMU" ? {} : { status: activeStatus as OrderStatus }),
+    },
     orderBy: { createdAt: "desc" },
     take: 100,
     include: {
