@@ -105,6 +105,7 @@ type SortableGig = {
   coverImage: string | null;
   sellerImage: string | null;
   founder: boolean;
+  pro: boolean;
   startingPrice: number;
 };
 
@@ -160,7 +161,7 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
     select: {
       id: true,
       coverImage: true,
-      seller: { select: { image: true, founderNumber: true } },
+      seller: { select: { image: true, founderNumber: true, isPro: true } },
       packages: { orderBy: { price: "asc" }, take: 1, select: { price: true } },
     },
   });
@@ -170,6 +171,7 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
     coverImage: g.coverImage,
     sellerImage: g.seller.image,
     founder: g.seller.founderNumber !== null,
+    pro: g.seller.isPro,
     startingPrice: g.packages[0] ? Number(g.packages[0].price) : 0,
   }));
 
@@ -192,10 +194,11 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
   // bozmuyor.
   sortable = sortable.sort((a, b) => (a.coverImage ? 0 : 1) - (b.coverImage ? 0 : 1));
 
-  // Kurucu Freelancer'ların ilanları varsayılan sıralamada en öne — son ve kararlı geçiş
-  // olduğu için önceki sıralamalar her iki grubun içinde korunuyor. Alıcının kendi
-  // seçtiği fiyat/yeni sıralamalarına dokunulmuyor.
+  // Varsayılan sıralamada önce Kurucu Freelancer'lar, sonra Pro'lar öne çıkar — geçişler
+  // kararlı olduğu için sıralama: kurucu+Pro, kurucu, Pro, diğerleri; her grubun içinde
+  // önceki sıralamalar korunuyor. Alıcının seçtiği fiyat/yeni sıralamalarına dokunulmuyor.
   if (!filters.sort || filters.sort === "uygun") {
+    sortable = sortable.sort((a, b) => (a.pro ? 0 : 1) - (b.pro ? 0 : 1));
     sortable = sortable.sort((a, b) => (a.founder ? 0 : 1) - (b.founder ? 0 : 1));
   }
 

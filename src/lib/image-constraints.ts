@@ -5,6 +5,12 @@
 export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 export const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 export const MAX_PORTFOLIO_IMAGES = 5;
+/** Prosinta Pro freelancers get a larger "örnek işler" gallery. */
+export const MAX_PORTFOLIO_IMAGES_PRO = 12;
+
+export function portfolioLimit(isPro: boolean): number {
+  return isPro ? MAX_PORTFOLIO_IMAGES_PRO : MAX_PORTFOLIO_IMAGES;
+}
 
 const readableTypes = "JPG, PNG veya WebP";
 

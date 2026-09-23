@@ -1,5 +1,12 @@
 import { putImage } from "@/lib/storage";
-import { validateImage, MAX_PORTFOLIO_IMAGES } from "@/lib/image-constraints";
+import { validateImage, MAX_PORTFOLIO_IMAGES, portfolioLimit } from "@/lib/image-constraints";
+import { prisma } from "@/lib/prisma";
+
+/** How many "örnek işler" images this seller may keep on a gig (Pro gets more). */
+export async function sellerPortfolioLimit(sellerId: string): Promise<number> {
+  const user = await prisma.user.findUnique({ where: { id: sellerId }, select: { isPro: true } });
+  return portfolioLimit(Boolean(user?.isPro));
+}
 
 /**
  * Reads the "örnek işler" picker out of a gig form. Existing images the seller marked
@@ -12,7 +19,8 @@ import { validateImage, MAX_PORTFOLIO_IMAGES } from "@/lib/image-constraints";
  */
 export async function readPortfolioFromForm(
   formData: FormData,
-  existingUrls: string[]
+  existingUrls: string[],
+  maxImages: number = MAX_PORTFOLIO_IMAGES
 ): Promise<{ portfolioImages?: string[]; error?: string }> {
   const removed = new Set(
     String(formData.get("removedPortfolio") ?? "")
@@ -27,8 +35,8 @@ export async function readPortfolioFromForm(
 
   if (removed.size === 0 && files.length === 0) return {};
 
-  if (kept.length + files.length > MAX_PORTFOLIO_IMAGES) {
-    return { error: `En fazla ${MAX_PORTFOLIO_IMAGES} örnek iş görseli ekleyebilirsin` };
+  if (kept.length + files.length > maxImages) {
+    return { error: `En fazla ${maxImages} örnek iş görseli ekleyebilirsin` };
   }
 
   const uploaded: string[] = [];

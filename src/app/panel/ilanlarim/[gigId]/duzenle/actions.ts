@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { gigSchema } from "@/lib/validation";
 import { readGigForm, packageData, type TierInput } from "@/lib/gig-form";
 import { readCoverFromForm } from "@/lib/gig-cover";
-import { readPortfolioFromForm } from "@/lib/gig-portfolio";
+import { readPortfolioFromForm, sellerPortfolioLimit } from "@/lib/gig-portfolio";
 import { deleteImageIfLocal } from "@/lib/storage";
 import type { PackageTier } from "@/generated/prisma/client";
 
@@ -41,7 +41,11 @@ export async function updateGigAction(
   const cover = await readCoverFromForm(formData);
   if (cover.error) return { error: cover.error };
 
-  const portfolio = await readPortfolioFromForm(formData, gig.portfolioImages);
+  const portfolio = await readPortfolioFromForm(
+    formData,
+    gig.portfolioImages,
+    await sellerPortfolioLimit(seller.id)
+  );
   if (portfolio.error) return { error: portfolio.error };
 
   const tiers: [PackageTier, TierInput][] = [
