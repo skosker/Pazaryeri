@@ -29,7 +29,11 @@ export default async function PanelPage() {
     role === "FREELANCER"
       ? prisma.order.findMany({
           where: { gig: { sellerId: userId } },
-          include: { gig: { select: { title: true, slug: true } }, buyer: { select: { name: true } } },
+          include: {
+            gig: { select: { title: true, slug: true } },
+            buyer: { select: { name: true } },
+            payout: { select: { net: true } },
+          },
           orderBy: { createdAt: "desc" },
         })
       : Promise.resolve([]),
@@ -43,14 +47,17 @@ export default async function PanelPage() {
       ? Promise.all([
           prisma.user.findUnique({ where: { id: userId }, select: { founderNumber: true } }),
           founderPlaces(),
-        ]).then(([user, places]) => ({ number: user?.founderNumber ?? null, ...places }))
+        ]).then(([user, places]) => ({ isFounder: user?.founderNumber != null, ...places }))
       : Promise.resolve(null),
   ]);
 
   const activeStatuses = ["PAID", "IN_PROGRESS", "DELIVERED"] as const;
+  // What the freelancer is actually paid: the payout's net (after the service fee), the
+  // same figure Ödeme Bilgileri shows. Orders completed before payouts were recorded have
+  // no row and were paid in full.
   const sellerEarnings = ordersAsSeller
     .filter((o) => o.status === "COMPLETED")
-    .reduce((sum, o) => sum + Number(o.amount), 0);
+    .reduce((sum, o) => sum + Number(o.payout?.net ?? o.amount), 0);
   const sellerActiveCount = ordersAsSeller.filter((o) =>
     (activeStatuses as readonly string[]).includes(o.status)
   ).length;
@@ -81,9 +88,9 @@ export default async function PanelPage() {
         )}
       </div>
 
-      {founder?.number != null ? (
+      {founder?.isFounder ? (
         <div className="mb-8 flex flex-wrap items-center gap-3 rounded-2xl border border-purple-200 bg-gradient-to-br from-fuchsia-50 to-indigo-50 p-5">
-          <FounderBadge number={founder.number} />
+          <FounderBadge />
           <p className="text-sm text-slate-600">
             Prosinta&apos;nın ilk {founder.limit} freelancer&apos;ından birisin. Rozetin kalıcı, ilanların aramalarda öne çıkıyor.
           </p>

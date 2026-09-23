@@ -103,7 +103,7 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
                   Pro
                 </span>
               )}
-              {freelancer.founderNumber !== null && <FounderBadge number={freelancer.founderNumber} />}
+              {freelancer.founderNumber !== null && <FounderBadge />}
             </div>
 
             {reviewCount > 0 && rating !== null && (

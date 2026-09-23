@@ -104,9 +104,7 @@ export default async function FreelancerlarPage(props: PageProps<"/freelancerlar
                           Pro
                         </span>
                       )}
-                      {freelancer.founderNumber !== null && (
-                        <FounderBadge number={freelancer.founderNumber} compact />
-                      )}
+                      {freelancer.isFounder && <FounderBadge compact />}
                     </div>
                     <p className="truncate text-xs text-slate-500">{freelancer.title ?? "Freelancer"}</p>
                   </div>

@@ -114,7 +114,7 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
                 Pro
               </span>
             )}
-            {gig.seller.founderNumber !== null && <FounderBadge number={gig.seller.founderNumber} />}
+            {gig.seller.founderNumber !== null && <FounderBadge />}
             {rating !== null && <StarRating rating={rating} count={reviewCount} />}
           </Link>
 

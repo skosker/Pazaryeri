@@ -28,7 +28,7 @@ export type GigCardData = {
     isOnline: boolean;
     isPro: boolean;
     emailVerified: boolean;
-    founderNumber: number | null;
+    isFounder: boolean;
   };
   sponsored: boolean;
   categoryName: string;
@@ -55,7 +55,16 @@ function toCardData(gig: RawGig): GigCardData {
     coverImage: gig.coverImage,
     featured: gig.featured,
     sponsored: isSponsored(gig.sponsoredUntil),
-    seller: { ...gig.seller, emailVerified: Boolean(gig.seller.emailVerified) },
+    seller: {
+      id: gig.seller.id,
+      name: gig.seller.name,
+      title: gig.seller.title,
+      image: gig.seller.image,
+      isOnline: gig.seller.isOnline,
+      isPro: gig.seller.isPro,
+      emailVerified: Boolean(gig.seller.emailVerified),
+      isFounder: gig.seller.founderNumber !== null,
+    },
     categoryName: gig.category.name,
     categorySlug: gig.category.slug,
     categoryIcon: gig.category.icon,
