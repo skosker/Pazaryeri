@@ -6,6 +6,7 @@ import { GigCover } from "@/components/gig-cover";
 import { UserAvatar } from "@/components/user-avatar";
 import { StarRating } from "@/components/star-rating";
 import { GigCard } from "@/components/gig-card";
+import { messageLink } from "@/lib/messaging";
 import { OrderPanel } from "./order-panel";
 
 function sellerLevelLabel(reviewCount: number) {
@@ -23,6 +24,12 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
   if (!gig) notFound();
 
   if (gig.packages.length === 0) notFound();
+
+  // Showcase sellers cannot log in to answer, so their gigs get no message button.
+  const messageHref =
+    !gig.seller.synthetic && session?.user?.id !== gig.sellerId
+      ? messageLink(gig.sellerId, Boolean(session?.user), { ilan: gig.slug })
+      : null;
 
   const reviewCount = gig.reviews.length;
   const rating =
@@ -220,6 +227,7 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
             features: p.features,
           }))}
           isOwnGig={session?.user?.id === gig.sellerId}
+          messageHref={messageHref}
         />
       </div>
 

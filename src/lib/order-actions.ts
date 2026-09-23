@@ -26,10 +26,10 @@ const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
  */
 const orderDetailInclude = {
   gig: {
-    select: { slug: true, title: true, sellerId: true, seller: { select: { name: true } } },
+    select: { slug: true, title: true, sellerId: true, seller: { select: { name: true, synthetic: true } } },
   },
   package: { select: { name: true, deliveryDays: true, revisionCount: true } },
-  buyer: { select: { name: true } },
+  buyer: { select: { name: true, synthetic: true } },
   review: { select: { rating: true, comment: true } },
 } as const;
 

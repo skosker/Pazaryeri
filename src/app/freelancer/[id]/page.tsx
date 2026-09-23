@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { messageLink } from "@/lib/messaging";
 import { getGigsBySeller } from "@/lib/gigs";
 import { GigCard } from "@/components/gig-card";
 import { StarRating } from "@/components/star-rating";
@@ -31,10 +33,18 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
       createdAt: true,
       role: true,
       suspended: true,
+      synthetic: true,
     },
   });
 
   if (!freelancer || freelancer.role !== "FREELANCER" || freelancer.suspended) notFound();
+
+  // Showcase profiles cannot log in to answer, and nobody messages themselves.
+  const session = await auth();
+  const messageHref =
+    !freelancer.synthetic && session?.user?.id !== freelancer.id
+      ? messageLink(freelancer.id, Boolean(session?.user))
+      : null;
 
   const [gigs, reviewAgg, completedCount, cancelledCount, reviews] = await Promise.all([
     getGigsBySeller(freelancer.id),
@@ -99,14 +109,14 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
               </div>
             )}
 
-            <button
-              type="button"
-              title="Yakında"
-              disabled
-              className="mt-5 w-full cursor-not-allowed rounded-full border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-400"
-            >
-              Mesaj Gönder
-            </button>
+            {messageHref && (
+              <Link
+                href={messageHref}
+                className="mt-5 block w-full rounded-full border border-slate-300 px-5 py-2.5 text-center text-sm font-semibold text-brand-navy transition hover:bg-slate-50"
+              >
+                Mesaj Gönder
+              </Link>
+            )}
 
             <dl className="mt-6 space-y-3 border-t border-slate-100 pt-5 text-left text-sm">
               {freelancer.age !== null && (

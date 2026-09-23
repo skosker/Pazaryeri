@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { auth, signOut } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { unreadConversationCount } from "@/lib/messaging";
 import { Logo } from "@/components/logo";
 import { LinkButton } from "@/components/ui/button";
 import { MobileNav } from "@/components/mobile-nav";
@@ -15,6 +16,8 @@ export async function Header() {
       select: { name: true, slug: true, category: { select: { slug: true } } },
     }),
   ]);
+
+  const unreadMessages = session?.user?.id ? await unreadConversationCount(session.user.id) : 0;
 
   const subcategoriesByCategory: Record<string, { name: string; slug: string }[]> = {};
   for (const sc of subcategories) {
@@ -62,6 +65,17 @@ export async function Header() {
                   className="hidden text-sm font-medium text-slate-600 hover:text-brand-navy md:block"
                 >
                   Freelancer Ol
+                </Link>
+              )}
+              {unreadMessages > 0 && (
+                <Link
+                  href="/panel/mesajlar"
+                  className="flex items-center gap-1.5 text-sm font-medium text-purple-700 hover:text-purple-800"
+                >
+                  Mesajlar
+                  <span className="rounded-full bg-purple-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+                    {unreadMessages > 99 ? "99+" : unreadMessages}
+                  </span>
                 </Link>
               )}
               <Link

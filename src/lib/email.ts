@@ -299,3 +299,25 @@ export async function sendRevisionRequestedEmail(params: {
     )
   );
 }
+
+export async function sendNewMessageEmail(params: {
+  to: string;
+  recipientName: string;
+  senderName: string;
+  preview: string;
+  threadUrl: string;
+}) {
+  const preview = params.preview.length > 200 ? `${params.preview.slice(0, 200)}…` : params.preview;
+  await sendEmail(
+    params.to,
+    `${params.senderName} sana mesaj gönderdi`,
+    layout(
+      "Yeni mesajın var",
+      `<p>Merhaba ${escapeHtml(params.recipientName)},</p>
+       <p><strong>${escapeHtml(params.senderName)}</strong> Prosinta'da sana mesaj gönderdi:</p>
+       <p style="background:#f8fafc;border-radius:12px;padding:12px 16px;">${escapeHtml(preview)}</p>
+       ${button(params.threadUrl, "Mesajı Yanıtla")}
+       <p style="font-size:12px;color:#94a3b8;">Güvenliğin için ödemeleri ve iletişimi Prosinta üzerinden yürüt.</p>`
+    )
+  );
+}

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { activeUser } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
+import { unreadConversationCount } from "@/lib/messaging";
 import { PanelNav } from "./panel-nav";
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
@@ -13,16 +14,20 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   const isFreelancer = account.role === "FREELANCER";
   const isBuyer = account.role === "BUYER";
 
-  const user = await prisma.user.findUnique({
-    where: { id: account.id },
-    select: { isPro: true },
-  });
+  const [user, unreadMessages] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: account.id },
+      select: { isPro: true },
+    }),
+    unreadConversationCount(account.id),
+  ]);
   const isPro = user?.isPro ?? false;
 
   const navItems = [
     { href: "/panel", label: "Genel Bakış" },
     ...(isFreelancer ? [{ href: "/panel/ilanlarim", label: "İlanlarım" }] : []),
     { href: "/panel/siparisler", label: isFreelancer ? "Siparişler" : "Siparişlerim" },
+    { href: "/panel/mesajlar", label: "Mesajlar", badge: unreadMessages },
     ...(isFreelancer ? [{ href: "/panel/odeme-bilgileri", label: "Ödeme Bilgileri" }] : []),
     { href: "/panel/profil", label: "Profilim" },
     { href: "/panel/sifre", label: "Şifre Değiştir" },

@@ -26,10 +26,13 @@ export function OrderPanel({
   slug,
   packages,
   isOwnGig,
+  messageHref,
 }: {
   slug: string;
   packages: PackageOption[];
   isOwnGig: boolean;
+  /** Null hides the button: the viewer's own gig, or a showcase seller nobody would answer for. */
+  messageHref: string | null;
 }) {
   // Default to the middle tier when there is a full ladder, otherwise the cheapest.
   const defaultIndex = packages.length === 3 ? 1 : 0;
@@ -111,14 +114,14 @@ export function OrderPanel({
           </form>
         )}
 
-        <button
-          type="button"
-          title="Yakında"
-          disabled
-          className="mt-3 w-full cursor-not-allowed rounded-full border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-400"
-        >
-          Satıcıya Mesaj Gönder
-        </button>
+        {messageHref && (
+          <Link
+            href={messageHref}
+            className="mt-3 block w-full rounded-full border border-slate-300 px-5 py-2.5 text-center text-sm font-semibold text-brand-navy transition hover:bg-slate-50"
+          >
+            Satıcıya Mesaj Gönder
+          </Link>
+        )}
 
         <ul className="mt-5 space-y-2 border-t border-slate-100 pt-5 text-xs text-slate-500">
           <li className="flex items-start gap-2">

@@ -5,6 +5,7 @@ import { getOrderForUser } from "@/lib/order-actions";
 import { orderStatusLabel, orderStatusColor } from "@/lib/order-status";
 import { ReviewForm } from "./review-form";
 import { formatPrice } from "@/lib/format-price";
+import { messageLink } from "@/lib/messaging";
 import {
   startOrderAction,
   deliverOrderAction,
@@ -35,6 +36,13 @@ export default async function OrderDetailPage(props: PageProps<"/siparis/[orderI
   const isAdmin = session.user.role === "ADMIN";
   const currentStepIndex = timelineSteps.findIndex((s) => s.key === order.status);
 
+  // Buyer and seller can reach each other from their order; showcase accounts cannot answer.
+  const otherParty = isBuyer ? order.gig.seller : isSeller ? order.buyer : null;
+  const messageHref =
+    otherParty && !otherParty.synthetic
+      ? messageLink(isBuyer ? order.gig.sellerId : order.buyerId, true, { siparis: order.id })
+      : null;
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <nav className="mb-6 text-sm text-slate-400">
@@ -55,9 +63,19 @@ export default async function OrderDetailPage(props: PageProps<"/siparis/[orderI
             {isBuyer ? `Satıcı: ${order.gig.seller.name}` : `Alıcı: ${order.buyer.name}`}
           </p>
         </div>
-        <span className={`rounded-full px-4 py-1.5 text-sm font-semibold ${orderStatusColor[order.status]}`}>
-          {orderStatusLabel[order.status]}
-        </span>
+        <div className="flex items-center gap-2">
+          {messageHref && (
+            <Link
+              href={messageHref}
+              className="rounded-full border border-slate-300 px-4 py-1.5 text-sm font-semibold text-brand-navy hover:bg-slate-50"
+            >
+              {isBuyer ? "Satıcıyla Mesajlaş" : "Alıcıyla Mesajlaş"}
+            </Link>
+          )}
+          <span className={`rounded-full px-4 py-1.5 text-sm font-semibold ${orderStatusColor[order.status]}`}>
+            {orderStatusLabel[order.status]}
+          </span>
+        </div>
       </div>
 
       {order.status === "PENDING_PAYMENT" && isBuyer && (
