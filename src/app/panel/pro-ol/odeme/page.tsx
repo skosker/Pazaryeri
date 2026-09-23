@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { isMockPayment, isPaytrTestMode, getPaytrToken, clientIp } from "@/lib/paytr";
+import { isMockPayment, isMockPaymentAllowed, isPaytrTestMode, getPaytrToken, clientIp } from "@/lib/paytr";
 import { findOrCreatePendingProPurchase } from "@/lib/pro-purchase";
 import { getBankAccounts } from "@/lib/bank-transfer";
 import { formatPrice } from "@/lib/format-price";
@@ -79,7 +79,7 @@ export default async function ProOdemePage(props: PageProps<"/panel/pro-ol/odeme
             // itself while PayTR is in test mode without anything shown at all — Havale/
             // EFT is offered here too, so hiding the card tab has a real alternative next
             // to it, same as orders.
-            isPaytrTestMode ? undefined : isMockPayment ? (
+            isPaytrTestMode || (isMockPayment && !isMockPaymentAllowed) ? undefined : isMockPayment ? (
               <ProMockCheckoutForm amount={price} />
             ) : paytrToken ? (
               <PaytrEmbed token={paytrToken} />
