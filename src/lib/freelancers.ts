@@ -58,47 +58,84 @@ function buildWhere(filters: FreelancerFilters): Prisma.UserWhereInput {
   return where;
 }
 
-/** 0 for a freelancer with a real photo, 1 for a drawn avatar (or none) — mirrors
- * gigs.ts's photoRank, so a listing that still has the auto-drawn placeholder sinks to
- * the back of the directory the same way it already does among a category's gig cards. */
-function photoRank(image: string | null): number {
-  return image && !image.startsWith("/api/avatar/") ? 0 : 1;
-}
+const cardSelect = {
+  id: true,
+  name: true,
+  title: true,
+  city: true,
+  age: true,
+  skills: true,
+  image: true,
+  isOnline: true,
+  isPro: true,
+  _count: { select: { gigs: true } },
+} satisfies Prisma.UserSelect;
+
+// Whoever is available right now comes first — the same signal the gig cards show —
+// then alphabetical, with the id as a tie-break so paging never repeats or drops
+// somebody between two pages. Pro is a badge here, not a ranking, which is how the gig
+// list treats it too.
+const directoryOrder: Prisma.UserOrderByWithRelationInput[] = [
+  { isOnline: "desc" },
+  { name: "asc" },
+  { id: "asc" },
+];
+
+// Profiles with a real photo come before the still-drawn-avatar ones across the whole
+// directory, not just within a page. Splitting the list into these two groups and
+// paging through them in turn keeps that order while letting the database return only
+// the page being shown — the directory holds ~13k freelancers, and loading all of them
+// to sort in memory on every visit was enough traffic to exhaust the database plan's
+// monthly transfer allowance.
+const realPhoto: Prisma.UserWhereInput = {
+  AND: [
+    { image: { not: null } },
+    { image: { not: "" } },
+    { NOT: { image: { startsWith: "/api/avatar/" } } },
+  ],
+};
+const drawnOrNoPhoto: Prisma.UserWhereInput = {
+  OR: [{ image: null }, { image: "" }, { image: { startsWith: "/api/avatar/" } }],
+};
 
 export async function listFreelancers(filters: FreelancerFilters): Promise<FreelancerListResult> {
   const pageSize = filters.pageSize ?? 24;
   const page = Math.max(1, filters.page ?? 1);
   const where = buildWhere(filters);
+  const withPhoto: Prisma.UserWhereInput = { AND: [where, realPhoto] };
+  const withoutPhoto: Prisma.UserWhereInput = { AND: [where, drawnOrNoPhoto] };
 
-  const rows = await prisma.user.findMany({
-    where,
-    select: {
-      id: true,
-      name: true,
-      title: true,
-      city: true,
-      age: true,
-      skills: true,
-      image: true,
-      isOnline: true,
-      isPro: true,
-      _count: { select: { gigs: true } },
-    },
-    // Whoever is available right now comes first — the same signal the gig cards
-    // show — then alphabetical, with the id as a tie-break so paging never repeats or
-    // drops somebody between two pages. Pro is a badge here, not a ranking, which is
-    // how the gig list treats it too.
-    orderBy: [{ isOnline: "desc" }, { name: "asc" }, { id: "asc" }],
-  });
+  const [photoCount, noPhotoCount] = await Promise.all([
+    prisma.user.count({ where: withPhoto }),
+    prisma.user.count({ where: withoutPhoto }),
+  ]);
 
-  // Still-drawn-avatar profiles sink to the very back of the whole directory, not just
-  // their own page. A stable sort (Node/V8) keeps the ordering above intact within each
-  // of the two groups this splits the list into.
-  rows.sort((a, b) => photoRank(a.image) - photoRank(b.image));
-
-  const total = rows.length;
+  const total = photoCount + noPhotoCount;
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
-  const paged = rows.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize);
+  const start = (page - 1) * pageSize;
+
+  const fromPhoto =
+    start < photoCount
+      ? await prisma.user.findMany({
+          where: withPhoto,
+          select: cardSelect,
+          orderBy: directoryOrder,
+          skip: start,
+          take: Math.min(pageSize, photoCount - start),
+        })
+      : [];
+  const remaining = pageSize - fromPhoto.length;
+  const fromNoPhoto =
+    remaining > 0
+      ? await prisma.user.findMany({
+          where: withoutPhoto,
+          select: cardSelect,
+          orderBy: directoryOrder,
+          skip: Math.max(0, start - photoCount),
+          take: remaining,
+        })
+      : [];
+  const paged = [...fromPhoto, ...fromNoPhoto];
 
   const reviews = await prisma.review.findMany({
     where: { gig: { sellerId: { in: paged.map((row) => row.id) } } },
