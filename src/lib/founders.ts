@@ -59,7 +59,6 @@ export async function grantFounderIfEligible(userId: string): Promise<void> {
       await sendFounderWelcomeEmail({
         to: user.email,
         name: user.name,
-        founderNumber: next,
         profileUrl: `${appUrl}/freelancer/${userId}`,
       });
       return;

@@ -17,7 +17,7 @@ export type FreelancerCardData = {
   image: string | null;
   isOnline: boolean;
   isPro: boolean;
-  founderNumber: number | null;
+  isFounder: boolean;
   gigCount: number;
   rating: number | null;
   reviewCount: number;
@@ -166,7 +166,7 @@ export async function listFreelancers(filters: FreelancerFilters): Promise<Freel
         image: row.image,
         isOnline: row.isOnline,
         isPro: row.isPro,
-        founderNumber: row.founderNumber,
+        isFounder: row.founderNumber !== null,
         gigCount: row._count.gigs,
         rating: rating ? rating.sum / rating.count : null,
         reviewCount: rating?.count ?? 0,
