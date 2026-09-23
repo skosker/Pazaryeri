@@ -34,6 +34,15 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
       </Section>
 
       <Section
+        title="İlk Sipariş İndirimi"
+        hint="Alıcının ilk siparişinde uygulanır, indirimi Prosinta karşılar: freelancer'ın hakedişi tam fiyat üzerinden hesaplanır. Ödeme ekranında ve ilan sayfasında gösterilir."
+      >
+        <Toggle label="İndirim açık" name="firstOrderEnabled" defaultChecked={settings.firstOrderEnabled} />
+        <Field label="İndirim oranı (%)" name="firstOrderPercent" defaultValue={settings.firstOrderPercent} step="0.01" />
+        <Field label="En fazla (₺)" name="firstOrderMaxTl" defaultValue={settings.firstOrderMaxTl} step="0.01" />
+      </Section>
+
+      <Section
         title="Kurucu Freelancer"
         hint="İlk ilanı onaylanan gerçek freelancer'lara kalıcı rozet ve aramada öncelik. Kapatınca yeni rozet verilmez ve kontenjan duyuruları gizlenir; verilmiş rozetler kalır."
       >

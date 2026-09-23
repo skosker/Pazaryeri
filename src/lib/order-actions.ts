@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { splitPayout } from "@/lib/commission";
 import { getSettings } from "@/lib/settings";
+import { payableAmount } from "@/lib/orders";
 import {
   sendOrderPaidEmails,
   sendOrderStartedEmail,
@@ -104,6 +105,7 @@ export async function markOrderPaid(orderId: string) {
     sellerName: order.gig.seller.name,
     gigTitle: order.gig.title,
     amount: Number(order.amount),
+    paidAmount: payableAmount(order),
     orderUrl: `${appUrl}/siparis/${orderId}`,
   });
 
@@ -256,7 +258,8 @@ export async function buyerRequestCancellation(orderId: string, buyerId: string)
       adminEmail,
       buyerName: order.buyer.name,
       gigTitle: order.gig.title,
-      amount: Number(order.amount),
+      // What would be refunded: what the buyer actually paid.
+      amount: payableAmount(order),
       orderUrl: `${appUrl}/siparis/${orderId}`,
     });
   }

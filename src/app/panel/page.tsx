@@ -6,6 +6,7 @@ import { formatPrice } from "@/lib/format-price";
 import { FounderPromo } from "@/components/founder-promo";
 import { FounderBadge } from "@/components/founder-badge";
 import { founderPlaces } from "@/lib/founders";
+import { payableAmount } from "@/lib/orders";
 
 export default async function PanelPage() {
   const session = await auth();
@@ -63,7 +64,7 @@ export default async function PanelPage() {
   ).length;
   const buyerSpent = ordersAsBuyer
     .filter((o) => o.status !== "PENDING_PAYMENT" && o.status !== "CANCELLED")
-    .reduce((sum, o) => sum + Number(o.amount), 0);
+    .reduce((sum, o) => sum + payableAmount(o), 0);
   const buyerActiveCount = ordersAsBuyer.filter((o) =>
     (activeStatuses as readonly string[]).includes(o.status)
   ).length;
@@ -202,7 +203,7 @@ export default async function PanelPage() {
               id: o.id,
               title: o.gig.title,
               subtitle: null,
-              amount: Number(o.amount),
+              amount: payableAmount(o),
               status: o.status,
             }))}
           />

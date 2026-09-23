@@ -6,6 +6,7 @@ import { orderStatusLabel, orderStatusColor } from "@/lib/order-status";
 import { ReviewForm } from "./review-form";
 import { formatPrice } from "@/lib/format-price";
 import { messageLink } from "@/lib/messaging";
+import { payableAmount } from "@/lib/orders";
 import {
   startOrderAction,
   deliverOrderAction,
@@ -201,6 +202,20 @@ export default async function OrderDetailPage(props: PageProps<"/siparis/[orderI
           <span className="text-slate-500">Tutar</span>
           <span className="font-semibold text-brand-navy">{formatPrice(order.amount)}₺</span>
         </div>
+        {/* The first-order discount is Prosinta's cost, not the seller's, so only the buyer
+            (and admin) see it; the seller keeps seeing their package price. */}
+        {(isBuyer || isAdmin) && Number(order.discount) > 0 && (
+          <>
+            <div className="mt-2 flex items-center justify-between text-sm">
+              <span className="text-emerald-700">İlk sipariş indirimi</span>
+              <span className="font-semibold text-emerald-700">−{formatPrice(order.discount)}₺</span>
+            </div>
+            <div className="mt-2 flex items-center justify-between text-sm">
+              <span className="text-slate-500">Ödenen tutar</span>
+              <span className="font-semibold text-brand-navy">{formatPrice(payableAmount(order))}₺</span>
+            </div>
+          </>
+        )}
         <div className="mt-2 flex items-center justify-between text-sm">
           <span className="text-slate-500">Teslim süresi</span>
           <span className="font-semibold text-brand-navy">{order.package.deliveryDays} gün</span>

@@ -126,7 +126,10 @@ export async function sendOrderPaidEmails(params: {
   sellerEmail: string;
   sellerName: string;
   gigTitle: string;
+  /** Package price — what the seller sees. */
   amount: number;
+  /** What the buyer actually paid (after any first-order discount). */
+  paidAmount: number;
   orderUrl: string;
 }) {
   await sendEmail(
@@ -135,7 +138,7 @@ export async function sendOrderPaidEmails(params: {
     layout(
       "Ödemen başarıyla alındı",
       `<p>Merhaba ${params.buyerName},</p>
-       <p><strong>${params.gigTitle}</strong> için <strong>${formatPrice(params.amount)}₺</strong> tutarındaki ödemen alındı. Satıcı işe başladığında haber vereceğiz.</p>
+       <p><strong>${params.gigTitle}</strong> için <strong>${formatPrice(params.paidAmount)}₺</strong> tutarındaki ödemen alındı. Satıcı işe başladığında haber vereceğiz.</p>
        ${button(params.orderUrl, "Siparişi Görüntüle")}`
     )
   );

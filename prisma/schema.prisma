@@ -234,7 +234,11 @@ model Package {
 model Order {
   id                      String      @id @default(cuid())
   status                  OrderStatus @default(PENDING_PAYMENT)
+  /// The package price: what the seller's payout is computed from.
   amount                  Decimal     @db.Decimal(10, 2)
+  /// First-order discount Prosinta absorbs: the buyer pays amount − discount, the seller
+  /// is still paid on the full amount. 0 for every other order.
+  discount                Decimal     @default(0) @db.Decimal(10, 2)
   escrowReleased          Boolean     @default(false)
   /// Free revisions used against the package's revisionCount (see buyerRequestRevision).
   revisionsUsed           Int         @default(0)
@@ -500,6 +504,10 @@ model SiteSettings {
   commissionPercent  Decimal  @default(2.5) @db.Decimal(5, 2)
   founderEnabled     Boolean  @default(true)
   founderLimit       Int      @default(100)
+  /// İlk sipariş indirimi: yüzde, en fazla bu kadar TL. Prosinta karşılar.
+  firstOrderEnabled  Boolean  @default(true)
+  firstOrderPercent  Decimal  @default(5) @db.Decimal(5, 2)
+  firstOrderMaxTl    Decimal  @default(500) @db.Decimal(10, 2)
   updatedAt          DateTime @updatedAt
 
   @@map("site_settings")

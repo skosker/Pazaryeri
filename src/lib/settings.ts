@@ -16,6 +16,10 @@ export type SiteSettings = {
   commissionPercent: number;
   founderEnabled: boolean;
   founderLimit: number;
+  firstOrderEnabled: boolean;
+  /** 5 means %5. */
+  firstOrderPercent: number;
+  firstOrderMaxTl: number;
 };
 
 /** Used until an admin first saves the settings form (mirrors the schema defaults). */
@@ -29,6 +33,9 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   commissionPercent: 2.5,
   founderEnabled: true,
   founderLimit: 100,
+  firstOrderEnabled: true,
+  firstOrderPercent: 5,
+  firstOrderMaxTl: 500,
 };
 
 /** One read per request however many components ask. */
@@ -45,6 +52,9 @@ export const getSettings = cache(async (): Promise<SiteSettings> => {
     commissionPercent: Number(row.commissionPercent),
     founderEnabled: row.founderEnabled,
     founderLimit: row.founderLimit,
+    firstOrderEnabled: row.firstOrderEnabled,
+    firstOrderPercent: Number(row.firstOrderPercent),
+    firstOrderMaxTl: Number(row.firstOrderMaxTl),
   };
 });
 
