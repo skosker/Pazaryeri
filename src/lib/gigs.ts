@@ -260,6 +260,7 @@ export async function getGigBySlug(slug: string) {
           isPro: true,
           emailVerified: true,
           synthetic: true,
+          suspended: true,
         },
       },
       category: { select: { name: true, slug: true, icon: true } },

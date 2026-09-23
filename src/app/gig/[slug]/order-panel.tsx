@@ -26,11 +26,13 @@ export function OrderPanel({
   slug,
   packages,
   isOwnGig,
+  acceptingOrders,
   messageHref,
 }: {
   slug: string;
   packages: PackageOption[];
   isOwnGig: boolean;
+  acceptingOrders: boolean;
   /** Null hides the button: the viewer's own gig, or a showcase seller nobody would answer for. */
   messageHref: string | null;
 }) {
@@ -101,6 +103,15 @@ export function OrderPanel({
           <p className="mt-5 rounded-full bg-slate-100 px-4 py-2.5 text-center text-sm font-semibold text-slate-500">
             Bu senin ilanın
           </p>
+        ) : !acceptingOrders ? (
+          <div className="mt-5">
+            <p className="rounded-full bg-slate-100 px-4 py-2.5 text-center text-sm font-semibold text-slate-500">
+              Şu An Sipariş Almıyor
+            </p>
+            <p className="mt-2 text-center text-xs text-slate-400">
+              Bu satıcı yeni sipariş kabul etmiyor. Aşağıda benzer hizmetleri bulabilirsin.
+            </p>
+          </div>
         ) : (
           <form action={orderAction}>
             <input type="hidden" name="slug" value={slug} />

@@ -7,6 +7,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { StarRating } from "@/components/star-rating";
 import { GigCard } from "@/components/gig-card";
 import { messageLink } from "@/lib/messaging";
+import { sellerTakesOrders } from "@/lib/orders";
 import { OrderPanel } from "./order-panel";
 
 function sellerLevelLabel(reviewCount: number) {
@@ -227,6 +228,7 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
             features: p.features,
           }))}
           isOwnGig={session?.user?.id === gig.sellerId}
+          acceptingOrders={sellerTakesOrders(gig.seller)}
           messageHref={messageHref}
         />
       </div>
