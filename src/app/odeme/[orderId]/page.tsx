@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { isMockPayment, isPaytrTestMode, getPaytrToken, clientIp } from "@/lib/paytr";
+import { isMockPayment, isMockPaymentAllowed, isPaytrTestMode, getPaytrToken, clientIp } from "@/lib/paytr";
 import { MockCheckoutForm } from "./mock-checkout-form";
 import { PaytrEmbed } from "./paytr-embed";
 import { PaymentMethodTabs } from "./payment-method-tabs";
@@ -114,7 +114,7 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
       <div className="mt-6">
         <PaymentMethodTabs
           cardContent={
-            isPaytrTestMode ? undefined : isMockPayment ? (
+            isPaytrTestMode || (isMockPayment && !isMockPaymentAllowed) ? undefined : isMockPayment ? (
               <MockCheckoutForm orderId={order.id} amount={amount} />
             ) : paytrToken ? (
               <PaytrEmbed token={paytrToken} />

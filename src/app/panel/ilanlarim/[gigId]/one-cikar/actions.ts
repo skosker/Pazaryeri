@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { activeUser } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
+import { assertMockPaymentAllowed } from "@/lib/paytr";
 import {
   boostableGig,
   findOrCreatePendingBoost,
@@ -19,6 +20,7 @@ async function requireBoostableGig(gigId: string) {
 }
 
 export async function completeMockBoostPayment(gigId: string) {
+  assertMockPaymentAllowed();
   const { user } = await requireBoostableGig(gigId);
   const boost = await findOrCreatePendingBoost(user.id, gigId);
   await markBoostPaid(boost.id);
@@ -26,6 +28,7 @@ export async function completeMockBoostPayment(gigId: string) {
 }
 
 export async function failMockBoostPayment(gigId: string) {
+  assertMockPaymentAllowed();
   const { user } = await requireBoostableGig(gigId);
   const boost = await findOrCreatePendingBoost(user.id, gigId);
   await prisma.gigBoost.update({ where: { id: boost.id }, data: { status: "FAILED" } });

@@ -7,11 +7,13 @@ import { prisma } from "@/lib/prisma";
 import { markOrderPaid } from "@/lib/order-actions";
 import { NOT_TAKING_ORDERS, payableAmount, refreshFirstOrderDiscount, sellerTakesOrders } from "@/lib/orders";
 import { sendBankTransferAdminAlertEmail, sendBankTransferSellerInfoEmail } from "@/lib/email";
+import { assertMockPaymentAllowed } from "@/lib/paytr";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const adminEmail = process.env.ADMIN_EMAIL;
 
 export async function completeMockPayment(orderId: string) {
+  assertMockPaymentAllowed();
   const buyer = await activeUser();
   if (!buyer) redirect(`/giris?callbackUrl=/odeme/${orderId}`);
 
@@ -50,6 +52,7 @@ export async function completeMockPayment(orderId: string) {
 }
 
 export async function failMockPayment(orderId: string) {
+  assertMockPaymentAllowed();
   const buyer = await activeUser();
   if (!buyer) redirect(`/giris?callbackUrl=/odeme/${orderId}`);
 

@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { activeUser } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
+import { assertMockPaymentAllowed } from "@/lib/paytr";
 import {
   findOrCreatePendingProPurchase,
   markProPurchasePaid,
@@ -10,6 +11,7 @@ import {
 } from "@/lib/pro-purchase";
 
 export async function completeMockProPayment() {
+  assertMockPaymentAllowed();
   const user = await activeUser();
   if (!user) redirect("/giris?callbackUrl=/panel/pro-ol/odeme");
 
@@ -20,6 +22,7 @@ export async function completeMockProPayment() {
 }
 
 export async function failMockProPayment() {
+  assertMockPaymentAllowed();
   const user = await activeUser();
   if (!user) redirect("/giris?callbackUrl=/panel/pro-ol/odeme");
 

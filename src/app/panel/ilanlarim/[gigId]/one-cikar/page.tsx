@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { isMockPayment, isPaytrTestMode, getPaytrToken, clientIp } from "@/lib/paytr";
+import { isMockPayment, isMockPaymentAllowed, isPaytrTestMode, getPaytrToken, clientIp } from "@/lib/paytr";
 import { boostableGig, findOrCreatePendingBoost, isSponsored } from "@/lib/gig-boost";
 import { getBankAccounts } from "@/lib/bank-transfer";
 import { formatPrice } from "@/lib/format-price";
@@ -96,7 +96,7 @@ export default async function BoostGigPage(props: PageProps<"/panel/ilanlarim/[g
       <div className="mt-6">
         <PaymentMethodTabs
           cardContent={
-            isPaytrTestMode ? undefined : isMockPayment ? (
+            isPaytrTestMode || (isMockPayment && !isMockPaymentAllowed) ? undefined : isMockPayment ? (
               <ProMockCheckoutForm
                 amount={price}
                 onComplete={completeMockBoostPayment.bind(null, gigId)}

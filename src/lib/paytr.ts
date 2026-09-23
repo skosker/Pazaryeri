@@ -36,6 +36,19 @@ function testMode() {
  */
 export const isPaytrTestMode = !isMockPayment && testMode() === "1";
 
+/**
+ * The simulated card form (no PayTR keys) is for local development only. Anywhere on
+ * Vercel — production, and previews that may share its database — it would let anyone
+ * mark an order, a Pro upgrade or an "Öne Çıkar" paid without paying, so it is never
+ * offered there and the actions behind it refuse to run. The pages hide it by this flag;
+ * the actions check it themselves because a server action can be called directly.
+ */
+export const isMockPaymentAllowed = isMockPayment && !process.env.VERCEL_ENV;
+
+export function assertMockPaymentAllowed() {
+  if (!isMockPaymentAllowed) throw new Error("Test ödemesi bu ortamda kullanılamaz");
+}
+
 type BasketItem = { name: string; price: number; quantity: number };
 
 type GetTokenParams = {
