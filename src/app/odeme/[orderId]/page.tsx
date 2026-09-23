@@ -7,6 +7,7 @@ import { PaytrEmbed } from "./paytr-embed";
 import { PaymentMethodTabs } from "./payment-method-tabs";
 import { BankTransferPanel } from "./bank-transfer-panel";
 import { getBankAccounts } from "@/lib/bank-transfer";
+import { NOT_TAKING_ORDERS, sellerTakesOrders } from "@/lib/orders";
 
 export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">) {
   const { orderId } = await props.params;
@@ -16,12 +17,20 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
 
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { gig: true, package: true, buyer: true },
+    include: {
+      gig: { include: { seller: { select: { synthetic: true, suspended: true } } } },
+      package: true,
+      buyer: true,
+    },
   });
 
   if (!order) notFound();
   if (order.buyerId !== session.user.id) notFound();
   if (order.status !== "PENDING_PAYMENT") redirect(`/siparis/${orderId}`);
+  // An unpaid order left over from before the seller stopped taking orders must not be paid.
+  if (!sellerTakesOrders(order.gig.seller)) {
+    redirect(`/gig/${order.gig.slug}?hata=${encodeURIComponent(NOT_TAKING_ORDERS)}`);
+  }
 
   const amount = Number(order.amount);
   const bankAccounts = await getBankAccounts();

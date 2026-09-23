@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { activeUser } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 import { markOrderPaid } from "@/lib/order-actions";
+import { NOT_TAKING_ORDERS, sellerTakesOrders } from "@/lib/orders";
 import { sendBankTransferAdminAlertEmail, sendBankTransferSellerInfoEmail } from "@/lib/email";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
@@ -14,9 +15,15 @@ export async function completeMockPayment(orderId: string) {
   const buyer = await activeUser();
   if (!buyer) redirect(`/giris?callbackUrl=/odeme/${orderId}`);
 
-  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { gig: { select: { slug: true, seller: { select: { synthetic: true, suspended: true } } } } },
+  });
   if (!order || order.buyerId !== buyer.id) redirect("/panel");
   if (order.status !== "PENDING_PAYMENT") redirect(`/siparis/${orderId}`);
+  if (!sellerTakesOrders(order.gig.seller)) {
+    redirect(`/gig/${order.gig.slug}?hata=${encodeURIComponent(NOT_TAKING_ORDERS)}`);
+  }
 
   await prisma.payment.upsert({
     where: { orderId },
@@ -75,6 +82,9 @@ export async function notifyBankTransfer(orderId: string) {
   });
   if (!order || order.buyerId !== buyer.id) redirect("/panel");
   if (order.status !== "PENDING_PAYMENT") redirect(`/siparis/${orderId}`);
+  if (!sellerTakesOrders(order.gig.seller)) {
+    redirect(`/gig/${order.gig.slug}?hata=${encodeURIComponent(NOT_TAKING_ORDERS)}`);
+  }
 
   await prisma.payment.upsert({
     where: { orderId },
