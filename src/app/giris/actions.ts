@@ -3,6 +3,7 @@
 import { AuthError } from "next-auth";
 import { signIn } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 import bcrypt from "bcryptjs";
 
 export type FormState = { error?: string };
@@ -33,7 +34,7 @@ export async function loginAction(
     await signIn("credentials", {
       email,
       password,
-      redirectTo: "/panel",
+      redirectTo: safeRedirectPath(formData.get("callbackUrl")),
     });
     return {};
   } catch (error) {

@@ -259,6 +259,7 @@ export async function getGigBySlug(slug: string) {
           isOnline: true,
           isPro: true,
           emailVerified: true,
+          synthetic: true,
         },
       },
       category: { select: { name: true, slug: true, icon: true } },

@@ -73,13 +73,16 @@ model User {
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
-  gigs               Gig[]                @relation("SellerGigs")
-  payouts            Payout[]             @relation("SellerPayouts")
-  ordersMade         Order[]              @relation("BuyerOrders")
-  reviews            Review[]             @relation("BuyerReviews")
-  verificationTokens VerificationToken[]
-  passwordResets     PasswordResetToken[]
-  proPurchases       ProPurchase[]
+  gigs                  Gig[]                @relation("SellerGigs")
+  payouts               Payout[]             @relation("SellerPayouts")
+  ordersMade            Order[]              @relation("BuyerOrders")
+  reviews               Review[]             @relation("BuyerReviews")
+  verificationTokens    VerificationToken[]
+  passwordResets        PasswordResetToken[]
+  proPurchases          ProPurchase[]
+  conversationsAsBuyer  Conversation[]       @relation("BuyerConversations")
+  conversationsAsSeller Conversation[]       @relation("SellerConversations")
+  messagesSent          Message[]            @relation("SentMessages")
 
   @@index([role, synthetic])
   @@map("users")
@@ -400,4 +403,51 @@ model FreelancerPayout {
 
   @@index([paidAt])
   @@map("freelancer_payouts")
+}
+
+/// One thread per (buyer, seller) pair — the same two people talking about a second gig
+/// keep the history they already have. The buyer is whoever contacted the freelancer;
+/// a freelancer never opens a thread with someone who has not ordered from them.
+model Conversation {
+  id               String    @id @default(cuid())
+  buyerId          String
+  buyer            User      @relation("BuyerConversations", fields: [buyerId], references: [id], onDelete: Cascade)
+  sellerId         String
+  seller           User      @relation("SellerConversations", fields: [sellerId], references: [id], onDelete: Cascade)
+  lastMessageAt    DateTime  @default(now())
+  /// A side has unread messages while lastMessageAt is later than its lastReadAt. The
+  /// sender's own lastReadAt moves with every message it sends, so it never counts its
+  /// own messages as unread.
+  buyerLastReadAt  DateTime?
+  sellerLastReadAt DateTime?
+  /// When each side was last emailed about unread messages: a new email goes out only
+  /// once they have read the thread since, so a burst of messages is one email.
+  buyerNotifiedAt  DateTime?
+  sellerNotifiedAt DateTime?
+  createdAt        DateTime  @default(now())
+  messages         Message[]
+
+  @@unique([buyerId, sellerId])
+  @@index([buyerId, lastMessageAt])
+  @@index([sellerId, lastMessageAt])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  /// Stored already masked: contact details (phone, e-mail, IBAN, messenger links) are
+  /// replaced before saving, per the membership agreement's ban on taking deals off the
+  /// platform (7.1–7.2), so the original never reaches the other side.
+  body           String
+  /// What was masked out, if anything — the queue an admin reviews.
+  maskedReason   String?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([senderId, createdAt])
+  @@map("messages")
 }

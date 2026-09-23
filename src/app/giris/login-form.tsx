@@ -6,7 +6,7 @@ import { loginAction, type FormState } from "./actions";
 
 const initialState: FormState = {};
 
-export function LoginForm() {
+export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
   const [state, formAction, pending] = useActionState(loginAction, initialState);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,6 +14,7 @@ export function LoginForm() {
   return (
     <>
       <form action={formAction} className="flex flex-col gap-4">
+        {callbackUrl && <input type="hidden" name="callbackUrl" value={callbackUrl} />}
         <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
           E-posta
           <input
