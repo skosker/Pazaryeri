@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { orderStatusLabel, orderStatusColor } from "@/lib/order-status";
 import type { OrderStatus } from "@/generated/prisma/enums";
 import { formatPrice } from "@/lib/format-price";
+import { payableAmount } from "@/lib/orders";
 
 const statusTabs: { key: OrderStatus | "TUMU"; label: string }[] = [
   { key: "TUMU", label: "Tümü" },
@@ -118,7 +119,10 @@ export default async function PanelOrdersPage(props: PageProps<"/panel/siparisle
                   <td className="px-5 py-4 text-slate-600">
                     {gorunum === "satici" ? order.buyer.name : order.gig.seller.name}
                   </td>
-                  <td className="px-5 py-4 font-semibold text-brand-navy">{formatPrice(order.amount)}₺</td>
+                  <td className="px-5 py-4 font-semibold text-brand-navy">
+                    {/* Buyers see what they paid; sellers their package price. */}
+                    {formatPrice(gorunum === "satici" ? Number(order.amount) : payableAmount(order))}₺
+                  </td>
                   <td className="px-5 py-4">
                     <span className={`rounded-full px-3 py-1 text-xs font-semibold ${orderStatusColor[order.status]}`}>
                       {orderStatusLabel[order.status]}

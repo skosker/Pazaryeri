@@ -27,12 +27,15 @@ export function OrderPanel({
   packages,
   isOwnGig,
   acceptingOrders,
+  firstOrderOffer,
   messageHref,
 }: {
   slug: string;
   packages: PackageOption[];
   isOwnGig: boolean;
   acceptingOrders: boolean;
+  /** Shown above the order button when the visitor would get the first-order discount. */
+  firstOrderOffer: { percent: number; maxTl: number } | null;
   /** Null hides the button: the viewer's own gig, or a showcase seller nobody would answer for. */
   messageHref: string | null;
 }) {
@@ -114,6 +117,14 @@ export function OrderPanel({
           </div>
         ) : (
           <form action={orderAction}>
+            {firstOrderOffer && (
+              <p className="mt-5 rounded-xl bg-emerald-50 px-3 py-2 text-center text-xs font-semibold text-emerald-700">
+                İlk siparişine özel %{firstOrderOffer.percent.toLocaleString("tr-TR")} indirim
+                {pkg.price * (firstOrderOffer.percent / 100) > firstOrderOffer.maxTl
+                  ? ` (en fazla ${formatPrice(firstOrderOffer.maxTl)}₺)`
+                  : ` — ${formatPrice(pkg.price - Math.round(pkg.price * firstOrderOffer.percent) / 100)}₺ ödersin`}
+              </p>
+            )}
             <input type="hidden" name="slug" value={slug} />
             <input type="hidden" name="packageId" value={pkg.id} />
             <button

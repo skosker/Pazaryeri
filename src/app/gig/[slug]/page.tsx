@@ -7,7 +7,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { StarRating } from "@/components/star-rating";
 import { GigCard } from "@/components/gig-card";
 import { messageLink } from "@/lib/messaging";
-import { sellerTakesOrders } from "@/lib/orders";
+import { firstOrderOffer, sellerTakesOrders } from "@/lib/orders";
 import { OrderPanel } from "./order-panel";
 import { FounderBadge } from "@/components/founder-badge";
 
@@ -40,7 +40,12 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
       : null;
 
   const errorMessage = typeof searchParams.hata === "string" ? searchParams.hata : null;
-  const relatedGigs = await getRelatedGigs(gig.category.slug, gig.slug);
+  const acceptingOrders = sellerTakesOrders(gig.seller);
+  const isOwnGig = session?.user?.id === gig.sellerId;
+  const [relatedGigs, offer] = await Promise.all([
+    getRelatedGigs(gig.category.slug, gig.slug),
+    acceptingOrders && !isOwnGig ? firstOrderOffer(session?.user?.id ?? null) : Promise.resolve(null),
+  ]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
@@ -229,8 +234,9 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
             revisionCount: p.revisionCount,
             features: p.features,
           }))}
-          isOwnGig={session?.user?.id === gig.sellerId}
-          acceptingOrders={sellerTakesOrders(gig.seller)}
+          isOwnGig={isOwnGig}
+          acceptingOrders={acceptingOrders}
+          firstOrderOffer={offer}
           messageHref={messageHref}
         />
       </div>

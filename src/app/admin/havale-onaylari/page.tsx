@@ -7,6 +7,7 @@ import { PeriodBreakdown, type PeriodRow } from "./period-breakdown";
 import { confirmProBankTransferAction } from "./pro-onay-actions";
 import { confirmBoostBankTransferAction } from "./one-cikar-onay-actions";
 import { listPendingBoostBankTransfers } from "@/lib/gig-boost";
+import { payableAmount } from "@/lib/orders";
 
 const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
 const dayLabelFmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "short", year: "numeric" });
@@ -47,7 +48,7 @@ function trimLeadingZeros(rows: PeriodRow[]): PeriodRow[] {
   return firstNonZero <= 0 ? rows : rows.slice(firstNonZero);
 }
 
-function buildBreakdown<T extends { createdAt: Date; amount: unknown }>(
+function buildBreakdown<T extends { createdAt: Date; amount: { toString(): string }; discount: { toString(): string } }>(
   rows: T[],
   start: Date,
   end: Date
@@ -57,7 +58,7 @@ function buildBreakdown<T extends { createdAt: Date; amount: unknown }>(
   const byMonth = new Map<string, { start: Date; count: number; total: number }>();
 
   for (const row of rows) {
-    const amount = Number(row.amount);
+    const amount = payableAmount(row);
 
     const dKey = dayKey(row.createdAt);
     const dEntry = byDay.get(dKey) ?? { count: 0, total: 0 };
@@ -156,7 +157,8 @@ export default async function BankTransferApprovalsPage(
   // today's data — an upper bound on the exact moment would clip it out of today's row.
   const reportRows = await listBankTransfers({ from: REPORT_START });
   const approvedCount = reportRows.filter((o) => APPROVED.has(o.status)).length;
-  const reportTotal = reportRows.reduce((sum, o) => sum + Number(o.amount), 0);
+  // Bank transfers: what the buyer actually sent, after any first-order discount.
+  const reportTotal = reportRows.reduce((sum, o) => sum + payableAmount(o), 0);
   const breakdown = buildBreakdown(reportRows, REPORT_START, now);
 
   return (
@@ -265,7 +267,7 @@ export default async function BankTransferApprovalsPage(
                       <td className="px-5 py-4 text-slate-600">{order.buyer.name}</td>
                       <td className="px-5 py-4 text-slate-600">{order.gig.seller.name}</td>
                       <td className="px-5 py-4 font-semibold text-brand-navy">
-                        {formatPrice(order.amount)}₺
+                        {formatPrice(payableAmount(order))}₺
                       </td>
                       <td className="px-5 py-4 text-right">
                         {approved ? (
