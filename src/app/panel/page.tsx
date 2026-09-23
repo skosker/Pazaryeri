@@ -3,6 +3,9 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { orderStatusLabel, orderStatusColor } from "@/lib/order-status";
 import { formatPrice } from "@/lib/format-price";
+import { FounderPromo } from "@/components/founder-promo";
+import { FounderBadge } from "@/components/founder-badge";
+import { FOUNDER_LIMIT, foundersRemaining } from "@/lib/founders";
 
 export default async function PanelPage() {
   const session = await auth();
@@ -10,7 +13,7 @@ export default async function PanelPage() {
 
   const { id: userId, role } = session.user;
 
-  const [myGigs, ordersAsBuyer, ordersAsSeller, ratingAgg] = await Promise.all([
+  const [myGigs, ordersAsBuyer, ordersAsSeller, ratingAgg, founder] = await Promise.all([
     role === "FREELANCER"
       ? prisma.gig.findMany({
           where: { sellerId: userId },
@@ -35,6 +38,12 @@ export default async function PanelPage() {
           where: { gig: { sellerId: userId } },
           _avg: { rating: true },
         })
+      : Promise.resolve(null),
+    role === "FREELANCER"
+      ? Promise.all([
+          prisma.user.findUnique({ where: { id: userId }, select: { founderNumber: true } }),
+          foundersRemaining(),
+        ]).then(([user, remaining]) => ({ number: user?.founderNumber ?? null, remaining }))
       : Promise.resolve(null),
   ]);
 
@@ -71,6 +80,17 @@ export default async function PanelPage() {
           </Link>
         )}
       </div>
+
+      {founder?.number != null ? (
+        <div className="mb-8 flex flex-wrap items-center gap-3 rounded-2xl border border-purple-200 bg-gradient-to-br from-fuchsia-50 to-indigo-50 p-5">
+          <FounderBadge number={founder.number} />
+          <p className="text-sm text-slate-600">
+            Prosinta&apos;nın ilk {FOUNDER_LIMIT} freelancer&apos;ından birisin. Rozetin kalıcı, ilanların aramalarda öne çıkıyor.
+          </p>
+        </div>
+      ) : (
+        founder && <FounderPromo remaining={founder.remaining} className="mb-8" />
+      )}
 
       <div className="mb-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
         {role === "FREELANCER" ? (

@@ -9,6 +9,7 @@ import { GigCard } from "@/components/gig-card";
 import { messageLink } from "@/lib/messaging";
 import { sellerTakesOrders } from "@/lib/orders";
 import { OrderPanel } from "./order-panel";
+import { FounderBadge } from "@/components/founder-badge";
 
 function sellerLevelLabel(reviewCount: number) {
   if (reviewCount === 0) return "Yeni Satıcı";
@@ -113,6 +114,7 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
                 Pro
               </span>
             )}
+            {gig.seller.founderNumber !== null && <FounderBadge number={gig.seller.founderNumber} />}
             {rating !== null && <StarRating rating={rating} count={reviewCount} />}
           </Link>
 

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { activeUser, INACTIVE_MESSAGE } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
+import { grantFounderIfEligible } from "@/lib/founders";
 
 async function requireGigOwner(gigId: string) {
   const seller = await activeUser();
@@ -20,6 +21,7 @@ export async function toggleMyGigPublishedAction(gigId: string) {
   // atlamak anlamına gelir — durdur/yayına al yalnızca zaten onaylanmış ilanlar için.
   if (gig.status !== "APPROVED") return;
   await prisma.gig.update({ where: { id: gigId }, data: { published: !gig.published } });
+  if (!gig.published) await grantFounderIfEligible(gig.sellerId);
   revalidatePath("/panel/ilanlarim");
 }
 

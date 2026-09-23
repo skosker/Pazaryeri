@@ -17,6 +17,7 @@ export type FreelancerCardData = {
   image: string | null;
   isOnline: boolean;
   isPro: boolean;
+  founderNumber: number | null;
   gigCount: number;
   rating: number | null;
   reviewCount: number;
@@ -68,6 +69,7 @@ const cardSelect = {
   image: true,
   isOnline: true,
   isPro: true,
+  founderNumber: true,
   _count: { select: { gigs: true } },
 } satisfies Prisma.UserSelect;
 
@@ -164,6 +166,7 @@ export async function listFreelancers(filters: FreelancerFilters): Promise<Freel
         image: row.image,
         isOnline: row.isOnline,
         isPro: row.isPro,
+        founderNumber: row.founderNumber,
         gigCount: row._count.gigs,
         rating: rating ? rating.sum / rating.count : null,
         reviewCount: rating?.count ?? 0,

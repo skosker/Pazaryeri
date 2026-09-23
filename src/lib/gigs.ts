@@ -2,7 +2,9 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 
 const gigCardInclude = {
-  seller: { select: { id: true, name: true, title: true, image: true, isOnline: true, isPro: true, emailVerified: true } },
+  seller: {
+    select: { id: true, name: true, title: true, image: true, isOnline: true, isPro: true, emailVerified: true, founderNumber: true },
+  },
   category: { select: { name: true, slug: true, icon: true } },
   subcategory: { select: { name: true, slug: true } },
   packages: { orderBy: { price: "asc" as const }, take: 1 },
@@ -25,6 +27,7 @@ export type GigCardData = {
     isOnline: boolean;
     isPro: boolean;
     emailVerified: boolean;
+    founderNumber: number | null;
   };
   categoryName: string;
   categorySlug: string;
@@ -101,6 +104,7 @@ type SortableGig = {
   id: string;
   coverImage: string | null;
   sellerImage: string | null;
+  founder: boolean;
   startingPrice: number;
 };
 
@@ -156,7 +160,7 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
     select: {
       id: true,
       coverImage: true,
-      seller: { select: { image: true } },
+      seller: { select: { image: true, founderNumber: true } },
       packages: { orderBy: { price: "asc" }, take: 1, select: { price: true } },
     },
   });
@@ -165,6 +169,7 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
     id: g.id,
     coverImage: g.coverImage,
     sellerImage: g.seller.image,
+    founder: g.seller.founderNumber !== null,
     startingPrice: g.packages[0] ? Number(g.packages[0].price) : 0,
   }));
 
@@ -186,6 +191,13 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
   // sona — bu üçüncü geçiş de kararlı olduğu için önceki iki sıralamayı grup içinde
   // bozmuyor.
   sortable = sortable.sort((a, b) => (a.coverImage ? 0 : 1) - (b.coverImage ? 0 : 1));
+
+  // Kurucu Freelancer'ların ilanları varsayılan sıralamada en öne — son ve kararlı geçiş
+  // olduğu için önceki sıralamalar her iki grubun içinde korunuyor. Alıcının kendi
+  // seçtiği fiyat/yeni sıralamalarına dokunulmuyor.
+  if (!filters.sort || filters.sort === "uygun") {
+    sortable = sortable.sort((a, b) => (a.founder ? 0 : 1) - (b.founder ? 0 : 1));
+  }
 
   const total = sortable.length;
   const pageSize = filters.pageSize ?? (total || 1);
@@ -261,6 +273,7 @@ export async function getGigBySlug(slug: string) {
           emailVerified: true,
           synthetic: true,
           suspended: true,
+          founderNumber: true,
         },
       },
       category: { select: { name: true, slug: true, icon: true } },
