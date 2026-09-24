@@ -370,17 +370,26 @@ export async function sendMembershipEndingEmail(params: {
   until: string;
   trial: boolean;
   renewUrl: string;
+  /** A corporate plan: different perks are lost, and it is a "paket" rather than an "üyelik". */
+  corporate?: boolean;
 }) {
-  const what = params.trial ? `Ücretsiz ${params.planLabel} denemen` : `${params.planLabel} üyeliğin`;
+  const what = params.trial
+    ? `Ücretsiz ${params.planLabel} denemen`
+    : params.corporate
+      ? `${params.planLabel} paketin`
+      : `${params.planLabel} üyeliğin`;
+  const loses = params.corporate
+    ? "Sonrasında sipariş indirimin ve bakiye bonusun sona erer; bakiyen ve geçmişin korunur."
+    : "Sonrasında rozetin, aramalardaki önceliğin ve aylık ücretsiz Öne Çıkar hakkın kalkar; ilanların yayında kalmaya devam eder.";
   await sendEmail(
     params.to,
     `${what} ${params.until} tarihinde bitiyor`,
     layout(
       `${what} bitiyor`,
       `<p>Merhaba ${escapeHtml(params.name)},</p>
-       <p>${what} <strong>${params.until}</strong> tarihinde sona erecek. Sonrasında rozetin, aramalardaki önceliğin ve aylık ücretsiz Öne Çıkar hakkın kalkar; ilanların yayında kalmaya devam eder.</p>
-       <p>Kesintisiz devam etmek için üyeliğini şimdi yenileyebilirsin. Yıllık planda daha az ödersin.</p>
-       ${button(params.renewUrl, "Üyeliğimi Yenile")}`
+       <p>${what} <strong>${params.until}</strong> tarihinde sona erecek. ${loses}</p>
+       <p>Kesintisiz devam etmek için şimdi yenileyebilirsin. Yıllık planda daha az ödersin.</p>
+       ${button(params.renewUrl, params.corporate ? "Paketimi Yenile" : "Üyeliğimi Yenile")}`
     )
   );
 }

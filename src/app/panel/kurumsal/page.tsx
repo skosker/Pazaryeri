@@ -6,6 +6,8 @@ import { corporateAccount, monthlySpending } from "@/lib/corporate";
 import { getBankAccounts } from "@/lib/bank-transfer";
 import { formatPrice } from "@/lib/format-price";
 import { TopUpForm } from "./top-up-form";
+import { CORP_PLAN_LABEL, corpPerks, corporatePlanState } from "@/lib/corporate-plans";
+import { untilFormat } from "@/lib/membership";
 
 const dateFmt = new Intl.DateTimeFormat("tr-TR", { dateStyle: "medium", timeZone: "Europe/Istanbul" });
 const statusLabel = { INITIALIZED: "Onay bekliyor", SUCCESS: "Yüklendi", FAILED: "Reddedildi" } as const;
@@ -31,12 +33,14 @@ export default async function CorporateAccountPage() {
     );
   }
 
-  const [topUps, entries, bankAccounts] = await Promise.all([
+  const [topUps, entries, bankAccounts, plan] = await Promise.all([
     prisma.balanceTopUp.findMany({ where: { userId: session.user.id }, orderBy: { createdAt: "desc" }, take: 10 }),
     prisma.balanceEntry.findMany({ where: { userId: session.user.id }, orderBy: { createdAt: "desc" }, take: 200 }),
     getBankAccounts(),
+    corporatePlanState(session.user.id),
   ]);
   const months = monthlySpending(entries);
+  const perks = corpPerks(plan.tier, plan.settings);
 
   return (
     <div className="max-w-3xl">
@@ -58,6 +62,30 @@ export default async function CorporateAccountPage() {
           )}
         </div>
       </div>
+
+      {plan.open && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-purple-200 bg-purple-50 p-5 text-sm">
+          <div>
+            <p className="font-semibold text-brand-navy">
+              {plan.tier ? `${CORP_PLAN_LABEL[plan.tier]} Paket` : "Temel Paket"}
+              {plan.until && (
+                <span className="font-normal text-slate-500"> · {untilFormat.format(plan.until)} tarihine kadar</span>
+              )}
+            </p>
+            <p className="mt-0.5 text-slate-600">
+              {plan.tier
+                ? `Siparişlerde %${perks.orderPercent.toLocaleString("tr-TR")} indirim (ayda en fazla ${formatPrice(perks.orderMaxTl)} TL), yüklemelerde %${perks.bonusPercent.toLocaleString("tr-TR")} bonus.`
+                : "Paket alarak siparişlerinde indirim ve bakiye yüklemelerinde bonus kazan."}
+            </p>
+          </div>
+          <Link
+            href="/panel/kurumsal/paketler"
+            className="brand-gradient rounded-full px-5 py-2 text-sm font-semibold text-white hover:opacity-90"
+          >
+            {plan.tier ? "Paketimi Yönet" : "Paketleri İncele"}
+          </Link>
+        </div>
+      )}
 
       <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="font-semibold text-brand-navy">Bakiye Yükle</h2>

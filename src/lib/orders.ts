@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { refreshReferralCredit } from "@/lib/referrals";
 import { activeCampaignPercent, campaignPrice, getCampaignPricing } from "@/lib/campaign";
+import { corporateOrderDiscount } from "@/lib/corporate-plans";
 
 export class OrderError extends Error {}
 
@@ -17,9 +18,17 @@ export function sellerTakesOrders(seller: { synthetic: boolean; suspended: boole
 
 type Money = number | { toString(): string };
 
-/** What the buyer is charged: the package price less the first-order discount and any referral credit. */
-export function payableAmount(order: { amount: Money; discount: Money; creditDiscount?: Money }): number {
-  const off = Number(order.discount) + Number(order.creditDiscount ?? 0);
+/**
+ * What the buyer is charged: the package price less the first-order discount, any
+ * referral credit and a corporate plan's discount.
+ */
+export function payableAmount(order: {
+  amount: Money;
+  discount: Money;
+  creditDiscount?: Money;
+  corporateDiscount?: Money;
+}): number {
+  const off = Number(order.discount) + Number(order.creditDiscount ?? 0) + Number(order.corporateDiscount ?? 0);
   return Math.round((Number(order.amount) - off) * 100) / 100;
 }
 
@@ -81,8 +90,9 @@ export async function refreshFirstOrderDiscount(order: {
 }
 
 /**
- * Both buyer-side reductions, re-checked right before an unpaid order is paid: the
- * first-order discount first, then a referral reward on what is left.
+ * The buyer-side reductions, re-checked right before an unpaid order is paid: the
+ * first-order discount first, then a referral reward on what is left, then a corporate
+ * plan's discount (from this month's allowance) on what is left after both.
  */
 export async function refreshOrderDiscounts(order: {
   id: string;
@@ -90,10 +100,19 @@ export async function refreshOrderDiscounts(order: {
   amount: Money;
   discount: Money;
   creditDiscount: Money;
-}): Promise<{ discount: number; creditDiscount: number }> {
+  corporateDiscount: Money;
+}): Promise<{ discount: number; creditDiscount: number; corporateDiscount: number }> {
   const discount = await refreshFirstOrderDiscount(order);
   const creditDiscount = await refreshReferralCredit({ ...order, discount });
-  return { discount, creditDiscount };
+  const corporateDiscount = await corporateOrderDiscount(
+    order.buyerId,
+    Number(order.amount) - discount - creditDiscount,
+    order.id
+  );
+  if (corporateDiscount !== Number(order.corporateDiscount)) {
+    await prisma.order.update({ where: { id: order.id }, data: { corporateDiscount } });
+  }
+  return { discount, creditDiscount, corporateDiscount };
 }
 
 export async function createOrder(buyerId: string, packageId: string) {

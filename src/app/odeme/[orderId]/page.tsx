@@ -37,9 +37,9 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
   }
 
   const listPrice = Number(order.amount);
-  const { discount, creditDiscount } = await refreshOrderDiscounts(order);
+  const { discount, creditDiscount, corporateDiscount } = await refreshOrderDiscounts(order);
   // What is actually charged — card, bank transfer and the summary below all use this.
-  const amount = payableAmount({ amount: listPrice, discount, creditDiscount });
+  const amount = payableAmount({ amount: listPrice, discount, creditDiscount, corporateDiscount });
   const bankAccounts = await getBankAccounts();
   const errorMessage =
     searchParams.hata === "odeme-basarisiz"
@@ -103,7 +103,7 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
         </p>
       )}
 
-      {(discount > 0 || creditDiscount > 0) && (
+      {(discount > 0 || creditDiscount > 0 || corporateDiscount > 0) && (
         <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm">
           <div className="flex justify-between text-slate-600">
             <span>Paket fiyatı</span>
@@ -119,6 +119,12 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
             <div className="mt-1 flex justify-between font-semibold text-emerald-700">
               <span>Davet ödülü</span>
               <span>−{formatPrice(creditDiscount)} TL</span>
+            </div>
+          )}
+          {corporateDiscount > 0 && (
+            <div className="mt-1 flex justify-between font-semibold text-emerald-700">
+              <span>Kurumsal paket indirimi</span>
+              <span>−{formatPrice(corporateDiscount)} TL</span>
             </div>
           )}
           <div className="mt-2 flex justify-between border-t border-emerald-200 pt-2 font-bold text-brand-navy">

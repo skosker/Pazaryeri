@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { markOrderPaid } from "@/lib/order-actions";
 import { payableAmount, refreshOrderDiscounts, sellerTakesOrders } from "@/lib/orders";
+import { corpPerks, corpPlanSelect, corpTier } from "@/lib/corporate-plans";
 
 export class CorporateError extends Error {}
 
@@ -13,8 +14,10 @@ export class CorporateError extends Error {}
 export async function corporateAccount(userId: string) {
   const [settings, user] = await Promise.all([
     getSettings(),
-    prisma.user.findUnique({ where: { id: userId }, select: { companyName: true, balance: true } }),
+    prisma.user.findUnique({ where: { id: userId }, select: { companyName: true, balance: true, ...corpPlanSelect } }),
   ]);
+  // A corporate plan's top-up bonus replaces the general one when it is higher.
+  const planBonus = user ? corpPerks(corpTier(user, settings), settings).bonusPercent : 0;
   return {
     enabled: settings.corporateEnabled,
     isCorporate: Boolean(user?.companyName),
@@ -22,7 +25,7 @@ export async function corporateAccount(userId: string) {
     companyName: user?.companyName ?? null,
     balance: Number(user?.balance ?? 0),
     minTopUp: settings.corporateMinTopUpTl,
-    bonusPercent: settings.corporateBonusPercent,
+    bonusPercent: Math.max(settings.corporateBonusPercent, planBonus),
   };
 }
 
@@ -82,8 +85,7 @@ export async function payOrderWithBalance(orderId: string, userId: string) {
   if (order.status !== "PENDING_PAYMENT") throw new CorporateError("Bu sipariş ödeme beklemiyor.");
   if (!sellerTakesOrders(order.gig.seller)) throw new CorporateError("Bu satıcı şu an yeni sipariş almıyor.");
 
-  const { discount, creditDiscount } = await refreshOrderDiscounts(order);
-  const payable = payableAmount({ amount: order.amount, discount, creditDiscount });
+  const payable = payableAmount({ amount: order.amount, ...(await refreshOrderDiscounts(order)) });
 
   await prisma.$transaction(async (tx) => {
     const flipped = await tx.order.updateMany({

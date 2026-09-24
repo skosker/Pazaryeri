@@ -38,6 +38,16 @@ export type SiteSettings = {
   corporateMinTopUpTl: number;
   /** 3 means %3. */
   corporateBonusPercent: number;
+  /** Kurumsal abonelik paketleri (Kurumsal / Kurumsal Plus). */
+  corporatePlansEnabled: boolean;
+  corpMonthlyTl: number;
+  corpPlusMonthlyTl: number;
+  corpOrderDiscountPercent: number;
+  corpOrderDiscountMaxTl: number;
+  corpPlusOrderDiscountPercent: number;
+  corpPlusOrderDiscountMaxTl: number;
+  corpTopUpBonusPercent: number;
+  corpPlusTopUpBonusPercent: number;
 };
 
 /** Used until an admin first saves the settings form (mirrors the schema defaults). */
@@ -67,6 +77,15 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   corporateEnabled: false,
   corporateMinTopUpTl: 5000,
   corporateBonusPercent: 0,
+  corporatePlansEnabled: false,
+  corpMonthlyTl: 1500,
+  corpPlusMonthlyTl: 3500,
+  corpOrderDiscountPercent: 3,
+  corpOrderDiscountMaxTl: 1000,
+  corpPlusOrderDiscountPercent: 5,
+  corpPlusOrderDiscountMaxTl: 3000,
+  corpTopUpBonusPercent: 1,
+  corpPlusTopUpBonusPercent: 2,
 };
 
 /** One read per request however many components ask. */
@@ -99,6 +118,15 @@ export const getSettings = cache(async (): Promise<SiteSettings> => {
     corporateEnabled: row.corporateEnabled,
     corporateMinTopUpTl: Number(row.corporateMinTopUpTl),
     corporateBonusPercent: Number(row.corporateBonusPercent),
+    corporatePlansEnabled: row.corporatePlansEnabled,
+    corpMonthlyTl: Number(row.corpMonthlyTl),
+    corpPlusMonthlyTl: Number(row.corpPlusMonthlyTl),
+    corpOrderDiscountPercent: Number(row.corpOrderDiscountPercent),
+    corpOrderDiscountMaxTl: Number(row.corpOrderDiscountMaxTl),
+    corpPlusOrderDiscountPercent: Number(row.corpPlusOrderDiscountPercent),
+    corpPlusOrderDiscountMaxTl: Number(row.corpPlusOrderDiscountMaxTl),
+    corpTopUpBonusPercent: Number(row.corpTopUpBonusPercent),
+    corpPlusTopUpBonusPercent: Number(row.corpPlusTopUpBonusPercent),
   };
 });
 
