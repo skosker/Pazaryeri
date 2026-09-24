@@ -35,6 +35,15 @@ export async function saveMembershipSettingsAction(
     corporateEnabled: formData.get("corporateEnabled") === "on",
     corporateMinTopUpTl: num(formData, "corporateMinTopUpTl"),
     corporateBonusPercent: num(formData, "corporateBonusPercent"),
+    corporatePlansEnabled: formData.get("corporatePlansEnabled") === "on",
+    corpMonthlyTl: num(formData, "corpMonthlyTl"),
+    corpPlusMonthlyTl: num(formData, "corpPlusMonthlyTl"),
+    corpOrderDiscountPercent: num(formData, "corpOrderDiscountPercent"),
+    corpOrderDiscountMaxTl: num(formData, "corpOrderDiscountMaxTl"),
+    corpPlusOrderDiscountPercent: num(formData, "corpPlusOrderDiscountPercent"),
+    corpPlusOrderDiscountMaxTl: num(formData, "corpPlusOrderDiscountMaxTl"),
+    corpTopUpBonusPercent: num(formData, "corpTopUpBonusPercent"),
+    corpPlusTopUpBonusPercent: num(formData, "corpPlusTopUpBonusPercent"),
   };
 
   if (!isPrice(s.proMonthlyTl!) || !isPrice(s.plusMonthlyTl!)) {
@@ -67,6 +76,26 @@ export async function saveMembershipSettingsAction(
   }
   if (!(Number.isFinite(s.corporateBonusPercent) && s.corporateBonusPercent! >= 0 && s.corporateBonusPercent! <= 50)) {
     return { error: "Bakiye bonusu %0 ile %50 arasında olmalı." };
+  }
+
+  const percents = [s.corpOrderDiscountPercent!, s.corpPlusOrderDiscountPercent!, s.corpTopUpBonusPercent!, s.corpPlusTopUpBonusPercent!];
+  if (!percents.every((n) => Number.isFinite(n) && n >= 0 && n <= 50)) {
+    return { error: "Kurumsal paket yüzdeleri %0 ile %50 arasında olmalı." };
+  }
+  if (![s.corpMonthlyTl!, s.corpPlusMonthlyTl!, s.corpOrderDiscountMaxTl!, s.corpPlusOrderDiscountMaxTl!].every(isPrice)) {
+    return { error: "Kurumsal paket tutarları 0 ile 1.000.000 TL arasında olmalı." };
+  }
+  for (const key of [
+    "corpMonthlyTl",
+    "corpPlusMonthlyTl",
+    "corpOrderDiscountPercent",
+    "corpOrderDiscountMaxTl",
+    "corpPlusOrderDiscountPercent",
+    "corpPlusOrderDiscountMaxTl",
+    "corpTopUpBonusPercent",
+    "corpPlusTopUpBonusPercent",
+  ] as const) {
+    s[key] = round2(s[key]!);
   }
 
   s.proMonthlyTl = round2(s.proMonthlyTl!);

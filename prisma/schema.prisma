@@ -80,6 +80,10 @@ model User {
   proTrialUsedAt     DateTime?
   /// Bitiş hatırlatmasının gönderildiği proUntil (aynı dönem için ikinci e-posta gitmesin).
   proReminderFor     DateTime?
+  /// Kurumsal abonelik (KURUMSAL / KURUMSAL_PLUS) ve bittiği an; geçmişte kalınca düşer.
+  corpPlan           MembershipPlan?
+  corpPlanUntil      DateTime?
+  corpReminderFor    DateTime?
   /// Kurucu Freelancer sırası (1'den kontenjana kadar, /admin/ayarlar): ilk ilanı onaylanan ilk gerçek freelancer'lara
   /// bir kez verilir ve kalıcıdır. Diğer herkes için NULL.
   founderNumber      Int?      @unique
@@ -276,6 +280,9 @@ model Order {
   /// Davet ödülünden düşülen tutar (Prosinta karşılar): alıcı amount − discount −
   /// creditDiscount öder, satıcının hakedişi yine amount üzerinden hesaplanır.
   creditDiscount          Decimal     @default(0) @db.Decimal(10, 2)
+  /// Kurumsal abonelik indirimi (Prosinta karşılar, aylık üst sınırlı); satıcının hakedişi
+  /// yine amount üzerinden.
+  corporateDiscount       Decimal     @default(0) @db.Decimal(10, 2)
   referralReward          ReferralReward? @relation("RewardUsedOn")
   escrowReleased          Boolean     @default(false)
   /// Free revisions used against the package's revisionCount (see buyerRequestRevision).
@@ -352,6 +359,9 @@ model ProPurchase {
 enum MembershipPlan {
   PRO
   PRO_PLUS
+  /// Kurumsal abonelik paketleri (alıcı tarafı, şirket hesapları).
+  KURUMSAL
+  KURUMSAL_PLUS
 }
 
 /// One paid "Öne Çıkar" purchase for a gig — same payment shape as ProPurchase (its id
@@ -574,6 +584,18 @@ model SiteSettings {
   referralRewardTl   Decimal  @default(200) @db.Decimal(10, 2)
   /// Kurumsal paket: toplu bakiye yükleme ve bakiyeyle ödeme (yalnızca kurumsal hesaplar).
   corporateEnabled      Boolean @default(false)
+  /// Kurumsal abonelik paketleri (Kurumsal / Kurumsal Plus); kapalıyken kimse görmez.
+  corporatePlansEnabled Boolean @default(false)
+  corpMonthlyTl         Decimal @default(1500) @db.Decimal(10, 2)
+  corpPlusMonthlyTl     Decimal @default(3500) @db.Decimal(10, 2)
+  /// Siparişlerde indirim yüzdesi ve aylık üst sınırı (TL); Prosinta karşılar.
+  corpOrderDiscountPercent     Decimal @default(3) @db.Decimal(5, 2)
+  corpOrderDiscountMaxTl       Decimal @default(1000) @db.Decimal(10, 2)
+  corpPlusOrderDiscountPercent Decimal @default(5) @db.Decimal(5, 2)
+  corpPlusOrderDiscountMaxTl   Decimal @default(3000) @db.Decimal(10, 2)
+  /// Bakiye yüklemede pakete göre bonus yüzdesi.
+  corpTopUpBonusPercent        Decimal @default(1) @db.Decimal(5, 2)
+  corpPlusTopUpBonusPercent    Decimal @default(2) @db.Decimal(5, 2)
   corporateMinTopUpTl   Decimal @default(5000) @db.Decimal(10, 2)
   /// Yüklemeye eklenen bonus, yüzde (ör. 3 = %3). 0 = bonus yok.
   corporateBonusPercent Decimal @default(0) @db.Decimal(5, 2)
@@ -627,6 +649,8 @@ enum BalanceEntryKind {
   TOPUP
   ORDER
   ADJUSTMENT
+  /// Kurumsal abonelik bakiyeden ödendi.
+  PLAN
 }
 
 /// Every change to a corporate balance: + for a confirmed top-up, − for an order paid.
@@ -637,6 +661,8 @@ model BalanceEntry {
   note      String?
   orderId   String?          @unique
   topUpId   String?          @unique
+  /// Bakiyeden ödenen abonelik satın alması (ProPurchase); aynı satın alma iki kez düşülmesin.
+  purchaseId String?         @unique
   createdAt DateTime         @default(now())
 
   userId String

@@ -1,3 +1,5 @@
+import { CORP_PLAN_LABEL, isCorpPlan } from "@/lib/corporate-plans";
+import { untilFormat } from "@/lib/membership";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
@@ -15,6 +17,7 @@ function monthStart(now = new Date()): Date {
 
 export default async function AdminCorporatePage() {
   const since = monthStart();
+  const now = new Date();
   const [settings, pending, companies, spending] = await Promise.all([
     getSettings(),
     prisma.balanceTopUp.findMany({
@@ -24,7 +27,7 @@ export default async function AdminCorporatePage() {
     }),
     prisma.user.findMany({
       where: { companyName: { not: null } },
-      select: { id: true, name: true, email: true, companyName: true, taxOffice: true, taxNumber: true, balance: true },
+      select: { id: true, name: true, email: true, companyName: true, taxOffice: true, taxNumber: true, balance: true, corpPlan: true, corpPlanUntil: true },
       orderBy: { companyName: "asc" },
     }),
     prisma.balanceEntry.groupBy({
@@ -119,6 +122,7 @@ export default async function AdminCorporatePage() {
                 <tr>
                   <th className="px-5 py-3 font-medium">Şirket</th>
                   <th className="px-5 py-3 font-medium">Vergi</th>
+                  <th className="px-5 py-3 font-medium">Paket</th>
                   <th className="px-5 py-3 font-medium">Bakiye</th>
                   <th className="px-5 py-3 font-medium">Bu Ay</th>
                 </tr>
@@ -138,6 +142,16 @@ export default async function AdminCorporatePage() {
                       </td>
                       <td className="px-5 py-4 text-slate-500">
                         {c.taxOffice} · {c.taxNumber}
+                      </td>
+                      <td className="px-5 py-4 text-slate-600">
+                        {c.corpPlan && isCorpPlan(c.corpPlan) && c.corpPlanUntil && c.corpPlanUntil > now ? (
+                          <>
+                            <span className="font-semibold text-purple-700">{CORP_PLAN_LABEL[c.corpPlan]}</span>
+                            <span className="block text-xs text-slate-400">{untilFormat.format(c.corpPlanUntil)}</span>
+                          </>
+                        ) : (
+                          "Temel"
+                        )}
                       </td>
                       <td className="px-5 py-4 font-semibold text-brand-navy">{formatPrice(c.balance)} TL</td>
                       <td className="px-5 py-4 text-slate-600">

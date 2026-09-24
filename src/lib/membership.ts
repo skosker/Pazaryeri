@@ -14,6 +14,12 @@ export type Tier = Plan | null;
 export type Period = "aylik" | "yillik";
 
 export const PLAN_LABEL: Record<Plan, string> = { PRO: "Pro", PRO_PLUS: "Pro Plus" };
+/** Every plan a purchase can be for, freelancer and corporate (admin lists, notices). */
+export const PURCHASE_PLAN_LABEL: Record<Plan | "KURUMSAL" | "KURUMSAL_PLUS", string> = {
+  ...PLAN_LABEL,
+  KURUMSAL: "Kurumsal",
+  KURUMSAL_PLUS: "Kurumsal Plus",
+};
 export const PERIOD_MONTHS: Record<Period, number> = { aylik: 1, yillik: 12 };
 export const PERIOD_LABEL: Record<Period, string> = { aylik: "Aylık", yillik: "Yıllık" };
 
@@ -103,17 +109,31 @@ export function extendMembership(
   settings: SiteSettings,
   now = new Date()
 ): { proUntil: Date; proPlus: boolean } {
-  let carriedMs = 0;
-  if (hasPaidPeriod(user, now)) {
-    const remaining = user.proUntil!.getTime() - now.getTime();
-    const current = monthlyPrice(user.proPlus ? "PRO_PLUS" : "PRO", settings);
-    const next = monthlyPrice(plan, settings);
-    carriedMs = current > 0 && next > 0 ? (remaining * current) / next : remaining;
-  }
+  const current = hasPaidPeriod(user, now) ? monthlyPrice(user.proPlus ? "PRO_PLUS" : "PRO", settings) : 0;
   return {
-    proUntil: new Date(addMonths(now, months).getTime() + Math.round(carriedMs)),
+    proUntil: extendPeriod(user.proUntil, current, monthlyPrice(plan, settings), months, now),
     proPlus: plan === "PRO_PLUS",
   };
+}
+
+/**
+ * End of a new paid period of `months` starting now, plus whatever is left of the running
+ * one (ending `until`), converted by the two plans' monthly prices. Shared by freelancer
+ * and corporate memberships.
+ */
+export function extendPeriod(
+  until: Date | null,
+  currentMonthly: number,
+  nextMonthly: number,
+  months: number,
+  now = new Date()
+): Date {
+  let carriedMs = 0;
+  if (until && until > now) {
+    const remaining = until.getTime() - now.getTime();
+    carriedMs = currentMonthly > 0 && nextMonthly > 0 ? (remaining * currentMonthly) / nextMonthly : remaining;
+  }
+  return new Date(addMonths(now, months).getTime() + Math.round(carriedMs));
 }
 
 /** Monthly free "Öne Çıkar" days that come with a tier (0: none). */

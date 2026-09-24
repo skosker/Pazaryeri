@@ -139,6 +139,14 @@ function buildFaqGroups(settings: SiteSettings, campaigns: CampaignRow[]): FaqGr
           q: "Şirket (kurumsal) olarak kayıt olabilir miyim?",
           a: "Evet. Kayıtta “Hizmet Satın Alacağım”ı seçip “Kurumsal”a geç; şirket unvanı, vergi dairesi, vergi numarası ve fatura adresini gir. Mevcut hesabın için Panel → Profilim → Fatura Bilgileri'nden de ekleyebilirsin. Faturaların şirket unvanına düzenlenir.",
         },
+        ...(settings.corporateEnabled && settings.corporatePlansEnabled
+          ? [
+              {
+                q: "Kurumsal paketler nedir?",
+                a: `Şirket hesaplarına özel aylık ya da yıllık paketler. Kurumsal (aylık ${tl(settings.corpMonthlyTl)}): siparişlerde ${pct(settings.corpOrderDiscountPercent)} indirim (ayda en fazla ${tl(settings.corpOrderDiscountMaxTl)}) ve bakiye yüklemelerinde ${pct(settings.corpTopUpBonusPercent)} bonus. Kurumsal Plus (aylık ${tl(settings.corpPlusMonthlyTl)}): siparişlerde ${pct(settings.corpPlusOrderDiscountPercent)} indirim (ayda en fazla ${tl(settings.corpPlusOrderDiscountMaxTl)}) ve ${pct(settings.corpPlusTopUpBonusPercent)} bonus. Panel → Kurumsal Hesap → Kurumsal Paketler'den bakiyeyle ya da Havale/EFT ile alabilirsin; yıllık planda ${pct(settings.yearlyDiscountPercent)} tasarruf edersin.`,
+              },
+            ]
+          : []),
         {
           q: "Şifremi unuttum, ne yapmalıyım?",
           a: "Giriş sayfasındaki “Şifremi Unuttum” linkine tıkla; e-posta adresine gelen bağlantıyla yeni bir şifre belirleyebilirsin.",

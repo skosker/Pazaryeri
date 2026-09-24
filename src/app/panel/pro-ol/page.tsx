@@ -5,7 +5,7 @@ import { formatPrice } from "@/lib/format-price";
 import { buildPlanCards } from "@/lib/membership-plans";
 import { freeBoostCredit } from "@/lib/gig-boost";
 import { pendingProBankTransfer } from "@/lib/pro-purchase";
-import { PERIOD_LABEL, PLAN_LABEL, hasPaidPeriod, periodOfMonths, untilFormat } from "@/lib/membership";
+import { PERIOD_LABEL, PURCHASE_PLAN_LABEL, hasPaidPeriod, periodOfMonths, untilFormat } from "@/lib/membership";
 import { MembershipPlans } from "@/components/membership-plans";
 import { ProBadge } from "@/components/pro-badge";
 import { startProTrialAction } from "./actions";
@@ -87,7 +87,7 @@ export default async function ProOlPage(props: PageProps<"/panel/pro-ol">) {
 
       {pending && (
         <p className="mt-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          {PLAN_LABEL[pending.plan]}
+          {PURCHASE_PLAN_LABEL[pending.plan]}
           {pendingPeriod ? ` (${PERIOD_LABEL[pendingPeriod]})` : ""} için {formatPrice(pending.amount)} TL Havale/EFT
           bildirimin alındı; onaylanınca üyeliğin güncellenecek.
         </p>

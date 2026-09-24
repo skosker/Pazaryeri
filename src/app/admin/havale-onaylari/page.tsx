@@ -1,4 +1,4 @@
-import { PLAN_LABEL } from "@/lib/membership";
+import { PURCHASE_PLAN_LABEL } from "@/lib/membership";
 import Link from "next/link";
 import { listBankTransfers } from "@/lib/order-actions";
 import { listPendingProBankTransfers } from "@/lib/pro-purchase";
@@ -296,7 +296,7 @@ export default async function BankTransferApprovalsPage(
       {pendingProTransfers.length > 0 && (
         <div className="mt-10">
           <h2 className="text-lg font-bold text-brand-navy">
-            Üyelik Havale Bildirimleri ({pendingProTransfers.length})
+            Üyelik ve Paket Havale Bildirimleri ({pendingProTransfers.length})
           </h2>
           <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
             <table className="w-full text-left text-sm">
@@ -319,7 +319,7 @@ export default async function BankTransferApprovalsPage(
                     <td className="px-5 py-4 text-slate-500">
                       {purchase.months === null
                         ? "Süresiz Pro"
-                        : `${PLAN_LABEL[purchase.plan]} · ${purchase.months === 12 ? "Yıllık" : "Aylık"}`}
+                        : `${PURCHASE_PLAN_LABEL[purchase.plan]} · ${purchase.months === 12 ? "Yıllık" : "Aylık"}`}
                     </td>
                     <td className="px-5 py-4 text-slate-500">{dateFmt.format(purchase.createdAt)}</td>
                     <td className="px-5 py-4 font-semibold text-brand-navy">

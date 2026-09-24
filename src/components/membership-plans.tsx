@@ -16,11 +16,13 @@ export type PlanPeriodPrice = {
 export type PlanFeature = { strong?: string; text: string };
 
 export type PlanCardData = {
-  key: "FREE" | "PRO" | "PRO_PLUS";
+  key: string;
   name: string;
   tagline: string;
   /** Null for the free plan. */
   prices: { aylik: PlanPeriodPrice; yillik: PlanPeriodPrice } | null;
+  /** Shown in place of a price on the free plan. */
+  note?: string;
   features: PlanFeature[];
   highlight?: boolean;
   /** `{donem}` in href is replaced with the chosen period. No href: shown disabled. */
@@ -95,9 +97,7 @@ export function MembershipPlans({
 
               <div className="mt-5 min-h-[5.5rem]">
                 {price === null ? (
-                  <p className="pt-2 text-sm leading-relaxed text-slate-600">
-                    Süre sınırı yok, kart bilgisi gerekmez. Hemen ilan açıp satışa başla.
-                  </p>
+                  <p className="pt-2 text-sm leading-relaxed text-slate-600">{plan.note}</p>
                 ) : (
                   <>
                     <p className="flex items-baseline gap-1">

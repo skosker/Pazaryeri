@@ -7,8 +7,8 @@ import { untilFormat } from "@/lib/membership";
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 /**
- * Daily (vercel.json): e-mail freelancers whose paid or trial membership ends within a
- * week, once per period. Vercel sends `Authorization: Bearer $CRON_SECRET`; without the
+ * Daily (vercel.json): e-mail freelancers whose paid or trial membership, and companies
+ * whose corporate plan, ends within a week, once per period. Vercel sends `Authorization: Bearer $CRON_SECRET`; without the
  * secret configured nobody can run it.
  */
 export async function GET(request: NextRequest) {
@@ -50,5 +50,38 @@ export async function GET(request: NextRequest) {
     sent++;
   }
 
-  return NextResponse.json({ checked: candidates.length, sent });
+  // Corporate plans the same way, keyed on corpPlanUntil.
+  const companies = await prisma.user.findMany({
+    where: {
+      synthetic: false,
+      suspended: false,
+      companyName: { not: null },
+      corpPlanUntil: { gt: now, lte: new Date(now.getTime() + WEEK_MS) },
+    },
+    select: { id: true, email: true, name: true, corpPlan: true, corpPlanUntil: true, corpReminderFor: true },
+  });
+  for (const company of companies) {
+    if (company.corpReminderFor?.getTime() === company.corpPlanUntil!.getTime()) continue;
+    const { count } = await prisma.user.updateMany({
+      where: {
+        id: company.id,
+        corpPlanUntil: company.corpPlanUntil,
+        OR: [{ corpReminderFor: null }, { corpReminderFor: { not: company.corpPlanUntil } }],
+      },
+      data: { corpReminderFor: company.corpPlanUntil },
+    });
+    if (count === 0) continue;
+    await sendMembershipEndingEmail({
+      to: company.email,
+      name: company.name,
+      planLabel: company.corpPlan === "KURUMSAL_PLUS" ? "Kurumsal Plus" : "Kurumsal",
+      until: untilFormat.format(company.corpPlanUntil!),
+      trial: false,
+      renewUrl: `${siteUrl}/panel/kurumsal/paketler`,
+      corporate: true,
+    });
+    sent++;
+  }
+
+  return NextResponse.json({ checked: candidates.length + companies.length, sent });
 }

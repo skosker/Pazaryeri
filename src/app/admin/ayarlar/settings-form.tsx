@@ -80,6 +80,25 @@ export function MembershipSettingsForm({ settings }: { settings: SiteSettings })
           <NumberField label="En düşük yükleme (TL)" name="corporateMinTopUpTl" defaultValue={settings.corporateMinTopUpTl} step="0.01" />
           <NumberField label="Yükleme bonusu (%)" name="corporateBonusPercent" defaultValue={settings.corporateBonusPercent} step="0.01" />
         </SettingsCard>
+
+        <SettingsCard
+          title="Kurumsal Paketler (Abonelik)"
+          status={{ on: settings.corporateEnabled && settings.corporatePlansEnabled }}
+          wide
+          hint="Kurumsal paket ile birlikte açıkken şirket hesapları Panel → Kurumsal Hesap → Kurumsal Paketler'den aylık/yıllık paket alır (yıllık indirim üyelik paketleriyle aynı). Sipariş indirimi ve yükleme bonusunu Prosinta karşılar; indirimin aylık üst sınırını paket fiyatının altında tut."
+        >
+          <div className="sm:col-span-2">
+            <Toggle label="Kurumsal paketler açık" name="corporatePlansEnabled" defaultChecked={settings.corporatePlansEnabled} />
+          </div>
+          <NumberField label="Kurumsal aylık fiyat (TL)" name="corpMonthlyTl" defaultValue={settings.corpMonthlyTl} step="0.01" />
+          <NumberField label="Kurumsal Plus aylık fiyat (TL)" name="corpPlusMonthlyTl" defaultValue={settings.corpPlusMonthlyTl} step="0.01" />
+          <NumberField label="Kurumsal sipariş indirimi (%)" name="corpOrderDiscountPercent" defaultValue={settings.corpOrderDiscountPercent} step="0.01" />
+          <NumberField label="Kurumsal Plus sipariş indirimi (%)" name="corpPlusOrderDiscountPercent" defaultValue={settings.corpPlusOrderDiscountPercent} step="0.01" />
+          <NumberField label="Kurumsal aylık indirim üst sınırı (TL)" name="corpOrderDiscountMaxTl" defaultValue={settings.corpOrderDiscountMaxTl} step="0.01" />
+          <NumberField label="Kurumsal Plus aylık indirim üst sınırı (TL)" name="corpPlusOrderDiscountMaxTl" defaultValue={settings.corpPlusOrderDiscountMaxTl} step="0.01" />
+          <NumberField label="Kurumsal yükleme bonusu (%)" name="corpTopUpBonusPercent" defaultValue={settings.corpTopUpBonusPercent} step="0.01" />
+          <NumberField label="Kurumsal Plus yükleme bonusu (%)" name="corpPlusTopUpBonusPercent" defaultValue={settings.corpPlusTopUpBonusPercent} step="0.01" />
+        </SettingsCard>
       </div>
 
       <SaveBar pending={pending} error={state.error} saved={state.saved} label="Ayarları Kaydet" />

@@ -91,7 +91,7 @@ export async function notifyBankTransfer(orderId: string) {
   if (!sellerTakesOrders(order.gig.seller)) {
     redirect(`/gig/${order.gig.slug}?hata=${encodeURIComponent(NOT_TAKING_ORDERS)}`);
   }
-  const { discount, creditDiscount } = await refreshOrderDiscounts(order);
+  const discounts = await refreshOrderDiscounts(order);
 
   await prisma.payment.upsert({
     where: { orderId },
@@ -115,7 +115,7 @@ export async function notifyBankTransfer(orderId: string) {
       adminEmail,
       buyerName: order.buyer.name,
       gigTitle: order.gig.title,
-      amount: payableAmount({ amount: order.amount, discount, creditDiscount }),
+      amount: payableAmount({ amount: order.amount, ...discounts }),
       orderUrl: `${appUrl}/siparis/${orderId}`,
     });
   }
