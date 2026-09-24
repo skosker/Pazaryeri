@@ -5,7 +5,7 @@ import "./globals.css";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { prisma } from "@/lib/prisma";
-import { getCampaign } from "@/lib/campaign";
+import { getLiveCampaign } from "@/lib/campaign";
 import { CampaignBanner } from "@/components/campaign-banner";
 
 const geistSans = Geist({
@@ -46,7 +46,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const categories = await prisma.category
     .findMany({ orderBy: { order: "asc" }, take: 6, select: { name: true, slug: true } })
     .catch(() => []);
-  const campaign = await getCampaign().catch(() => null);
+  const liveCampaign = await getLiveCampaign().catch(() => null);
 
   return (
     <html
@@ -54,7 +54,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
-        {campaign?.live && <CampaignBanner name={campaign.name} />}
+        {liveCampaign && <CampaignBanner name={liveCampaign.name} />}
         <Header />
         <main className="flex-1">{children}</main>
         <Footer categories={categories.map((c) => ({ label: c.name, slug: c.slug }))} />

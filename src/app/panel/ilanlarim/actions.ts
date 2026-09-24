@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { activeUser, INACTIVE_MESSAGE } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 import { grantFounderIfEligible } from "@/lib/founders";
-import { getCampaign } from "@/lib/campaign";
 
 async function requireGigOwner(gigId: string) {
   const seller = await activeUser();
@@ -43,19 +42,3 @@ export async function deleteMyGigAction(gigId: string) {
   revalidatePath("/panel/ilanlarim");
 }
 
-/** Join (or change the discount of) the seasonal campaign with one of your approved gigs. */
-export async function joinCampaignAction(gigId: string, formData: FormData) {
-  const gig = await requireGigOwner(gigId);
-  const campaign = await getCampaign();
-  if (!campaign.signupOpen || gig.status !== "APPROVED") return;
-  const percent = Number(formData.get("percent"));
-  if (!Number.isInteger(percent) || percent < campaign.minPercent || percent > campaign.maxPercent) return;
-  await prisma.gig.update({ where: { id: gigId }, data: { campaignPercent: percent } });
-  revalidatePath("/panel/ilanlarim");
-}
-
-export async function leaveCampaignAction(gigId: string) {
-  await requireGigOwner(gigId);
-  await prisma.gig.update({ where: { id: gigId }, data: { campaignPercent: null } });
-  revalidatePath("/panel/ilanlarim");
-}

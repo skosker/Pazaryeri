@@ -1,58 +1,49 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
-import Link from "next/link";
-import { SettingsForm } from "./settings-form";
-import { resetCampaignSignupsAction } from "./actions";
+import { MembershipSettingsForm } from "./settings-form";
 
-export default async function AdminSettingsPage() {
+export default async function MembershipSettingsPage() {
   const now = new Date();
-  const [settings, founders, sponsored, pros, campaignGigs] = await Promise.all([
+  const [settings, founders, sponsored, pros, companies] = await Promise.all([
     getSettings(),
     prisma.user.count({ where: { founderNumber: { not: null } } }),
     prisma.gig.count({ where: { sponsoredUntil: { gt: now } } }),
     prisma.user.count({ where: { isPro: true, synthetic: false } }),
-    prisma.gig.count({ where: { campaignPercent: { not: null } } }),
+    prisma.user.count({ where: { companyName: { not: null } } }),
   ]);
 
   return (
-    <div className="max-w-3xl">
-      <h1 className="text-2xl font-bold text-brand-navy">Kampanya ve Üyelik Ayarları</h1>
-      <p className="mt-1 text-sm text-slate-500">
-        Fiyatlar, süreler ve kampanyalar. Kaydettiğin değerler sitede hemen geçerli olur, yeni bir
-        dağıtım gerekmez.
-      </p>
-
-      <div className="mt-6 flex flex-wrap gap-3 text-sm">
-        <span className="rounded-xl bg-purple-50 px-4 py-2 text-purple-800">
-          Kurucu Freelancer: <strong>{founders.toLocaleString("tr-TR")}</strong> / {settings.founderLimit.toLocaleString("tr-TR")}
-        </span>
-        <span className="rounded-xl bg-slate-100 px-4 py-2 text-slate-700">
-          Şu an sponsorlu ilan: <strong>{sponsored}</strong>
-        </span>
-        <span className="rounded-xl bg-amber-50 px-4 py-2 text-amber-800">
-          Pro üye (gerçek): <strong>{pros}</strong>
-        </span>
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
-        <span className="rounded-xl bg-rose-50 px-4 py-2 text-rose-800">
-          Kampanyaya katılan ilan: <strong>{campaignGigs}</strong>
-        </span>
-        <Link href="/kampanya" className="font-semibold text-purple-700 hover:underline">
-          Kampanya sayfasını önizle →
+    <div className="max-w-5xl">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-brand-navy">Üyelik ve Gelir Ayarları</h1>
+          <p className="mt-1 text-sm text-slate-500">Kaydettiğin değerler sitede hemen geçerli olur.</p>
+        </div>
+        <Link href="/admin/kampanyalar" className="text-sm font-semibold text-purple-700 hover:underline">
+          Kampanyalar →
         </Link>
-        {campaignGigs > 0 && (
-          <form action={resetCampaignSignupsAction}>
-            <button type="submit" className="text-xs font-semibold text-slate-500 underline hover:text-slate-700">
-              Katılımları sıfırla
-            </button>
-          </form>
-        )}
       </div>
 
-      <div className="mt-8">
-        <SettingsForm settings={settings} />
+      <div className="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+        <Stat label="Kurucu Freelancer" value={`${founders.toLocaleString("tr-TR")} / ${settings.founderLimit.toLocaleString("tr-TR")}`} />
+        <Stat label="Sponsorlu ilan" value={String(sponsored)} />
+        <Stat label="Pro üye (gerçek)" value={String(pros)} />
+        <Stat label="Kurumsal hesap" value={String(companies)} />
       </div>
+
+      <div className="mt-6">
+        <MembershipSettingsForm settings={settings} />
+      </div>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+      <p className="text-[11px] uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="mt-1 text-lg font-bold text-brand-navy">{value}</p>
     </div>
   );
 }

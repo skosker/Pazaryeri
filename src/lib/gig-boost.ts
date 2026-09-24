@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
+import { campaignPrice, livePerkPercents } from "@/lib/campaign";
 
 export class GigBoostError extends Error {}
 
@@ -36,7 +37,9 @@ export async function boostableGig(userId: string, gigId: string) {
  * changed them follows the new values.
  */
 export async function findOrCreatePendingBoost(userId: string, gigId: string) {
-  const { boostPriceTl, boostDays } = await getSettings();
+  const [{ boostPriceTl: basePrice, boostDays }, perks] = await Promise.all([getSettings(), livePerkPercents()]);
+  // A live campaign may discount "Öne Çıkar" for its duration.
+  const boostPriceTl = campaignPrice(basePrice, perks.boost || null);
   const existing = await prisma.gigBoost.findFirst({
     where: { userId, gigId, status: "INITIALIZED" },
     orderBy: { createdAt: "desc" },

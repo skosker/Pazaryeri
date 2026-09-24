@@ -9,6 +9,9 @@ import { BankTransferPanel } from "./bank-transfer-panel";
 import { getBankAccounts } from "@/lib/bank-transfer";
 import { NOT_TAKING_ORDERS, payableAmount, refreshOrderDiscounts, sellerTakesOrders } from "@/lib/orders";
 import { formatPrice } from "@/lib/format-price";
+import Link from "next/link";
+import { corporateAccount } from "@/lib/corporate";
+import { payWithBalanceAction } from "./actions";
 
 export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">) {
   const { orderId } = await props.params;
@@ -38,7 +41,13 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
   // What is actually charged — card, bank transfer and the summary below all use this.
   const amount = payableAmount({ amount: listPrice, discount, creditDiscount });
   const bankAccounts = await getBankAccounts();
-  const errorMessage = searchParams.hata === "odeme-basarisiz" ? "Ödeme başarısız oldu, tekrar deneyin." : null;
+  const errorMessage =
+    searchParams.hata === "odeme-basarisiz"
+      ? "Ödeme başarısız oldu, tekrar deneyin."
+      : typeof searchParams.hata === "string"
+        ? searchParams.hata
+        : null;
+  const corporate = await corporateAccount(session.user.id);
 
   let paytrToken: string | null = null;
   let tokenError: string | null = null;
@@ -115,6 +124,33 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
           <div className="mt-2 flex justify-between border-t border-emerald-200 pt-2 font-bold text-brand-navy">
             <span>Ödenecek tutar</span>
             <span>{formatPrice(amount)}₺</span>
+          </div>
+        </div>
+      )}
+
+      {corporate.usable && (
+        <div className="mt-6 rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="font-semibold text-brand-navy">Kurumsal Bakiye ile Öde</p>
+              <p className="text-sm text-slate-600">
+                Bakiyen: <strong>{formatPrice(corporate.balance)}₺</strong>
+              </p>
+            </div>
+            {corporate.balance >= amount ? (
+              <form action={payWithBalanceAction.bind(null, order.id)}>
+                <button
+                  type="submit"
+                  className="brand-gradient rounded-full px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+                >
+                  {formatPrice(amount)}₺ Bakiyeden Öde
+                </button>
+              </form>
+            ) : (
+              <Link href="/panel/kurumsal" className="text-sm font-semibold text-purple-700 hover:underline">
+                Bakiye yetersiz — bakiye yükle →
+              </Link>
+            )}
           </div>
         </div>
       )}

@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format-price";
 import { getSettings, type SiteSettings } from "@/lib/settings";
+import { campaignPrice, livePerkPercents } from "@/lib/campaign";
 
 const benefitsByRole = (settings: SiteSettings): Record<"BUYER" | "FREELANCER", string[]> => ({
   BUYER: [
@@ -28,7 +29,8 @@ export default async function ProOlPage() {
   if (user.isPro) redirect("/panel");
 
   const role = session.user.role as "BUYER" | "FREELANCER";
-  const settings = await getSettings();
+  const [settings, perks] = await Promise.all([getSettings(), livePerkPercents()]);
+  const price = campaignPrice(settings.proPriceTl, perks.pro || null);
 
   return (
     <div className="max-w-xl">
@@ -39,7 +41,14 @@ export default async function ProOlPage() {
         </span>
       </div>
       <p className="mt-1 text-sm text-slate-500">
-        Tek seferlik {formatPrice(settings.proPriceTl)}₺ ile süresiz Prosinta Pro üyeliğine geç.
+        Tek seferlik{" "}
+        {perks.pro > 0 && <span className="text-slate-400 line-through">{formatPrice(settings.proPriceTl)}₺</span>}{" "}
+        {formatPrice(price)}₺ ile süresiz Prosinta Pro üyeliğine geç.
+        {perks.pro > 0 && (
+          <span className="ml-1 font-semibold text-rose-600">
+            {perks.name} indirimi: %{perks.pro}
+          </span>
+        )}
       </p>
 
       <ul className="mt-6 space-y-2 text-sm text-slate-600">

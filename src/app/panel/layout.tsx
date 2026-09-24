@@ -3,6 +3,8 @@ import { activeUser } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 import { unreadConversationCount } from "@/lib/messaging";
 import { PanelNav } from "./panel-nav";
+import { getSettings } from "@/lib/settings";
+import { getOpenCampaigns } from "@/lib/campaign";
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   // activeUser rather than the session: it reads the row, so a suspended account or one
@@ -17,10 +19,11 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   const [user, unreadMessages] = await Promise.all([
     prisma.user.findUnique({
       where: { id: account.id },
-      select: { isPro: true },
+      select: { isPro: true, companyName: true },
     }),
     unreadConversationCount(account.id),
   ]);
+  const [{ corporateEnabled }, openCampaigns] = await Promise.all([getSettings(), getOpenCampaigns()]);
   const isPro = user?.isPro ?? false;
 
   const navItems = [
@@ -28,7 +31,9 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     ...(isFreelancer ? [{ href: "/panel/ilanlarim", label: "İlanlarım" }] : []),
     { href: "/panel/siparisler", label: isFreelancer ? "Siparişler" : "Siparişlerim" },
     { href: "/panel/mesajlar", label: "Mesajlar", badge: unreadMessages },
+    ...(isFreelancer && openCampaigns.length > 0 ? [{ href: "/panel/kampanyalar", label: "Kampanyalar" }] : []),
     ...(isFreelancer ? [{ href: "/panel/odeme-bilgileri", label: "Ödeme Bilgileri" }] : []),
+    ...(corporateEnabled && user?.companyName ? [{ href: "/panel/kurumsal", label: "Kurumsal Hesap" }] : []),
     { href: "/panel/davet", label: "Davet Et" },
     { href: "/panel/profil", label: "Profilim" },
     { href: "/panel/sifre", label: "Şifre Değiştir" },

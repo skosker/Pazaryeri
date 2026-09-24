@@ -13,6 +13,7 @@ const navGroups: { label: string | null; items: { href: string; label: string }[
       { href: "/admin/hakedis-odemeleri", label: "Hakediş Ödemeleri" },
       { href: "/admin/freelancer-ibanlari", label: "Freelancer IBAN’ları" },
       { href: "/admin/banka", label: "Şirket Banka Hesapları" },
+      { href: "/admin/kurumsal", label: "Kurumsal Hesaplar" },
     ],
   },
   {
@@ -22,7 +23,8 @@ const navGroups: { label: string | null; items: { href: string; label: string }[
       { href: "/admin/kullanicilar", label: "Kullanıcılar" },
       { href: "/admin/ilanlar", label: "İlanlar" },
       { href: "/admin/kategoriler", label: "Kategoriler" },
-      { href: "/admin/ayarlar", label: "Kampanya ve Üyelik Ayarları" },
+      { href: "/admin/ayarlar", label: "Üyelik ve Gelir Ayarları" },
+      { href: "/admin/kampanyalar", label: "Kampanyalar" },
     ],
   },
   {

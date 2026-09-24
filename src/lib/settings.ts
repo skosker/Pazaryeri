@@ -22,12 +22,10 @@ export type SiteSettings = {
   firstOrderMaxTl: number;
   referralEnabled: boolean;
   referralRewardTl: number;
-  campaignEnabled: boolean;
-  campaignName: string;
-  campaignStart: Date | null;
-  campaignEnd: Date | null;
-  campaignMinPercent: number;
-  campaignMaxPercent: number;
+  corporateEnabled: boolean;
+  corporateMinTopUpTl: number;
+  /** 3 means %3. */
+  corporateBonusPercent: number;
 };
 
 /** Used until an admin first saves the settings form (mirrors the schema defaults). */
@@ -46,12 +44,9 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   firstOrderMaxTl: 500,
   referralEnabled: true,
   referralRewardTl: 200,
-  campaignEnabled: false,
-  campaignName: "Efsane Cuma",
-  campaignStart: null,
-  campaignEnd: null,
-  campaignMinPercent: 10,
-  campaignMaxPercent: 50,
+  corporateEnabled: false,
+  corporateMinTopUpTl: 5000,
+  corporateBonusPercent: 0,
 };
 
 /** One read per request however many components ask. */
@@ -73,16 +68,14 @@ export const getSettings = cache(async (): Promise<SiteSettings> => {
     firstOrderMaxTl: Number(row.firstOrderMaxTl),
     referralEnabled: row.referralEnabled,
     referralRewardTl: Number(row.referralRewardTl),
-    campaignEnabled: row.campaignEnabled,
-    campaignName: row.campaignName,
-    campaignStart: row.campaignStart,
-    campaignEnd: row.campaignEnd,
-    campaignMinPercent: row.campaignMinPercent,
-    campaignMaxPercent: row.campaignMaxPercent,
+    corporateEnabled: row.corporateEnabled,
+    corporateMinTopUpTl: Number(row.corporateMinTopUpTl),
+    corporateBonusPercent: Number(row.corporateBonusPercent),
   };
 });
 
-export async function saveSettings(settings: SiteSettings): Promise<void> {
+/** Saves the fields given; the rest keep their stored (or default) values. */
+export async function saveSettings(settings: Partial<SiteSettings>): Promise<void> {
   await prisma.siteSettings.upsert({
     where: { id: 1 },
     create: { id: 1, ...settings },

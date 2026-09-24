@@ -8,7 +8,7 @@ import { StarRating } from "@/components/star-rating";
 import { GigCard } from "@/components/gig-card";
 import { messageLink } from "@/lib/messaging";
 import { firstOrderOffer, sellerTakesOrders } from "@/lib/orders";
-import { activeCampaignPercent, getCampaign } from "@/lib/campaign";
+import { activeCampaignPercent, getCampaignPricing } from "@/lib/campaign";
 import { OrderPanel } from "./order-panel";
 import { FounderBadge } from "@/components/founder-badge";
 
@@ -46,9 +46,9 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
   const [relatedGigs, offer, campaign] = await Promise.all([
     getRelatedGigs(gig.category.slug, gig.slug),
     acceptingOrders && !isOwnGig ? firstOrderOffer(session?.user?.id ?? null) : Promise.resolve(null),
-    getCampaign(),
+    getCampaignPricing(),
   ]);
-  const campaignPercent = activeCampaignPercent(campaign, gig.campaignPercent);
+  const campaignPercent = activeCampaignPercent(campaign, gig.id);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
@@ -240,7 +240,7 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
           isOwnGig={isOwnGig}
           acceptingOrders={acceptingOrders}
           firstOrderOffer={offer}
-          campaign={campaignPercent ? { name: campaign.name, percent: campaignPercent } : null}
+          campaign={campaignPercent && campaign.campaign ? { name: campaign.campaign.name, percent: campaignPercent } : null}
           messageHref={messageHref}
         />
       </div>

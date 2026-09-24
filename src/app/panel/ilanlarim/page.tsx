@@ -2,25 +2,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import {
-  toggleMyGigPublishedAction,
-  deleteMyGigAction,
-  resubmitMyGigAction,
-  joinCampaignAction,
-  leaveCampaignAction,
-} from "./actions";
-import { getCampaign } from "@/lib/campaign";
+import { toggleMyGigPublishedAction, deleteMyGigAction, resubmitMyGigAction } from "./actions";
+import { getOpenCampaigns } from "@/lib/campaign";
 import { formatPrice } from "@/lib/format-price";
 import { isSponsored } from "@/lib/gig-boost";
 import { getSettings } from "@/lib/settings";
 
-const campaignDateFmt = new Intl.DateTimeFormat("tr-TR", {
-  day: "numeric",
-  month: "long",
-  hour: "2-digit",
-  minute: "2-digit",
-  timeZone: "Europe/Istanbul",
-});
 const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", timeZone: "Europe/Istanbul" });
 
 export default async function MyGigsPage(props: PageProps<"/panel/ilanlarim">) {
@@ -33,11 +20,8 @@ export default async function MyGigsPage(props: PageProps<"/panel/ilanlarim">) {
   const justBoosted = searchParams["one-cikarildi"] === "1";
   const now = new Date();
 
-  const [{ boostEnabled, boostDays }, campaign] = await Promise.all([getSettings(), getCampaign()]);
-  const percentOptions = Array.from(
-    { length: Math.floor((campaign.maxPercent - campaign.minPercent) / 5) + 1 },
-    (_, i) => campaign.minPercent + i * 5
-  );
+  const [{ boostEnabled, boostDays }, openCampaigns] = await Promise.all([getSettings(), getOpenCampaigns()]);
+  const openIds = openCampaigns.map((c) => c.id);
   const gigs = await prisma.gig.findMany({
     where: { sellerId: session.user.id },
     orderBy: { createdAt: "desc" },
@@ -45,6 +29,10 @@ export default async function MyGigsPage(props: PageProps<"/panel/ilanlarim">) {
       category: { select: { name: true } },
       packages: { orderBy: { price: "asc" }, take: 1 },
       _count: { select: { orders: true } },
+      campaignEntries: {
+        where: { campaignId: { in: openIds } },
+        select: { percent: true, campaign: { select: { id: true, name: true } } },
+      },
     },
   });
 
@@ -76,18 +64,14 @@ export default async function MyGigsPage(props: PageProps<"/panel/ilanlarim">) {
         </p>
       )}
 
-      {campaign.signupOpen && (
-        <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-sm text-rose-900">
-          <p className="font-bold">{campaign.name} Kampanyası</p>
-          <p className="mt-1">
-            {campaign.start && campaign.end
-              ? `${campaignDateFmt.format(campaign.start)} – ${campaignDateFmt.format(campaign.end)} arasında`
-              : "Kampanya süresince"}{" "}
-            katıldığın ilanlar indirimli fiyat ve &quot;{campaign.name}&quot; rozetiyle gösterilir, kampanya sayfasında
-            listelenir. İndirimi sen belirlersin (%{campaign.minPercent}–%{campaign.maxPercent}); sipariş tutarı
-            indirimli fiyattır.
-          </p>
-        </div>
+      {openCampaigns.length > 0 && (
+        <Link
+          href="/panel/kampanyalar"
+          className="mb-6 block rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900 hover:bg-rose-100"
+        >
+          <strong>{openCampaigns.map((c) => c.name).join(", ")}</strong> için katılım açık — ilanlarını kendi
+          belirlediğin indirimle kampanyaya kat →
+        </Link>
       )}
 
       {gigs.length === 0 ? (
@@ -131,11 +115,11 @@ export default async function MyGigsPage(props: PageProps<"/panel/ilanlarim">) {
                         <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                           Yayında
                         </span>
-                        {campaign.enabled && gig.campaignPercent !== null && (
-                          <p className="mt-1.5 text-xs font-semibold text-rose-600">
-                            {campaign.name} · %{gig.campaignPercent}
+                        {gig.campaignEntries.map((e) => (
+                          <p key={e.campaign.id} className="mt-1.5 text-xs font-semibold text-rose-600">
+                            {e.campaign.name} · %{e.percent}
                           </p>
-                        )}
+                        ))}
                         {isSponsored(gig.sponsoredUntil, now) && (
                           <p className="mt-1.5 text-xs font-semibold text-purple-700">
                             Sponsorlu · {dateFmt.format(gig.sponsoredUntil!)} tarihine kadar
@@ -156,44 +140,6 @@ export default async function MyGigsPage(props: PageProps<"/panel/ilanlarim">) {
                       >
                         Düzenle
                       </Link>
-                      {campaign.signupOpen && gig.status === "APPROVED" && (
-                        // Keyed on the saved percent so the select shows it again after the
-                        // action (React resets a submitted form to its first defaultValue).
-                        <form
-                          key={gig.campaignPercent ?? "yok"}
-                          action={joinCampaignAction.bind(null, gig.id)}
-                          className="flex items-center gap-1"
-                        >
-                          <select
-                            name="percent"
-                            defaultValue={gig.campaignPercent ?? campaign.minPercent}
-                            aria-label={`${campaign.name} indirimi`}
-                            className="rounded-full border border-rose-200 bg-white px-2 py-1 text-xs text-rose-700"
-                          >
-                            {percentOptions.map((p) => (
-                              <option key={p} value={p}>
-                                %{p}
-                              </option>
-                            ))}
-                          </select>
-                          <button
-                            type="submit"
-                            className="rounded-full bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-700"
-                          >
-                            {gig.campaignPercent ? "İndirimi Güncelle" : "Kampanyaya Katıl"}
-                          </button>
-                        </form>
-                      )}
-                      {campaign.signupOpen && gig.campaignPercent !== null && (
-                        <form action={leaveCampaignAction.bind(null, gig.id)}>
-                          <button
-                            type="submit"
-                            className="rounded-full border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50"
-                          >
-                            Kampanyadan Ayrıl
-                          </button>
-                        </form>
-                      )}
                       {boostEnabled && gig.status === "APPROVED" && gig.published && (
                         <Link
                           href={`/panel/ilanlarim/${gig.id}/one-cikar`}
