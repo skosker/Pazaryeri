@@ -22,7 +22,7 @@ export function RolePicker() {
   return (
     <div className="text-center">
       <h1 className="text-lg font-semibold text-brand-navy">
-        Nasıl kullanmak istediğini seç, hesabını bir dakikada oluştur.
+        Nasıl Kullanmak İstediğini Seç, Hesabını Bir Dakikada Oluştur.
       </h1>
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
