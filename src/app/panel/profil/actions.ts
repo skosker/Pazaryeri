@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { activeUser, INACTIVE_MESSAGE } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
-import { profileSchema } from "@/lib/validation";
+import { companySchema, profileSchema } from "@/lib/validation";
 import { validateImage } from "@/lib/image-constraints";
 import { normalizeCoverImage } from "@/lib/image-processing";
 import { putImageBuffer } from "@/lib/storage";
@@ -63,4 +63,33 @@ export async function updateProfileAction(_prevState: FormState, formData: FormD
   revalidatePath("/panel");
   revalidatePath("/panel/profil");
   return { success: true, flagged };
+}
+
+export type CompanyFormState = { error?: string; success?: boolean };
+
+/** Kurumsal fatura bilgileri: all four filled makes the account corporate, "Bireysel" clears them. */
+export async function updateCompanyAction(_prevState: CompanyFormState, formData: FormData): Promise<CompanyFormState> {
+  const user = await activeUser();
+  if (!user) return { error: INACTIVE_MESSAGE };
+
+  if (formData.get("accountType") !== "KURUMSAL") {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { companyName: null, taxOffice: null, taxNumber: null, billingAddress: null },
+    });
+    revalidatePath("/panel/profil");
+    return { success: true };
+  }
+
+  const parsed = companySchema.safeParse({
+    companyName: String(formData.get("companyName") ?? ""),
+    taxOffice: String(formData.get("taxOffice") ?? ""),
+    taxNumber: String(formData.get("taxNumber") ?? ""),
+    billingAddress: String(formData.get("billingAddress") ?? ""),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Geçersiz form verisi" };
+
+  await prisma.user.update({ where: { id: user.id }, data: parsed.data });
+  revalidatePath("/panel/profil");
+  return { success: true };
 }

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidTaxNumber } from "@/lib/tax-number";
 
 /** One rule for every place a password is set, so they cannot drift apart. */
 const password = z
@@ -8,6 +9,22 @@ const password = z
   .regex(/[A-Z]/, "Şifre en az bir büyük harf içermeli")
   .regex(/[0-9]/, "Şifre en az bir rakam içermeli");
 
+/**
+ * Kurumsal fatura bilgileri. All four are required together: a company account without
+ * a tax number cannot be invoiced.
+ */
+export const companySchema = z.object({
+  companyName: z.string().trim().min(2, "Şirket unvanını gir").max(200),
+  taxOffice: z.string().trim().min(2, "Vergi dairesini gir").max(100),
+  taxNumber: z
+    .string()
+    .transform((v) => v.replace(/\s/g, ""))
+    .refine(isValidTaxNumber, "Vergi numarası geçersiz (10 haneli VKN ya da şahıs şirketi için 11 haneli TCKN)"),
+  billingAddress: z.string().trim().min(10, "Fatura adresini gir").max(500),
+});
+
+export type CompanyInput = z.infer<typeof companySchema>;
+
 export const registerSchema = z.object({
   name: z.string().trim().min(2, "Ad Soyad en az 2 karakter olmalı"),
   email: z.string().trim().toLowerCase().email("Geçerli bir e-posta girin"),
@@ -16,6 +33,8 @@ export const registerSchema = z.object({
   acceptedTerms: z.boolean().refine((v) => v === true, {
     message: "Üyelik Sözleşmesi'ni ve Kullanım Şartları'nı onaylamalısın",
   }),
+  /** Only for a buyer who picked "Kurumsal" at signup. */
+  company: companySchema.optional(),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

@@ -21,8 +21,8 @@ const roles = [
 export function RolePicker() {
   return (
     <div className="text-center">
-      <h1 className="text-2xl font-bold text-brand-navy sm:text-3xl">
-        Prosinta&apos;ya Hoş Geldiniz.
+      <h1 className="text-lg font-semibold text-brand-navy">
+        Nasıl kullanmak istediğini seç, hesabını bir dakikada oluştur.
       </h1>
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -30,10 +30,10 @@ export function RolePicker() {
           <Link
             key={option.role}
             href={`/kayit?role=${option.role}`}
-            className="group rounded-2xl border border-slate-200 bg-white p-4 text-center transition hover:-translate-y-0.5 hover:border-purple-300 hover:shadow-lg hover:shadow-purple-100"
+            className="group rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-purple-300 hover:shadow-lg hover:shadow-purple-100"
           >
             <span
-              className={`flex h-32 items-center justify-center rounded-xl bg-gradient-to-br ${option.tint} text-5xl`}
+              className={`flex h-40 items-center justify-center rounded-xl bg-gradient-to-br ${option.tint} text-6xl`}
               aria-hidden
             >
               {option.emoji}
