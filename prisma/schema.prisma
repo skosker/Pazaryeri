@@ -97,7 +97,10 @@ model User {
   taxOffice          String?
   /// 10 haneli VKN ya da şahıs şirketi için 11 haneli TCKN.
   taxNumber          String?
+  /// Açık adres (mahalle, cadde, no); il ve ilçe ayrı alanlarda, listeden seçilir.
   billingAddress     String?
+  billingCity        String?
+  billingDistrict    String?
   /// Kurumsal bakiye (TL): Havale/EFT ile yüklenir, siparişlerde harcanır. Her hareket
   /// BalanceEntry'de kayıtlı; bu alan onların toplamıdır.
   balance            Decimal   @default(0) @db.Decimal(12, 2)

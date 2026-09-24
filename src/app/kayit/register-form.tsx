@@ -4,6 +4,7 @@ import { useRef, useState, type ReactNode } from "react";
 import { DocumentModal } from "@/components/document-modal";
 import { useActionState } from "react";
 import { registerAction, type FormState } from "./actions";
+import { CompanyFields } from "@/components/company-fields";
 
 const initialState: FormState = {};
 
@@ -55,49 +56,32 @@ export function RegisterForm({
         </>
       )}
 
-      {corporate && (
-        <>
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
-            Şirket Unvanı
-            <input name="companyName" defaultValue={typed.companyName} type="text" required autoComplete="organization" placeholder="Örnek Teknoloji A.Ş." className={inputClass} />
-          </label>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
-              Vergi Dairesi
-              <input name="taxOffice" defaultValue={typed.taxOffice} type="text" required placeholder="Kadıköy" className={inputClass} />
-            </label>
-            <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
-              Vergi Numarası
-              <input
-                name="taxNumber" defaultValue={typed.taxNumber}
-                type="text"
-                inputMode="numeric"
-                required
-                pattern="[0-9 ]{10,13}"
-                placeholder="10 haneli VKN"
-                className={inputClass}
-              />
-            </label>
-          </div>
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
-            Fatura Adresi
-            <textarea name="billingAddress" defaultValue={typed.billingAddress} required rows={2} autoComplete="street-address" placeholder="Mahalle, cadde, no, ilçe / il" className={inputClass} />
-          </label>
-        </>
-      )}
+      {corporate && <CompanyFields defaults={typed} inputClass={inputClass} />}
 
-      <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
-        {corporate ? "Yetkili Ad Soyad" : "Ad Soyad"}
-        <input
-          name="name"
-          defaultValue={typed.name}
-          type="text"
-          required
-          autoComplete="name"
-          placeholder="Adın Soyadın"
-          className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
-        />
-      </label>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
+          {corporate ? "Yetkili Adı" : "Ad"}
+          <input
+            name="firstName"
+            defaultValue={typed.firstName}
+            type="text"
+            required
+            autoComplete="given-name"
+            className={inputClass}
+          />
+        </label>
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
+          {corporate ? "Yetkili Soyadı" : "Soyad"}
+          <input
+            name="lastName"
+            defaultValue={typed.lastName}
+            type="text"
+            required
+            autoComplete="family-name"
+            className={inputClass}
+          />
+        </label>
+      </div>
 
       <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
         E-posta
@@ -107,7 +91,6 @@ export function RegisterForm({
           type="email"
           required
           autoComplete="email"
-          placeholder="ornek@eposta.com"
           className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
         />
       </label>
@@ -120,9 +103,9 @@ export function RegisterForm({
           required
           minLength={6}
           autoComplete="new-password"
-          placeholder="En az 6 karakter, büyük/küçük harf ve rakam"
           className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
         />
+        <span className="text-xs font-normal text-slate-400">En az 6 karakter; büyük harf, küçük harf ve rakam içermeli.</span>
       </label>
 
       <label className="flex items-start gap-2 text-sm text-slate-600">

@@ -16,7 +16,10 @@ export async function registerAction(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const name = formData.get("name");
+  // Ad and soyad are asked for separately and stored together as the account name.
+  const firstName = String(formData.get("firstName") ?? "").trim().replace(/\s+/g, " ");
+  const lastName = String(formData.get("lastName") ?? "").trim().replace(/\s+/g, " ");
+  const name = firstName && lastName ? `${firstName} ${lastName}` : "";
   const email = formData.get("email");
   const password = formData.get("password");
   const role = formData.get("role");
@@ -25,7 +28,7 @@ export async function registerAction(
     const cookieStore = await cookies();
     await registerUser({
       referralCode: cookieStore.get(REFERRAL_COOKIE)?.value,
-      name: String(name ?? ""),
+      name,
       email: String(email ?? ""),
       password: String(password ?? ""),
       role: role === "FREELANCER" ? "FREELANCER" : "BUYER",
@@ -34,6 +37,8 @@ export async function registerAction(
         role !== "FREELANCER" && formData.get("accountType") === "KURUMSAL"
           ? {
               companyName: String(formData.get("companyName") ?? ""),
+              billingCity: String(formData.get("billingCity") ?? ""),
+              billingDistrict: String(formData.get("billingDistrict") ?? ""),
               taxOffice: String(formData.get("taxOffice") ?? ""),
               taxNumber: String(formData.get("taxNumber") ?? ""),
               billingAddress: String(formData.get("billingAddress") ?? ""),
@@ -43,7 +48,19 @@ export async function registerAction(
   } catch (error) {
     if (error instanceof RegisterError) {
       const values: Record<string, string> = {};
-      for (const key of ["name", "email", "acceptedTerms", "accountType", "companyName", "taxOffice", "taxNumber", "billingAddress"]) {
+      for (const key of [
+        "firstName",
+        "lastName",
+        "email",
+        "acceptedTerms",
+        "accountType",
+        "companyName",
+        "billingCity",
+        "billingDistrict",
+        "taxOffice",
+        "taxNumber",
+        "billingAddress",
+      ]) {
         values[key] = String(formData.get(key) ?? "");
       }
       return { error: error.message, values };

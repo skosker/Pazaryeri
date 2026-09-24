@@ -67,7 +67,7 @@ export async function updateProfileAction(_prevState: FormState, formData: FormD
 
 export type CompanyFormState = { error?: string; success?: boolean };
 
-/** Kurumsal fatura bilgileri: all four filled makes the account corporate, "Bireysel" clears them. */
+/** Kurumsal fatura bilgileri: all of them filled makes the account corporate, "Bireysel" clears them. */
 export async function updateCompanyAction(_prevState: CompanyFormState, formData: FormData): Promise<CompanyFormState> {
   const user = await activeUser();
   if (!user) return { error: INACTIVE_MESSAGE };
@@ -75,7 +75,7 @@ export async function updateCompanyAction(_prevState: CompanyFormState, formData
   if (formData.get("accountType") !== "KURUMSAL") {
     await prisma.user.update({
       where: { id: user.id },
-      data: { companyName: null, taxOffice: null, taxNumber: null, billingAddress: null },
+      data: { companyName: null, taxOffice: null, taxNumber: null, billingAddress: null, billingCity: null, billingDistrict: null },
     });
     revalidatePath("/panel/profil");
     return { success: true };
@@ -83,6 +83,8 @@ export async function updateCompanyAction(_prevState: CompanyFormState, formData
 
   const parsed = companySchema.safeParse({
     companyName: String(formData.get("companyName") ?? ""),
+    billingCity: String(formData.get("billingCity") ?? ""),
+    billingDistrict: String(formData.get("billingDistrict") ?? ""),
     taxOffice: String(formData.get("taxOffice") ?? ""),
     taxNumber: String(formData.get("taxNumber") ?? ""),
     billingAddress: String(formData.get("billingAddress") ?? ""),
