@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AuthShell } from "@/components/auth-shell";
 import { RegisterForm } from "./register-form";
+import { KullanimSartlariText, UyelikSozlesmesiText } from "@/components/legal-texts";
 import { RolePicker } from "./role-picker";
 import { founderPlaces } from "@/lib/founders";
 import { FounderPromo } from "@/components/founder-promo";
@@ -39,7 +40,10 @@ export default async function RegisterPage(props: PageProps<"/kayit">) {
       {places && <FounderPromo {...places} className="mt-6" />}
 
       <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <RegisterForm role={role} />
+        <RegisterForm
+          role={role}
+          documents={{ uyelik: <UyelikSozlesmesiText />, kullanim: <KullanimSartlariText /> }}
+        />
       </div>
 
       <p className="mt-6 text-center text-sm text-slate-500">

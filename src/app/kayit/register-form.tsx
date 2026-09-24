@@ -1,16 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
+import { DocumentModal } from "@/components/document-modal";
 import { useActionState } from "react";
-import Link from "next/link";
 import { registerAction, type FormState } from "./actions";
 
 const initialState: FormState = {};
 
-export function RegisterForm({ role }: { role: "BUYER" | "FREELANCER" }) {
+export function RegisterForm({
+  role,
+  documents,
+}: {
+  role: "BUYER" | "FREELANCER";
+  /** The agreement texts, rendered on the server and shown in a pop-up. */
+  documents: { uyelik: ReactNode; kullanim: ReactNode };
+}) {
   const [state, formAction, pending] = useActionState(registerAction, initialState);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [corporate, setCorporate] = useState(false);
+  const [openDoc, setOpenDoc] = useState<"uyelik" | "kullanim" | null>(null);
+  const termsRef = useRef<HTMLInputElement>(null);
   const typed = state.values ?? {};
   const inputClass =
     "rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400";
@@ -120,22 +129,52 @@ export function RegisterForm({ role }: { role: "BUYER" | "FREELANCER" }) {
         <input
           type="checkbox"
           name="acceptedTerms"
+          ref={termsRef}
           required
           defaultChecked={typed.acceptedTerms === "on"}
           onChange={(e) => setAcceptedTerms(e.target.checked)}
           className="mt-0.5 h-4 w-4 rounded border-slate-300 text-purple-600 focus:ring-purple-400"
         />
         <span>
-          <Link href="/uyelik-sozlesmesi" target="_blank" className="font-semibold text-purple-700 hover:underline">
+          {/* Buttons, not links: the text opens over the form instead of in a new tab.
+              preventDefault keeps the click from also toggling the checkbox. */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              setOpenDoc("uyelik");
+            }}
+            className="font-semibold text-purple-700 hover:underline"
+          >
             Üyelik Sözleşmesi
-          </Link>
+          </button>
           &apos;ni ve{" "}
-          <Link href="/kullanim-sartlari" target="_blank" className="font-semibold text-purple-700 hover:underline">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              setOpenDoc("kullanim");
+            }}
+            className="font-semibold text-purple-700 hover:underline"
+          >
             Kullanım Şartları
-          </Link>
+          </button>
           &apos;nı okudum, kabul ediyorum.
         </span>
       </label>
+
+      {openDoc && (
+        <DocumentModal
+          title={openDoc === "uyelik" ? "Üyelik Sözleşmesi" : "Kullanım Şartları"}
+          onClose={() => setOpenDoc(null)}
+          onAccept={() => {
+            if (termsRef.current) termsRef.current.checked = true;
+            setAcceptedTerms(true);
+          }}
+        >
+          {openDoc === "uyelik" ? documents.uyelik : documents.kullanim}
+        </DocumentModal>
+      )}
 
       {state.error && (
         <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
