@@ -165,8 +165,8 @@ export default function HowItWorksPage() {
           </div>
           <p className="mt-10 text-sm text-slate-500">
             Başka sorun mu var?{" "}
-            <Link href="/" className="font-semibold text-purple-700 hover:underline">
-              Ana Sayfaya Dön
+            <Link href="/destek" className="font-semibold text-purple-700 hover:underline">
+              Tüm Sık Sorulan Sorular
             </Link>
           </p>
         </div>
