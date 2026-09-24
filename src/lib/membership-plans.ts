@@ -118,7 +118,7 @@ export async function buildPlanCards(
       badge: tier === "PRO_PLUS" ? "Mevcut Paketin" : undefined,
       cta: cta("PRO_PLUS"),
       features: [
-        { strong: "Pro'daki her şey,", text: "üstüne:" },
+        { strong: "Pro'daki her şey", text: "ve üstüne:" },
         { strong: "Pro Plus rozeti", text: "ilanlarında ve profilinde" },
         { strong: "Aramalarda öncelik:", text: "Pro üyelerin de önünde" },
         { strong: "Freelancer Bul", text: "listesinde en üstte" },
