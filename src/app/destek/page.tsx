@@ -50,6 +50,14 @@ function buildFaqGroups(settings: SiteSettings): FaqGroup[] {
               },
             ]
           : []),
+        ...(settings.campaignEnabled
+          ? [
+              {
+                q: `${settings.campaignName} kampanyası nedir?`,
+                a: `Freelancer'ların ilanlarına kendi belirlediği indirimle katıldığı sezonluk kampanyadır. Katılan ilanlar kampanya süresince indirimli fiyat ve “${settings.campaignName}” rozetiyle gösterilir; hepsini Kampanya sayfasında bulabilirsin. Freelancer'sanız İlanlarım sayfasından ilanlarınızı kampanyaya katabilirsiniz.`,
+              },
+            ]
+          : []),
         {
           q: "Bazı ilanlarda “Şu An Sipariş Almıyor” yazıyor, neden?",
           a: "O satıcı şu an yeni sipariş kabul etmiyor. İlan sayfasının altındaki benzer hizmetlere ya da aynı kategorideki diğer ilanlara göz atabilirsin.",

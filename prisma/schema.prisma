@@ -193,6 +193,9 @@ model Gig {
   /// Paid "Öne Çıkar": while this is in the future the gig leads the default listing with
   /// a "Sponsorlu" label. Each paid GigBoost pushes it forward by its days.
   sponsoredUntil  DateTime?
+  /// Sezonluk kampanyaya katılım: freelancer'ın bu ilana verdiği indirim yüzdesi. Yalnızca
+  /// kampanya yayındayken uygulanır; indirimi freelancer karşılar.
+  campaignPercent Int?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -530,6 +533,14 @@ model SiteSettings {
   /// Davet programı: davet edilenin ilk siparişi tamamlanınca davet edene bu kadar TL.
   referralEnabled    Boolean  @default(true)
   referralRewardTl   Decimal  @default(200) @db.Decimal(10, 2)
+  /// Sezonluk kampanya (ör. Efsane Cuma). Açıkken freelancer'lar ilanlarını katabilir;
+  /// alıcılar indirimi yalnızca başlangıç–bitiş arasında görür.
+  campaignEnabled    Boolean   @default(false)
+  campaignName       String    @default("Efsane Cuma")
+  campaignStart      DateTime?
+  campaignEnd        DateTime?
+  campaignMinPercent Int       @default(10)
+  campaignMaxPercent Int       @default(50)
   updatedAt          DateTime @updatedAt
 
   @@map("site_settings")

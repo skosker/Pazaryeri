@@ -28,6 +28,7 @@ export function OrderPanel({
   isOwnGig,
   acceptingOrders,
   firstOrderOffer,
+  campaign,
   messageHref,
 }: {
   slug: string;
@@ -36,6 +37,8 @@ export function OrderPanel({
   acceptingOrders: boolean;
   /** Shown above the order button when the visitor would get the first-order discount. */
   firstOrderOffer: { percent: number; maxTl: number } | null;
+  /** A live seasonal campaign this gig joined: prices shown (and charged) with it applied. */
+  campaign: { name: string; percent: number } | null;
   /** Null hides the button: the viewer's own gig, or a showcase seller nobody would answer for. */
   messageHref: string | null;
 }) {
@@ -45,6 +48,7 @@ export function OrderPanel({
   const pkg = packages[selected] ?? packages[0];
 
   if (!pkg) return null;
+  const price = campaign ? Math.round((pkg.price * (100 - campaign.percent)) / 100) : pkg.price;
 
   return (
     <div className="sticky top-24 rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -76,7 +80,17 @@ export function OrderPanel({
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-brand-navy">{pkg.name}</h2>
           <div className="text-right">
-            <span className="text-2xl font-extrabold text-brand-navy">{formatPrice(pkg.price)}₺</span>
+            {campaign && (
+              <span className="mr-2 text-sm text-slate-400 line-through">{formatPrice(pkg.price)}₺</span>
+            )}
+            <span className={`text-2xl font-extrabold ${campaign ? "text-rose-600" : "text-brand-navy"}`}>
+              {formatPrice(price)}₺
+            </span>
+            {campaign && (
+              <p className="mt-0.5 text-xs font-bold text-rose-600">
+                {campaign.name} −%{campaign.percent}
+              </p>
+            )}
             <p className="text-xs text-slate-400">KDV dahil</p>
           </div>
         </div>
@@ -120,9 +134,9 @@ export function OrderPanel({
             {firstOrderOffer && (
               <p className="mt-5 rounded-xl bg-emerald-50 px-3 py-2 text-center text-xs font-semibold text-emerald-700">
                 İlk siparişine özel %{firstOrderOffer.percent.toLocaleString("tr-TR")} indirim
-                {pkg.price * (firstOrderOffer.percent / 100) > firstOrderOffer.maxTl
+                {price * (firstOrderOffer.percent / 100) > firstOrderOffer.maxTl
                   ? ` (en fazla ${formatPrice(firstOrderOffer.maxTl)}₺)`
-                  : ` — ${formatPrice(pkg.price - Math.round(pkg.price * firstOrderOffer.percent) / 100)}₺ ödersin`}
+                  : ` — ${formatPrice(price - Math.round(price * firstOrderOffer.percent) / 100)}₺ ödersin`}
               </p>
             )}
             <input type="hidden" name="slug" value={slug} />

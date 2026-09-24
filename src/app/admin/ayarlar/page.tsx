@@ -1,14 +1,17 @@
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
+import Link from "next/link";
 import { SettingsForm } from "./settings-form";
+import { resetCampaignSignupsAction } from "./actions";
 
 export default async function AdminSettingsPage() {
   const now = new Date();
-  const [settings, founders, sponsored, pros] = await Promise.all([
+  const [settings, founders, sponsored, pros, campaignGigs] = await Promise.all([
     getSettings(),
     prisma.user.count({ where: { founderNumber: { not: null } } }),
     prisma.gig.count({ where: { sponsoredUntil: { gt: now } } }),
     prisma.user.count({ where: { isPro: true, synthetic: false } }),
+    prisma.gig.count({ where: { campaignPercent: { not: null } } }),
   ]);
 
   return (
@@ -29,6 +32,22 @@ export default async function AdminSettingsPage() {
         <span className="rounded-xl bg-amber-50 px-4 py-2 text-amber-800">
           Pro üye (gerçek): <strong>{pros}</strong>
         </span>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
+        <span className="rounded-xl bg-rose-50 px-4 py-2 text-rose-800">
+          Kampanyaya katılan ilan: <strong>{campaignGigs}</strong>
+        </span>
+        <Link href="/kampanya" className="font-semibold text-purple-700 hover:underline">
+          Kampanya sayfasını önizle →
+        </Link>
+        {campaignGigs > 0 && (
+          <form action={resetCampaignSignupsAction}>
+            <button type="submit" className="text-xs font-semibold text-slate-500 underline hover:text-slate-700">
+              Katılımları sıfırla
+            </button>
+          </form>
+        )}
       </div>
 
       <div className="mt-8">

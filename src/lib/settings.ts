@@ -22,6 +22,12 @@ export type SiteSettings = {
   firstOrderMaxTl: number;
   referralEnabled: boolean;
   referralRewardTl: number;
+  campaignEnabled: boolean;
+  campaignName: string;
+  campaignStart: Date | null;
+  campaignEnd: Date | null;
+  campaignMinPercent: number;
+  campaignMaxPercent: number;
 };
 
 /** Used until an admin first saves the settings form (mirrors the schema defaults). */
@@ -40,6 +46,12 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   firstOrderMaxTl: 500,
   referralEnabled: true,
   referralRewardTl: 200,
+  campaignEnabled: false,
+  campaignName: "Efsane Cuma",
+  campaignStart: null,
+  campaignEnd: null,
+  campaignMinPercent: 10,
+  campaignMaxPercent: 50,
 };
 
 /** One read per request however many components ask. */
@@ -61,6 +73,12 @@ export const getSettings = cache(async (): Promise<SiteSettings> => {
     firstOrderMaxTl: Number(row.firstOrderMaxTl),
     referralEnabled: row.referralEnabled,
     referralRewardTl: Number(row.referralRewardTl),
+    campaignEnabled: row.campaignEnabled,
+    campaignName: row.campaignName,
+    campaignStart: row.campaignStart,
+    campaignEnd: row.campaignEnd,
+    campaignMinPercent: row.campaignMinPercent,
+    campaignMaxPercent: row.campaignMaxPercent,
   };
 });
 

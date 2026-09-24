@@ -26,6 +26,11 @@ export function GigCard({ gig }: { gig: GigCardData }) {
             ✦ Editör Seçkisi
           </span>
         )}
+        {gig.campaign && (
+          <span className="absolute bottom-3 right-3 rounded-full bg-rose-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
+            {gig.campaign.name} −%{gig.campaign.percent}
+          </span>
+        )}
         {gig.sponsored && (
           <span className="absolute bottom-3 left-3 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-600 shadow-sm">
             Sponsorlu
@@ -71,7 +76,12 @@ export function GigCard({ gig }: { gig: GigCardData }) {
             </div>
           </div>
           <div className="shrink-0 text-right">
-            <p className="text-base font-extrabold text-brand-navy">{formatPrice(gig.startingPrice)}₺</p>
+            {gig.campaign && (
+              <p className="text-[11px] text-slate-400 line-through">{formatPrice(gig.campaign.listPrice)}₺</p>
+            )}
+            <p className={`text-base font-extrabold ${gig.campaign ? "text-rose-600" : "text-brand-navy"}`}>
+              {formatPrice(gig.startingPrice)}₺
+            </p>
             <p className="text-[11px] text-slate-400">Başlangıç</p>
           </div>
         </div>
