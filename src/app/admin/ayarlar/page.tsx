@@ -21,7 +21,7 @@ export default async function AdminSettingsPage() {
 
       <div className="mt-6 flex flex-wrap gap-3 text-sm">
         <span className="rounded-xl bg-purple-50 px-4 py-2 text-purple-800">
-          Kurucu Freelancer: <strong>{founders}</strong> / {settings.founderLimit}
+          Kurucu Freelancer: <strong>{founders.toLocaleString("tr-TR")}</strong> / {settings.founderLimit.toLocaleString("tr-TR")}
         </span>
         <span className="rounded-xl bg-slate-100 px-4 py-2 text-slate-700">
           Şu an sponsorlu ilan: <strong>{sponsored}</strong>
