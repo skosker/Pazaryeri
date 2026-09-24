@@ -92,7 +92,7 @@ export default async function AdminGigsPage(props: PageProps<"/admin/ilanlar">) 
                     </td>
                     <td className="px-5 py-4 text-slate-500">{gig.category.name}</td>
                     <td className="px-5 py-4 font-semibold text-brand-navy">
-                      {formatPrice(gig.packages[0]?.price ?? 0)}₺
+                      {formatPrice(gig.packages[0]?.price ?? 0)} TL
                     </td>
                     <td className="px-5 py-4 text-slate-500">{dateFmt.format(gig.createdAt)}</td>
                     <td className="px-5 py-4">
@@ -147,18 +147,18 @@ export default async function AdminGigsPage(props: PageProps<"/admin/ilanlar">) 
                 {categoryStats.reduce((sum, row) => sum + row.gigCount, 0)}
               </td>
               <td className="px-5 py-3 text-right text-slate-400">—</td>
-              <td className="px-5 py-3 text-right">{formatPrice(overallAvg)}₺</td>
+              <td className="px-5 py-3 text-right">{formatPrice(overallAvg)} TL</td>
               <td className="px-5 py-3 text-right text-slate-400">—</td>
             </tr>
             {categoryStats.map((row) => (
               <tr key={row.categoryId} className="border-b border-slate-100 last:border-0">
                 <td className="px-5 py-3 text-brand-navy">{row.categoryName}</td>
                 <td className="px-5 py-3 text-right text-slate-500">{row.gigCount}</td>
-                <td className="px-5 py-3 text-right text-slate-500">{formatPrice(row.minPrice)}₺</td>
+                <td className="px-5 py-3 text-right text-slate-500">{formatPrice(row.minPrice)} TL</td>
                 <td className="px-5 py-3 text-right font-semibold text-brand-navy">
-                  {formatPrice(row.avgPrice)}₺
+                  {formatPrice(row.avgPrice)} TL
                 </td>
-                <td className="px-5 py-3 text-right text-slate-500">{formatPrice(row.maxPrice)}₺</td>
+                <td className="px-5 py-3 text-right text-slate-500">{formatPrice(row.maxPrice)} TL</td>
               </tr>
             ))}
           </tbody>
@@ -194,7 +194,7 @@ export default async function AdminGigsPage(props: PageProps<"/admin/ilanlar">) 
                 <td className="px-5 py-4 text-slate-600">{gig.seller.name}</td>
                 <td className="px-5 py-4 text-slate-500">{gig.category.name}</td>
                 <td className="px-5 py-4 font-semibold text-brand-navy">
-                  {formatPrice(gig.packages[0]?.price ?? 0)}₺
+                  {formatPrice(gig.packages[0]?.price ?? 0)} TL
                 </td>
                 <td className="px-5 py-4">
                   {gig.status === "PENDING" ? (

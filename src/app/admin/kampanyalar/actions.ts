@@ -22,8 +22,8 @@ export async function saveOfferSettingsAction(_prev: FormState, formData: FormDa
   if (!(Number.isFinite(s.firstOrderPercent) && s.firstOrderPercent! >= 0 && s.firstOrderPercent! <= 90)) {
     return { error: "İlk sipariş indirimi %0 ile %90 arasında olmalı." };
   }
-  if (!isPrice(s.firstOrderMaxTl!)) return { error: "İlk sipariş indirimi üst sınırı 0 ile 1.000.000 ₺ arasında olmalı." };
-  if (!isPrice(s.referralRewardTl!)) return { error: "Davet ödülü 0 ile 1.000.000 ₺ arasında olmalı." };
+  if (!isPrice(s.firstOrderMaxTl!)) return { error: "İlk sipariş indirimi üst sınırı 0 ile 1.000.000 TL arasında olmalı." };
+  if (!isPrice(s.referralRewardTl!)) return { error: "Davet ödülü 0 ile 1.000.000 TL arasında olmalı." };
   s.firstOrderPercent = round2(s.firstOrderPercent!);
   s.firstOrderMaxTl = round2(s.firstOrderMaxTl!);
   s.referralRewardTl = round2(s.referralRewardTl!);

@@ -45,7 +45,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   proMonthlyTl: 1000,
   plusMonthlyTl: 1250,
   yearlyDiscountPercent: 20,
-  proTrialEnabled: true,
+  proTrialEnabled: false,
   proTrialDays: 30,
   proFreeBoostDays: 3,
   plusFreeBoostDays: 10,

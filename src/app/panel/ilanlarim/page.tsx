@@ -99,7 +99,7 @@ export default async function MyGigsPage(props: PageProps<"/panel/ilanlarim">) {
                   </td>
                   <td className="px-5 py-4 text-slate-500">{gig.category.name}</td>
                   <td className="px-5 py-4 font-semibold text-brand-navy">
-                    {formatPrice(gig.packages[0]?.price ?? 0)}₺
+                    {formatPrice(gig.packages[0]?.price ?? 0)} TL
                   </td>
                   <td className="px-5 py-4">
                     {gig.status === "PENDING" ? (

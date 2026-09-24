@@ -107,23 +107,23 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
         <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm">
           <div className="flex justify-between text-slate-600">
             <span>Paket fiyatı</span>
-            <span>{formatPrice(listPrice)}₺</span>
+            <span>{formatPrice(listPrice)} TL</span>
           </div>
           {discount > 0 && (
             <div className="mt-1 flex justify-between font-semibold text-emerald-700">
               <span>İlk sipariş indirimi</span>
-              <span>−{formatPrice(discount)}₺</span>
+              <span>−{formatPrice(discount)} TL</span>
             </div>
           )}
           {creditDiscount > 0 && (
             <div className="mt-1 flex justify-between font-semibold text-emerald-700">
               <span>Davet ödülü</span>
-              <span>−{formatPrice(creditDiscount)}₺</span>
+              <span>−{formatPrice(creditDiscount)} TL</span>
             </div>
           )}
           <div className="mt-2 flex justify-between border-t border-emerald-200 pt-2 font-bold text-brand-navy">
             <span>Ödenecek tutar</span>
-            <span>{formatPrice(amount)}₺</span>
+            <span>{formatPrice(amount)} TL</span>
           </div>
         </div>
       )}
@@ -134,7 +134,7 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
             <div>
               <p className="font-semibold text-brand-navy">Kurumsal Bakiye ile Öde</p>
               <p className="text-sm text-slate-600">
-                Bakiyen: <strong>{formatPrice(corporate.balance)}₺</strong>
+                Bakiyen: <strong>{formatPrice(corporate.balance)} TL</strong>
               </p>
             </div>
             {corporate.balance >= amount ? (
@@ -143,7 +143,7 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
                   type="submit"
                   className="brand-gradient rounded-full px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
                 >
-                  {formatPrice(amount)}₺ Bakiyeden Öde
+                  {formatPrice(amount)} TL Bakiyeden Öde
                 </button>
               </form>
             ) : (

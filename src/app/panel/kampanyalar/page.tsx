@@ -87,8 +87,8 @@ export default async function FreelancerCampaignsPage() {
                         <div className="min-w-0">
                           <p className="truncate font-medium text-brand-navy">{gig.title}</p>
                           <p className="text-xs text-slate-400">
-                            {formatPrice(price)}₺
-                            {entry && ` → kampanyada ${formatPrice(campaignPrice(price, entry.percent))}₺`}
+                            {formatPrice(price)} TL
+                            {entry && ` → kampanyada ${formatPrice(campaignPrice(price, entry.percent))} TL`}
                             {!gig.published && " · duraklatılmış"}
                           </p>
                         </div>

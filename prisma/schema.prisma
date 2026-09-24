@@ -545,7 +545,7 @@ model SiteSettings {
   proMonthlyTl       Decimal  @default(1000) @db.Decimal(10, 2)
   plusMonthlyTl      Decimal  @default(1250) @db.Decimal(10, 2)
   yearlyDiscountPercent Decimal @default(20) @db.Decimal(5, 2)
-  proTrialEnabled    Boolean  @default(true)
+  proTrialEnabled    Boolean  @default(false)
   proTrialDays       Int      @default(30)
   /// Her ay üyelikle gelen ücretsiz Öne Çıkar süresi (gün).
   proFreeBoostDays   Int      @default(3)

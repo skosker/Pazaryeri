@@ -200,7 +200,7 @@ export default async function OrderDetailPage(props: PageProps<"/siparis/[orderI
       <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6">
         <div className="flex items-center justify-between text-sm">
           <span className="text-slate-500">Tutar</span>
-          <span className="font-semibold text-brand-navy">{formatPrice(order.amount)}₺</span>
+          <span className="font-semibold text-brand-navy">{formatPrice(order.amount)} TL</span>
         </div>
         {/* The first-order discount is Prosinta's cost, not the seller's, so only the buyer
             (and admin) see it; the seller keeps seeing their package price. */}
@@ -209,18 +209,18 @@ export default async function OrderDetailPage(props: PageProps<"/siparis/[orderI
             {Number(order.discount) > 0 && (
               <div className="mt-2 flex items-center justify-between text-sm">
                 <span className="text-emerald-700">İlk sipariş indirimi</span>
-                <span className="font-semibold text-emerald-700">−{formatPrice(order.discount)}₺</span>
+                <span className="font-semibold text-emerald-700">−{formatPrice(order.discount)} TL</span>
               </div>
             )}
             {Number(order.creditDiscount) > 0 && (
               <div className="mt-2 flex items-center justify-between text-sm">
                 <span className="text-emerald-700">Davet ödülü</span>
-                <span className="font-semibold text-emerald-700">−{formatPrice(order.creditDiscount)}₺</span>
+                <span className="font-semibold text-emerald-700">−{formatPrice(order.creditDiscount)} TL</span>
               </div>
             )}
             <div className="mt-2 flex items-center justify-between text-sm">
               <span className="text-slate-500">Ödenen tutar</span>
-              <span className="font-semibold text-brand-navy">{formatPrice(payableAmount(order))}₺</span>
+              <span className="font-semibold text-brand-navy">{formatPrice(payableAmount(order))} TL</span>
             </div>
           </>
         )}

@@ -19,7 +19,7 @@ export function OfferSettingsForm({ settings }: { settings: SiteSettings }) {
         >
           <Toggle label="İndirim açık" name="firstOrderEnabled" defaultChecked={settings.firstOrderEnabled} />
           <NumberField label="Oran (%)" name="firstOrderPercent" defaultValue={settings.firstOrderPercent} step="0.01" />
-          <NumberField label="En fazla (₺)" name="firstOrderMaxTl" defaultValue={settings.firstOrderMaxTl} step="0.01" />
+          <NumberField label="En fazla (TL)" name="firstOrderMaxTl" defaultValue={settings.firstOrderMaxTl} step="0.01" />
         </SettingsCard>
         <SettingsCard
           title="Davet Programı"
@@ -27,7 +27,7 @@ export function OfferSettingsForm({ settings }: { settings: SiteSettings }) {
           hint="Davet edilenin ilk siparişi tamamlanınca davet edene ödül; ödülden yüksek bir sonraki siparişinde düşer."
         >
           <Toggle label="Program açık" name="referralEnabled" defaultChecked={settings.referralEnabled} />
-          <NumberField label="Ödül (₺)" name="referralRewardTl" defaultValue={settings.referralRewardTl} step="0.01" />
+          <NumberField label="Ödül (TL)" name="referralRewardTl" defaultValue={settings.referralRewardTl} step="0.01" />
         </SettingsCard>
       </div>
       <SaveBar pending={pending} error={state.error} saved={state.saved} label="İndirimleri Kaydet" />

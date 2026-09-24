@@ -89,8 +89,8 @@ export default async function BoostGigPage(props: PageProps<"/panel/ilanlarim/[g
         </li>
         <li className="flex items-start gap-2">
           <span className="mt-0.5 text-emerald-500">✓</span> Tek seferlik{" "}
-          {quote.percent > 0 && <span className="text-slate-400 line-through">{formatPrice(quote.listAmount)}₺</span>}{" "}
-          {formatPrice(price)}₺, otomatik yenilenmez
+          {quote.percent > 0 && <span className="text-slate-400 line-through">{formatPrice(quote.listAmount)} TL</span>}{" "}
+          {formatPrice(price)} TL, otomatik yenilenmez
           {quote.percent > 0 && (
             <span className="font-semibold text-rose-600">
               ({quote.reason} indirimi: %{quote.percent.toLocaleString("tr-TR")})

@@ -138,7 +138,7 @@ export async function sendOrderPaidEmails(params: {
     layout(
       "Ödemen başarıyla alındı",
       `<p>Merhaba ${params.buyerName},</p>
-       <p><strong>${params.gigTitle}</strong> için <strong>${formatPrice(params.paidAmount)}₺</strong> tutarındaki ödemen alındı. Satıcı işe başladığında haber vereceğiz.</p>
+       <p><strong>${params.gigTitle}</strong> için <strong>${formatPrice(params.paidAmount)} TL</strong> tutarındaki ödemen alındı. Satıcı işe başladığında haber vereceğiz.</p>
        ${button(params.orderUrl, "Siparişi Görüntüle")}`
     )
   );
@@ -149,7 +149,7 @@ export async function sendOrderPaidEmails(params: {
     layout(
       "Yeni sipariş!",
       `<p>Merhaba ${params.sellerName},</p>
-       <p><strong>${params.gigTitle}</strong> ilanın için yeni bir sipariş aldın (${formatPrice(params.amount)}₺). İşe başlamak için siparişi onayla.</p>
+       <p><strong>${params.gigTitle}</strong> ilanın için yeni bir sipariş aldın (${formatPrice(params.amount)} TL). İşe başlamak için siparişi onayla.</p>
        ${button(params.orderUrl, "Siparişi Görüntüle")}`
     )
   );
@@ -167,7 +167,7 @@ export async function sendBankTransferAdminAlertEmail(params: {
     "Havale/EFT ödeme bildirimi — onay bekleniyor",
     layout(
       "Ödeme onayı bekleniyor",
-      `<p><strong>${params.buyerName}</strong>, <strong>${params.gigTitle}</strong> siparişi için <strong>${formatPrice(params.amount)}₺</strong> tutarında havale/EFT yaptığını bildirdi. Şirket hesabını kontrol edip ödemeyi onayla.</p>
+      `<p><strong>${params.buyerName}</strong>, <strong>${params.gigTitle}</strong> siparişi için <strong>${formatPrice(params.amount)} TL</strong> tutarında havale/EFT yaptığını bildirdi. Şirket hesabını kontrol edip ödemeyi onayla.</p>
        ${button(params.orderUrl, "Ödemeyi Onayla")}`
     )
   );
@@ -240,7 +240,7 @@ export async function sendOrderCompletedEmail(params: {
     layout(
       "Ödeme aktarıldı",
       `<p>Merhaba ${params.sellerName},</p>
-       <p><strong>${params.gigTitle}</strong> siparişi alıcı tarafından onaylandı, <strong>${formatPrice(params.amount)}₺</strong> tutarındaki ödeme sana aktarıldı.</p>
+       <p><strong>${params.gigTitle}</strong> siparişi alıcı tarafından onaylandı, <strong>${formatPrice(params.amount)} TL</strong> tutarındaki ödeme sana aktarıldı.</p>
        ${button(params.orderUrl, "Siparişi Görüntüle")}`
     )
   );
@@ -260,7 +260,7 @@ export async function sendCancellationRequestEmail(params: {
     "Sipariş iptal talebi",
     layout(
       "İptal talebi geldi",
-      `<p><strong>${params.buyerName}</strong>, ödemesi tamamlanmış <strong>${params.gigTitle}</strong> siparişi (${formatPrice(params.amount)}₺) için iptal talep etti. Satıcı henüz işe başlamadıysa iade sürecini destek@prosinta.com üzerinden yürüt.</p>
+      `<p><strong>${params.buyerName}</strong>, ödemesi tamamlanmış <strong>${params.gigTitle}</strong> siparişi (${formatPrice(params.amount)} TL) için iptal talep etti. Satıcı henüz işe başlamadıysa iade sürecini destek@prosinta.com üzerinden yürüt.</p>
        ${button(params.orderUrl, "Siparişi Görüntüle")}`
     )
   );
@@ -352,12 +352,12 @@ export async function sendReferralRewardEmail(params: {
 }) {
   await sendEmail(
     params.to,
-    `Davet ödülün hazır: ${formatPrice(params.amount)}₺`,
+    `Davet ödülün hazır: ${formatPrice(params.amount)} TL`,
     layout(
       "Davet ödülün hazır",
       `<p>Merhaba ${escapeHtml(params.name)},</p>
        <p>Davet ettiğin <strong>${escapeHtml(params.friendName)}</strong> Prosinta'daki ilk siparişini tamamladı. Teşekkürler!</p>
-       <p><strong>${formatPrice(params.amount)}₺</strong> davet ödülün tanımlandı; bu tutardan yüksek bir sonraki siparişinde ödeme sayfasında otomatik düşülecek.</p>
+       <p><strong>${formatPrice(params.amount)} TL</strong> davet ödülün tanımlandı; bu tutardan yüksek bir sonraki siparişinde ödeme sayfasında otomatik düşülecek.</p>
        ${button(params.inviteUrl, "Davetlerimi Gör")}`
     )
   );

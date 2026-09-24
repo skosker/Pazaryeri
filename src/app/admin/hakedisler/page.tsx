@@ -19,11 +19,11 @@ export default async function PayoutsPage() {
 
       <div className="mt-6 flex flex-wrap gap-3 text-sm">
         <span className="rounded-xl bg-amber-50 px-4 py-2 text-amber-800">
-          Ödenecek: <strong>{formatPrice(total)}₺</strong> ({pending.length} kayıt)
+          Ödenecek: <strong>{formatPrice(total)} TL</strong> ({pending.length} kayıt)
         </span>
         {commissionTotal > 0 && (
           <span className="rounded-xl bg-emerald-50 px-4 py-2 text-emerald-800">
-            Bu hakedişlerden komisyon: <strong>{formatPrice(commissionTotal)}₺</strong>
+            Bu hakedişlerden komisyon: <strong>{formatPrice(commissionTotal)} TL</strong>
           </span>
         )}
       </div>
@@ -74,10 +74,10 @@ export default async function PayoutsPage() {
                         )}
                       </td>
                       <td className="px-5 py-4">
-                        <p className="font-semibold text-brand-navy">{formatPrice(payout.net)}₺</p>
+                        <p className="font-semibold text-brand-navy">{formatPrice(payout.net)} TL</p>
                         {Number(payout.commission) > 0 && (
                           <p className="text-xs text-slate-400">
-                            Brüt {formatPrice(payout.gross)}₺ · Komisyon {formatPrice(payout.commission)}₺
+                            Brüt {formatPrice(payout.gross)} TL · Komisyon {formatPrice(payout.commission)} TL
                           </p>
                         )}
                       </td>
@@ -104,7 +104,7 @@ export default async function PayoutsPage() {
                   <span className="ml-2 text-slate-400">{payout.order.gig.title}</span>
                 </span>
                 <span className="shrink-0 text-slate-500">
-                  {formatPrice(payout.net)}₺
+                  {formatPrice(payout.net)} TL
                   {payout.paidAt && ` · ${payout.paidAt.toLocaleDateString("tr-TR")}`}
                 </span>
               </li>

@@ -3,7 +3,7 @@
  *
  * Prices are stored as Decimal, so the value arrives here as a number, a string or a
  * Prisma Decimal; all three are read the same way. Kuruş only shows when there is any —
- * a listing at 12.500₺ should not read "12.500,00₺".
+ * a listing at 12.500 TL should not read "12.500,00 TL".
  */
 export function formatPrice(value: number | string | { toString(): string } | null | undefined) {
   const amount = Number(value ?? 0);

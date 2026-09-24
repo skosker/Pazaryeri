@@ -38,7 +38,7 @@ export async function saveMembershipSettingsAction(
   };
 
   if (!isPrice(s.proMonthlyTl!) || !isPrice(s.plusMonthlyTl!)) {
-    return { error: "Üyelik fiyatları 0 ile 1.000.000 ₺ arasında olmalı." };
+    return { error: "Üyelik fiyatları 0 ile 1.000.000 TL arasında olmalı." };
   }
   if (!(Number.isFinite(s.yearlyDiscountPercent) && s.yearlyDiscountPercent! >= 0 && s.yearlyDiscountPercent! <= 90)) {
     return { error: "Yıllık indirim %0 ile %90 arasında olmalı." };
@@ -50,7 +50,7 @@ export async function saveMembershipSettingsAction(
   if (!(Number.isFinite(s.plusBoostDiscountPercent) && s.plusBoostDiscountPercent! >= 0 && s.plusBoostDiscountPercent! <= 100)) {
     return { error: "Pro Plus Öne Çıkar indirimi %0 ile %100 arasında olmalı." };
   }
-  if (!isPrice(s.boostPriceTl!)) return { error: "Öne Çıkar fiyatı 0 ile 1.000.000 ₺ arasında olmalı." };
+  if (!isPrice(s.boostPriceTl!)) return { error: "Öne Çıkar fiyatı 0 ile 1.000.000 TL arasında olmalı." };
   if (!isWhole(s.boostDays!, 1, 365)) return { error: "Öne Çıkar süresi 1 ile 365 gün arasında olmalı." };
   if (![s.portfolioImages!, s.portfolioImagesPro!, s.portfolioImagesPlus!].every((n) => isWhole(n, 1, 50))) {
     return { error: "Örnek iş görseli sınırları 1 ile 50 arasında olmalı." };
@@ -63,7 +63,7 @@ export async function saveMembershipSettingsAction(
   }
   if (!isWhole(s.founderLimit!, 0, 100_000)) return { error: "Kurucu kontenjanı 0 veya pozitif bir tam sayı olmalı." };
   if (!isPrice(s.corporateMinTopUpTl!) || s.corporateMinTopUpTl! < 1) {
-    return { error: "En düşük bakiye yüklemesi 1 ile 1.000.000 ₺ arasında olmalı." };
+    return { error: "En düşük bakiye yüklemesi 1 ile 1.000.000 TL arasında olmalı." };
   }
   if (!(Number.isFinite(s.corporateBonusPercent) && s.corporateBonusPercent! >= 0 && s.corporateBonusPercent! <= 50)) {
     return { error: "Bakiye bonusu %0 ile %50 arasında olmalı." };

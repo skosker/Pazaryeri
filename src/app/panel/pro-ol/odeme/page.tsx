@@ -90,8 +90,8 @@ export default async function ProOdemePage(props: PageProps<"/panel/pro-ol/odeme
       </Link>
       <h1 className="mt-3 text-2xl font-bold text-brand-navy">{title} Üyelik</h1>
       <p className="mt-1 text-sm text-slate-500">
-        {quote.perkPercent > 0 && <span className="mr-1 text-slate-400 line-through">{formatPrice(quote.listAmount)}₺</span>}
-        {formatPrice(price)}₺ · {period === "yillik" ? "12 ay" : "1 ay"}, otomatik yenilenmez.
+        {quote.perkPercent > 0 && <span className="mr-1 text-slate-400 line-through">{formatPrice(quote.listAmount)} TL</span>}
+        {formatPrice(price)} TL · {period === "yillik" ? "12 ay" : "1 ay"}, otomatik yenilenmez.
         {quote.perkPercent > 0 && (
           <span className="ml-1 font-semibold text-rose-600">
             {quote.perkName} indirimi: %{quote.perkPercent}

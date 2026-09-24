@@ -25,7 +25,7 @@ export default async function InvitePage() {
       {settings.referralEnabled ? (
         <p className="mt-1 text-sm text-slate-500">
           Arkadaşlarını Prosinta&apos;ya davet et. Davet ettiğin kişi ilk siparişini tamamladığında sana{" "}
-          <strong className="text-brand-navy">{reward}₺</strong> ödül tanımlanır.
+          <strong className="text-brand-navy">{reward} TL</strong> ödül tanımlanır.
         </p>
       ) : (
         <p className="mt-2 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
@@ -43,8 +43,8 @@ export default async function InvitePage() {
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Stat label="Davet Ettiğin" value={String(summary.invited)} />
-        <Stat label="Kazandığın Ödül" value={`${formatPrice(summary.earned)}₺`} />
-        <Stat label="Kullanılabilir Ödül" value={`${formatPrice(summary.available)}₺`} highlight />
+        <Stat label="Kazandığın Ödül" value={`${formatPrice(summary.earned)} TL`} />
+        <Stat label="Kullanılabilir Ödül" value={`${formatPrice(summary.available)} TL`} highlight />
       </div>
 
       <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-600">
@@ -54,10 +54,10 @@ export default async function InvitePage() {
           {settings.firstOrderEnabled && settings.firstOrderPercent > 0 && (
             <li>
               Arkadaşın ilk siparişinde %{settings.firstOrderPercent.toLocaleString("tr-TR")} indirim alır (en fazla{" "}
-              {formatPrice(settings.firstOrderMaxTl)}₺).
+              {formatPrice(settings.firstOrderMaxTl)} TL).
             </li>
           )}
-          <li>Arkadaşının ilk siparişi tamamlanınca {reward}₺ ödülün tanımlanır, sana e-posta ile haber veririz.</li>
+          <li>Arkadaşının ilk siparişi tamamlanınca {reward} TL ödülün tanımlanır, sana e-posta ile haber veririz.</li>
           <li>
             Ödül, ödül tutarından yüksek bir sonraki siparişinde ödeme sayfasında otomatik düşer. Her ödül bir
             siparişte kullanılır.

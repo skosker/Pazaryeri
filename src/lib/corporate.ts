@@ -31,7 +31,7 @@ export async function requestTopUp(userId: string, amount: number) {
   const account = await corporateAccount(userId);
   if (!account.usable) throw new CorporateError("Kurumsal paket kullanılamıyor.");
   if (!Number.isFinite(amount) || amount < account.minTopUp || amount > 10_000_000) {
-    throw new CorporateError(`En az ${account.minTopUp.toLocaleString("tr-TR")} ₺ yükleyebilirsin.`);
+    throw new CorporateError(`En az ${account.minTopUp.toLocaleString("tr-TR")} TL yükleyebilirsin.`);
   }
   const rounded = Math.round(amount * 100) / 100;
   const bonus = Math.round(rounded * account.bonusPercent) / 100;
@@ -55,7 +55,7 @@ export async function confirmTopUp(topUpId: string) {
         kind: "TOPUP",
         amount: credit,
         topUpId,
-        note: Number(topUp.bonus) > 0 ? `Havale/EFT yükleme (+${Number(topUp.bonus).toLocaleString("tr-TR")} ₺ bonus)` : "Havale/EFT yükleme",
+        note: Number(topUp.bonus) > 0 ? `Havale/EFT yükleme (+${Number(topUp.bonus).toLocaleString("tr-TR")} TL bonus)` : "Havale/EFT yükleme",
       },
     });
   });

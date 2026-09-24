@@ -105,7 +105,7 @@ export default async function AdminDashboardPage(props: PageProps<"/admin">) {
         <StatCard label="İlan Vermeyen Freelancer" value={String(noGigFreelancerCount)} />
         <StatCard label={filtered ? "Yeni İlan" : "İlan"} value={String(gigCount)} />
         <StatCard label="Sipariş" value={String(orderCount)} />
-        <StatCard label="Tamamlanan Ciro" value={`${formatPrice(totalRevenue)}₺`} />
+        <StatCard label="Tamamlanan Ciro" value={`${formatPrice(totalRevenue)} TL`} />
       </div>
 
       <div className="mt-10">
@@ -134,7 +134,7 @@ export default async function AdminDashboardPage(props: PageProps<"/admin">) {
                         Sipariş #{order.id.slice(-8).toUpperCase()} · {order.buyer.name}
                       </p>
                     </td>
-                    <td className="px-5 py-4 font-semibold text-brand-navy">{formatPrice(order.amount)}₺</td>
+                    <td className="px-5 py-4 font-semibold text-brand-navy">{formatPrice(order.amount)} TL</td>
                     <td className="px-5 py-4 text-right">
                       <Link href={`/siparis/${order.id}`} className="font-semibold text-purple-700 hover:underline">
                         İncele

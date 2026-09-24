@@ -107,7 +107,7 @@ export default async function AdminOrdersPage(props: PageProps<"/admin/siparisle
                   <td className="px-5 py-4 text-slate-600">{order.buyer.name}</td>
                   <td className="px-5 py-4 text-slate-600">{order.gig.seller.name}</td>
                   <td className="px-5 py-4 font-semibold text-brand-navy">
-                    {formatPrice(order.amount)}₺
+                    {formatPrice(order.amount)} TL
                   </td>
                   <td className="px-5 py-4">
                     <span

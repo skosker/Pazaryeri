@@ -81,10 +81,10 @@ export function OrderPanel({
           <h2 className="font-semibold text-brand-navy">{pkg.name}</h2>
           <div className="text-right">
             {campaign && (
-              <span className="mr-2 text-sm text-slate-400 line-through">{formatPrice(pkg.price)}₺</span>
+              <span className="mr-2 text-sm text-slate-400 line-through">{formatPrice(pkg.price)} TL</span>
             )}
             <span className={`text-2xl font-extrabold ${campaign ? "text-rose-600" : "text-brand-navy"}`}>
-              {formatPrice(price)}₺
+              {formatPrice(price)} TL
             </span>
             {campaign && (
               <p className="mt-0.5 text-xs font-bold text-rose-600">
@@ -135,8 +135,8 @@ export function OrderPanel({
               <p className="mt-5 rounded-xl bg-emerald-50 px-3 py-2 text-center text-xs font-semibold text-emerald-700">
                 İlk siparişine özel %{firstOrderOffer.percent.toLocaleString("tr-TR")} indirim
                 {price * (firstOrderOffer.percent / 100) > firstOrderOffer.maxTl
-                  ? ` (en fazla ${formatPrice(firstOrderOffer.maxTl)}₺)`
-                  : ` — ${formatPrice(price - Math.round(price * firstOrderOffer.percent) / 100)}₺ ödersin`}
+                  ? ` (en fazla ${formatPrice(firstOrderOffer.maxTl)} TL)`
+                  : ` — ${formatPrice(price - Math.round(price * firstOrderOffer.percent) / 100)} TL ödersin`}
               </p>
             )}
             <input type="hidden" name="slug" value={slug} />

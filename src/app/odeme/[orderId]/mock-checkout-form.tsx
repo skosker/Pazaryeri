@@ -48,7 +48,7 @@ export function MockCheckoutForm({ orderId, amount }: { orderId: string; amount:
 
       <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
         <span className="text-sm text-slate-500">Ödenecek tutar</span>
-        <span className="text-xl font-bold text-brand-navy">{formatPrice(amount)}₺</span>
+        <span className="text-xl font-bold text-brand-navy">{formatPrice(amount)} TL</span>
       </div>
 
       <button
@@ -57,7 +57,7 @@ export function MockCheckoutForm({ orderId, amount }: { orderId: string; amount:
         onClick={() => startTransition(() => completeMockPayment(orderId))}
         className="brand-gradient mt-5 w-full rounded-full px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
       >
-        {pending ? "İşleniyor..." : `${formatPrice(amount)}₺ Öde`}
+        {pending ? "İşleniyor..." : `${formatPrice(amount)} TL Öde`}
       </button>
 
       <button

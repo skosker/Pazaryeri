@@ -88,7 +88,7 @@ export default async function ProOlPage(props: PageProps<"/panel/pro-ol">) {
       {pending && (
         <p className="mt-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900">
           {PLAN_LABEL[pending.plan]}
-          {pendingPeriod ? ` (${PERIOD_LABEL[pendingPeriod]})` : ""} için {formatPrice(pending.amount)}₺ Havale/EFT
+          {pendingPeriod ? ` (${PERIOD_LABEL[pendingPeriod]})` : ""} için {formatPrice(pending.amount)} TL Havale/EFT
           bildirimin alındı; onaylanınca üyeliğin güncellenecek.
         </p>
       )}
