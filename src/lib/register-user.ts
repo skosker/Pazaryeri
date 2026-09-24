@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { registerSchema, type RegisterInput } from "@/lib/validation";
 import { sendWelcomeVerificationEmail } from "@/lib/email";
+import { referrerByCode } from "@/lib/referrals";
 
 export class RegisterError extends Error {}
 
@@ -14,7 +15,8 @@ export async function registerUser(input: RegisterInput) {
     throw new RegisterError(parsed.error.issues[0]?.message ?? "Geçersiz form verisi");
   }
 
-  const { name, email, password, role, company } = parsed.data;
+  const { name, email, password, role, company, referralCode } = parsed.data;
+  const referrer = await referrerByCode(referralCode);
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
@@ -24,7 +26,7 @@ export async function registerUser(input: RegisterInput) {
   const passwordHash = await bcrypt.hash(password, 10);
 
   const user = await prisma.user.create({
-    data: { name, email, passwordHash, role, ...(company ?? {}) },
+    data: { name, email, passwordHash, role, ...(company ?? {}), referredById: referrer?.id ?? null },
   });
 
   const token = randomUUID();

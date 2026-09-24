@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { splitPayout } from "@/lib/commission";
+import { grantReferralReward } from "@/lib/referrals";
 import { getSettings } from "@/lib/settings";
 import { payableAmount } from "@/lib/orders";
 import {
@@ -210,6 +211,9 @@ export async function buyerCompleteOrder(orderId: string, buyerId: string) {
       },
     }),
   ]);
+
+  // An invited buyer's first completed order earns their inviter the referral reward.
+  await grantReferralReward({ id: orderId, buyerId });
 
   await sendOrderCompletedEmail({
     sellerEmail: order.gig.seller.email,

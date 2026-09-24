@@ -20,6 +20,8 @@ export type SiteSettings = {
   /** 5 means %5. */
   firstOrderPercent: number;
   firstOrderMaxTl: number;
+  referralEnabled: boolean;
+  referralRewardTl: number;
 };
 
 /** Used until an admin first saves the settings form (mirrors the schema defaults). */
@@ -36,6 +38,8 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   firstOrderEnabled: true,
   firstOrderPercent: 5,
   firstOrderMaxTl: 500,
+  referralEnabled: true,
+  referralRewardTl: 200,
 };
 
 /** One read per request however many components ask. */
@@ -55,6 +59,8 @@ export const getSettings = cache(async (): Promise<SiteSettings> => {
     firstOrderEnabled: row.firstOrderEnabled,
     firstOrderPercent: Number(row.firstOrderPercent),
     firstOrderMaxTl: Number(row.firstOrderMaxTl),
+    referralEnabled: row.referralEnabled,
+    referralRewardTl: Number(row.referralRewardTl),
   };
 });
 

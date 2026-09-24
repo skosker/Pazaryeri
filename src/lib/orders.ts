@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
+import { refreshReferralCredit } from "@/lib/referrals";
 
 export class OrderError extends Error {}
 
@@ -15,9 +16,10 @@ export function sellerTakesOrders(seller: { synthetic: boolean; suspended: boole
 
 type Money = number | { toString(): string };
 
-/** What the buyer is charged: the package price less any first-order discount. */
-export function payableAmount(order: { amount: Money; discount: Money }): number {
-  return Math.round((Number(order.amount) - Number(order.discount)) * 100) / 100;
+/** What the buyer is charged: the package price less the first-order discount and any referral credit. */
+export function payableAmount(order: { amount: Money; discount: Money; creditDiscount?: Money }): number {
+  const off = Number(order.discount) + Number(order.creditDiscount ?? 0);
+  return Math.round((Number(order.amount) - off) * 100) / 100;
 }
 
 /**
@@ -75,6 +77,22 @@ export async function refreshFirstOrderDiscount(order: {
     await prisma.order.update({ where: { id: order.id }, data: { discount } });
   }
   return discount;
+}
+
+/**
+ * Both buyer-side reductions, re-checked right before an unpaid order is paid: the
+ * first-order discount first, then a referral reward on what is left.
+ */
+export async function refreshOrderDiscounts(order: {
+  id: string;
+  buyerId: string;
+  amount: Money;
+  discount: Money;
+  creditDiscount: Money;
+}): Promise<{ discount: number; creditDiscount: number }> {
+  const discount = await refreshFirstOrderDiscount(order);
+  const creditDiscount = await refreshReferralCredit({ ...order, discount });
+  return { discount, creditDiscount };
 }
 
 export async function createOrder(buyerId: string, packageId: string) {

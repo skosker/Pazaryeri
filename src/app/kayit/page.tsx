@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { AuthShell } from "@/components/auth-shell";
 import { RegisterForm } from "./register-form";
+import { cookies } from "next/headers";
+import { REFERRAL_COOKIE, referrerByCode } from "@/lib/referrals";
 import { KullanimSartlariText, UyelikSozlesmesiText } from "@/components/legal-texts";
 import { RolePicker } from "./role-picker";
 import { founderPlaces } from "@/lib/founders";
@@ -20,6 +22,8 @@ export default async function RegisterPage(props: PageProps<"/kayit">) {
   }
 
   const sells = role === "FREELANCER";
+  // Arrived through someone's invite link: say so, it is why they are here.
+  const inviter = await referrerByCode((await cookies()).get(REFERRAL_COOKIE)?.value);
   const places = sells ? await founderPlaces() : null;
 
   return (
@@ -36,6 +40,12 @@ export default async function RegisterPage(props: PageProps<"/kayit">) {
           ? "Hesabını oluştur, ilanını yayınla ve kazanmaya başla."
           : "Hesabını oluştur, aradığın hizmeti bul ve işe hemen başla."}
       </p>
+
+      {inviter && (
+        <p className="mt-6 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <strong>{inviter.name.split(" ")[0]}</strong> seni Prosinta&apos;ya davet etti.
+        </p>
+      )}
 
       {places && <FounderPromo {...places} className="mt-6" />}
 

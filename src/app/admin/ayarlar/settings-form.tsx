@@ -43,6 +43,14 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
       </Section>
 
       <Section
+        title="Davet Programı"
+        hint="Davet edilen kullanıcının ilk siparişi tamamlanınca davet edene bu tutarda ödül tanımlanır; ödül, ondan yüksek bir sonraki siparişinde otomatik düşer. İndirimi Prosinta karşılar. Kapatınca yeni ödül verilmez, kazanılmış ödüller kullanılabilir kalır."
+      >
+        <Toggle label="Davet programı açık" name="referralEnabled" defaultChecked={settings.referralEnabled} />
+        <Field label="Ödül tutarı (₺)" name="referralRewardTl" defaultValue={settings.referralRewardTl} step="0.01" />
+      </Section>
+
+      <Section
         title="Kurucu Freelancer"
         hint="İlk ilanı onaylanan gerçek freelancer'lara kalıcı rozet ve aramada öncelik. Kapatınca yeni rozet verilmez ve kontenjan duyuruları gizlenir; verilmiş rozetler kalır."
       >

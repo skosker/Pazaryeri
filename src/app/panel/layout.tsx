@@ -29,6 +29,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     { href: "/panel/siparisler", label: isFreelancer ? "Siparişler" : "Siparişlerim" },
     { href: "/panel/mesajlar", label: "Mesajlar", badge: unreadMessages },
     ...(isFreelancer ? [{ href: "/panel/odeme-bilgileri", label: "Ödeme Bilgileri" }] : []),
+    { href: "/panel/davet", label: "Davet Et" },
     { href: "/panel/profil", label: "Profilim" },
     { href: "/panel/sifre", label: "Şifre Değiştir" },
     ...((isBuyer || isFreelancer) && !isPro ? [{ href: "/panel/pro-ol", label: "Prosinta Pro Ol" }] : []),

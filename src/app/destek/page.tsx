@@ -42,6 +42,14 @@ function buildFaqGroups(settings: SiteSettings): FaqGroup[] {
               },
             ]
           : []),
+        ...(settings.referralEnabled && settings.referralRewardTl > 0
+          ? [
+              {
+                q: "Arkadaşımı davet edersem ne kazanırım?",
+                a: `Panel → Davet Et sayfasındaki kişisel bağlantınla kayıt olan arkadaşının ilk siparişi tamamlandığında sana ${tl(settings.referralRewardTl)} davet ödülü tanımlanır. Ödül, bu tutardan yüksek bir sonraki siparişinde ödeme sayfasında otomatik düşer.`,
+              },
+            ]
+          : []),
         {
           q: "Bazı ilanlarda “Şu An Sipariş Almıyor” yazıyor, neden?",
           a: "O satıcı şu an yeni sipariş kabul etmiyor. İlan sayfasının altındaki benzer hizmetlere ya da aynı kategorideki diğer ilanlara göz atabilirsin.",

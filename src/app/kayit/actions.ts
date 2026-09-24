@@ -2,6 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { registerUser, RegisterError } from "@/lib/register-user";
+import { cookies } from "next/headers";
+import { REFERRAL_COOKIE } from "@/lib/referrals";
 
 /**
  * `values` echoes what was typed (never the password) so the form can put it back:
@@ -20,7 +22,9 @@ export async function registerAction(
   const role = formData.get("role");
 
   try {
+    const cookieStore = await cookies();
     await registerUser({
+      referralCode: cookieStore.get(REFERRAL_COOKIE)?.value,
       name: String(name ?? ""),
       email: String(email ?? ""),
       password: String(password ?? ""),
