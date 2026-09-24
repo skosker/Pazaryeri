@@ -32,7 +32,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   boostDays: 30,
   commissionPercent: 2.5,
   founderEnabled: true,
-  founderLimit: 100,
+  founderLimit: 5000,
   firstOrderEnabled: true,
   firstOrderPercent: 5,
   firstOrderMaxTl: 500,

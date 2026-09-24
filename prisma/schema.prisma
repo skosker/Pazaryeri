@@ -70,7 +70,7 @@ model User {
   importedOrderCount Int?
   // Meaning depends on role: BUYER = Prosinta Pro member, FREELANCER = admin-verified Pro freelancer.
   isPro              Boolean   @default(false)
-  /// Kurucu Freelancer sırası (1–100): ilk ilanı onaylanan ilk gerçek freelancer'lara
+  /// Kurucu Freelancer sırası (1'den kontenjana kadar, /admin/ayarlar): ilk ilanı onaylanan ilk gerçek freelancer'lara
   /// bir kez verilir ve kalıcıdır. Diğer herkes için NULL.
   founderNumber      Int?      @unique
   founderAt          DateTime?
@@ -503,7 +503,7 @@ model SiteSettings {
   /// Hakedişten kesilen komisyon, yüzde olarak (2.5 = %2,5).
   commissionPercent  Decimal  @default(2.5) @db.Decimal(5, 2)
   founderEnabled     Boolean  @default(true)
-  founderLimit       Int      @default(100)
+  founderLimit       Int      @default(5000)
   /// İlk sipariş indirimi: yüzde, en fazla bu kadar TL. Prosinta karşılar.
   firstOrderEnabled  Boolean  @default(true)
   firstOrderPercent  Decimal  @default(5) @db.Decimal(5, 2)
