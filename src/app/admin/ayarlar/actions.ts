@@ -3,6 +3,22 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/require-admin";
 import { saveSettings, type SiteSettings } from "@/lib/settings";
+import { prisma } from "@/lib/prisma";
+
+/** A datetime-local value ("2026-11-23T00:00") read as Istanbul time; empty → null. */
+function istanbulDateTime(value: FormDataEntryValue | null): Date | null {
+  const v = String(value ?? "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(v)) return null;
+  const date = new Date(`${v}:00+03:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/** Ends every gig's campaign sign-up, e.g. before setting up the next campaign. */
+export async function resetCampaignSignupsAction(): Promise<void> {
+  await requireAdmin();
+  await prisma.gig.updateMany({ where: { campaignPercent: { not: null } }, data: { campaignPercent: null } });
+  revalidatePath("/", "layout");
+}
 
 export type SettingsFormState = { error?: string; saved?: boolean };
 
@@ -32,6 +48,12 @@ export async function saveSettingsAction(
     firstOrderMaxTl: num(formData, "firstOrderMaxTl"),
     referralEnabled: formData.get("referralEnabled") === "on",
     referralRewardTl: num(formData, "referralRewardTl"),
+    campaignEnabled: formData.get("campaignEnabled") === "on",
+    campaignName: String(formData.get("campaignName") ?? "").trim(),
+    campaignStart: istanbulDateTime(formData.get("campaignStart")),
+    campaignEnd: istanbulDateTime(formData.get("campaignEnd")),
+    campaignMinPercent: num(formData, "campaignMinPercent"),
+    campaignMaxPercent: num(formData, "campaignMaxPercent"),
   };
 
   const price = (v: number) => Number.isFinite(v) && v >= 0 && v <= 1_000_000;
@@ -52,6 +74,21 @@ export async function saveSettingsAction(
   if (!whole(settings.founderLimit, 0, 100_000)) return { error: "Kurucu kontenjanı 0 veya pozitif bir tam sayı olmalı." };
   if (!(Number.isFinite(settings.firstOrderPercent) && settings.firstOrderPercent >= 0 && settings.firstOrderPercent <= 90)) {
     return { error: "İlk sipariş indirimi %0 ile %90 arasında olmalı." };
+  }
+  if (settings.campaignName.length < 2 || settings.campaignName.length > 60) {
+    return { error: "Kampanya adı 2–60 karakter olmalı." };
+  }
+  if (!whole(settings.campaignMinPercent, 1, 90) || !whole(settings.campaignMaxPercent, 1, 90)) {
+    return { error: "Kampanya indirim oranları %1 ile %90 arasında tam sayı olmalı." };
+  }
+  if (settings.campaignMinPercent > settings.campaignMaxPercent) {
+    return { error: "Kampanyada en düşük indirim en yüksekten büyük olamaz." };
+  }
+  if (settings.campaignEnabled && (!settings.campaignStart || !settings.campaignEnd)) {
+    return { error: "Kampanyayı açmak için başlangıç ve bitiş tarihini gir." };
+  }
+  if (settings.campaignStart && settings.campaignEnd && settings.campaignEnd <= settings.campaignStart) {
+    return { error: "Kampanya bitişi başlangıçtan sonra olmalı." };
   }
   if (!price(settings.referralRewardTl)) return { error: "Davet ödülü 0 ile 1.000.000 ₺ arasında olmalı." };
   if (!price(settings.firstOrderMaxTl)) return { error: "İlk sipariş indirimi üst sınırı 0 ile 1.000.000 ₺ arasında olmalı." };

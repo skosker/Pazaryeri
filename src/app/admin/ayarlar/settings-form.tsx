@@ -43,6 +43,18 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
       </Section>
 
       <Section
+        title="Sezonluk Kampanya"
+        hint="Kapalıyken kullanıcılar hiçbir şey görmez; yalnızca sen /kampanya sayfasını önizleyebilirsin. Açınca freelancer'lar İlanlarım'dan ilanlarını belirlediğin aralıkta bir indirimle kampanyaya katabilir; alıcılar indirimli fiyatı, rozeti ve kampanya sayfasını yalnızca başlangıç ile bitiş arasında görür. İndirimi freelancer karşılar. Saatler İstanbul saatidir."
+      >
+        <Toggle label="Kampanya açık" name="campaignEnabled" defaultChecked={settings.campaignEnabled} />
+        <TextField label="Kampanya adı" name="campaignName" defaultValue={settings.campaignName} />
+        <DateTimeField label="Başlangıç" name="campaignStart" defaultValue={settings.campaignStart} fallback="2026-11-23T00:00" />
+        <DateTimeField label="Bitiş" name="campaignEnd" defaultValue={settings.campaignEnd} fallback="2026-12-01T00:00" />
+        <Field label="En düşük indirim (%)" name="campaignMinPercent" defaultValue={settings.campaignMinPercent} />
+        <Field label="En yüksek indirim (%)" name="campaignMaxPercent" defaultValue={settings.campaignMaxPercent} />
+      </Section>
+
+      <Section
         title="Davet Programı"
         hint="Davet edilen kullanıcının ilk siparişi tamamlanınca davet edene bu tutarda ödül tanımlanır; ödül, ondan yüksek bir sonraki siparişinde otomatik düşer. İndirimi Prosinta karşılar. Kapatınca yeni ödül verilmez, kazanılmış ödüller kullanılabilir kalır."
       >
@@ -105,6 +117,60 @@ function Field({
         min={0}
         step={step}
         defaultValue={defaultValue}
+        className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
+      />
+    </label>
+  );
+}
+
+function TextField({ label, name, defaultValue }: { label: string; name: string; defaultValue: string }) {
+  return (
+    <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
+      {label}
+      <input
+        type="text"
+        name={name}
+        required
+        defaultValue={defaultValue}
+        className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
+      />
+    </label>
+  );
+}
+
+/** Shows a stored instant as Istanbul wall-clock time for a datetime-local input. */
+function toIstanbulInput(date: Date | null): string | null {
+  if (!date) return null;
+  return new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Europe/Istanbul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+    .format(date)
+    .replace(" ", "T");
+}
+
+function DateTimeField({
+  label,
+  name,
+  defaultValue,
+  fallback,
+}: {
+  label: string;
+  name: string;
+  defaultValue: Date | null;
+  fallback: string;
+}) {
+  return (
+    <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
+      {label}
+      <input
+        type="datetime-local"
+        name={name}
+        defaultValue={toIstanbulInput(defaultValue) ?? fallback}
         className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-purple-400"
       />
     </label>

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 import { isSponsored } from "@/lib/gig-boost";
+import { activeCampaignPercent, campaignPrice, getCampaign, type Campaign } from "@/lib/campaign";
 
 const gigCardInclude = {
   seller: {
@@ -39,9 +40,13 @@ export type GigCardData = {
   startingPrice: number;
   rating: number | null;
   reviewCount: number;
+  /** Set only while a seasonal campaign is live and this gig joined it. */
+  campaign: { name: string; percent: number; listPrice: number } | null;
 };
 
-function toCardData(gig: RawGig): GigCardData {
+function toCardData(gig: RawGig, campaign: Campaign): GigCardData {
+  const listPrice = gig.packages[0] ? Number(gig.packages[0].price) : 0;
+  const percent = activeCampaignPercent(campaign, gig.campaignPercent);
   const reviewCount = gig.reviews.length;
   const rating =
     reviewCount > 0
@@ -70,9 +75,10 @@ function toCardData(gig: RawGig): GigCardData {
     categoryIcon: gig.category.icon,
     subcategoryName: gig.subcategory?.name ?? null,
     subcategorySlug: gig.subcategory?.slug ?? null,
-    startingPrice: gig.packages[0] ? Number(gig.packages[0].price) : 0,
+    startingPrice: campaignPrice(listPrice, percent),
     rating,
     reviewCount,
+    campaign: percent ? { name: campaign.name, percent, listPrice } : null,
   };
 }
 
@@ -83,7 +89,8 @@ export async function getFeaturedGigs(limit = 6): Promise<GigCardData[]> {
     orderBy: { createdAt: "desc" },
     take: limit,
   });
-  return gigs.map(toCardData);
+  const campaign = await getCampaign();
+  return gigs.map((g) => toCardData(g, campaign));
 }
 
 export type GigFilters = {
@@ -168,6 +175,7 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
   const orderBy: Prisma.GigOrderByWithRelationInput[] =
     filters.sort && filters.sort !== "uygun" ? [{ createdAt: "desc" }] : [{ featured: "desc" }, { createdAt: "desc" }];
 
+  const campaign = await getCampaign();
   const thin = await prisma.gig.findMany({
     where,
     orderBy,
@@ -175,6 +183,7 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
       id: true,
       coverImage: true,
       sponsoredUntil: true,
+      campaignPercent: true,
       seller: { select: { image: true, founderNumber: true, isPro: true } },
       packages: { orderBy: { price: "asc" }, take: 1, select: { price: true } },
     },
@@ -187,7 +196,11 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
     founder: g.seller.founderNumber !== null,
     pro: g.seller.isPro,
     sponsored: isSponsored(g.sponsoredUntil),
-    startingPrice: g.packages[0] ? Number(g.packages[0].price) : 0,
+    // Sort by what the buyer would pay right now, campaign discount included.
+    startingPrice: campaignPrice(
+      g.packages[0] ? Number(g.packages[0].price) : 0,
+      activeCampaignPercent(campaign, g.campaignPercent)
+    ),
   }));
 
   if (filters.sort === "fiyat-artan") {
@@ -232,9 +245,27 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
     include: gigCardInclude,
   });
   const byId = new Map(fullGigs.map((g) => [g.id, g]));
-  const cards = pageIds.map((id) => byId.get(id)).filter((g): g is RawGig => Boolean(g)).map(toCardData);
+  const cards = pageIds.map((id) => byId.get(id)).filter((g): g is RawGig => Boolean(g)).map((g) => toCardData(g, campaign));
 
   return { cards, total, page, pageCount };
+}
+
+/**
+ * Gigs that joined the seasonal campaign, biggest discount first. Pass a campaign with
+ * `live: true` to preview the page (admin) before it starts.
+ */
+export async function listCampaignGigs(campaign: Campaign, limit = 60): Promise<GigCardData[]> {
+  const gigs = await prisma.gig.findMany({
+    where: {
+      published: true,
+      campaignPercent: { not: null },
+      seller: { synthetic: false, suspended: false },
+    },
+    include: gigCardInclude,
+    orderBy: [{ campaignPercent: "desc" }, { createdAt: "desc" }],
+    take: limit,
+  });
+  return gigs.map((g) => toCardData(g, campaign));
 }
 
 export async function getRelatedGigs(
@@ -252,7 +283,8 @@ export async function getRelatedGigs(
     orderBy: { createdAt: "desc" },
     take: limit,
   });
-  return gigs.map(toCardData);
+  const campaign = await getCampaign();
+  return gigs.map((g) => toCardData(g, campaign));
 }
 
 export async function getGigsBySeller(sellerId: string): Promise<GigCardData[]> {
@@ -261,7 +293,8 @@ export async function getGigsBySeller(sellerId: string): Promise<GigCardData[]> 
     include: gigCardInclude,
     orderBy: { createdAt: "desc" },
   });
-  return gigs.map(toCardData);
+  const campaign = await getCampaign();
+  return gigs.map((g) => toCardData(g, campaign));
 }
 
 /** How many freelancers list a gig in this category — the category banner's "X
