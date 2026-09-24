@@ -1,3 +1,4 @@
+import { membershipSelect, membershipTier } from "@/lib/membership";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
@@ -67,7 +68,7 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
       name: true,
       role: true,
       suspended: true,
-      isPro: true,
+      ...membershipSelect,
       synthetic: true,
       emailVerified: true,
       importedOrderCount: true,
@@ -137,9 +138,9 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
                 </td>
                 <td className="px-5 py-4 text-slate-600">
                   <span>{roleLabel[user.role] ?? user.role}</span>
-                  {user.role === "FREELANCER" && user.isPro && (
+                  {user.role === "FREELANCER" && membershipTier(user) && (
                     <span className="ml-1.5 inline-block rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
-                      Pro
+                      {membershipTier(user) === "PRO_PLUS" ? "Pro Plus" : "Pro"}
                     </span>
                   )}
                 </td>
@@ -217,7 +218,7 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
                                   : "bg-amber-50 text-amber-700 hover:bg-amber-100"
                               }`}
                             >
-                              {user.isPro ? "Pro Kaldır" : "Pro Yap"}
+                              {user.isPro ? "Süresiz Pro Kaldır" : "Süresiz Pro Yap"}
                             </button>
                           </form>
                         )}

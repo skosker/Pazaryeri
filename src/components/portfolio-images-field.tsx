@@ -11,7 +11,7 @@ export function PortfolioImagesField({
 }: {
   currentUrls?: string[];
   maxImages?: number;
-  /** The Pro limit, shown as an upgrade hint when it is higher than the seller's own. */
+  /** The next membership's limit, shown as an upgrade hint when it is higher than the seller's own. */
   proMaxImages?: number;
 }) {
   const [removedUrls, setRemovedUrls] = useState<string[]>([]);
@@ -55,7 +55,7 @@ export function PortfolioImagesField({
           <>
             {" "}
             <Link href="/panel/pro-ol" className="font-medium text-purple-700 hover:underline">
-              Pro üyeler {proMaxImages} görsel ekleyebilir.
+              Üst pakette {proMaxImages} görsel ekleyebilirsin.
             </Link>
           </>
         )}

@@ -3,14 +3,19 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { isMockPayment, isMockPaymentAllowed, isPaytrTestMode, getPaytrToken, clientIp } from "@/lib/paytr";
-import { boostableGig, findOrCreatePendingBoost, isSponsored } from "@/lib/gig-boost";
+import { boostQuote, boostableGig, findOrCreatePendingBoost, freeBoostCredit, isSponsored } from "@/lib/gig-boost";
 import { getBankAccounts } from "@/lib/bank-transfer";
 import { formatPrice } from "@/lib/format-price";
 import { ProMockCheckoutForm } from "@/app/panel/pro-ol/odeme/pro-mock-checkout-form";
 import { ProBankTransferPanel } from "@/app/panel/pro-ol/odeme/pro-bank-transfer-panel";
 import { PaymentMethodTabs } from "@/app/odeme/[orderId]/payment-method-tabs";
 import { PaytrEmbed } from "@/app/odeme/[orderId]/paytr-embed";
-import { completeMockBoostPayment, failMockBoostPayment, notifyBoostBankTransferAction } from "./actions";
+import {
+  completeMockBoostPayment,
+  failMockBoostPayment,
+  notifyBoostBankTransferAction,
+  redeemFreeBoostAction,
+} from "./actions";
 
 const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Istanbul" });
 
@@ -24,12 +29,18 @@ export default async function BoostGigPage(props: PageProps<"/panel/ilanlarim/[g
 
   const searchParams = await props.searchParams;
   const errorMessage =
-    searchParams.hata === "odeme-basarisiz" ? "Ödeme başarısız oldu, tekrar deneyin." : null;
+    searchParams.hata === "odeme-basarisiz"
+      ? "Ödeme başarısız oldu, tekrar deneyin."
+      : searchParams.hata === "ucretsiz-hak"
+        ? "Bu ayki ücretsiz öne çıkarma hakkın kullanılmış."
+        : null;
 
-  const [user, boost, bankAccounts] = await Promise.all([
+  const [user, boost, bankAccounts, credit, quote] = await Promise.all([
     prisma.user.findUniqueOrThrow({ where: { id: session.user.id }, select: { email: true, name: true } }),
     findOrCreatePendingBoost(session.user.id, gigId),
     getBankAccounts(),
+    freeBoostCredit(session.user.id),
+    boostQuote(session.user.id),
   ]);
 
   const price = Number(boost.amount);
@@ -77,10 +88,41 @@ export default async function BoostGigPage(props: PageProps<"/panel/ilanlarim/[g
           <span className="mt-0.5 text-emerald-500">✓</span> İlan kartında &quot;Sponsorlu&quot; etiketi
         </li>
         <li className="flex items-start gap-2">
-          <span className="mt-0.5 text-emerald-500">✓</span> Tek seferlik {formatPrice(price)}₺,
-          otomatik yenilenmez
+          <span className="mt-0.5 text-emerald-500">✓</span> Tek seferlik{" "}
+          {quote.percent > 0 && <span className="text-slate-400 line-through">{formatPrice(quote.listAmount)}₺</span>}{" "}
+          {formatPrice(price)}₺, otomatik yenilenmez
+          {quote.percent > 0 && (
+            <span className="font-semibold text-rose-600">
+              ({quote.reason} indirimi: %{quote.percent.toLocaleString("tr-TR")})
+            </span>
+          )}
         </li>
       </ul>
+
+      {credit && !credit.usedOn && (
+        <form
+          action={redeemFreeBoostAction.bind(null, gigId)}
+          className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-5"
+        >
+          <p className="text-sm text-emerald-900">
+            Üyeliğinle bu ay <strong>{credit.days} gün ücretsiz</strong> öne çıkarma hakkın var.
+          </p>
+          <button
+            type="submit"
+            className="rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+          >
+            Ücretsiz Öne Çıkar
+          </button>
+        </form>
+      )}
+      {!credit && (
+        <p className="mt-6 text-sm text-slate-500">
+          <Link href="/panel/pro-ol" className="font-semibold text-purple-700 hover:underline">
+            Pro üyelikle
+          </Link>{" "}
+          her ay ücretsiz öne çıkarma hakkı kazanırsın.
+        </p>
+      )}
 
       {running && (
         <p className="mt-5 rounded-lg bg-purple-50 px-4 py-3 text-sm text-purple-800">

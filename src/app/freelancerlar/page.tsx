@@ -6,6 +6,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { StarRating } from "@/components/star-rating";
 import { FilterBar } from "./filter-bar";
 import { FounderBadge } from "@/components/founder-badge";
+import { ProBadge } from "@/components/pro-badge";
 
 const PAGE_SIZE = 24;
 
@@ -99,11 +100,7 @@ export default async function FreelancerlarPage(props: PageProps<"/freelancerlar
                       <p className="truncate text-sm font-semibold text-brand-navy group-hover:text-purple-700">
                         {freelancer.name}
                       </p>
-                      {freelancer.isPro && (
-                        <span className="rounded-full bg-amber-400 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-950">
-                          Pro
-                        </span>
-                      )}
+                      {freelancer.isPro && <ProBadge plus={freelancer.isProPlus} size="xs" />}
                       {freelancer.isFounder && <FounderBadge compact />}
                     </div>
                     <p className="truncate text-xs text-slate-500">{freelancer.title ?? "Freelancer"}</p>

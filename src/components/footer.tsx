@@ -10,6 +10,7 @@ const marketplaceLinks: FooterLink[] = [
   { href: "/kategoriler", label: "Hizmetler" },
   { href: "/freelancerlar", label: "Freelancer Bul" },
   { href: "/kayit?role=FREELANCER", label: "Freelancer Ol" },
+  { href: "/uyelik", label: "Üyelik Paketleri" },
 ];
 
 /**

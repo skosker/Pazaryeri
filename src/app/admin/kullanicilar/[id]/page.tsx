@@ -1,3 +1,4 @@
+import { hasPaidPeriod, membershipSelect, membershipTier, untilFormat } from "@/lib/membership";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/require-admin";
@@ -35,7 +36,8 @@ export default async function AdminUserDetailPage(props: PageProps<"/admin/kulla
       email: true,
       role: true,
       suspended: true,
-      isPro: true,
+      ...membershipSelect,
+      proTrialUsedAt: true,
       synthetic: true,
       emailVerified: true,
       createdAt: true,
@@ -110,8 +112,12 @@ export default async function AdminUserDetailPage(props: PageProps<"/admin/kulla
         <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
           {roleLabel[user.role] ?? user.role}
         </span>
-        {user.isPro && (
-          <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">Pro</span>
+        {membershipTier(user) && (
+          <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+            {membershipTier(user) === "PRO_PLUS" ? "Pro Plus" : "Pro"}
+            {hasPaidPeriod(user) ? ` · ${untilFormat.format(user.proUntil!)} tarihine kadar` : " · Süresiz"}
+            {user.proTrialUsedAt ? " · Deneme kullandı" : ""}
+          </span>
         )}
         {user.synthetic && (
           <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500">

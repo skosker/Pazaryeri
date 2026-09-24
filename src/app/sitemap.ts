@@ -14,6 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/freelancerlar",
     "/nasil-calisir",
     "/hakkimizda",
+    "/uyelik",
     "/uyelik-sozlesmesi",
     "/kullanim-sartlari",
     "/gizlilik-politikasi",

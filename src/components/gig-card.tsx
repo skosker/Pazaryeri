@@ -1,3 +1,4 @@
+import { ProBadge } from "@/components/pro-badge";
 import Link from "next/link";
 import { GigCover } from "@/components/gig-cover";
 import { UserAvatar } from "@/components/user-avatar";
@@ -97,11 +98,7 @@ export function GigCard({ gig }: { gig: GigCardData }) {
         {(gig.seller.isPro || gig.seller.isFounder) && (
           <div className="mt-2 flex flex-wrap gap-1.5">
             {gig.seller.isFounder && <FounderBadge compact />}
-            {gig.seller.isPro && (
-              <span className="w-fit rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
-                Pro
-              </span>
-            )}
+            {gig.seller.isPro && <ProBadge plus={gig.seller.isProPlus} soft />}
           </div>
         )}
       </div>

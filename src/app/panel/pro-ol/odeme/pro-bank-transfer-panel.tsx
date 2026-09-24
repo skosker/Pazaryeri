@@ -1,7 +1,6 @@
 "use client";
 
 import { useTransition, useState } from "react";
-import { notifyProBankTransferAction } from "./actions";
 import type { BankTransferInfo } from "@/lib/bank-transfer";
 import { formatPrice } from "@/lib/format-price";
 
@@ -43,18 +42,18 @@ function AccountCard({ account }: { account: BankTransferInfo }) {
   );
 }
 
-/** Also used by "Öne Çıkar", which passes its own action and wording; Pro's are the default. */
+/** Shared by membership and "Öne Çıkar" checkout, each passing its own action and wording. */
 export function ProBankTransferPanel({
   amount,
   accounts,
-  onNotify = notifyProBankTransferAction,
-  activatesLabel = "Pro üyeliğin",
+  onNotify,
+  activatesLabel,
 }: {
   amount: number;
   accounts: BankTransferInfo[];
-  onNotify?: () => Promise<void>;
-  /** What the admin's confirmation switches on, e.g. "Pro üyeliğin" / "Öne Çıkarma". */
-  activatesLabel?: string;
+  onNotify: () => Promise<void>;
+  /** What the admin's confirmation switches on, e.g. "Pro üyeliğin" / "öne çıkarma". */
+  activatesLabel: string;
 }) {
   const [pending, startTransition] = useTransition();
   const [done, setDone] = useState(false);

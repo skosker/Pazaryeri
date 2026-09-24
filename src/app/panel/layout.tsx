@@ -5,6 +5,9 @@ import { unreadConversationCount } from "@/lib/messaging";
 import { PanelNav } from "./panel-nav";
 import { getSettings } from "@/lib/settings";
 import { getOpenCampaigns } from "@/lib/campaign";
+import { hasPaidPeriod, membershipSelect, membershipTier, untilFormat } from "@/lib/membership";
+import { ProBadge } from "@/components/pro-badge";
+import Link from "next/link";
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   // activeUser rather than the session: it reads the row, so a suspended account or one
@@ -19,12 +22,18 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   const [user, unreadMessages] = await Promise.all([
     prisma.user.findUnique({
       where: { id: account.id },
-      select: { isPro: true, companyName: true },
+      select: { ...membershipSelect, companyName: true },
     }),
     unreadConversationCount(account.id),
   ]);
   const [{ corporateEnabled }, openCampaigns] = await Promise.all([getSettings(), getOpenCampaigns()]);
-  const isPro = user?.isPro ?? false;
+  const now = new Date();
+  const tier = user ? membershipTier(user, now) : null;
+  // A paid (or trial) period ending within a week: nudge them to renew before it lapses.
+  const endingSoon =
+    isFreelancer && user && hasPaidPeriod(user, now) && user.proUntil!.getTime() - now.getTime() < 7 * 24 * 60 * 60 * 1000
+      ? user.proUntil!
+      : null;
 
   const navItems = [
     { href: "/panel", label: "Genel Bakış" },
@@ -37,7 +46,8 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     { href: "/panel/davet", label: "Davet Et" },
     { href: "/panel/profil", label: "Profilim" },
     { href: "/panel/sifre", label: "Şifre Değiştir" },
-    ...((isBuyer || isFreelancer) && !isPro ? [{ href: "/panel/pro-ol", label: "Prosinta Pro Ol" }] : []),
+    // Membership is sold to freelancers only; members come back here to renew or upgrade.
+    ...(isFreelancer ? [{ href: "/panel/pro-ol", label: tier ? "Üyeliğim" : "Pro Üyelik" }] : []),
     ...(isBuyer ? [{ href: "/panel/freelancer-ol", label: "Freelancer Ol" }] : []),
   ];
 
@@ -49,11 +59,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
               {isFreelancer ? "Freelancer Paneli" : "Alıcı Paneli"}
             </p>
-            {(isBuyer || isFreelancer) && isPro && (
-              <span className="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950">
-                Pro
-              </span>
-            )}
+            {(isBuyer || isFreelancer) && tier && <ProBadge plus={tier === "PRO_PLUS"} />}
           </div>
           <p className="mb-4 mt-1 text-xs text-slate-400">
             {isFreelancer
@@ -63,7 +69,17 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           <PanelNav items={navItems} />
         </aside>
 
-        <div className="min-w-0 flex-1">{children}</div>
+        <div className="min-w-0 flex-1">
+          {endingSoon && (
+            <p className="mb-6 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              {tier === "PRO_PLUS" ? "Pro Plus" : "Pro"} üyeliğin {untilFormat.format(endingSoon)} tarihinde bitiyor.{" "}
+              <Link href="/panel/pro-ol" className="font-semibold underline">
+                Üyeliğini Yenile
+              </Link>
+            </p>
+          )}
+          {children}
+        </div>
       </div>
     </div>
   );

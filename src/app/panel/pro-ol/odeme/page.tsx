@@ -2,34 +2,56 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { isMockPayment, isMockPaymentAllowed, isPaytrTestMode, getPaytrToken, clientIp } from "@/lib/paytr";
-import { findOrCreatePendingProPurchase } from "@/lib/pro-purchase";
+import { findOrCreatePendingProPurchase, membershipQuote } from "@/lib/pro-purchase";
+import {
+  PERIOD_LABEL,
+  PLAN_LABEL,
+  PLAN_SLUG,
+  hasPaidPeriod,
+  membershipSelect,
+  membershipTier,
+  parsePeriod,
+  parsePlan,
+  untilFormat,
+} from "@/lib/membership";
+import Link from "next/link";
 import { getBankAccounts } from "@/lib/bank-transfer";
 import { formatPrice } from "@/lib/format-price";
 import { ProMockCheckoutForm } from "./pro-mock-checkout-form";
 import { ProBankTransferPanel } from "./pro-bank-transfer-panel";
+import { completeMockProPayment, failMockProPayment, notifyProBankTransferAction } from "./actions";
 import { PaymentMethodTabs } from "@/app/odeme/[orderId]/payment-method-tabs";
 import { PaytrEmbed } from "@/app/odeme/[orderId]/paytr-embed";
 
 export default async function ProOdemePage(props: PageProps<"/panel/pro-ol/odeme">) {
   const session = await auth();
-  if (!session?.user) redirect("/giris?callbackUrl=/panel/pro-ol/odeme");
-  if (session.user.role !== "BUYER" && session.user.role !== "FREELANCER") redirect("/panel");
+  const searchParams = await props.searchParams;
+  const plan = parsePlan(searchParams.paket);
+  const period = parsePeriod(searchParams.donem);
+  const here = `/panel/pro-ol/odeme?paket=${plan ? PLAN_SLUG[plan] : ""}&donem=${period ?? ""}`;
+  if (!session?.user) redirect(`/giris?callbackUrl=${encodeURIComponent(here)}`);
+  if (session.user.role !== "FREELANCER") redirect("/uyelik");
+  if (!plan || !period) redirect("/panel/pro-ol");
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { isPro: true, email: true, name: true },
+    select: { email: true, name: true, ...membershipSelect },
   });
   if (!user) redirect("/panel");
-  if (user.isPro) redirect("/panel");
+  // Süresiz Pro has nothing to gain from buying Pro again (Pro Plus still makes sense).
+  if (user.isPro && plan === "PRO") redirect("/panel/pro-ol");
+  const tier = membershipTier(user);
+  const paid = hasPaidPeriod(user);
 
-  const searchParams = await props.searchParams;
   const errorMessage =
     searchParams.hata === "odeme-basarisiz" ? "Ödeme başarısız oldu, tekrar deneyin." : null;
 
   const [purchase, bankAccounts] = await Promise.all([
-    findOrCreatePendingProPurchase(session.user.id),
+    findOrCreatePendingProPurchase(session.user.id, plan, period),
     getBankAccounts(),
   ]);
+  const quote = await membershipQuote(plan, period);
+  const title = `${PLAN_LABEL[plan]} · ${PERIOD_LABEL[period]}`;
 
   const price = Number(purchase.amount);
   let paytrToken: string | null = null;
@@ -47,9 +69,9 @@ export default async function ProOdemePage(props: PageProps<"/panel/pro-ol/odeme
         userName: user.name,
         userAddress: "Prosinta, Türkiye",
         userPhone: "05000000000",
-        basket: [{ name: "Prosinta Pro üyelik", price: price, quantity: 1 }],
-        okUrl: `${appUrl}/panel`,
-        failUrl: `${appUrl}/panel/pro-ol/odeme?hata=odeme-basarisiz`,
+        basket: [{ name: `Prosinta ${title} üyelik`, price: price, quantity: 1 }],
+        okUrl: `${appUrl}/panel/pro-ol?odendi=1`,
+        failUrl: `${appUrl}${here}&hata=odeme-basarisiz`,
       });
 
       await prisma.proPurchase.update({
@@ -63,8 +85,27 @@ export default async function ProOdemePage(props: PageProps<"/panel/pro-ol/odeme
 
   return (
     <div className="max-w-xl">
-      <h1 className="text-2xl font-bold text-brand-navy">Pro Üyeliği Tamamla</h1>
-      <p className="mt-1 text-sm text-slate-500">Tek seferlik {formatPrice(price)}₺</p>
+      <Link href="/panel/pro-ol" className="text-sm text-slate-500 hover:text-brand-navy">
+        ← Üyelik Paketleri
+      </Link>
+      <h1 className="mt-3 text-2xl font-bold text-brand-navy">{title} Üyelik</h1>
+      <p className="mt-1 text-sm text-slate-500">
+        {quote.perkPercent > 0 && <span className="mr-1 text-slate-400 line-through">{formatPrice(quote.listAmount)}₺</span>}
+        {formatPrice(price)}₺ · {period === "yillik" ? "12 ay" : "1 ay"}, otomatik yenilenmez.
+        {quote.perkPercent > 0 && (
+          <span className="ml-1 font-semibold text-rose-600">
+            {quote.perkName} indirimi: %{quote.perkPercent}
+          </span>
+        )}
+      </p>
+
+      {paid && (
+        <p className="mt-4 rounded-lg bg-purple-50 px-4 py-3 text-sm text-purple-800">
+          {tier === (plan === "PRO_PLUS" ? "PRO_PLUS" : "PRO")
+            ? `Mevcut üyeliğin ${untilFormat.format(user.proUntil!)} tarihinde bitiyor; yeni süre bunun üzerine eklenir.`
+            : `Mevcut ${tier === "PRO_PLUS" ? "Pro Plus" : "Pro"} üyeliğinin kalan süresi, iki paketin fiyat oranına göre ${PLAN_LABEL[plan]} süresine çevrilip eklenir.`}
+        </p>
+      )}
 
       {(errorMessage || tokenError) && (
         <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
@@ -80,7 +121,11 @@ export default async function ProOdemePage(props: PageProps<"/panel/pro-ol/odeme
             // EFT is offered here too, so hiding the card tab has a real alternative next
             // to it, same as orders.
             isPaytrTestMode || (isMockPayment && !isMockPaymentAllowed) ? undefined : isMockPayment ? (
-              <ProMockCheckoutForm amount={price} />
+              <ProMockCheckoutForm
+                amount={price}
+                onComplete={completeMockProPayment.bind(null, PLAN_SLUG[plan], period)}
+                onFail={failMockProPayment.bind(null, PLAN_SLUG[plan], period)}
+              />
             ) : paytrToken ? (
               <PaytrEmbed token={paytrToken} />
             ) : (
@@ -89,7 +134,14 @@ export default async function ProOdemePage(props: PageProps<"/panel/pro-ol/odeme
               </p>
             )
           }
-          bankContent={<ProBankTransferPanel amount={price} accounts={bankAccounts} />}
+          bankContent={
+            <ProBankTransferPanel
+              amount={price}
+              accounts={bankAccounts}
+              onNotify={notifyProBankTransferAction.bind(null, PLAN_SLUG[plan], period)}
+              activatesLabel={`${PLAN_LABEL[plan]} üyeliğin`}
+            />
+          }
         />
       </div>
     </div>

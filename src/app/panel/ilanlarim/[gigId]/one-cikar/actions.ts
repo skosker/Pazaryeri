@@ -4,11 +4,14 @@ import { redirect } from "next/navigation";
 import { activeUser } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 import { assertMockPaymentAllowed } from "@/lib/paytr";
+import { revalidatePath } from "next/cache";
 import {
+  GigBoostError,
   boostableGig,
   findOrCreatePendingBoost,
   markBoostPaid,
   notifyBoostBankTransfer,
+  redeemFreeBoostCredit,
 } from "@/lib/gig-boost";
 
 async function requireBoostableGig(gigId: string) {
@@ -38,4 +41,17 @@ export async function failMockBoostPayment(gigId: string) {
 export async function notifyBoostBankTransferAction(gigId: string) {
   const { user } = await requireBoostableGig(gigId);
   await notifyBoostBankTransfer(user.id, gigId);
+}
+
+/** Spend this month's free "Öne Çıkar" that comes with Pro / Pro Plus. */
+export async function redeemFreeBoostAction(gigId: string) {
+  const { user } = await requireBoostableGig(gigId);
+  try {
+    await redeemFreeBoostCredit(user.id, gigId);
+  } catch (error) {
+    if (!(error instanceof GigBoostError)) throw error;
+    redirect(`/panel/ilanlarim/${gigId}/one-cikar?hata=ucretsiz-hak`);
+  }
+  revalidatePath("/", "layout");
+  redirect("/panel/ilanlarim?one-cikarildi=1");
 }
