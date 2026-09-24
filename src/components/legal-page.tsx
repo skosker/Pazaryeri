@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LegalNav } from "@/components/legal-nav";
+import { legalProseClass } from "@/components/legal-prose";
 
 /**
  * Shared frame for the pages the bottom bar links to. The text of each page lives in the
@@ -42,13 +43,7 @@ export function LegalPage({
           {children ? (
             // Başlık, paragraf ve liste biçimleri burada tanımlı, böylece sayfalar
             // yalnızca metni yazıyor: <h2>, <p>, <ul><li>.
-            <div
-              className="mt-8 space-y-4 text-[15px] leading-relaxed text-slate-600
-                [&_h2]:mt-10 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-brand-navy
-                [&_h2:first-child]:mt-0
-                [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5 [&_ul]:marker:text-purple-400
-                [&_strong]:font-semibold [&_strong]:text-brand-navy"
-            >
+            <div className={`mt-8 ${legalProseClass}`}>
               {children}
             </div>
           ) : (
