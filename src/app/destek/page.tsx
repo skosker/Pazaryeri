@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LinkButton } from "@/components/ui/button";
 import { SupportFaq, type FaqGroup } from "./support-faq";
 import { getSettings, type SiteSettings } from "@/lib/settings";
+import { getOpenCampaigns, type CampaignRow } from "@/lib/campaign";
 
 // Built statically; saving /admin/ayarlar revalidates every page, and this refreshes it at
 // least hourly anyway so an answer never quotes an old price for long.
@@ -15,7 +16,7 @@ const pct = (n: number) => `%${n.toLocaleString("tr-TR")}`;
  * the site no longer charges; a campaign switched off there drops its questions.
  * Deliberately nothing about the service fee — it is not published.
  */
-function buildFaqGroups(settings: SiteSettings): FaqGroup[] {
+function buildFaqGroups(settings: SiteSettings, campaigns: CampaignRow[]): FaqGroup[] {
   const groups: FaqGroup[] = [
     {
       id: "siparis-odeme",
@@ -50,14 +51,10 @@ function buildFaqGroups(settings: SiteSettings): FaqGroup[] {
               },
             ]
           : []),
-        ...(settings.campaignEnabled
-          ? [
-              {
-                q: `${settings.campaignName} kampanyası nedir?`,
-                a: `Freelancer'ların ilanlarına kendi belirlediği indirimle katıldığı sezonluk kampanyadır. Katılan ilanlar kampanya süresince indirimli fiyat ve “${settings.campaignName}” rozetiyle gösterilir; hepsini Kampanya sayfasında bulabilirsin. Freelancer'sanız İlanlarım sayfasından ilanlarınızı kampanyaya katabilirsiniz.`,
-              },
-            ]
-          : []),
+        ...campaigns.slice(0, 1).map((c) => ({
+          q: `${c.name} kampanyası nedir?`,
+          a: `Freelancer'ların ilanlarına kendi belirlediği indirimle katıldığı tarihli bir kampanyadır. Katılan ilanlar kampanya süresince indirimli fiyat ve “${c.name}” rozetiyle gösterilir; hepsini Kampanya sayfasında bulabilirsin. Freelancer'san Panel → Kampanyalar'dan ilanlarını katabilirsin.`,
+        })),
         {
           q: "Bazı ilanlarda “Şu An Sipariş Almıyor” yazıyor, neden?",
           a: "O satıcı şu an yeni sipariş kabul etmiyor. İlan sayfasının altındaki benzer hizmetlere ya da aynı kategorideki diğer ilanlara göz atabilirsin.",
@@ -207,7 +204,7 @@ function buildFaqGroups(settings: SiteSettings): FaqGroup[] {
 }
 
 export default async function SupportPage() {
-  const faqGroups = buildFaqGroups(await getSettings());
+  const faqGroups = buildFaqGroups(await getSettings(), await getOpenCampaigns());
   return (
     <div>
       <section className="bg-gradient-to-b from-purple-50 via-white to-white">

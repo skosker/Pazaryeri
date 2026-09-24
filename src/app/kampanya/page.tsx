@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { auth } from "@/auth";
-import { getCampaign } from "@/lib/campaign";
+import { getCampaignPricing, previewCampaignPricing } from "@/lib/campaign";
 import { listCampaignGigs } from "@/lib/gigs";
 import { GigCard } from "@/components/gig-card";
 
@@ -16,39 +16,45 @@ const dateFmt = new Intl.DateTimeFormat("tr-TR", {
 });
 
 /**
- * The seasonal campaign's showcase. Only there while the campaign is live; before that an
- * admin can open it as a preview (with every sign-up shown as if it had started), and
+ * The live campaign's showcase. Before (or without) one, only an admin can open it — as a
+ * preview of a chosen campaign (?onizleme=<id>) with its sign-ups priced as if live;
  * everyone else gets a 404, so nothing leaks early.
  */
-export default async function CampaignPage() {
-  const campaign = await getCampaign();
+export default async function CampaignPage(props: PageProps<"/kampanya">) {
+  const { onizleme } = await props.searchParams;
+  let pricing = await getCampaignPricing();
   let preview = false;
-  if (!campaign.live) {
-    const session = await auth();
-    if (session?.user?.role !== "ADMIN") notFound();
-    preview = true;
-  }
 
-  const cards = await listCampaignGigs({ ...campaign, live: true });
+  if (typeof onizleme === "string" || !pricing.campaign) {
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      if (!pricing.campaign) notFound();
+    } else if (typeof onizleme === "string") {
+      pricing = await previewCampaignPricing(onizleme);
+      preview = true;
+    }
+  }
+  const campaign = pricing.campaign;
+  if (!campaign) notFound();
+
+  const cards = await listCampaignGigs(pricing);
 
   return (
     <div>
       {preview && (
         <p className="bg-amber-100 px-4 py-2 text-center text-sm font-semibold text-amber-900">
-          Önizleme — kampanya {campaign.enabled ? "henüz başlamadı" : "kapalı"}; bu sayfayı yalnızca adminler görüyor.
+          Önizleme — bu sayfayı yalnızca adminler görüyor; katılan ilanlar kampanya yayındaymış gibi gösteriliyor.
         </p>
       )}
       <section className="bg-gradient-to-br from-rose-600 via-fuchsia-600 to-indigo-700 text-white">
         <div className="mx-auto max-w-6xl px-4 py-14 text-center sm:px-6 lg:px-8">
           <h1 className="text-3xl font-extrabold sm:text-5xl">{campaign.name}</h1>
           <p className="mt-3 text-white/90">
-            Freelancer&apos;ların kendi belirlediği indirimlerle, Prosinta güvencesinde.
+            {campaign.tagline ?? "Freelancer'ların kendi belirlediği indirimlerle, Prosinta güvencesinde."}
           </p>
-          {campaign.start && campaign.end && (
-            <p className="mt-4 inline-block rounded-full bg-white/15 px-4 py-1.5 text-sm font-semibold">
-              {dateFmt.format(campaign.start)} – {dateFmt.format(campaign.end)}
-            </p>
-          )}
+          <p className="mt-4 inline-block rounded-full bg-white/15 px-4 py-1.5 text-sm font-semibold">
+            {dateFmt.format(campaign.start)} – {dateFmt.format(campaign.end)}
+          </p>
         </div>
       </section>
 

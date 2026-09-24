@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
+import { campaignPrice, livePerkPercents } from "@/lib/campaign";
 
 export class ProPurchaseError extends Error {}
 
@@ -10,7 +11,9 @@ export class ProPurchaseError extends Error {}
  */
 export async function findOrCreatePendingProPurchase(userId: string) {
   // Prosinta Pro's one-time price (for buyers and freelancers) is set at /admin/ayarlar.
-  const { proPriceTl } = await getSettings();
+  // A live campaign may discount Pro for its duration (e.g. Freelancer Günü).
+  const [{ proPriceTl: basePrice }, perks] = await Promise.all([getSettings(), livePerkPercents()]);
+  const proPriceTl = campaignPrice(basePrice, perks.pro || null);
   const existing = await prisma.proPurchase.findFirst({
     where: { userId, status: "INITIALIZED" },
     orderBy: { createdAt: "desc" },

@@ -198,9 +198,6 @@ model Gig {
   /// Paid "Öne Çıkar": while this is in the future the gig leads the default listing with
   /// a "Sponsorlu" label. Each paid GigBoost pushes it forward by its days.
   sponsoredUntil  DateTime?
-  /// Sezonluk kampanyaya katılım: freelancer'ın bu ilana verdiği indirim yüzdesi. Yalnızca
-  /// kampanya yayındayken uygulanır; indirimi freelancer karşılar.
-  campaignPercent Int?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -216,6 +213,7 @@ model Gig {
   orders   Order[]
   reviews  Review[]
   boosts   GigBoost[]
+  campaignEntries CampaignEntry[]
 
   @@index([categoryId])
   @@index([sellerId])
@@ -538,14 +536,6 @@ model SiteSettings {
   /// Davet programı: davet edilenin ilk siparişi tamamlanınca davet edene bu kadar TL.
   referralEnabled    Boolean  @default(true)
   referralRewardTl   Decimal  @default(200) @db.Decimal(10, 2)
-  /// Sezonluk kampanya (ör. Efsane Cuma). Açıkken freelancer'lar ilanlarını katabilir;
-  /// alıcılar indirimi yalnızca başlangıç–bitiş arasında görür.
-  campaignEnabled    Boolean   @default(false)
-  campaignName       String    @default("Efsane Cuma")
-  campaignStart      DateTime?
-  campaignEnd        DateTime?
-  campaignMinPercent Int       @default(10)
-  campaignMaxPercent Int       @default(50)
   /// Kurumsal paket: toplu bakiye yükleme ve bakiyeyle ödeme (yalnızca kurumsal hesaplar).
   corporateEnabled      Boolean @default(false)
   corporateMinTopUpTl   Decimal @default(5000) @db.Decimal(10, 2)
@@ -618,4 +608,43 @@ model BalanceEntry {
 
   @@index([userId, createdAt])
   @@map("balance_entries")
+}
+
+/// A seasonal campaign (Freelancer Günü, Efsane Cuma…), created and edited at
+/// /admin/kampanyalar. Switched off it is invisible to everyone but admins. Switched on,
+/// freelancers can sign gigs up until it ends; buyers see the discounts only between
+/// start and end. It can also discount Pro and "Öne Çıkar" for freelancers while live.
+model Campaign {
+  id                   String   @id @default(cuid())
+  name                 String
+  /// Short line under the name on the campaign page.
+  tagline              String?
+  enabled              Boolean  @default(false)
+  start                DateTime
+  end                  DateTime
+  minPercent           Int      @default(10)
+  maxPercent           Int      @default(50)
+  proDiscountPercent   Int      @default(0)
+  boostDiscountPercent Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  entries CampaignEntry[]
+
+  @@map("campaigns")
+}
+
+/// A gig's sign-up to a campaign with the discount its freelancer chose (they carry it).
+model CampaignEntry {
+  percent   Int
+  createdAt DateTime @default(now())
+
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  gigId      String
+  gig        Gig      @relation(fields: [gigId], references: [id], onDelete: Cascade)
+
+  @@id([campaignId, gigId])
+  @@index([gigId])
+  @@map("campaign_entries")
 }

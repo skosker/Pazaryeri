@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { refreshReferralCredit } from "@/lib/referrals";
-import { activeCampaignPercent, campaignPrice, getCampaign } from "@/lib/campaign";
+import { activeCampaignPercent, campaignPrice, getCampaignPricing } from "@/lib/campaign";
 
 export class OrderError extends Error {}
 
@@ -115,7 +115,7 @@ export async function createOrder(buyerId: string, packageId: string) {
 
   // A live seasonal campaign the gig joined lowers the price itself: the freelancer
   // chose that discount, so the order (and their payout) is simply worth less.
-  const percent = activeCampaignPercent(await getCampaign(), pkg.gig.campaignPercent);
+  const percent = activeCampaignPercent(await getCampaignPricing(), pkg.gigId);
   const amount = campaignPrice(Number(pkg.price), percent);
 
   return prisma.order.create({
