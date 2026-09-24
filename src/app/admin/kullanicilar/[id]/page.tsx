@@ -52,6 +52,8 @@ export default async function AdminUserDetailPage(props: PageProps<"/admin/kulla
       taxOffice: true,
       taxNumber: true,
       billingAddress: true,
+      billingCity: true,
+      billingDistrict: true,
     },
   });
   if (!user) notFound();
@@ -147,9 +149,14 @@ export default async function AdminUserDetailPage(props: PageProps<"/admin/kulla
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Kurumsal Fatura Bilgileri</p>
           <p className="mt-2 font-semibold text-brand-navy">{user.companyName}</p>
           <p className="text-slate-600">
-            {user.taxOffice} V.D. · {user.taxNumber}
+            {/* Picked from the list it reads "Kadıköy Vergi Dairesi"; older free-text entries were just "Kadıköy". */}
+            {user.taxOffice}
+            {user.taxOffice && !/Vergi Dairesi|Malmüdürlüğü/.test(user.taxOffice) ? " V.D." : ""} · {user.taxNumber}
           </p>
-          <p className="mt-1 text-slate-500">{user.billingAddress}</p>
+          <p className="mt-1 text-slate-500">
+            {user.billingAddress}
+            {user.billingCity ? `, ${user.billingDistrict} / ${user.billingCity}` : ""}
+          </p>
         </div>
       )}
 

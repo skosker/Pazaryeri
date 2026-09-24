@@ -22,6 +22,8 @@ export default async function ProfilPage() {
       taxOffice: true,
       taxNumber: true,
       billingAddress: true,
+      billingCity: true,
+      billingDistrict: true,
     },
   });
   if (!user) redirect("/giris");
@@ -62,6 +64,8 @@ export default async function ProfilPage() {
                   taxOffice: user.taxOffice ?? "",
                   taxNumber: user.taxNumber ?? "",
                   billingAddress: user.billingAddress ?? "",
+                  billingCity: user.billingCity ?? "",
+                  billingDistrict: user.billingDistrict ?? "",
                 }
               : null
           }

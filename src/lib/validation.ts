@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { isValidTaxNumber } from "@/lib/tax-number";
+import { cityByName } from "@/lib/tr-locations";
+import { TAX_OFFICES } from "@/lib/tax-offices";
 
 /** One rule for every place a password is set, so they cannot drift apart. */
 const password = z
@@ -15,18 +17,33 @@ const password = z
  */
 export const companySchema = z.object({
   companyName: z.string().trim().min(2, "Şirket unvanını gir").max(200),
-  taxOffice: z.string().trim().min(2, "Vergi dairesini gir").max(100),
+  billingCity: z.string().trim().min(1, "İl seçin"),
+  billingDistrict: z.string().trim().min(1, "İlçe seçin"),
+  taxOffice: z.string().trim().min(1, "Vergi dairesi seçin"),
   taxNumber: z
     .string()
     .transform((v) => v.replace(/\s/g, ""))
     .refine(isValidTaxNumber, "Vergi numarası geçersiz (10 haneli VKN ya da şahıs şirketi için 11 haneli TCKN)"),
-  billingAddress: z.string().trim().min(10, "Fatura adresini gir").max(500),
+  billingAddress: z.string().trim().min(5, "Açık adresi gir").max(500),
+}).superRefine((value, ctx) => {
+  // The pickers only offer listed values; this stops anything else sent by hand.
+  const city = cityByName(value.billingCity);
+  if (!city) {
+    ctx.addIssue({ code: "custom", message: "İl listeden seçilmeli", path: ["billingCity"] });
+    return;
+  }
+  if (!city.districts.includes(value.billingDistrict)) {
+    ctx.addIssue({ code: "custom", message: "İlçe listeden seçilmeli", path: ["billingDistrict"] });
+  }
+  if (!(TAX_OFFICES[city.code] ?? []).includes(value.taxOffice)) {
+    ctx.addIssue({ code: "custom", message: "Vergi dairesi listeden seçilmeli", path: ["taxOffice"] });
+  }
 });
 
 export type CompanyInput = z.infer<typeof companySchema>;
 
 export const registerSchema = z.object({
-  name: z.string().trim().min(2, "Ad Soyad en az 2 karakter olmalı"),
+  name: z.string().trim().min(3, "Adını ve soyadını gir"),
   email: z.string().trim().toLowerCase().email("Geçerli bir e-posta girin"),
   password,
   role: z.enum(["BUYER", "FREELANCER"]),

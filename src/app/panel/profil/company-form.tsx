@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { updateCompanyAction, type CompanyFormState } from "./actions";
+import { CompanyFields } from "@/components/company-fields";
 
 const initialState: CompanyFormState = {};
 const inputClass =
@@ -12,6 +13,8 @@ export type CompanyValues = {
   taxOffice: string;
   taxNumber: string;
   billingAddress: string;
+  billingCity: string;
+  billingDistrict: string;
 };
 
 export function CompanyForm({ values }: { values: CompanyValues | null }) {
@@ -40,34 +43,7 @@ export function CompanyForm({ values }: { values: CompanyValues | null }) {
       </div>
 
       {corporate ? (
-        <>
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
-            Şirket Unvanı
-            <input name="companyName" required defaultValue={values?.companyName} className={inputClass} />
-          </label>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
-              Vergi Dairesi
-              <input name="taxOffice" required defaultValue={values?.taxOffice} className={inputClass} />
-            </label>
-            <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
-              Vergi Numarası
-              <input
-                name="taxNumber"
-                required
-                inputMode="numeric"
-                pattern="[0-9 ]{10,13}"
-                placeholder="10 haneli VKN"
-                defaultValue={values?.taxNumber}
-                className={inputClass}
-              />
-            </label>
-          </div>
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
-            Fatura Adresi
-            <textarea name="billingAddress" required rows={2} defaultValue={values?.billingAddress} className={inputClass} />
-          </label>
-        </>
+        <CompanyFields defaults={values ?? undefined} inputClass={inputClass} />
       ) : (
         <p className="text-sm text-slate-500">Faturaların adına ve e-posta adresine düzenlenir.</p>
       )}
