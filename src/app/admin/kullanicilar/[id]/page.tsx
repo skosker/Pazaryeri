@@ -46,6 +46,10 @@ export default async function AdminUserDetailPage(props: PageProps<"/admin/kulla
       skills: true,
       iban: true,
       ibanHolder: true,
+      companyName: true,
+      taxOffice: true,
+      taxNumber: true,
+      billingAddress: true,
     },
   });
   if (!user) notFound();
@@ -131,6 +135,17 @@ export default async function AdminUserDetailPage(props: PageProps<"/admin/kulla
         <InfoCard label="Şehir" value={user.city ?? "—"} />
         <InfoCard label="Yaş" value={user.age ? String(user.age) : "—"} />
       </div>
+
+      {user.companyName && (
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 text-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Kurumsal Fatura Bilgileri</p>
+          <p className="mt-2 font-semibold text-brand-navy">{user.companyName}</p>
+          <p className="text-slate-600">
+            {user.taxOffice} V.D. · {user.taxNumber}
+          </p>
+          <p className="mt-1 text-slate-500">{user.billingAddress}</p>
+        </div>
+      )}
 
       {user.role === "FREELANCER" && (
         <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">

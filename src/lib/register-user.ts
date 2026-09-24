@@ -14,7 +14,7 @@ export async function registerUser(input: RegisterInput) {
     throw new RegisterError(parsed.error.issues[0]?.message ?? "Geçersiz form verisi");
   }
 
-  const { name, email, password, role } = parsed.data;
+  const { name, email, password, role, company } = parsed.data;
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
@@ -24,7 +24,7 @@ export async function registerUser(input: RegisterInput) {
   const passwordHash = await bcrypt.hash(password, 10);
 
   const user = await prisma.user.create({
-    data: { name, email, passwordHash, role },
+    data: { name, email, passwordHash, role, ...(company ?? {}) },
   });
 
   const token = randomUUID();

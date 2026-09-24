@@ -73,6 +73,13 @@ model User {
   /// Kurucu Freelancer sırası (1'den kontenjana kadar, /admin/ayarlar): ilk ilanı onaylanan ilk gerçek freelancer'lara
   /// bir kez verilir ve kalıcıdır. Diğer herkes için NULL.
   founderNumber      Int?      @unique
+  /// Kurumsal hesap fatura bilgileri (alıcı kayıtta "Kurumsal" seçerse ya da Profil'den
+  /// girer). Bireysel hesaplarda hepsi NULL; companyName dolu olan hesap kurumsaldır.
+  companyName        String?
+  taxOffice          String?
+  /// 10 haneli VKN ya da şahıs şirketi için 11 haneli TCKN.
+  taxNumber          String?
+  billingAddress     String?
   founderAt          DateTime?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
