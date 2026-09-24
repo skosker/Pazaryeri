@@ -93,7 +93,7 @@ export default async function PanelPage() {
         <div className="mb-8 flex flex-wrap items-center gap-3 rounded-2xl border border-purple-200 bg-gradient-to-br from-fuchsia-50 to-indigo-50 p-5">
           <FounderBadge />
           <p className="text-sm text-slate-600">
-            Prosinta&apos;nın ilk {founder.limit} freelancer&apos;ından birisin. Rozetin kalıcı, ilanların aramalarda öne çıkıyor.
+            Prosinta&apos;nın ilk {founder.limit.toLocaleString("tr-TR")} freelancer&apos;ından birisin. Rozetin kalıcı, ilanların aramalarda öne çıkıyor.
           </p>
         </div>
       ) : (
