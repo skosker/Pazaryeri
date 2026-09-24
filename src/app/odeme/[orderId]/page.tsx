@@ -7,7 +7,7 @@ import { PaytrEmbed } from "./paytr-embed";
 import { PaymentMethodTabs } from "./payment-method-tabs";
 import { BankTransferPanel } from "./bank-transfer-panel";
 import { getBankAccounts } from "@/lib/bank-transfer";
-import { NOT_TAKING_ORDERS, payableAmount, refreshFirstOrderDiscount, sellerTakesOrders } from "@/lib/orders";
+import { NOT_TAKING_ORDERS, payableAmount, refreshOrderDiscounts, sellerTakesOrders } from "@/lib/orders";
 import { formatPrice } from "@/lib/format-price";
 
 export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">) {
@@ -34,9 +34,9 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
   }
 
   const listPrice = Number(order.amount);
-  const discount = await refreshFirstOrderDiscount(order);
+  const { discount, creditDiscount } = await refreshOrderDiscounts(order);
   // What is actually charged — card, bank transfer and the summary below all use this.
-  const amount = payableAmount({ amount: listPrice, discount });
+  const amount = payableAmount({ amount: listPrice, discount, creditDiscount });
   const bankAccounts = await getBankAccounts();
   const errorMessage = searchParams.hata === "odeme-basarisiz" ? "Ödeme başarısız oldu, tekrar deneyin." : null;
 
@@ -94,16 +94,24 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
         </p>
       )}
 
-      {discount > 0 && (
+      {(discount > 0 || creditDiscount > 0) && (
         <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm">
           <div className="flex justify-between text-slate-600">
             <span>Paket fiyatı</span>
             <span>{formatPrice(listPrice)}₺</span>
           </div>
-          <div className="mt-1 flex justify-between font-semibold text-emerald-700">
-            <span>İlk sipariş indirimi</span>
-            <span>−{formatPrice(discount)}₺</span>
-          </div>
+          {discount > 0 && (
+            <div className="mt-1 flex justify-between font-semibold text-emerald-700">
+              <span>İlk sipariş indirimi</span>
+              <span>−{formatPrice(discount)}₺</span>
+            </div>
+          )}
+          {creditDiscount > 0 && (
+            <div className="mt-1 flex justify-between font-semibold text-emerald-700">
+              <span>Davet ödülü</span>
+              <span>−{formatPrice(creditDiscount)}₺</span>
+            </div>
+          )}
           <div className="mt-2 flex justify-between border-t border-emerald-200 pt-2 font-bold text-brand-navy">
             <span>Ödenecek tutar</span>
             <span>{formatPrice(amount)}₺</span>

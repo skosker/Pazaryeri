@@ -204,12 +204,20 @@ export default async function OrderDetailPage(props: PageProps<"/siparis/[orderI
         </div>
         {/* The first-order discount is Prosinta's cost, not the seller's, so only the buyer
             (and admin) see it; the seller keeps seeing their package price. */}
-        {(isBuyer || isAdmin) && Number(order.discount) > 0 && (
+        {(isBuyer || isAdmin) && (Number(order.discount) > 0 || Number(order.creditDiscount) > 0) && (
           <>
-            <div className="mt-2 flex items-center justify-between text-sm">
-              <span className="text-emerald-700">İlk sipariş indirimi</span>
-              <span className="font-semibold text-emerald-700">−{formatPrice(order.discount)}₺</span>
-            </div>
+            {Number(order.discount) > 0 && (
+              <div className="mt-2 flex items-center justify-between text-sm">
+                <span className="text-emerald-700">İlk sipariş indirimi</span>
+                <span className="font-semibold text-emerald-700">−{formatPrice(order.discount)}₺</span>
+              </div>
+            )}
+            {Number(order.creditDiscount) > 0 && (
+              <div className="mt-2 flex items-center justify-between text-sm">
+                <span className="text-emerald-700">Davet ödülü</span>
+                <span className="font-semibold text-emerald-700">−{formatPrice(order.creditDiscount)}₺</span>
+              </div>
+            )}
             <div className="mt-2 flex items-center justify-between text-sm">
               <span className="text-slate-500">Ödenen tutar</span>
               <span className="font-semibold text-brand-navy">{formatPrice(payableAmount(order))}₺</span>

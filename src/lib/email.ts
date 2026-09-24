@@ -342,3 +342,23 @@ export async function sendFounderWelcomeEmail(params: {
     )
   );
 }
+
+export async function sendReferralRewardEmail(params: {
+  to: string;
+  name: string;
+  friendName: string;
+  amount: number;
+  inviteUrl: string;
+}) {
+  await sendEmail(
+    params.to,
+    `Davet ödülün hazır: ${formatPrice(params.amount)}₺`,
+    layout(
+      "Davet ödülün hazır",
+      `<p>Merhaba ${escapeHtml(params.name)},</p>
+       <p>Davet ettiğin <strong>${escapeHtml(params.friendName)}</strong> Prosinta'daki ilk siparişini tamamladı. Teşekkürler!</p>
+       <p><strong>${formatPrice(params.amount)}₺</strong> davet ödülün tanımlandı; bu tutardan yüksek bir sonraki siparişinde ödeme sayfasında otomatik düşülecek.</p>
+       ${button(params.inviteUrl, "Davetlerimi Gör")}`
+    )
+  );
+}

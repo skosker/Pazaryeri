@@ -30,6 +30,8 @@ export async function saveSettingsAction(
     firstOrderEnabled: formData.get("firstOrderEnabled") === "on",
     firstOrderPercent: num(formData, "firstOrderPercent"),
     firstOrderMaxTl: num(formData, "firstOrderMaxTl"),
+    referralEnabled: formData.get("referralEnabled") === "on",
+    referralRewardTl: num(formData, "referralRewardTl"),
   };
 
   const price = (v: number) => Number.isFinite(v) && v >= 0 && v <= 1_000_000;
@@ -51,6 +53,7 @@ export async function saveSettingsAction(
   if (!(Number.isFinite(settings.firstOrderPercent) && settings.firstOrderPercent >= 0 && settings.firstOrderPercent <= 90)) {
     return { error: "İlk sipariş indirimi %0 ile %90 arasında olmalı." };
   }
+  if (!price(settings.referralRewardTl)) return { error: "Davet ödülü 0 ile 1.000.000 ₺ arasında olmalı." };
   if (!price(settings.firstOrderMaxTl)) return { error: "İlk sipariş indirimi üst sınırı 0 ile 1.000.000 ₺ arasında olmalı." };
 
   settings.proPriceTl = Math.round(settings.proPriceTl * 100) / 100;
@@ -58,6 +61,7 @@ export async function saveSettingsAction(
   settings.commissionPercent = Math.round(settings.commissionPercent * 100) / 100;
   settings.firstOrderPercent = Math.round(settings.firstOrderPercent * 100) / 100;
   settings.firstOrderMaxTl = Math.round(settings.firstOrderMaxTl * 100) / 100;
+  settings.referralRewardTl = Math.round(settings.referralRewardTl * 100) / 100;
 
   await saveSettings(settings);
   // Prices, limits and call-outs show up across the site.

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { activeUser } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 import { markOrderPaid } from "@/lib/order-actions";
-import { NOT_TAKING_ORDERS, payableAmount, refreshFirstOrderDiscount, sellerTakesOrders } from "@/lib/orders";
+import { NOT_TAKING_ORDERS, payableAmount, refreshOrderDiscounts, sellerTakesOrders } from "@/lib/orders";
 import { sendBankTransferAdminAlertEmail, sendBankTransferSellerInfoEmail } from "@/lib/email";
 import { assertMockPaymentAllowed } from "@/lib/paytr";
 
@@ -26,8 +26,8 @@ export async function completeMockPayment(orderId: string) {
   if (!sellerTakesOrders(order.gig.seller)) {
     redirect(`/gig/${order.gig.slug}?hata=${encodeURIComponent(NOT_TAKING_ORDERS)}`);
   }
-  // The discount is fixed here, before the order is marked paid (see refreshFirstOrderDiscount).
-  await refreshFirstOrderDiscount(order);
+  // The discounts are fixed here, before the order is marked paid (see refreshOrderDiscounts).
+  await refreshOrderDiscounts(order);
 
   await prisma.payment.upsert({
     where: { orderId },
@@ -90,7 +90,7 @@ export async function notifyBankTransfer(orderId: string) {
   if (!sellerTakesOrders(order.gig.seller)) {
     redirect(`/gig/${order.gig.slug}?hata=${encodeURIComponent(NOT_TAKING_ORDERS)}`);
   }
-  const discount = await refreshFirstOrderDiscount(order);
+  const { discount, creditDiscount } = await refreshOrderDiscounts(order);
 
   await prisma.payment.upsert({
     where: { orderId },
@@ -114,7 +114,7 @@ export async function notifyBankTransfer(orderId: string) {
       adminEmail,
       buyerName: order.buyer.name,
       gigTitle: order.gig.title,
-      amount: payableAmount({ amount: order.amount, discount }),
+      amount: payableAmount({ amount: order.amount, discount, creditDiscount }),
       orderUrl: `${appUrl}/siparis/${orderId}`,
     });
   }

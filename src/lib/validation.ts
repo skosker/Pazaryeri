@@ -35,6 +35,8 @@ export const registerSchema = z.object({
   }),
   /** Only for a buyer who picked "Kurumsal" at signup. */
   company: companySchema.optional(),
+  /** From the /davet/<kod> cookie; an unknown code is simply ignored. */
+  referralCode: z.string().optional(),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
