@@ -2,14 +2,16 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { MembershipSettingsForm } from "./settings-form";
+import { plusMemberWhere, proMemberWhere } from "@/lib/membership";
 
 export default async function MembershipSettingsPage() {
   const now = new Date();
-  const [settings, founders, sponsored, pros, companies] = await Promise.all([
+  const [settings, founders, sponsored, pros, pluses, companies] = await Promise.all([
     getSettings(),
     prisma.user.count({ where: { founderNumber: { not: null } } }),
     prisma.gig.count({ where: { sponsoredUntil: { gt: now } } }),
-    prisma.user.count({ where: { isPro: true, synthetic: false } }),
+    prisma.user.count({ where: { ...proMemberWhere(now), synthetic: false } }),
+    prisma.user.count({ where: { ...plusMemberWhere(now), synthetic: false } }),
     prisma.user.count({ where: { companyName: { not: null } } }),
   ]);
 
@@ -28,7 +30,7 @@ export default async function MembershipSettingsPage() {
       <div className="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
         <Stat label="Kurucu Freelancer" value={`${founders.toLocaleString("tr-TR")} / ${settings.founderLimit.toLocaleString("tr-TR")}`} />
         <Stat label="Sponsorlu ilan" value={String(sponsored)} />
-        <Stat label="Pro üye (gerçek)" value={String(pros)} />
+        <Stat label="Pro / Pro Plus üye" value={`${pros - pluses} / ${pluses}`} />
         <Stat label="Kurumsal hesap" value={String(companies)} />
       </div>
 

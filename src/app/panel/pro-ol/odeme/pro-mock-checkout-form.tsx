@@ -1,18 +1,17 @@
 "use client";
 
 import { useTransition } from "react";
-import { completeMockProPayment, failMockProPayment } from "./actions";
 import { formatPrice } from "@/lib/format-price";
 
-/** Also used by "Öne Çıkar", which passes its own actions; Pro's are the default. */
+/** Shared by membership and "Öne Çıkar" checkout, each passing its own actions. */
 export function ProMockCheckoutForm({
   amount,
-  onComplete = completeMockProPayment,
-  onFail = failMockProPayment,
+  onComplete,
+  onFail,
 }: {
   amount: number;
-  onComplete?: () => Promise<void>;
-  onFail?: () => Promise<void>;
+  onComplete: () => Promise<void>;
+  onFail: () => Promise<void>;
 }) {
   const [pending, startTransition] = useTransition();
 

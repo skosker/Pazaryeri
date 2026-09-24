@@ -15,9 +15,17 @@ export async function saveMembershipSettingsAction(
   await requireAdmin();
 
   const s: Partial<SiteSettings> = {
-    proPriceTl: num(formData, "proPriceTl"),
+    proMonthlyTl: num(formData, "proMonthlyTl"),
+    plusMonthlyTl: num(formData, "plusMonthlyTl"),
+    yearlyDiscountPercent: num(formData, "yearlyDiscountPercent"),
+    proTrialEnabled: formData.get("proTrialEnabled") === "on",
+    proTrialDays: num(formData, "proTrialDays"),
+    proFreeBoostDays: num(formData, "proFreeBoostDays"),
+    plusFreeBoostDays: num(formData, "plusFreeBoostDays"),
+    plusBoostDiscountPercent: num(formData, "plusBoostDiscountPercent"),
     portfolioImages: num(formData, "portfolioImages"),
     portfolioImagesPro: num(formData, "portfolioImagesPro"),
+    portfolioImagesPlus: num(formData, "portfolioImagesPlus"),
     boostEnabled: formData.get("boostEnabled") === "on",
     boostPriceTl: num(formData, "boostPriceTl"),
     boostDays: num(formData, "boostDays"),
@@ -29,13 +37,27 @@ export async function saveMembershipSettingsAction(
     corporateBonusPercent: num(formData, "corporateBonusPercent"),
   };
 
-  if (!isPrice(s.proPriceTl!)) return { error: "Pro fiyatı 0 ile 1.000.000 ₺ arasında olmalı." };
+  if (!isPrice(s.proMonthlyTl!) || !isPrice(s.plusMonthlyTl!)) {
+    return { error: "Üyelik fiyatları 0 ile 1.000.000 ₺ arasında olmalı." };
+  }
+  if (!(Number.isFinite(s.yearlyDiscountPercent) && s.yearlyDiscountPercent! >= 0 && s.yearlyDiscountPercent! <= 90)) {
+    return { error: "Yıllık indirim %0 ile %90 arasında olmalı." };
+  }
+  if (!isWhole(s.proTrialDays!, 1, 365)) return { error: "Deneme süresi 1 ile 365 gün arasında olmalı." };
+  if (!isWhole(s.proFreeBoostDays!, 0, 60) || !isWhole(s.plusFreeBoostDays!, 0, 60)) {
+    return { error: "Aylık ücretsiz Öne Çıkar süresi 0 ile 60 gün arasında olmalı." };
+  }
+  if (!(Number.isFinite(s.plusBoostDiscountPercent) && s.plusBoostDiscountPercent! >= 0 && s.plusBoostDiscountPercent! <= 100)) {
+    return { error: "Pro Plus Öne Çıkar indirimi %0 ile %100 arasında olmalı." };
+  }
   if (!isPrice(s.boostPriceTl!)) return { error: "Öne Çıkar fiyatı 0 ile 1.000.000 ₺ arasında olmalı." };
   if (!isWhole(s.boostDays!, 1, 365)) return { error: "Öne Çıkar süresi 1 ile 365 gün arasında olmalı." };
-  if (!isWhole(s.portfolioImages!, 1, 50) || !isWhole(s.portfolioImagesPro!, 1, 50)) {
+  if (![s.portfolioImages!, s.portfolioImagesPro!, s.portfolioImagesPlus!].every((n) => isWhole(n, 1, 50))) {
     return { error: "Örnek iş görseli sınırları 1 ile 50 arasında olmalı." };
   }
-  if (s.portfolioImagesPro! < s.portfolioImages!) return { error: "Pro görsel sınırı normal sınırdan düşük olamaz." };
+  if (s.portfolioImagesPro! < s.portfolioImages! || s.portfolioImagesPlus! < s.portfolioImagesPro!) {
+    return { error: "Görsel sınırları Ücretsiz ≤ Pro ≤ Pro Plus olmalı." };
+  }
   if (!(Number.isFinite(s.commissionPercent) && s.commissionPercent! >= 0 && s.commissionPercent! <= 50)) {
     return { error: "Komisyon oranı %0 ile %50 arasında olmalı." };
   }
@@ -47,7 +69,10 @@ export async function saveMembershipSettingsAction(
     return { error: "Bakiye bonusu %0 ile %50 arasında olmalı." };
   }
 
-  s.proPriceTl = round2(s.proPriceTl!);
+  s.proMonthlyTl = round2(s.proMonthlyTl!);
+  s.plusMonthlyTl = round2(s.plusMonthlyTl!);
+  s.yearlyDiscountPercent = round2(s.yearlyDiscountPercent!);
+  s.plusBoostDiscountPercent = round2(s.plusBoostDiscountPercent!);
   s.boostPriceTl = round2(s.boostPriceTl!);
   s.commissionPercent = round2(s.commissionPercent!);
   s.corporateMinTopUpTl = round2(s.corporateMinTopUpTl!);

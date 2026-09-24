@@ -6,9 +6,21 @@ import { prisma } from "@/lib/prisma";
  * pass the numbers down — a client component must not import this (it pulls Prisma in).
  */
 export type SiteSettings = {
-  proPriceTl: number;
+  /** Üyelik paketleri (yalnızca freelancer'lar): aylık fiyatlar. */
+  proMonthlyTl: number;
+  plusMonthlyTl: number;
+  /** Yıllık ödemede aylık fiyattan indirim; 20 means %20. */
+  yearlyDiscountPercent: number;
+  proTrialEnabled: boolean;
+  proTrialDays: number;
+  /** Üyelikle her ay gelen ücretsiz Öne Çıkar süresi (gün). */
+  proFreeBoostDays: number;
+  plusFreeBoostDays: number;
+  /** Pro Plus'ın Öne Çıkar satın alma indirimi; 25 means %25. */
+  plusBoostDiscountPercent: number;
   portfolioImages: number;
   portfolioImagesPro: number;
+  portfolioImagesPlus: number;
   boostEnabled: boolean;
   boostPriceTl: number;
   boostDays: number;
@@ -30,9 +42,17 @@ export type SiteSettings = {
 
 /** Used until an admin first saves the settings form (mirrors the schema defaults). */
 export const DEFAULT_SETTINGS: SiteSettings = {
-  proPriceTl: 1000,
+  proMonthlyTl: 1000,
+  plusMonthlyTl: 1250,
+  yearlyDiscountPercent: 20,
+  proTrialEnabled: true,
+  proTrialDays: 30,
+  proFreeBoostDays: 3,
+  plusFreeBoostDays: 10,
+  plusBoostDiscountPercent: 25,
   portfolioImages: 5,
   portfolioImagesPro: 12,
+  portfolioImagesPlus: 20,
   boostEnabled: true,
   boostPriceTl: 1000,
   boostDays: 30,
@@ -54,9 +74,17 @@ export const getSettings = cache(async (): Promise<SiteSettings> => {
   const row = await prisma.siteSettings.findUnique({ where: { id: 1 } });
   if (!row) return DEFAULT_SETTINGS;
   return {
-    proPriceTl: Number(row.proPriceTl),
+    proMonthlyTl: Number(row.proMonthlyTl),
+    plusMonthlyTl: Number(row.plusMonthlyTl),
+    yearlyDiscountPercent: Number(row.yearlyDiscountPercent),
+    proTrialEnabled: row.proTrialEnabled,
+    proTrialDays: row.proTrialDays,
+    proFreeBoostDays: row.proFreeBoostDays,
+    plusFreeBoostDays: row.plusFreeBoostDays,
+    plusBoostDiscountPercent: Number(row.plusBoostDiscountPercent),
     portfolioImages: row.portfolioImages,
     portfolioImagesPro: row.portfolioImagesPro,
+    portfolioImagesPlus: row.portfolioImagesPlus,
     boostEnabled: row.boostEnabled,
     boostPriceTl: Number(row.boostPriceTl),
     boostDays: row.boostDays,

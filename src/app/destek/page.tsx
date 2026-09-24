@@ -190,12 +190,32 @@ function buildFaqGroups(settings: SiteSettings, campaigns: CampaignRow[]): FaqGr
       title: "Pro Üyelik",
       items: [
         {
-          q: "Pro üyelik nedir?",
-          a: `Tek seferlik ${tl(settings.proPriceTl)} ile süresiz ayrıcalıklı üyelik. Freelancer'lar için: ilanların aramalarda öne çıkar, ilan başına ${settings.portfolioImages} yerine ${settings.portfolioImagesPro} örnek iş görseli ekleyebilirsin, profilinde Pro rozeti görünür. Alıcılar için: “Sadece Pro freelancer'ları göster” filtresi ve Pro rozeti.`,
+          q: "Pro ve Pro Plus üyelik nedir?",
+          a: `Freelancer'lara özel üyelik paketleri. Pro (aylık ${tl(settings.proMonthlyTl)}): ilanların aramalarda Pro olmayanların önüne geçer, ilanlarında ve profilinde Pro rozeti görünür, ilan başına ${settings.portfolioImagesPro} örnek iş görseli ekleyebilirsin${settings.proFreeBoostDays > 0 ? ` ve her ay ${settings.proFreeBoostDays} gün ücretsiz Öne Çıkar hakkın olur` : ""}. Pro Plus (aylık ${tl(settings.plusMonthlyTl)}): Pro'daki her şeye ek olarak aramalarda Pro üyelerin de önüne geçersin, Freelancer Bul listesinde en üstte görünürsün${settings.plusFreeBoostDays > 0 ? `, her ay ${settings.plusFreeBoostDays} gün ücretsiz Öne Çıkar hakkın olur` : ""}${settings.plusBoostDiscountPercent > 0 ? ` ve Öne Çıkar'ı ${pct(settings.plusBoostDiscountPercent)} indirimle alırsın` : ""}.`,
         },
         {
-          q: "Pro üyeliğe nasıl geçerim?",
-          a: "Panelindeki “Prosinta Pro Ol” sayfasından ödemeni yaparak geçebilirsin; Havale/EFT ile ödediysen onay sonrası üyeliğin açılır.",
+          q: "Aylık ve yıllık ödeme arasındaki fark nedir?",
+          a: `Yıllık planda 12 ayı tek seferde ödersin ve aylık fiyata göre ${pct(settings.yearlyDiscountPercent)} tasarruf edersin. Üyelikler otomatik yenilenmez: süren bitmeden bir hafta önce e-postayla hatırlatırız, yenilemezsen ücretsiz pakete dönersin ve ilanların yayında kalır.`,
+        },
+        ...(settings.proTrialEnabled
+          ? [
+              {
+                q: "Pro'yu ücretsiz deneyebilir miyim?",
+                a: `Evet. Daha önce üye olmadıysan Pro'yu ${settings.proTrialDays} gün ücretsiz deneyebilirsin; kart ya da ödeme bilgisi istenmez. Deneme bitince otomatik ücret alınmaz.`,
+              },
+            ]
+          : []),
+        {
+          q: "Paketimi değiştirebilir miyim?",
+          a: "Evet, istediğin zaman. Yeni paketi aldığında mevcut üyeliğinin kalan süresi kaybolmaz; iki paketin fiyat oranına göre yeni paketinin süresine çevrilip eklenir. Aynı paketi yeniden alırsan süren mevcut bitiş tarihinin üzerine eklenir.",
+        },
+        {
+          q: "Üyeliğe nasıl geçerim?",
+          a: "Panel → Pro Üyelik sayfasından (ya da Üyelik Paketleri sayfasından) paketini ve dönemini seçip ödemeni yap. Havale/EFT ile ödediysen ekibimiz onayladığında üyeliğin açılır.",
+        },
+        {
+          q: "Alıcılar Pro üye olabilir mi?",
+          a: "Üyelik paketleri freelancer'lar içindir. Alıcılar “Sadece Pro freelancer'ları göster” filtresini ücretsiz kullanabilir.",
         },
       ],
     },

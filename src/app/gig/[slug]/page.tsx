@@ -11,6 +11,8 @@ import { firstOrderOffer, sellerTakesOrders } from "@/lib/orders";
 import { activeCampaignPercent, getCampaignPricing } from "@/lib/campaign";
 import { OrderPanel } from "./order-panel";
 import { FounderBadge } from "@/components/founder-badge";
+import { ProBadge } from "@/components/pro-badge";
+import { membershipTier } from "@/lib/membership";
 
 function sellerLevelLabel(reviewCount: number) {
   if (reviewCount === 0) return "Yeni Satıcı";
@@ -27,6 +29,7 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
   if (!gig) notFound();
 
   if (gig.packages.length === 0) notFound();
+  const sellerTier = membershipTier(gig.seller);
 
   // Showcase sellers cannot log in to answer, so their gigs get no message button.
   const messageHref =
@@ -117,11 +120,7 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
             <span className="ml-2 rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
               {sellerLevelLabel(reviewCount)}
             </span>
-            {gig.seller.isPro && (
-              <span className="rounded-full bg-amber-400 px-3 py-1 text-xs font-bold uppercase tracking-wide text-amber-950">
-                Pro
-              </span>
-            )}
+            {sellerTier && <ProBadge plus={sellerTier === "PRO_PLUS"} size="md" />}
             {gig.seller.founderNumber !== null && <FounderBadge />}
             {rating !== null && <StarRating rating={rating} count={reviewCount} />}
           </Link>
@@ -179,11 +178,7 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
                       ✓
                     </span>
                   )}
-                  {gig.seller.isPro && (
-                    <span className="rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950">
-                      Pro
-                    </span>
-                  )}
+                  {sellerTier && <ProBadge plus={sellerTier === "PRO_PLUS"} />}
                 </div>
                 <p className="text-sm text-slate-400">{gig.seller.title ?? "Freelancer"}</p>
                 {gig.seller.bio && <p className="mt-2 max-w-xl text-sm text-slate-600">{gig.seller.bio}</p>}

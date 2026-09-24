@@ -9,6 +9,8 @@ import { StarRating } from "@/components/star-rating";
 import { UserAvatar } from "@/components/user-avatar";
 import { ReviewSummary } from "./review-summary";
 import { FounderBadge } from "@/components/founder-badge";
+import { ProBadge } from "@/components/pro-badge";
+import { membershipSelect, membershipTier } from "@/lib/membership";
 
 function sellerLevelLabel(reviewCount: number) {
   if (reviewCount === 0) return "Yeni Satıcı";
@@ -30,7 +32,7 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
       age: true,
       skills: true,
       isOnline: true,
-      isPro: true,
+      ...membershipSelect,
       founderNumber: true,
       createdAt: true,
       role: true,
@@ -40,6 +42,7 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
   });
 
   if (!freelancer || freelancer.role !== "FREELANCER" || freelancer.suspended) notFound();
+  const tier = membershipTier(freelancer);
 
   // Showcase profiles cannot log in to answer, and nobody messages themselves.
   const session = await auth();
@@ -57,7 +60,7 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
     }),
     prisma.order.count({ where: { gig: { sellerId: freelancer.id }, status: "COMPLETED" } }),
     prisma.order.count({ where: { gig: { sellerId: freelancer.id }, status: "CANCELLED" } }),
-    freelancer.isPro
+    tier
       ? prisma.review.findMany({
           where: { gig: { sellerId: freelancer.id } },
           include: { buyer: { select: { name: true } }, gig: { select: { title: true, slug: true } } },
@@ -98,11 +101,7 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
               <span className="inline-block rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
                 {sellerLevelLabel(reviewCount)}
               </span>
-              {freelancer.isPro && (
-                <span className="inline-block rounded-full bg-amber-400 px-3 py-1 text-xs font-bold uppercase tracking-wide text-amber-950">
-                  Pro
-                </span>
-              )}
+              {tier && <ProBadge plus={tier === "PRO_PLUS"} size="md" />}
               {freelancer.founderNumber !== null && <FounderBadge />}
             </div>
 
@@ -199,7 +198,7 @@ export default async function FreelancerProfilePage(props: PageProps<"/freelance
             )}
           </section>
 
-          {freelancer.isPro && (
+          {tier && (
             <section className="mt-10 border-t border-slate-100 pt-8">
               {reviewCount === 0 ? (
                 <>

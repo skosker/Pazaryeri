@@ -68,8 +68,18 @@ model User {
   /// sayısı (ismin ham listede kaç kez geçtiği). Gerçek Order kaydı değildir; diğer
   /// kullanıcılarda NULL kalır ve sipariş sayısı gerçek kayıtlardan gelir.
   importedOrderCount Int?
-  // Meaning depends on role: BUYER = Prosinta Pro member, FREELANCER = admin-verified Pro freelancer.
+  /// Süresiz Pro: aylık/yıllık üyelikten önce tek seferlik ödemeyle Pro olanlar ve
+  /// admin'in elle Pro yaptıkları. Süreli üyelik proUntil/proPlus'ta; etkin üyelik
+  /// ikisinden hesaplanır (src/lib/membership.ts).
   isPro              Boolean   @default(false)
+  /// Ücretli (ya da deneme) üyeliğin bittiği an; geçmişte kalınca üyelik düşer.
+  proUntil           DateTime?
+  /// proUntil'e kadar olan dönem Pro Plus mı (değilse Pro).
+  proPlus            Boolean   @default(false)
+  /// Ücretsiz Pro denemesini kullandığı an (kişi başına bir kez).
+  proTrialUsedAt     DateTime?
+  /// Bitiş hatırlatmasının gönderildiği proUntil (aynı dönem için ikinci e-posta gitmesin).
+  proReminderFor     DateTime?
   /// Kurucu Freelancer sırası (1'den kontenjana kadar, /admin/ayarlar): ilk ilanı onaylanan ilk gerçek freelancer'lara
   /// bir kez verilir ve kalıcıdır. Diğer herkes için NULL.
   founderNumber      Int?      @unique
@@ -321,6 +331,9 @@ model ProPurchase {
   provider    String        @default("paytr")
   status      PaymentStatus @default(INITIALIZED)
   amount      Decimal       @db.Decimal(10, 2)
+  plan        MembershipPlan @default(PRO)
+  /// 1 = aylık, 12 = yıllık. NULL: eski tek seferlik (süresiz) Pro satın alması.
+  months      Int?
   token       String?
   rawResponse Json?
   createdAt   DateTime      @default(now())
@@ -331,6 +344,11 @@ model ProPurchase {
 
   @@index([userId])
   @@map("pro_purchases")
+}
+
+enum MembershipPlan {
+  PRO
+  PRO_PLUS
 }
 
 /// One paid "Öne Çıkar" purchase for a gig — same payment shape as ProPurchase (its id
@@ -345,6 +363,9 @@ model GigBoost {
   token       String?
   rawResponse Json?
   activatedAt DateTime?
+  /// Üyelikle gelen aylık ücretsiz Öne Çıkar hakkı ("2026-10"); ücretli satın almada NULL.
+  /// Kullanıcı başına ayda bir tane olabilir.
+  creditMonth String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -353,6 +374,7 @@ model GigBoost {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, creditMonth])
   @@index([gigId])
   @@index([userId])
   @@map("gig_boosts")
@@ -519,9 +541,20 @@ model Message {
 /// an admin saves the form there is no row and the column defaults below apply.
 model SiteSettings {
   id                 Int      @id @default(1)
-  proPriceTl         Decimal  @default(1000) @db.Decimal(10, 2)
+  /// Üyelik paketleri (yalnızca freelancer'lar): aylık fiyatlar; yıllıkta indirim yüzdesi.
+  proMonthlyTl       Decimal  @default(1000) @db.Decimal(10, 2)
+  plusMonthlyTl      Decimal  @default(1250) @db.Decimal(10, 2)
+  yearlyDiscountPercent Decimal @default(20) @db.Decimal(5, 2)
+  proTrialEnabled    Boolean  @default(true)
+  proTrialDays       Int      @default(30)
+  /// Her ay üyelikle gelen ücretsiz Öne Çıkar süresi (gün).
+  proFreeBoostDays   Int      @default(3)
+  plusFreeBoostDays  Int      @default(10)
+  /// Pro Plus üyelerin Öne Çıkar satın alırken aldığı indirim, yüzde.
+  plusBoostDiscountPercent Decimal @default(25) @db.Decimal(5, 2)
   portfolioImages    Int      @default(5)
   portfolioImagesPro Int      @default(12)
+  portfolioImagesPlus Int     @default(20)
   boostEnabled       Boolean  @default(true)
   boostPriceTl       Decimal  @default(1000) @db.Decimal(10, 2)
   boostDays          Int      @default(30)

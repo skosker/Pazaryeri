@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
+import { membershipSelect, membershipTier, plusMemberWhere, proMemberWhere } from "@/lib/membership";
 
 /**
  * Reading side of the freelancer directory: who is on the marketplace, filtered by what
@@ -17,6 +18,7 @@ export type FreelancerCardData = {
   image: string | null;
   isOnline: boolean;
   isPro: boolean;
+  isProPlus: boolean;
   isFounder: boolean;
   gigCount: number;
   rating: number | null;
@@ -42,7 +44,8 @@ function buildWhere(filters: FreelancerFilters): Prisma.UserWhereInput {
   const where: Prisma.UserWhereInput = { role: "FREELANCER", suspended: false };
 
   if (filters.onlineOnly) where.isOnline = true;
-  if (filters.proOnly) where.isPro = true;
+  // proMemberWhere is an OR of its own; kept under AND so the search OR below cannot replace it.
+  if (filters.proOnly) where.AND = [proMemberWhere()];
 
   if (filters.q) {
     const q = filters.q.trim();
@@ -68,15 +71,14 @@ const cardSelect = {
   skills: true,
   image: true,
   isOnline: true,
-  isPro: true,
+  ...membershipSelect,
   founderNumber: true,
   _count: { select: { gigs: true } },
 } satisfies Prisma.UserSelect;
 
 // Whoever is available right now comes first — the same signal the gig cards show —
 // then alphabetical, with the id as a tie-break so paging never repeats or drops
-// somebody between two pages. Pro is a badge here, not a ranking, which is how the gig
-// list treats it too.
+// somebody between two pages.
 const directoryOrder: Prisma.UserOrderByWithRelationInput[] = [
   { isOnline: "desc" },
   { name: "asc" },
@@ -104,40 +106,32 @@ export async function listFreelancers(filters: FreelancerFilters): Promise<Freel
   const pageSize = filters.pageSize ?? 24;
   const page = Math.max(1, filters.page ?? 1);
   const where = buildWhere(filters);
-  const withPhoto: Prisma.UserWhereInput = { AND: [where, realPhoto] };
-  const withoutPhoto: Prisma.UserWhereInput = { AND: [where, drawnOrNoPhoto] };
+  // Pro Plus members lead the directory (a membership perk), then real photos, then the rest.
+  const plus = plusMemberWhere();
+  const groups: Prisma.UserWhereInput[] = [
+    { AND: [where, plus] },
+    { AND: [where, realPhoto, { NOT: plus }] },
+    { AND: [where, drawnOrNoPhoto, { NOT: plus }] },
+  ];
 
-  const [photoCount, noPhotoCount] = await Promise.all([
-    prisma.user.count({ where: withPhoto }),
-    prisma.user.count({ where: withoutPhoto }),
-  ]);
-
-  const total = photoCount + noPhotoCount;
+  const counts = await Promise.all(groups.map((group) => prisma.user.count({ where: group })));
+  const total = counts.reduce((sum, n) => sum + n, 0);
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const start = (page - 1) * pageSize;
 
-  const fromPhoto =
-    start < photoCount
-      ? await prisma.user.findMany({
-          where: withPhoto,
-          select: cardSelect,
-          orderBy: directoryOrder,
-          skip: start,
-          take: Math.min(pageSize, photoCount - start),
-        })
-      : [];
-  const remaining = pageSize - fromPhoto.length;
-  const fromNoPhoto =
-    remaining > 0
-      ? await prisma.user.findMany({
-          where: withoutPhoto,
-          select: cardSelect,
-          orderBy: directoryOrder,
-          skip: Math.max(0, start - photoCount),
-          take: remaining,
-        })
-      : [];
-  const paged = [...fromPhoto, ...fromNoPhoto];
+  // Walk the groups in order, taking the slice of each that falls on this page.
+  const paged: Prisma.UserGetPayload<{ select: typeof cardSelect }>[] = [];
+  let offset = 0;
+  for (const [i, group] of groups.entries()) {
+    const skip = Math.max(0, start - offset);
+    const take = pageSize - paged.length;
+    offset += counts[i];
+    if (take <= 0) break;
+    if (skip >= counts[i]) continue;
+    paged.push(
+      ...(await prisma.user.findMany({ where: group, select: cardSelect, orderBy: directoryOrder, skip, take }))
+    );
+  }
 
   const reviews = await prisma.review.findMany({
     where: { gig: { sellerId: { in: paged.map((row) => row.id) } } },
@@ -165,7 +159,8 @@ export async function listFreelancers(filters: FreelancerFilters): Promise<Freel
         skills: row.skills,
         image: row.image,
         isOnline: row.isOnline,
-        isPro: row.isPro,
+        isPro: membershipTier(row) !== null,
+        isProPlus: membershipTier(row) === "PRO_PLUS",
         isFounder: row.founderNumber !== null,
         gigCount: row._count.gigs,
         rating: rating ? rating.sum / rating.count : null,

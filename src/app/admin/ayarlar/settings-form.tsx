@@ -7,16 +7,41 @@ import { saveMembershipSettingsAction, type SettingsFormState } from "./actions"
 
 const initialState: SettingsFormState = {};
 
+/** "9.600 ₺ (ayda 800 ₺)" — the yearly price the plan cards will show. */
+function yearly(monthly: number, discountPercent: number): string {
+  const perMonth = Math.round(monthly * (100 - discountPercent)) / 100;
+  const fmt = (n: number) => n.toLocaleString("tr-TR", { maximumFractionDigits: 2 });
+  return `${fmt(Math.round(perMonth * 1200) / 100)} ₺ (ayda ${fmt(perMonth)} ₺)`;
+}
+
 export function MembershipSettingsForm({ settings }: { settings: SiteSettings }) {
   const [state, formAction, pending] = useActionState(saveMembershipSettingsAction, initialState);
 
   return (
     <form action={formAction}>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <SettingsCard title="Prosinta Pro" hint="Tek seferlik ödeme, süresiz üyelik. Mevcut Pro üyeler etkilenmez.">
-          <NumberField label="Pro fiyatı (₺)" name="proPriceTl" defaultValue={settings.proPriceTl} step="0.01" />
-          <NumberField label="Görsel sınırı (normal)" name="portfolioImages" defaultValue={settings.portfolioImages} />
+        <SettingsCard
+          title="Üyelik Paketleri (Pro / Pro Plus)"
+          wide
+          hint="Yalnızca freelancer'lara satılır; aylık ya da yıllık, otomatik yenilenmez. Yıllık fiyat = aylık × 12, yıllık indirimle. Fiyat değişikliği yalnızca yeni satın almalara uygulanır; süresiz Pro üyeler etkilenmez."
+        >
+          <NumberField label="Pro aylık fiyat (₺)" name="proMonthlyTl" defaultValue={settings.proMonthlyTl} step="0.01" />
+          <NumberField label="Pro Plus aylık fiyat (₺)" name="plusMonthlyTl" defaultValue={settings.plusMonthlyTl} step="0.01" />
+          <NumberField label="Yıllık ödemede indirim (%)" name="yearlyDiscountPercent" defaultValue={settings.yearlyDiscountPercent} step="0.01" />
+          <NumberField label="Pro Plus Öne Çıkar indirimi (%)" name="plusBoostDiscountPercent" defaultValue={settings.plusBoostDiscountPercent} step="0.01" />
+          <NumberField label="Aylık ücretsiz Öne Çıkar – Pro (gün)" name="proFreeBoostDays" defaultValue={settings.proFreeBoostDays} />
+          <NumberField label="Aylık ücretsiz Öne Çıkar – Pro Plus (gün)" name="plusFreeBoostDays" defaultValue={settings.plusFreeBoostDays} />
+          <NumberField label="Görsel sınırı (Ücretsiz)" name="portfolioImages" defaultValue={settings.portfolioImages} />
           <NumberField label="Görsel sınırı (Pro)" name="portfolioImagesPro" defaultValue={settings.portfolioImagesPro} />
+          <NumberField label="Görsel sınırı (Pro Plus)" name="portfolioImagesPlus" defaultValue={settings.portfolioImagesPlus} />
+          <div className="sm:col-span-2 grid grid-cols-1 gap-3 border-t border-slate-100 pt-3 sm:grid-cols-2">
+            <Toggle label="Ücretsiz Pro denemesi açık" name="proTrialEnabled" defaultChecked={settings.proTrialEnabled} />
+            <NumberField label="Deneme süresi (gün)" name="proTrialDays" defaultValue={settings.proTrialDays} />
+          </div>
+          <p className="sm:col-span-2 text-xs text-slate-500">
+            Yıllık: Pro {yearly(settings.proMonthlyTl, settings.yearlyDiscountPercent)} · Pro Plus{" "}
+            {yearly(settings.plusMonthlyTl, settings.yearlyDiscountPercent)} (kaydettikten sonra güncellenir)
+          </p>
         </SettingsCard>
 
         <SettingsCard

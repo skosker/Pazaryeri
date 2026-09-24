@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { listGigs, getCategoryFreelancerCount, type GigFilters } from "@/lib/gigs";
 import { GigCard } from "@/components/gig-card";
@@ -67,12 +66,9 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
   const proParam = toSingle(searchParams.pro) === "1";
   const sayfa = Number(toSingle(searchParams.sayfa) ?? "1") || 1;
 
-  const session = await auth();
-  const isProBuyer =
-    session?.user?.role === "BUYER"
-      ? Boolean((await prisma.user.findUnique({ where: { id: session.user.id }, select: { isPro: true } }))?.isPro)
-      : false;
-  const proOnly = isProBuyer && proParam;
+  // "Sadece Pro freelancer'lar" is open to every buyer: membership is sold to
+  // freelancers, and being findable this way is part of what they pay for.
+  const proOnly = proParam;
 
   const filters: GigFilters = {
     categorySlugs,
@@ -163,7 +159,6 @@ export default async function KategorilerPage(props: PageProps<"/kategoriler">) 
           initialBudgetMax={butceMax ? Number(butceMax) : undefined}
           initialDelivery={sure ?? "farketmez"}
           initialOnlineOnly={cevrimici}
-          isProBuyer={isProBuyer}
           initialProOnly={proOnly}
         />
       </div>

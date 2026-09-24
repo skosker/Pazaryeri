@@ -2,16 +2,21 @@ import { putImage } from "@/lib/storage";
 import { validateImage, MAX_PORTFOLIO_IMAGES } from "@/lib/image-constraints";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
+import { membershipSelect, membershipTier, portfolioLimitFor } from "@/lib/membership";
 
-/** "Örnek işler" limits for this seller: theirs, and the Pro one to point them at. */
+/**
+ * "Örnek işler" limits for this seller: theirs, and the next membership's to point them
+ * at (equal to theirs once there is nothing higher).
+ */
 export async function sellerPortfolioLimits(sellerId: string): Promise<{ max: number; proMax: number }> {
   const [user, settings] = await Promise.all([
-    prisma.user.findUnique({ where: { id: sellerId }, select: { isPro: true } }),
+    prisma.user.findUnique({ where: { id: sellerId }, select: membershipSelect }),
     getSettings(),
   ]);
+  const tier = user ? membershipTier(user) : null;
   return {
-    max: user?.isPro ? settings.portfolioImagesPro : settings.portfolioImages,
-    proMax: settings.portfolioImagesPro,
+    max: portfolioLimitFor(tier, settings),
+    proMax: portfolioLimitFor(tier === null ? "PRO" : "PRO_PLUS", settings),
   };
 }
 

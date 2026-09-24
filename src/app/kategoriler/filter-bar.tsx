@@ -26,7 +26,6 @@ export function FilterBar({
   initialBudgetMax,
   initialDelivery,
   initialOnlineOnly,
-  isProBuyer,
   initialProOnly,
 }: {
   categories: Category[];
@@ -37,7 +36,6 @@ export function FilterBar({
   initialBudgetMax?: number;
   initialDelivery: string;
   initialOnlineOnly: boolean;
-  isProBuyer?: boolean;
   initialProOnly?: boolean;
 }) {
   const router = useRouter();
@@ -173,29 +171,27 @@ export function FilterBar({
       </div>
 
       <div className="flex flex-wrap items-center gap-4">
-        {isProBuyer && (
-          <label className="flex cursor-pointer items-center gap-2.5 text-sm text-slate-600">
-            Sadece Pro freelancer&apos;ları göster
+        <label className="flex cursor-pointer items-center gap-2.5 text-sm text-slate-600">
+          Sadece Pro freelancer&apos;ları göster
+          <span
+            role="switch"
+            aria-checked={proOnly}
+            onClick={() => {
+              const next = !proOnly;
+              setProOnly(next);
+              applyParams({ proOnly: next });
+            }}
+            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition ${
+              proOnly ? "bg-amber-500" : "bg-slate-200"
+            }`}
+          >
             <span
-              role="switch"
-              aria-checked={proOnly}
-              onClick={() => {
-                const next = !proOnly;
-                setProOnly(next);
-                applyParams({ proOnly: next });
-              }}
-              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition ${
-                proOnly ? "bg-amber-500" : "bg-slate-200"
+              className={`inline-block h-4.5 w-4.5 transform rounded-full bg-white shadow transition ${
+                proOnly ? "translate-x-6" : "translate-x-1"
               }`}
-            >
-              <span
-                className={`inline-block h-4.5 w-4.5 transform rounded-full bg-white shadow transition ${
-                  proOnly ? "translate-x-6" : "translate-x-1"
-                }`}
-              />
-            </span>
-          </label>
-        )}
+            />
+          </span>
+        </label>
         <label className="flex cursor-pointer items-center gap-2.5 text-sm text-slate-600">
           Online olan freelancer&apos;ların ilanlarını göster
           <span

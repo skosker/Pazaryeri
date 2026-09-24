@@ -362,3 +362,25 @@ export async function sendReferralRewardEmail(params: {
     )
   );
 }
+
+export async function sendMembershipEndingEmail(params: {
+  to: string;
+  name: string;
+  planLabel: string;
+  until: string;
+  trial: boolean;
+  renewUrl: string;
+}) {
+  const what = params.trial ? `Ücretsiz ${params.planLabel} denemen` : `${params.planLabel} üyeliğin`;
+  await sendEmail(
+    params.to,
+    `${what} ${params.until} tarihinde bitiyor`,
+    layout(
+      `${what} bitiyor`,
+      `<p>Merhaba ${escapeHtml(params.name)},</p>
+       <p>${what} <strong>${params.until}</strong> tarihinde sona erecek. Sonrasında rozetin, aramalardaki önceliğin ve aylık ücretsiz Öne Çıkar hakkın kalkar; ilanların yayında kalmaya devam eder.</p>
+       <p>Kesintisiz devam etmek için üyeliğini şimdi yenileyebilirsin. Yıllık planda daha az ödersin.</p>
+       ${button(params.renewUrl, "Üyeliğimi Yenile")}`
+    )
+  );
+}

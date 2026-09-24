@@ -1,3 +1,4 @@
+import { PLAN_LABEL } from "@/lib/membership";
 import Link from "next/link";
 import { listBankTransfers } from "@/lib/order-actions";
 import { listPendingProBankTransfers } from "@/lib/pro-purchase";
@@ -295,14 +296,14 @@ export default async function BankTransferApprovalsPage(
       {pendingProTransfers.length > 0 && (
         <div className="mt-10">
           <h2 className="text-lg font-bold text-brand-navy">
-            Pro Üyelik Havale Bildirimleri ({pendingProTransfers.length})
+            Üyelik Havale Bildirimleri ({pendingProTransfers.length})
           </h2>
           <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
             <table className="w-full text-left text-sm">
               <thead className="border-b border-slate-100 text-xs uppercase text-slate-400">
                 <tr>
                   <th className="px-5 py-3 font-medium">Kullanıcı</th>
-                  <th className="px-5 py-3 font-medium">Rol</th>
+                  <th className="px-5 py-3 font-medium">Paket</th>
                   <th className="px-5 py-3 font-medium">Tarih</th>
                   <th className="px-5 py-3 font-medium">Tutar</th>
                   <th className="px-5 py-3 font-medium text-right">İşlem</th>
@@ -316,7 +317,9 @@ export default async function BankTransferApprovalsPage(
                       <p className="text-xs text-slate-400">{purchase.user.email}</p>
                     </td>
                     <td className="px-5 py-4 text-slate-500">
-                      {purchase.user.role === "FREELANCER" ? "Freelancer" : "Alıcı"}
+                      {purchase.months === null
+                        ? "Süresiz Pro"
+                        : `${PLAN_LABEL[purchase.plan]} · ${purchase.months === 12 ? "Yıllık" : "Aylık"}`}
                     </td>
                     <td className="px-5 py-4 text-slate-500">{dateFmt.format(purchase.createdAt)}</td>
                     <td className="px-5 py-4 font-semibold text-brand-navy">

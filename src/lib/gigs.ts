@@ -2,10 +2,11 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 import { isSponsored } from "@/lib/gig-boost";
 import { activeCampaignPercent, campaignPrice, getCampaignPricing, type CampaignPricing } from "@/lib/campaign";
+import { membershipSelect, membershipTier, proMemberWhere } from "@/lib/membership";
 
 const gigCardInclude = {
   seller: {
-    select: { id: true, name: true, title: true, image: true, isOnline: true, isPro: true, emailVerified: true, founderNumber: true },
+    select: { id: true, name: true, title: true, image: true, isOnline: true, ...membershipSelect, emailVerified: true, founderNumber: true },
   },
   category: { select: { name: true, slug: true, icon: true } },
   subcategory: { select: { name: true, slug: true } },
@@ -28,6 +29,7 @@ export type GigCardData = {
     image: string | null;
     isOnline: boolean;
     isPro: boolean;
+    isProPlus: boolean;
     emailVerified: boolean;
     isFounder: boolean;
   };
@@ -45,6 +47,7 @@ export type GigCardData = {
 };
 
 function toCardData(gig: RawGig, pricing: CampaignPricing): GigCardData {
+  const tier = membershipTier(gig.seller);
   const listPrice = gig.packages[0] ? Number(gig.packages[0].price) : 0;
   const percent = activeCampaignPercent(pricing, gig.id);
   const reviewCount = gig.reviews.length;
@@ -66,7 +69,8 @@ function toCardData(gig: RawGig, pricing: CampaignPricing): GigCardData {
       title: gig.seller.title,
       image: gig.seller.image,
       isOnline: gig.seller.isOnline,
-      isPro: gig.seller.isPro,
+      isPro: tier !== null,
+      isProPlus: tier === "PRO_PLUS",
       emailVerified: Boolean(gig.seller.emailVerified),
       isFounder: gig.seller.founderNumber !== null,
     },
@@ -125,6 +129,7 @@ type SortableGig = {
   sellerImage: string | null;
   founder: boolean;
   pro: boolean;
+  plus: boolean;
   sponsored: boolean;
   startingPrice: number;
 };
@@ -143,7 +148,7 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
   if (filters.onlineSellersOnly || filters.proSellersOnly) {
     where.seller = {
       ...(filters.onlineSellersOnly ? { isOnline: true } : {}),
-      ...(filters.proSellersOnly ? { isPro: true } : {}),
+      ...(filters.proSellersOnly ? proMemberWhere() : {}),
     };
   }
 
@@ -183,17 +188,19 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
       id: true,
       coverImage: true,
       sponsoredUntil: true,
-      seller: { select: { image: true, founderNumber: true, isPro: true } },
+      seller: { select: { image: true, founderNumber: true, ...membershipSelect } },
       packages: { orderBy: { price: "asc" }, take: 1, select: { price: true } },
     },
   });
 
+  const now = new Date();
   let sortable: SortableGig[] = thin.map((g) => ({
     id: g.id,
     coverImage: g.coverImage,
     sellerImage: g.seller.image,
     founder: g.seller.founderNumber !== null,
-    pro: g.seller.isPro,
+    pro: membershipTier(g.seller, now) !== null,
+    plus: membershipTier(g.seller, now) === "PRO_PLUS",
     sponsored: isSponsored(g.sponsoredUntil),
     // Sort by what the buyer would pay right now, campaign discount included.
     startingPrice: campaignPrice(
@@ -221,11 +228,12 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
   // bozmuyor.
   sortable = sortable.sort((a, b) => (a.coverImage ? 0 : 1) - (b.coverImage ? 0 : 1));
 
-  // Varsayılan sıralamada önce Kurucu Freelancer'lar, sonra Pro'lar öne çıkar — geçişler
-  // kararlı olduğu için sıralama: kurucu+Pro, kurucu, Pro, diğerleri; her grubun içinde
-  // önceki sıralamalar korunuyor. Alıcının seçtiği fiyat/yeni sıralamalarına dokunulmuyor.
+  // Varsayılan sıralamada önce Kurucu Freelancer'lar, sonra Pro Plus, sonra Pro üyeler öne
+  // çıkar — geçişler kararlı olduğu için her grubun içinde önceki sıralamalar korunuyor.
+  // Alıcının seçtiği fiyat/yeni sıralamalarına dokunulmuyor.
   if (!filters.sort || filters.sort === "uygun") {
     sortable = sortable.sort((a, b) => (a.pro ? 0 : 1) - (b.pro ? 0 : 1));
+    sortable = sortable.sort((a, b) => (a.plus ? 0 : 1) - (b.plus ? 0 : 1));
     sortable = sortable.sort((a, b) => (a.founder ? 0 : 1) - (b.founder ? 0 : 1));
     // Paid "Öne Çıkar" leads above everything; the card says "Sponsorlu" so it is not
     // mistaken for an organic ranking.
@@ -322,7 +330,7 @@ export async function getGigBySlug(slug: string) {
           skills: true,
           createdAt: true,
           isOnline: true,
-          isPro: true,
+          ...membershipSelect,
           emailVerified: true,
           synthetic: true,
           suspended: true,
