@@ -95,13 +95,9 @@ export function MembershipPlans({
 
               <div className="mt-5 min-h-[5.5rem]">
                 {price === null ? (
-                  <>
-                    <p className="flex items-baseline gap-1">
-                      <span className="text-4xl font-bold text-brand-navy">0₺</span>
-                      <span className="text-sm text-slate-500">/ ay</span>
-                    </p>
-                    <p className="mt-1 text-xs text-slate-500">Her zaman ücretsiz</p>
-                  </>
+                  <p className="pt-2 text-sm leading-relaxed text-slate-600">
+                    Süre sınırı yok, kart bilgisi gerekmez. Hemen ilan açıp satışa başla.
+                  </p>
                 ) : (
                   <>
                     <p className="flex items-baseline gap-1">
