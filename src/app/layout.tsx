@@ -4,7 +4,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { LegalBar } from "@/components/legal-bar";
 import { prisma } from "@/lib/prisma";
 
 const geistSans = Geist({
@@ -55,7 +54,6 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <Header />
         <main className="flex-1">{children}</main>
         <Footer categories={categories.map((c) => ({ label: c.name, slug: c.slug }))} />
-        <LegalBar />
       </body>
     </html>
   );
