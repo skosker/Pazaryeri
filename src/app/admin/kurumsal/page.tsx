@@ -79,8 +79,8 @@ export default async function AdminCorporatePage() {
                     </td>
                     <td className="px-5 py-4 text-slate-500">{dateFmt.format(t.createdAt)}</td>
                     <td className="px-5 py-4 font-semibold text-brand-navy">
-                      {formatPrice(t.amount)}₺
-                      {Number(t.bonus) > 0 && <span className="block text-xs font-normal text-emerald-700">+{formatPrice(t.bonus)}₺ bonus</span>}
+                      {formatPrice(t.amount)} TL
+                      {Number(t.bonus) > 0 && <span className="block text-xs font-normal text-emerald-700">+{formatPrice(t.bonus)} TL bonus</span>}
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex justify-end gap-2">
@@ -139,9 +139,9 @@ export default async function AdminCorporatePage() {
                       <td className="px-5 py-4 text-slate-500">
                         {c.taxOffice} · {c.taxNumber}
                       </td>
-                      <td className="px-5 py-4 font-semibold text-brand-navy">{formatPrice(c.balance)}₺</td>
+                      <td className="px-5 py-4 font-semibold text-brand-navy">{formatPrice(c.balance)} TL</td>
                       <td className="px-5 py-4 text-slate-600">
-                        {spent ? `${formatPrice(spent.total)}₺ (${spent.count} sipariş)` : "—"}
+                        {spent ? `${formatPrice(spent.total)} TL (${spent.count} sipariş)` : "—"}
                       </td>
                     </tr>
                   );

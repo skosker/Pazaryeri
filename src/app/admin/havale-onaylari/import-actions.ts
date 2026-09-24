@@ -18,7 +18,7 @@ export type ImportResult = {
 };
 
 const NAME_COLUMNS = ["Alıcı Adı", "Alıcı", "Ad Soyad", "Müşteri", "Müşteri Adı"];
-const AMOUNT_COLUMNS = ["Tutar", "Ücret", "Ödeme", "Tutar (₺)", "Miktar"];
+const AMOUNT_COLUMNS = ["Tutar", "Ücret", "Ödeme", "Tutar (₺)", "Tutar (TL)", "Miktar"];
 const DATE_COLUMNS = ["Tarih", "Ödeme Tarihi", "Tarihi"];
 const STATUS_COLUMNS = ["Durum", "Onay Durumu", "Status"];
 

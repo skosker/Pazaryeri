@@ -7,11 +7,11 @@ import { saveMembershipSettingsAction, type SettingsFormState } from "./actions"
 
 const initialState: SettingsFormState = {};
 
-/** "9.600 ₺ (ayda 800 ₺)" — the yearly price the plan cards will show. */
+/** "9.600 TL (ayda 800 TL)" — the yearly price the plan cards will show. */
 function yearly(monthly: number, discountPercent: number): string {
   const perMonth = Math.round(monthly * (100 - discountPercent)) / 100;
   const fmt = (n: number) => n.toLocaleString("tr-TR", { maximumFractionDigits: 2 });
-  return `${fmt(Math.round(perMonth * 1200) / 100)} ₺ (ayda ${fmt(perMonth)} ₺)`;
+  return `${fmt(Math.round(perMonth * 1200) / 100)} TL (ayda ${fmt(perMonth)} TL)`;
 }
 
 export function MembershipSettingsForm({ settings }: { settings: SiteSettings }) {
@@ -25,8 +25,8 @@ export function MembershipSettingsForm({ settings }: { settings: SiteSettings })
           wide
           hint="Yalnızca freelancer'lara satılır; aylık ya da yıllık, otomatik yenilenmez. Yıllık fiyat = aylık × 12, yıllık indirimle. Fiyat değişikliği yalnızca yeni satın almalara uygulanır; süresiz Pro üyeler etkilenmez."
         >
-          <NumberField label="Pro aylık fiyat (₺)" name="proMonthlyTl" defaultValue={settings.proMonthlyTl} step="0.01" />
-          <NumberField label="Pro Plus aylık fiyat (₺)" name="plusMonthlyTl" defaultValue={settings.plusMonthlyTl} step="0.01" />
+          <NumberField label="Pro aylık fiyat (TL)" name="proMonthlyTl" defaultValue={settings.proMonthlyTl} step="0.01" />
+          <NumberField label="Pro Plus aylık fiyat (TL)" name="plusMonthlyTl" defaultValue={settings.plusMonthlyTl} step="0.01" />
           <NumberField label="Yıllık ödemede indirim (%)" name="yearlyDiscountPercent" defaultValue={settings.yearlyDiscountPercent} step="0.01" />
           <NumberField label="Pro Plus Öne Çıkar indirimi (%)" name="plusBoostDiscountPercent" defaultValue={settings.plusBoostDiscountPercent} step="0.01" />
           <NumberField label="Aylık ücretsiz Öne Çıkar – Pro (gün)" name="proFreeBoostDays" defaultValue={settings.proFreeBoostDays} />
@@ -50,7 +50,7 @@ export function MembershipSettingsForm({ settings }: { settings: SiteSettings })
           hint="İlanı ücret karşılığı varsayılan sıralamada en üste taşır. Kapatınca yeni satın alma olmaz, süresi devam edenler biter."
         >
           <Toggle label="Satış açık" name="boostEnabled" defaultChecked={settings.boostEnabled} />
-          <NumberField label="Fiyat (₺)" name="boostPriceTl" defaultValue={settings.boostPriceTl} step="0.01" />
+          <NumberField label="Fiyat (TL)" name="boostPriceTl" defaultValue={settings.boostPriceTl} step="0.01" />
           <NumberField label="Süre (gün)" name="boostDays" defaultValue={settings.boostDays} />
         </SettingsCard>
 
@@ -77,7 +77,7 @@ export function MembershipSettingsForm({ settings }: { settings: SiteSettings })
           hint="Kapalıyken kullanıcılar görmez. Açınca kurumsal hesaplar Panel → Kurumsal Hesap'tan Havale/EFT ile toplu bakiye yükler (Admin → Kurumsal Hesaplar'dan onaylarsın) ve siparişleri bakiyeyle öder."
         >
           <Toggle label="Kurumsal paket açık" name="corporateEnabled" defaultChecked={settings.corporateEnabled} />
-          <NumberField label="En düşük yükleme (₺)" name="corporateMinTopUpTl" defaultValue={settings.corporateMinTopUpTl} step="0.01" />
+          <NumberField label="En düşük yükleme (TL)" name="corporateMinTopUpTl" defaultValue={settings.corporateMinTopUpTl} step="0.01" />
           <NumberField label="Yükleme bonusu (%)" name="corporateBonusPercent" defaultValue={settings.corporateBonusPercent} step="0.01" />
         </SettingsCard>
       </div>

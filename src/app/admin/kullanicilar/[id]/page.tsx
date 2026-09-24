@@ -199,7 +199,7 @@ export default async function AdminUserDetailPage(props: PageProps<"/admin/kulla
                     <tr key={g.id} className="border-b border-slate-100 last:border-0">
                       <td className="px-5 py-3 font-medium text-brand-navy">{g.title}</td>
                       <td className="px-5 py-3 text-slate-500">{g.category.name}</td>
-                      <td className="px-5 py-3 text-slate-600">{formatPrice(g.packages[0]?.price ?? 0)}₺</td>
+                      <td className="px-5 py-3 text-slate-600">{formatPrice(g.packages[0]?.price ?? 0)} TL</td>
                       <td className="px-5 py-3 text-slate-500">{g._count.orders}</td>
                       <td className="px-5 py-3">
                         {g.published ? (
@@ -287,7 +287,7 @@ function OrderSection({
                     <td className="px-5 py-3 text-slate-500">{o.counterparty ?? "—"}</td>
                   )}
                   <td className="px-5 py-3 text-slate-500">{dateFmt.format(o.createdAt)}</td>
-                  <td className="px-5 py-3 font-semibold text-brand-navy">{formatPrice(o.amount)}₺</td>
+                  <td className="px-5 py-3 font-semibold text-brand-navy">{formatPrice(o.amount)} TL</td>
                   <td className="px-5 py-3 text-right">
                     <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${orderStatusColor[o.status]}`}>
                       {orderStatusLabel[o.status]}

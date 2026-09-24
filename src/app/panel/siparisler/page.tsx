@@ -121,7 +121,7 @@ export default async function PanelOrdersPage(props: PageProps<"/panel/siparisle
                   </td>
                   <td className="px-5 py-4 font-semibold text-brand-navy">
                     {/* Buyers see what they paid; sellers their package price. */}
-                    {formatPrice(gorunum === "satici" ? Number(order.amount) : payableAmount(order))}₺
+                    {formatPrice(gorunum === "satici" ? Number(order.amount) : payableAmount(order))} TL
                   </td>
                   <td className="px-5 py-4">
                     <span className={`rounded-full px-3 py-1 text-xs font-semibold ${orderStatusColor[order.status]}`}>

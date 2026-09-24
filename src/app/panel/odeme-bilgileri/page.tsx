@@ -49,7 +49,7 @@ export default async function PayoutDetailsPage() {
           {pendingTotal > 0 && (
             <p className="text-sm text-slate-500">
               Ödeme bekleyen toplam:{" "}
-              <span className="font-semibold text-brand-navy">{formatPrice(pendingTotal)}₺</span>
+              <span className="font-semibold text-brand-navy">{formatPrice(pendingTotal)} TL</span>
             </p>
           )}
         </div>
@@ -87,7 +87,7 @@ export default async function PayoutDetailsPage() {
                         </p>
                       </td>
                       <td className="px-5 py-4 font-semibold text-brand-navy">
-                        {formatPrice(payout.net)}₺
+                        {formatPrice(payout.net)} TL
                       </td>
                       <td className="px-5 py-4">
                         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${status.tone}`}>

@@ -8,7 +8,7 @@ import { getOpenCampaigns, type CampaignRow } from "@/lib/campaign";
 // least hourly anyway so an answer never quotes an old price for long.
 export const revalidate = 3600;
 
-const tl = (n: number) => `${n.toLocaleString("tr-TR")} ₺`;
+const tl = (n: number) => `${n.toLocaleString("tr-TR")} TL`;
 const pct = (n: number) => `%${n.toLocaleString("tr-TR")}`;
 
 /**

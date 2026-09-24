@@ -89,7 +89,7 @@ export function ProBankTransferPanel({
 
       <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
         <span className="text-sm text-slate-500">Ödenecek tutar</span>
-        <span className="text-xl font-bold text-brand-navy">{formatPrice(amount)}₺</span>
+        <span className="text-xl font-bold text-brand-navy">{formatPrice(amount)} TL</span>
       </div>
 
       <button

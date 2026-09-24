@@ -176,7 +176,7 @@ export default async function BankTransferApprovalsPage(
         <StatCard label="Toplam Sipariş" value={String(reportRows.length)} />
         <StatCard label="Onaylanan Havale" value={String(approvedCount)} />
         <StatCard label="Onay Bekleyen" value={String(reportRows.length - approvedCount)} />
-        <StatCard label="Toplam Tutar" value={`${formatPrice(reportTotal)}₺`} />
+        <StatCard label="Toplam Tutar" value={`${formatPrice(reportTotal)} TL`} />
       </div>
       <p className="mt-2 text-xs text-slate-400">
         1 Ağustos 2026&apos;dan bugüne, aşağıdaki tarih filtresinden bağımsız.
@@ -268,7 +268,7 @@ export default async function BankTransferApprovalsPage(
                       <td className="px-5 py-4 text-slate-600">{order.buyer.name}</td>
                       <td className="px-5 py-4 text-slate-600">{order.gig.seller.name}</td>
                       <td className="px-5 py-4 font-semibold text-brand-navy">
-                        {formatPrice(payableAmount(order))}₺
+                        {formatPrice(payableAmount(order))} TL
                       </td>
                       <td className="px-5 py-4 text-right">
                         {approved ? (
@@ -323,7 +323,7 @@ export default async function BankTransferApprovalsPage(
                     </td>
                     <td className="px-5 py-4 text-slate-500">{dateFmt.format(purchase.createdAt)}</td>
                     <td className="px-5 py-4 font-semibold text-brand-navy">
-                      {formatPrice(purchase.amount)}₺
+                      {formatPrice(purchase.amount)} TL
                     </td>
                     <td className="px-5 py-4 text-right">
                       <form action={confirmProBankTransferAction.bind(null, purchase.id)}>
@@ -373,7 +373,7 @@ export default async function BankTransferApprovalsPage(
                       <p className="text-xs text-slate-400">{boost.days} gün</p>
                     </td>
                     <td className="px-5 py-4 text-slate-500">{dateFmt.format(boost.createdAt)}</td>
-                    <td className="px-5 py-4 font-semibold text-brand-navy">{formatPrice(boost.amount)}₺</td>
+                    <td className="px-5 py-4 font-semibold text-brand-navy">{formatPrice(boost.amount)} TL</td>
                     <td className="px-5 py-4 text-right">
                       <form action={confirmBoostBankTransferAction.bind(null, boost.id)}>
                         <button

@@ -102,16 +102,16 @@ export function MembershipPlans({
                   <>
                     <p className="flex items-baseline gap-1">
                       <span className={`text-4xl font-bold ${discounted ? "text-rose-600" : "text-brand-navy"}`}>
-                        {formatPrice(price.perMonth)}₺
+                        {formatPrice(price.perMonth)} TL
                       </span>
                       <span className="text-sm text-slate-500">/ ay</span>
                     </p>
                     {discounted && (
-                      <p className="mt-0.5 text-sm text-slate-400 line-through">{formatPrice(price.listPerMonth)}₺ / ay</p>
+                      <p className="mt-0.5 text-sm text-slate-400 line-through">{formatPrice(price.listPerMonth)} TL / ay</p>
                     )}
                     <p className="mt-1 text-xs text-slate-500">
                       {period === "yillik"
-                        ? `Yıllık ${formatPrice(price.total)}₺ tek ödeme`
+                        ? `Yıllık ${formatPrice(price.total)} TL tek ödeme`
                         : "Aylık ödeme, otomatik yenilenmez"}
                     </p>
                   </>

@@ -64,7 +64,7 @@ export function PeriodBreakdown({
                 <td className="px-5 py-3 font-medium text-brand-navy">{row.label}</td>
                 <td className="px-5 py-3 text-slate-500">{row.count}</td>
                 <td className="px-5 py-3 text-right font-semibold text-brand-navy">
-                  {row.total > 0 ? `${formatPrice(row.total)}₺` : "—"}
+                  {row.total > 0 ? `${formatPrice(row.total)} TL` : "—"}
                 </td>
               </tr>
             ))}

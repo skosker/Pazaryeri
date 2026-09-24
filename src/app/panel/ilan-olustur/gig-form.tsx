@@ -138,7 +138,7 @@ export function GigForm({
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
-                Fiyat (₺)
+                Fiyat (TL)
                 <input
                   name={`${tier.key}Price`}
                   type="number"

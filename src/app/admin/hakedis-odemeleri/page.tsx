@@ -117,7 +117,7 @@ export default async function FreelancerPayoutsPage(props: PageProps<"/admin/hak
 
       <div className="mt-6 flex flex-wrap gap-3 text-sm">
         <span className="rounded-xl bg-emerald-50 px-4 py-2 text-emerald-800">
-          Toplam ödenen: <strong>{formatPrice(total)}₺</strong>
+          Toplam ödenen: <strong>{formatPrice(total)} TL</strong>
         </span>
       </div>
 
@@ -150,7 +150,7 @@ export default async function FreelancerPayoutsPage(props: PageProps<"/admin/hak
                   </td>
                   <td className="px-5 py-3 text-slate-500">{day.count}</td>
                   <td className="px-5 py-3 text-right font-semibold text-brand-navy">
-                    {day.total > 0 ? `${formatPrice(day.total)}₺` : "—"}
+                    {day.total > 0 ? `${formatPrice(day.total)} TL` : "—"}
                   </td>
                 </tr>
               ))}
@@ -176,7 +176,7 @@ export default async function FreelancerPayoutsPage(props: PageProps<"/admin/hak
                 <td className="px-5 py-4 font-mono text-xs text-slate-600 sm:text-sm">
                   {maskIban(row.iban)}
                 </td>
-                <td className="px-5 py-4 font-semibold text-brand-navy">{formatPrice(row.amount)}₺</td>
+                <td className="px-5 py-4 font-semibold text-brand-navy">{formatPrice(row.amount)} TL</td>
                 <td className="px-5 py-4 text-right text-slate-500">{dateFmt.format(row.paidAt)}</td>
               </tr>
             ))}

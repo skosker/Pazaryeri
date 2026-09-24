@@ -10,7 +10,7 @@ export function TopUpForm({ minTopUp }: { minTopUp: number }) {
   return (
     <form action={formAction} className="flex flex-col gap-3 sm:flex-row sm:items-end">
       <label className="flex flex-1 flex-col gap-1.5 text-sm font-medium text-brand-navy">
-        Yüklenen tutar (₺)
+        Yüklenen tutar (TL)
         <input
           name="amount"
           type="number"

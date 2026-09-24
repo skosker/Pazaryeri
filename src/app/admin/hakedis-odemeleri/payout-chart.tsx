@@ -38,7 +38,7 @@ export function PayoutByFreelancerChart({ payments }: { payments: { name: string
 
       <div className="space-y-2.5">
         {top.map((row) => (
-          <div key={row.name} className="flex items-center gap-3" title={`${row.name}: ${formatPrice(row.amount)}₺`}>
+          <div key={row.name} className="flex items-center gap-3" title={`${row.name}: ${formatPrice(row.amount)} TL`}>
             <span className="w-32 shrink-0 truncate text-xs text-slate-600 sm:w-40" title={row.name}>
               {row.name}
             </span>
@@ -49,7 +49,7 @@ export function PayoutByFreelancerChart({ payments }: { payments: { name: string
               />
             </div>
             <span className="w-24 shrink-0 text-right text-xs font-semibold text-brand-navy sm:w-28">
-              {formatPrice(row.amount)}₺
+              {formatPrice(row.amount)} TL
             </span>
           </div>
         ))}
