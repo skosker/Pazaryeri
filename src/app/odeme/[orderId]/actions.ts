@@ -8,6 +8,7 @@ import { markOrderPaid } from "@/lib/order-actions";
 import { NOT_TAKING_ORDERS, payableAmount, refreshOrderDiscounts, sellerTakesOrders } from "@/lib/orders";
 import { sendBankTransferAdminAlertEmail, sendBankTransferSellerInfoEmail } from "@/lib/email";
 import { assertMockPaymentAllowed } from "@/lib/paytr";
+import { CorporateError, payOrderWithBalance } from "@/lib/corporate";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const adminEmail = process.env.ADMIN_EMAIL;
@@ -126,5 +127,20 @@ export async function notifyBankTransfer(orderId: string) {
     orderUrl: `${appUrl}/siparis/${orderId}`,
   });
 
+  redirect(`/siparis/${orderId}`);
+}
+
+/** Corporate package: pay the whole (discounted) amount from the company balance. */
+export async function payWithBalanceAction(orderId: string) {
+  const buyer = await activeUser();
+  if (!buyer) redirect(`/giris?callbackUrl=/odeme/${orderId}`);
+  try {
+    await payOrderWithBalance(orderId, buyer.id);
+  } catch (error) {
+    if (error instanceof CorporateError) {
+      redirect(`/odeme/${orderId}?hata=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
+  }
   redirect(`/siparis/${orderId}`);
 }

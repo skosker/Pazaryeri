@@ -13,6 +13,7 @@ const navGroups: { label: string | null; items: { href: string; label: string }[
       { href: "/admin/hakedis-odemeleri", label: "Hakediş Ödemeleri" },
       { href: "/admin/freelancer-ibanlari", label: "Freelancer IBAN’ları" },
       { href: "/admin/banka", label: "Şirket Banka Hesapları" },
+      { href: "/admin/kurumsal", label: "Kurumsal Hesaplar" },
     ],
   },
   {

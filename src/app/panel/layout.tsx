@@ -3,6 +3,7 @@ import { activeUser } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 import { unreadConversationCount } from "@/lib/messaging";
 import { PanelNav } from "./panel-nav";
+import { getSettings } from "@/lib/settings";
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   // activeUser rather than the session: it reads the row, so a suspended account or one
@@ -17,10 +18,11 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   const [user, unreadMessages] = await Promise.all([
     prisma.user.findUnique({
       where: { id: account.id },
-      select: { isPro: true },
+      select: { isPro: true, companyName: true },
     }),
     unreadConversationCount(account.id),
   ]);
+  const { corporateEnabled } = await getSettings();
   const isPro = user?.isPro ?? false;
 
   const navItems = [
@@ -29,6 +31,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     { href: "/panel/siparisler", label: isFreelancer ? "Siparişler" : "Siparişlerim" },
     { href: "/panel/mesajlar", label: "Mesajlar", badge: unreadMessages },
     ...(isFreelancer ? [{ href: "/panel/odeme-bilgileri", label: "Ödeme Bilgileri" }] : []),
+    ...(corporateEnabled && user?.companyName ? [{ href: "/panel/kurumsal", label: "Kurumsal Hesap" }] : []),
     { href: "/panel/davet", label: "Davet Et" },
     { href: "/panel/profil", label: "Profilim" },
     { href: "/panel/sifre", label: "Şifre Değiştir" },

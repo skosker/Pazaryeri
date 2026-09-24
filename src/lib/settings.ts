@@ -28,6 +28,10 @@ export type SiteSettings = {
   campaignEnd: Date | null;
   campaignMinPercent: number;
   campaignMaxPercent: number;
+  corporateEnabled: boolean;
+  corporateMinTopUpTl: number;
+  /** 3 means %3. */
+  corporateBonusPercent: number;
 };
 
 /** Used until an admin first saves the settings form (mirrors the schema defaults). */
@@ -52,6 +56,9 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   campaignEnd: null,
   campaignMinPercent: 10,
   campaignMaxPercent: 50,
+  corporateEnabled: false,
+  corporateMinTopUpTl: 5000,
+  corporateBonusPercent: 0,
 };
 
 /** One read per request however many components ask. */
@@ -79,6 +86,9 @@ export const getSettings = cache(async (): Promise<SiteSettings> => {
     campaignEnd: row.campaignEnd,
     campaignMinPercent: row.campaignMinPercent,
     campaignMaxPercent: row.campaignMaxPercent,
+    corporateEnabled: row.corporateEnabled,
+    corporateMinTopUpTl: Number(row.corporateMinTopUpTl),
+    corporateBonusPercent: Number(row.corporateBonusPercent),
   };
 });
 

@@ -88,6 +88,11 @@ model User {
   /// 10 haneli VKN ya da şahıs şirketi için 11 haneli TCKN.
   taxNumber          String?
   billingAddress     String?
+  /// Kurumsal bakiye (TL): Havale/EFT ile yüklenir, siparişlerde harcanır. Her hareket
+  /// BalanceEntry'de kayıtlı; bu alan onların toplamıdır.
+  balance            Decimal   @default(0) @db.Decimal(12, 2)
+  balanceTopUps      BalanceTopUp[]
+  balanceEntries     BalanceEntry[]
   founderAt          DateTime?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
@@ -541,6 +546,11 @@ model SiteSettings {
   campaignEnd        DateTime?
   campaignMinPercent Int       @default(10)
   campaignMaxPercent Int       @default(50)
+  /// Kurumsal paket: toplu bakiye yükleme ve bakiyeyle ödeme (yalnızca kurumsal hesaplar).
+  corporateEnabled      Boolean @default(false)
+  corporateMinTopUpTl   Decimal @default(5000) @db.Decimal(10, 2)
+  /// Yüklemeye eklenen bonus, yüzde (ör. 3 = %3). 0 = bonus yok.
+  corporateBonusPercent Decimal @default(0) @db.Decimal(5, 2)
   updatedAt          DateTime @updatedAt
 
   @@map("site_settings")
@@ -567,4 +577,45 @@ model ReferralReward {
 
   @@index([referrerId])
   @@map("referral_rewards")
+}
+
+/// A corporate account's bank-transfer top-up request; an admin confirms it once the
+/// money is in, which credits amount + bonus to the balance.
+model BalanceTopUp {
+  id          String        @id @default(cuid())
+  status      PaymentStatus @default(INITIALIZED)
+  amount      Decimal       @db.Decimal(12, 2)
+  bonus       Decimal       @default(0) @db.Decimal(12, 2)
+  confirmedAt DateTime?
+  createdAt   DateTime      @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("balance_top_ups")
+}
+
+enum BalanceEntryKind {
+  TOPUP
+  ORDER
+  ADJUSTMENT
+}
+
+/// Every change to a corporate balance: + for a confirmed top-up, − for an order paid.
+model BalanceEntry {
+  id        String           @id @default(cuid())
+  kind      BalanceEntryKind
+  amount    Decimal          @db.Decimal(12, 2)
+  note      String?
+  orderId   String?          @unique
+  topUpId   String?          @unique
+  createdAt DateTime         @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("balance_entries")
 }

@@ -55,6 +55,15 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
       </Section>
 
       <Section
+        title="Kurumsal Paket"
+        hint="Kapalıyken kullanıcılar hiçbir şey görmez. Açınca kurumsal hesaplar (fatura bilgisi girilmiş) Panel → Kurumsal Hesap'tan Havale/EFT ile toplu bakiye yükler; yüklemeyi Admin → Kurumsal Hesaplar'dan onaylarsın. Bakiye, ödeme sayfasında siparişlerde harcanır. Aylık tek fatura için harcamalar Kurumsal Hesaplar sayfasında listelenir."
+      >
+        <Toggle label="Kurumsal paket açık" name="corporateEnabled" defaultChecked={settings.corporateEnabled} />
+        <Field label="En düşük yükleme (₺)" name="corporateMinTopUpTl" defaultValue={settings.corporateMinTopUpTl} step="0.01" />
+        <Field label="Yükleme bonusu (%)" name="corporateBonusPercent" defaultValue={settings.corporateBonusPercent} step="0.01" />
+      </Section>
+
+      <Section
         title="Davet Programı"
         hint="Davet edilen kullanıcının ilk siparişi tamamlanınca davet edene bu tutarda ödül tanımlanır; ödül, ondan yüksek bir sonraki siparişinde otomatik düşer. İndirimi Prosinta karşılar. Kapatınca yeni ödül verilmez, kazanılmış ödüller kullanılabilir kalır."
       >

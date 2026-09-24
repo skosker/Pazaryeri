@@ -54,6 +54,9 @@ export async function saveSettingsAction(
     campaignEnd: istanbulDateTime(formData.get("campaignEnd")),
     campaignMinPercent: num(formData, "campaignMinPercent"),
     campaignMaxPercent: num(formData, "campaignMaxPercent"),
+    corporateEnabled: formData.get("corporateEnabled") === "on",
+    corporateMinTopUpTl: num(formData, "corporateMinTopUpTl"),
+    corporateBonusPercent: num(formData, "corporateBonusPercent"),
   };
 
   const price = (v: number) => Number.isFinite(v) && v >= 0 && v <= 1_000_000;
@@ -90,6 +93,12 @@ export async function saveSettingsAction(
   if (settings.campaignStart && settings.campaignEnd && settings.campaignEnd <= settings.campaignStart) {
     return { error: "Kampanya bitişi başlangıçtan sonra olmalı." };
   }
+  if (!price(settings.corporateMinTopUpTl) || settings.corporateMinTopUpTl < 1) {
+    return { error: "En düşük bakiye yüklemesi 1 ile 1.000.000 ₺ arasında olmalı." };
+  }
+  if (!(Number.isFinite(settings.corporateBonusPercent) && settings.corporateBonusPercent >= 0 && settings.corporateBonusPercent <= 50)) {
+    return { error: "Bakiye bonusu %0 ile %50 arasında olmalı." };
+  }
   if (!price(settings.referralRewardTl)) return { error: "Davet ödülü 0 ile 1.000.000 ₺ arasında olmalı." };
   if (!price(settings.firstOrderMaxTl)) return { error: "İlk sipariş indirimi üst sınırı 0 ile 1.000.000 ₺ arasında olmalı." };
 
@@ -99,6 +108,8 @@ export async function saveSettingsAction(
   settings.firstOrderPercent = Math.round(settings.firstOrderPercent * 100) / 100;
   settings.firstOrderMaxTl = Math.round(settings.firstOrderMaxTl * 100) / 100;
   settings.referralRewardTl = Math.round(settings.referralRewardTl * 100) / 100;
+  settings.corporateMinTopUpTl = Math.round(settings.corporateMinTopUpTl * 100) / 100;
+  settings.corporateBonusPercent = Math.round(settings.corporateBonusPercent * 100) / 100;
 
   await saveSettings(settings);
   // Prices, limits and call-outs show up across the site.
