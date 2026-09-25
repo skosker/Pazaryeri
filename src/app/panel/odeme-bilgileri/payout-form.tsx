@@ -11,9 +11,11 @@ const fieldClass =
 export function PayoutForm({
   iban,
   ibanHolder,
+  tckn,
 }: {
   iban: string | null;
   ibanHolder: string | null;
+  tckn: string | null;
 }) {
   const [state, formAction, pending] = useActionState(updatePayoutDetailsAction, initialState);
 
@@ -24,7 +26,6 @@ export function PayoutForm({
         <input
           name="iban"
           defaultValue={iban ?? ""}
-          placeholder="TR00 0000 0000 0000 0000 0000 00"
           className={`${fieldClass} font-mono`}
         />
       </label>
@@ -34,11 +35,40 @@ export function PayoutForm({
         <input
           name="ibanHolder"
           defaultValue={ibanHolder ?? ""}
-          placeholder="Hesabın açık olduğu ad soyad"
           className={fieldClass}
         />
         <span className="text-xs font-normal text-slate-400">
           Bankada hesabın kayıtlı olduğu isimle birebir aynı olmalı; farklıysa havale geri döner.
+        </span>
+      </label>
+
+      <div className="border-t border-slate-100 pt-4">
+        <p className="text-sm font-semibold text-brand-navy">Fatura Bilgisi</p>
+        <p className="mt-0.5 text-xs text-slate-500">
+          Prosinta, hakedişinden kestiği hizmet bedeli için sana fatura keser.
+        </p>
+      </div>
+
+      <label className="flex flex-col gap-1.5 text-sm font-medium text-brand-navy">
+        <span>
+          T.C. Kimlik No <span className="font-normal text-slate-400">(isteğe bağlı)</span>
+        </span>
+        <input
+          name="tckn"
+          defaultValue={tckn ?? ""}
+          inputMode="numeric"
+          maxLength={11}
+          autoComplete="off"
+          className={`${fieldClass} max-w-xs font-mono tracking-wider`}
+        />
+        <span className="text-xs font-normal text-slate-400">
+          Fatura adına kesilsin diye istiyoruz; yalnızca fatura için kullanılır ve kimseyle paylaşılmaz. Boş
+          bırakırsan fatura &quot;nihai tüketici&quot; olarak kesilir. Şirketin ya da şahıs şirketin adına fatura
+          istiyorsan{" "}
+          <a href="/panel/profil" className="font-medium text-purple-700 hover:underline">
+            Profilim → Fatura Bilgileri
+          </a>
+          &apos;ni doldur.
         </span>
       </label>
 

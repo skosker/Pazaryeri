@@ -22,7 +22,8 @@ function isValidVkn(v: string): boolean {
   return (10 - (sum % 10)) % 10 === d[9];
 }
 
-function isValidTckn(v: string): boolean {
+export function isValidTckn(v: string): boolean {
+  if (!/^\d{11}$/.test(v)) return false;
   const d = v.split("").map(Number);
   if (d[0] === 0) return false;
   const odd = d[0] + d[2] + d[4] + d[6] + d[8];

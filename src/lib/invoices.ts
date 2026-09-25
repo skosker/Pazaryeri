@@ -44,6 +44,7 @@ const customerSelect = {
   billingAddress: true,
   billingDistrict: true,
   billingCity: true,
+  tckn: true,
 } as const;
 
 type CustomerFields = {
@@ -55,6 +56,7 @@ type CustomerFields = {
   billingAddress: string | null;
   billingDistrict: string | null;
   billingCity: string | null;
+  tckn: string | null;
 };
 
 function customer(u: CustomerFields): InvoiceRow["customer"] {
@@ -65,8 +67,9 @@ function customer(u: CustomerFields): InvoiceRow["customer"] {
     name: u.name,
     email: u.email,
     companyName: u.companyName,
-    taxOffice: u.taxOffice,
-    taxNumber: u.taxNumber,
+    taxOffice: u.companyName ? u.taxOffice : null,
+    // A company is invoiced on its VKN; a person on their TCKN when they gave one.
+    taxNumber: u.companyName ? u.taxNumber : u.tckn,
     address: address || null,
   };
 }

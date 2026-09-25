@@ -19,7 +19,7 @@ export default async function PayoutDetailsPage() {
   const [user, payouts] = await Promise.all([
     prisma.user.findUniqueOrThrow({
       where: { id: session.user.id },
-      select: { iban: true, ibanHolder: true },
+      select: { iban: true, ibanHolder: true, tckn: true },
     }),
     prisma.payout.findMany({
       where: { sellerId: session.user.id },
@@ -40,7 +40,7 @@ export default async function PayoutDetailsPage() {
       </p>
 
       <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <PayoutForm iban={user.iban} ibanHolder={user.ibanHolder} />
+        <PayoutForm iban={user.iban} ibanHolder={user.ibanHolder} tckn={user.tckn} />
       </div>
 
       <div className="mt-10">
