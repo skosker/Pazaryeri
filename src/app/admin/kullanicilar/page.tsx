@@ -4,6 +4,8 @@ import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
 import { toggleSuspensionAction, changeUserRoleAction, toggleProFreelancerAction } from "./actions";
 import { DeleteUserButton } from "./delete-user-button";
+import { FilterSelect } from "./filter-select";
+import type { Prisma } from "@/generated/prisma/client";
 
 const roleLabel: Record<string, string> = {
   BUYER: "Alıcı",
@@ -20,10 +22,44 @@ function toSingle(value: string | string[] | undefined): string {
   return Array.isArray(value) ? value[0] : value;
 }
 
-function pageHref(page: number, search: string, showGenerated: boolean): string {
+const ROLE_FILTERS = [
+  { value: "", label: "Tüm Roller" },
+  { value: "alici", label: "Alıcı" },
+  { value: "kurumsal", label: "Kurumsal Alıcı" },
+  { value: "freelancer", label: "Freelancer" },
+  { value: "admin", label: "Admin" },
+];
+
+const STATUS_FILTERS = [
+  { value: "", label: "Tüm Durumlar" },
+  { value: "aktif", label: "Aktif" },
+  { value: "dogrulanmadi", label: "Doğrulanmadı" },
+  { value: "askida", label: "Askıya Alındı" },
+];
+
+function roleWhere(role: string): Prisma.UserWhereInput {
+  if (role === "alici") return { role: "BUYER" };
+  if (role === "kurumsal") return { companyName: { not: null } };
+  if (role === "freelancer") return { role: "FREELANCER" };
+  if (role === "admin") return { role: "ADMIN" };
+  return {};
+}
+
+function statusWhere(status: string): Prisma.UserWhereInput {
+  if (status === "aktif") return { suspended: false, emailVerified: { not: null } };
+  if (status === "dogrulanmadi") return { suspended: false, emailVerified: null };
+  if (status === "askida") return { suspended: true };
+  return {};
+}
+
+type Filters = { search: string; showGenerated: boolean; role: string; status: string };
+
+function pageHref(page: number, f: Filters): string {
   const params = new URLSearchParams();
-  if (search) params.set("ara", search);
-  if (showGenerated) params.set("uretilmis", "1");
+  if (f.search) params.set("ara", f.search);
+  if (f.role) params.set("rol", f.role);
+  if (f.status) params.set("durum", f.status);
+  if (f.showGenerated) params.set("uretilmis", "1");
   if (page > 1) params.set("sayfa", String(page));
   const qs = params.toString();
   return qs ? `/admin/kullanicilar?${qs}` : "/admin/kullanicilar";
@@ -41,9 +77,14 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
   const showGenerated = toSingle(searchParams.uretilmis) === "1";
   const search = toSingle(searchParams.ara).trim();
   const page = Math.max(1, Number(toSingle(searchParams.sayfa)) || 1);
+  const role = ROLE_FILTERS.some((r) => r.value === toSingle(searchParams.rol)) ? toSingle(searchParams.rol) : "";
+  const status = STATUS_FILTERS.some((s) => s.value === toSingle(searchParams.durum)) ? toSingle(searchParams.durum) : "";
+  const filters: Filters = { search, showGenerated, role, status };
 
-  const where = {
+  const where: Prisma.UserWhereInput = {
     ...(showGenerated ? {} : { synthetic: false }),
+    ...roleWhere(role),
+    ...statusWhere(status),
     ...(search
       ? {
           OR: [
@@ -90,13 +131,15 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
           className="w-64 rounded-full border border-slate-300 px-4 py-2 text-sm outline-none focus:border-purple-400"
         />
         {showGenerated && <input type="hidden" name="uretilmis" value="1" />}
+        <FilterSelect name="rol" value={role} options={ROLE_FILTERS} />
+        <FilterSelect name="durum" value={status} options={STATUS_FILTERS} />
         <button
           type="submit"
           className="rounded-full bg-purple-600 px-5 py-2 text-sm font-semibold text-white hover:bg-purple-700"
         >
           Ara
         </button>
-        {search && (
+        {(search || role || status) && (
           <Link
             href={showGenerated ? "/admin/kullanicilar?uretilmis=1" : "/admin/kullanicilar"}
             className="text-sm font-medium text-slate-500 hover:text-brand-navy"
@@ -242,7 +285,7 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
         <div className="mt-4 flex items-center justify-center gap-3">
           {currentPage > 1 ? (
             <Link
-              href={pageHref(currentPage - 1, search, showGenerated)}
+              href={pageHref(currentPage - 1, filters)}
               className="rounded-full border border-slate-300 px-4 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
             >
               Önceki
@@ -257,7 +300,7 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
           </span>
           {currentPage < totalPages ? (
             <Link
-              href={pageHref(currentPage + 1, search, showGenerated)}
+              href={pageHref(currentPage + 1, filters)}
               className="rounded-full border border-slate-300 px-4 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
             >
               Sonraki
