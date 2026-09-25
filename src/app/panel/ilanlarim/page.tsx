@@ -27,7 +27,7 @@ export default async function MyGigsPage(props: PageProps<"/panel/ilanlarim">) {
     orderBy: { createdAt: "desc" },
     include: {
       category: { select: { name: true } },
-      packages: { orderBy: { price: "asc" }, take: 1 },
+      packages: { where: { tier: { not: "CUSTOM" as const } }, orderBy: { price: "asc" }, take: 1 },
       _count: { select: { orders: true } },
       campaignEntries: {
         where: { campaignId: { in: openIds } },

@@ -27,7 +27,7 @@ export default async function FreelancerCampaignsPage() {
       id: true,
       title: true,
       published: true,
-      packages: { orderBy: { price: "asc" }, take: 1, select: { price: true } },
+      packages: { where: { tier: { not: "CUSTOM" as const } }, orderBy: { price: "asc" }, take: 1, select: { price: true } },
       campaignEntries: {
         where: { campaignId: { in: campaigns.map((c) => c.id) } },
         select: { campaignId: true, percent: true },

@@ -82,6 +82,8 @@ model User {
   proReminderFor     DateTime?
   /// Kampanya ve fırsat duyurusu e-postaları; e-postadaki bağlantıyla ya da Profilim'den kapatılır.
   campaignEmails     Boolean   @default(true)
+  /// Kategorisinde açılan yeni iş talepleri için günlük özet e-postası (freelancer).
+  jobRequestEmails   Boolean   @default(true)
   /// Kurumsal abonelik (KURUMSAL / KURUMSAL_PLUS) ve bittiği an; geçmişte kalınca düşer.
   corpPlan           MembershipPlan?
   corpPlanUntil      DateTime?
@@ -127,6 +129,8 @@ model User {
   passwordResets        PasswordResetToken[]
   proPurchases          ProPurchase[]
   gigBoosts             GigBoost[]
+  jobRequests           JobRequest[]
+  jobOffers             JobOffer[]
   conversationsAsBuyer  Conversation[]       @relation("BuyerConversations")
   conversationsAsSeller Conversation[]       @relation("SellerConversations")
   messagesSent          Message[]            @relation("SentMessages")
@@ -177,6 +181,7 @@ model Category {
 
   gigs          Gig[]
   subcategories Subcategory[]
+  jobRequests   JobRequest[]
 
   @@map("categories")
 }
@@ -235,6 +240,7 @@ model Gig {
   orders   Order[]
   reviews  Review[]
   boosts   GigBoost[]
+  jobOffers JobOffer[]
   campaignEntries CampaignEntry[]
 
   @@index([categoryId])
@@ -253,6 +259,9 @@ enum PackageTier {
   STANDARD
   BASIC
   PREMIUM
+  /// Kabul edilen bir iş talebi teklifinden oluşan, yalnızca o siparişe ait paket. İlan
+  /// sayfasında, fiyat listelerinde ve düzenleme formunda görünmez.
+  CUSTOM
 }
 
 model Package {
@@ -607,6 +616,14 @@ model SiteSettings {
   referralRewardTl   Decimal  @default(200) @db.Decimal(10, 2)
   /// Kurumsal paket: toplu bakiye yükleme ve bakiyeyle ödeme (yalnızca kurumsal hesaplar).
   corporateEnabled      Boolean @default(false)
+  /// İş talepleri ve teklifler; kapalıyken kimse görmez.
+  jobRequestsEnabled    Boolean @default(false)
+  /// Talebin açık kaldığı gün sayısı.
+  jobRequestDays        Int     @default(30)
+  /// Freelancer'ın ayda verebileceği teklif sayısı, pakete göre.
+  offerQuotaFree        Int     @default(10)
+  offerQuotaPro         Int     @default(40)
+  offerQuotaPlus        Int     @default(100)
   /// Kurumsal abonelik paketleri (Kurumsal / Kurumsal Plus); kapalıyken kimse görmez.
   corporatePlansEnabled Boolean @default(false)
   corpMonthlyTl         Decimal @default(1500) @db.Decimal(10, 2)
@@ -735,4 +752,73 @@ model CampaignEntry {
   @@id([campaignId, gigId])
   @@index([gigId])
   @@map("campaign_entries")
+}
+
+enum JobRequestStatus {
+  OPEN
+  /// Alıcı bir teklifi kabul etti (sipariş oluştu).
+  HIRED
+  /// Alıcı kapattı ya da süresi doldu.
+  CLOSED
+  /// Admin kaldırdı.
+  REMOVED
+}
+
+/// Alıcının açtığı iş talebi (İş Talepleri): freelancer'lar kendi ilanlarından biriyle teklif
+/// verir, alıcı birini kabul edince sipariş oluşur.
+model JobRequest {
+  id           String           @id @default(cuid())
+  title        String
+  description  String
+  budgetMin    Int
+  budgetMax    Int
+  deliveryDays Int
+  status       JobRequestStatus @default(OPEN)
+  expiresAt    DateTime
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  buyerId    String
+  buyer      User     @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+
+  offers JobOffer[]
+
+  @@index([status, createdAt])
+  @@index([categoryId])
+  @@index([buyerId])
+  @@map("job_requests")
+}
+
+enum JobOfferStatus {
+  PENDING
+  ACCEPTED
+  /// Talep başka bir teklifle ya da kapatılarak sonuçlandı.
+  DECLINED
+  WITHDRAWN
+}
+
+/// Bir freelancer'ın iş talebine teklifi: hangi ilanıyla, kaça, kaç günde. Kabul edilince
+/// ilana CUSTOM bir paket eklenip sipariş o pakete bağlanır (orderId).
+model JobOffer {
+  id           String         @id @default(cuid())
+  price        Decimal        @db.Decimal(10, 2)
+  deliveryDays Int
+  message      String
+  status       JobOfferStatus @default(PENDING)
+  orderId      String?        @unique
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  requestId String
+  request   JobRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  sellerId  String
+  seller    User       @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  gigId     String
+  gig       Gig        @relation(fields: [gigId], references: [id], onDelete: Cascade)
+
+  @@unique([requestId, sellerId])
+  @@index([sellerId, createdAt])
+  @@map("job_offers")
 }

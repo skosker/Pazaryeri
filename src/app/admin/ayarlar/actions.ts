@@ -7,7 +7,7 @@ import { formNumber as num, isPrice, isWhole, round2 } from "@/app/admin/setting
 
 export type SettingsFormState = { error?: string; saved?: boolean };
 
-/** Üyelik ve gelir: Pro, Öne Çıkar, komisyon, Kurucu Freelancer, kurumsal paket. */
+/** Üyelik ve gelir: Pro, Öne Çıkar, komisyon, Kurucu Freelancer, iş talepleri, kurumsal paket. */
 export async function saveMembershipSettingsAction(
   _prev: SettingsFormState,
   formData: FormData
@@ -45,6 +45,11 @@ export async function saveMembershipSettingsAction(
     corpPlusOrderDiscountMaxTl: num(formData, "corpPlusOrderDiscountMaxTl"),
     corpTopUpBonusPercent: num(formData, "corpTopUpBonusPercent"),
     corpPlusTopUpBonusPercent: num(formData, "corpPlusTopUpBonusPercent"),
+    jobRequestsEnabled: formData.get("jobRequestsEnabled") === "on",
+    jobRequestDays: num(formData, "jobRequestDays"),
+    offerQuotaFree: num(formData, "offerQuotaFree"),
+    offerQuotaPro: num(formData, "offerQuotaPro"),
+    offerQuotaPlus: num(formData, "offerQuotaPlus"),
   };
 
   if (!isPrice(s.proMonthlyTl!) || !isPrice(s.plusMonthlyTl!)) {
@@ -67,6 +72,10 @@ export async function saveMembershipSettingsAction(
   }
   if (s.portfolioImagesPro! < s.portfolioImages! || s.portfolioImagesPlus! < s.portfolioImagesPro!) {
     return { error: "Görsel sınırları Ücretsiz ≤ Pro ≤ Pro Plus olmalı." };
+  }
+  if (!isWhole(s.jobRequestDays!, 1, 180)) return { error: "İş talebi yayın süresi 1 ile 180 gün arasında olmalı." };
+  if (![s.offerQuotaFree!, s.offerQuotaPro!, s.offerQuotaPlus!].every((n) => isWhole(n, 0, 10_000))) {
+    return { error: "Aylık teklif hakları 0 veya pozitif bir tam sayı olmalı." };
   }
   if (!(Number.isFinite(s.commissionPercent) && s.commissionPercent! >= 0 && s.commissionPercent! <= 50)) {
     return { error: "Komisyon oranı %0 ile %50 arasında olmalı." };

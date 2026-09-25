@@ -26,7 +26,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     }),
     unreadConversationCount(account.id),
   ]);
-  const [{ corporateEnabled }, openCampaigns] = await Promise.all([getSettings(), getOpenCampaigns()]);
+  const [{ corporateEnabled, jobRequestsEnabled }, openCampaigns] = await Promise.all([getSettings(), getOpenCampaigns()]);
   const now = new Date();
   const tier = user ? membershipTier(user, now) : null;
   // A paid (or trial) period ending within a week: nudge them to renew before it lapses.
@@ -40,6 +40,8 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     ...(isFreelancer ? [{ href: "/panel/ilanlarim", label: "İlanlarım" }] : []),
     { href: "/panel/siparisler", label: isFreelancer ? "Siparişler" : "Siparişlerim" },
     { href: "/panel/mesajlar", label: "Mesajlar", badge: unreadMessages },
+    ...(jobRequestsEnabled ? [{ href: "/panel/is-taleplerim", label: "İş Taleplerim" }] : []),
+    ...(jobRequestsEnabled && isFreelancer ? [{ href: "/panel/tekliflerim", label: "Tekliflerim" }] : []),
     ...(isFreelancer && openCampaigns.length > 0 ? [{ href: "/panel/kampanyalar", label: "Kampanyalar" }] : []),
     ...(isFreelancer ? [{ href: "/panel/odeme-bilgileri", label: "Ödeme Bilgileri" }] : []),
     ...(corporateEnabled && user?.companyName ? [{ href: "/panel/kurumsal", label: "Kurumsal Hesap" }] : []),

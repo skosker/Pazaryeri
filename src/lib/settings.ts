@@ -40,6 +40,13 @@ export type SiteSettings = {
   corporateMinTopUpTl: number;
   /** 3 means %3. */
   corporateBonusPercent: number;
+  /** İş talepleri ve teklifler. */
+  jobRequestsEnabled: boolean;
+  jobRequestDays: number;
+  /** Monthly offers a freelancer may send, by membership. */
+  offerQuotaFree: number;
+  offerQuotaPro: number;
+  offerQuotaPlus: number;
   /** Kurumsal abonelik paketleri (Kurumsal / Kurumsal Plus). */
   corporatePlansEnabled: boolean;
   corpMonthlyTl: number;
@@ -80,6 +87,11 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   corporateEnabled: false,
   corporateMinTopUpTl: 5000,
   corporateBonusPercent: 0,
+  jobRequestsEnabled: false,
+  jobRequestDays: 30,
+  offerQuotaFree: 10,
+  offerQuotaPro: 40,
+  offerQuotaPlus: 100,
   corporatePlansEnabled: false,
   corpMonthlyTl: 1500,
   corpPlusMonthlyTl: 3500,
@@ -122,6 +134,11 @@ export const getSettings = cache(async (): Promise<SiteSettings> => {
     corporateEnabled: row.corporateEnabled,
     corporateMinTopUpTl: Number(row.corporateMinTopUpTl),
     corporateBonusPercent: Number(row.corporateBonusPercent),
+    jobRequestsEnabled: row.jobRequestsEnabled,
+    jobRequestDays: row.jobRequestDays,
+    offerQuotaFree: row.offerQuotaFree,
+    offerQuotaPro: row.offerQuotaPro,
+    offerQuotaPlus: row.offerQuotaPlus,
     corporatePlansEnabled: row.corporatePlansEnabled,
     corpMonthlyTl: Number(row.corpMonthlyTl),
     corpPlusMonthlyTl: Number(row.corpPlusMonthlyTl),

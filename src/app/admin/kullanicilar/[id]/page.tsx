@@ -64,7 +64,7 @@ export default async function AdminUserDetailPage(props: PageProps<"/admin/kulla
           where: { sellerId: id },
           include: {
             category: { select: { name: true } },
-            packages: { orderBy: { price: "asc" }, take: 1 },
+            packages: { where: { tier: { not: "CUSTOM" as const } }, orderBy: { price: "asc" }, take: 1 },
             _count: { select: { orders: true } },
           },
           orderBy: { createdAt: "desc" },

@@ -10,7 +10,7 @@ const gigCardInclude = {
   },
   category: { select: { name: true, slug: true, icon: true } },
   subcategory: { select: { name: true, slug: true } },
-  packages: { orderBy: { price: "asc" as const }, take: 1 },
+  packages: { where: { tier: { not: "CUSTOM" as const } }, orderBy: { price: "asc" as const }, take: 1 },
   reviews: { select: { rating: true } },
 } satisfies Prisma.GigInclude;
 
@@ -166,6 +166,7 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
 
     where.packages = {
       some: {
+        tier: { not: "CUSTOM" },
         ...(Object.keys(price).length ? { price } : {}),
         ...(filters.maxDeliveryDays
           ? { deliveryDays: { lte: filters.maxDeliveryDays } }
@@ -189,7 +190,7 @@ export async function listGigs(filters: GigFilters): Promise<GigListResult> {
       coverImage: true,
       sponsoredUntil: true,
       seller: { select: { image: true, founderNumber: true, ...membershipSelect } },
-      packages: { orderBy: { price: "asc" }, take: 1, select: { price: true } },
+      packages: { where: { tier: { not: "CUSTOM" as const } }, orderBy: { price: "asc" }, take: 1, select: { price: true } },
     },
   });
 
@@ -339,7 +340,7 @@ export async function getGigBySlug(slug: string) {
       },
       category: { select: { name: true, slug: true, icon: true } },
       subcategory: { select: { name: true, slug: true } },
-      packages: { orderBy: { price: "asc" } },
+      packages: { where: { tier: { not: "CUSTOM" as const } }, orderBy: { price: "asc" } },
       reviews: {
         include: { buyer: { select: { name: true } } },
         orderBy: { createdAt: "desc" },

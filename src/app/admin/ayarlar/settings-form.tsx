@@ -84,6 +84,14 @@ export function MembershipSettingsForm({ settings: s }: { settings: SiteSettings
                 label: "Öne Çıkar satın alma indirimi (%)",
                 cells: [null, null, { name: "plusBoostDiscountPercent", value: s.plusBoostDiscountPercent, step: "0.01" }],
               },
+              {
+                label: "Aylık iş talebi teklif hakkı",
+                cells: [
+                  { name: "offerQuotaFree", value: s.offerQuotaFree },
+                  { name: "offerQuotaPro", value: s.offerQuotaPro },
+                  { name: "offerQuotaPlus", value: s.offerQuotaPlus },
+                ],
+              },
             ]}
           />
           <NumberField label="Yıllık ödemede indirim (%)" name="yearlyDiscountPercent" defaultValue={s.yearlyDiscountPercent} step="0.01" />
@@ -95,7 +103,7 @@ export function MembershipSettingsForm({ settings: s }: { settings: SiteSettings
           </p>
         </SettingsCard>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <SettingsCard
             title="Öne Çıkar"
             status={{ on: s.boostEnabled }}
@@ -113,6 +121,15 @@ export function MembershipSettingsForm({ settings: s }: { settings: SiteSettings
           >
             <Toggle label="Kampanya açık" name="founderEnabled" defaultChecked={s.founderEnabled} />
             <NumberField label="Kontenjan (kişi)" name="founderLimit" defaultValue={s.founderLimit} />
+          </SettingsCard>
+
+          <SettingsCard
+            title="İş Talepleri"
+            status={{ on: s.jobRequestsEnabled }}
+            hint="Alıcılar iş talebi açar, freelancer'lar aylık hakları kadar teklif verir. Kapalıyken sayfalar ve menüler görünmez."
+          >
+            <Toggle label="İş talepleri açık" name="jobRequestsEnabled" defaultChecked={s.jobRequestsEnabled} />
+            <NumberField label="Talep yayın süresi (gün)" name="jobRequestDays" defaultValue={s.jobRequestDays} />
           </SettingsCard>
 
           <SettingsCard

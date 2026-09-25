@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { verifyUnsubscribeToken } from "@/lib/email-preferences";
+import { EMAIL_KIND_FIELD, EMAIL_KIND_LABEL, parseEmailKind, verifyUnsubscribeToken } from "@/lib/email-preferences";
 import { unsubscribeAction } from "./actions";
 
 export const metadata: Metadata = { title: "E-posta Tercihi", robots: { index: false } };
@@ -15,36 +15,39 @@ export default async function EmailPreferencePage(props: PageProps<"/eposta-terc
   const searchParams = await props.searchParams;
   const userId = typeof searchParams.u === "string" ? searchParams.u : "";
   const token = typeof searchParams.t === "string" ? searchParams.t : "";
-  const valid = userId !== "" && verifyUnsubscribeToken(userId, token);
+  const kind = parseEmailKind(searchParams.tur);
+  const valid = userId !== "" && verifyUnsubscribeToken(userId, token, kind);
   const user = valid
-    ? await prisma.user.findUnique({ where: { id: userId }, select: { email: true, campaignEmails: true } })
+    ? await prisma.user.findUnique({ where: { id: userId }, select: { email: true, campaignEmails: true, jobRequestEmails: true } })
     : null;
+  const subscribed = user ? user[EMAIL_KIND_FIELD[kind]] : false;
+  const what = kind === "kampanya" ? "kampanya ve fırsat duyurusu" : "yeni iş talebi özeti";
 
   return (
     <div className="mx-auto max-w-md px-4 py-20">
       <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-        <h1 className="text-xl font-bold text-brand-navy">Kampanya Duyuruları</h1>
+        <h1 className="text-xl font-bold text-brand-navy">{EMAIL_KIND_LABEL[kind]}</h1>
         {!user ? (
           <p className="mt-3 text-sm text-slate-600">
             Bağlantı geçersiz. Tercihini Panel → Profilim sayfasından değiştirebilirsin.
           </p>
-        ) : !user.campaignEmails ? (
+        ) : !subscribed ? (
           <p className="mt-3 text-sm text-slate-600">
-            <strong>{user.email}</strong> adresine artık kampanya duyurusu göndermeyeceğiz. Sipariş ve hesap
+            <strong>{user.email}</strong> adresine artık {what} göndermeyeceğiz. Sipariş ve hesap
             e-postaların gelmeye devam eder. Fikrini değiştirirsen Panel → Profilim&apos;den yeniden açabilirsin.
           </p>
         ) : (
           <>
             <p className="mt-3 text-sm text-slate-600">
-              <strong>{user.email}</strong> adresine kampanya ve fırsat duyurusu göndermeyi bırakalım mı? Sipariş ve hesap
+              <strong>{user.email}</strong> adresine {what} göndermeyi bırakalım mı? Sipariş ve hesap
               e-postaların gelmeye devam eder.
             </p>
-            <form action={unsubscribeAction.bind(null, userId, token)} className="mt-6">
+            <form action={unsubscribeAction.bind(null, userId, token, kind)} className="mt-6">
               <button
                 type="submit"
                 className="brand-gradient rounded-full px-6 py-2.5 text-sm font-semibold text-white hover:opacity-90"
               >
-                Duyuruları Almak İstemiyorum
+                {kind === "kampanya" ? "Duyuruları" : "Özetleri"} Almak İstemiyorum
               </button>
             </form>
           </>

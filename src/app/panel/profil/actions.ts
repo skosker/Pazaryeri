@@ -96,13 +96,17 @@ export async function updateCompanyAction(_prevState: CompanyFormState, formData
   return { success: true };
 }
 
-/** "Kampanya duyuruları" e-mail preference, the same switch the e-mail's unsubscribe link flips. */
+/** E-mail preferences, the same switches the e-mails' unsubscribe links flip. */
 export async function updateEmailPreferenceAction(formData: FormData) {
   const user = await activeUser();
   if (!user) return;
   await prisma.user.update({
     where: { id: user.id },
-    data: { campaignEmails: formData.get("campaignEmails") === "on" },
+    data: {
+      campaignEmails: formData.get("campaignEmails") === "on",
+      // Only when the box was on the form: while İş Talepleri is off it is not shown.
+      ...(formData.has("jobRequestShown") ? { jobRequestEmails: formData.get("jobRequestEmails") === "on" } : {}),
+    },
   });
   revalidatePath("/panel/profil");
 }

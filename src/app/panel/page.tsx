@@ -18,7 +18,7 @@ export default async function PanelPage() {
     role === "FREELANCER"
       ? prisma.gig.findMany({
           where: { sellerId: userId },
-          include: { packages: { orderBy: { price: "asc" }, take: 1 } },
+          include: { packages: { where: { tier: { not: "CUSTOM" as const } }, orderBy: { price: "asc" }, take: 1 } },
           orderBy: { createdAt: "desc" },
         })
       : Promise.resolve([]),

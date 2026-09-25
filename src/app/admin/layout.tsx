@@ -25,6 +25,7 @@ const navGroups: NavGroup[] = [
       { href: "/admin/siparisler", label: "Siparişler" },
       { href: "/admin/kullanicilar", label: "Kullanıcılar" },
       { href: "/admin/ilanlar", label: "İlanlar" },
+      { href: "/admin/is-talepleri", label: "İş Talepleri" },
       { href: "/admin/kategoriler", label: "Kategoriler" },
       { href: "/admin/ayarlar", label: "Üyelik ve Gelir Ayarları" },
       { href: "/admin/kampanyalar", label: "Kampanyalar" },

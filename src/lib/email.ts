@@ -468,3 +468,109 @@ export async function sendCampaignAnnouncementEmails(
   }
   return sent;
 }
+
+export async function sendNewJobOfferEmail(params: {
+  to: string;
+  name: string;
+  requestTitle: string;
+  sellerName: string;
+  price: number;
+  deliveryDays: number;
+  manageUrl: string;
+}) {
+  await sendEmail(
+    params.to,
+    `Talebine yeni teklif: ${params.requestTitle}`,
+    layout(
+      "Talebine yeni bir teklif geldi",
+      `<p>Merhaba ${escapeHtml(params.name)},</p>
+       <p><strong>${escapeHtml(params.requestTitle)}</strong> talebine <strong>${escapeHtml(params.sellerName)}</strong>
+       ${formatPrice(params.price)} TL karşılığında ${params.deliveryDays} günde teslim teklif etti.</p>
+       <p>Teklifleri karşılaştırıp freelancer'lara mesaj atabilir, beğendiğin teklifi kabul edip güvenle ödeyebilirsin.</p>
+       ${button(params.manageUrl, "Teklifleri Gör")}`
+    )
+  );
+}
+
+export async function sendJobOfferAcceptedEmail(params: {
+  to: string;
+  name: string;
+  requestTitle: string;
+  price: number;
+  orderUrl: string;
+}) {
+  await sendEmail(
+    params.to,
+    `Teklifin kabul edildi: ${params.requestTitle}`,
+    layout(
+      "Teklifin kabul edildi",
+      `<p>Merhaba ${escapeHtml(params.name)},</p>
+       <p><strong>${escapeHtml(params.requestTitle)}</strong> talebine verdiğin ${formatPrice(params.price)} TL'lik teklif kabul edildi.
+       Alıcı ödemeyi tamamladığında sipariş başlayacak; sana ayrıca haber vereceğiz.</p>
+       ${button(params.orderUrl, "Siparişi Gör")}`
+    )
+  );
+}
+
+/** Daily digest: new requests in the freelancer's categories. */
+export type JobRequestDigest = {
+  email: string;
+  name: string;
+  requests: { title: string; budget: string; url: string }[];
+  unsubscribeUrl: string;
+  oneClickUrl: string;
+};
+
+/**
+ * The daily "yeni iş talepleri" digest, in batches of 100 like the campaign announcement
+ * (a daily mail to every freelancer would otherwise run into Resend's rate limit). Returns
+ * how many were handed to Resend.
+ */
+export async function sendJobRequestDigestEmails(digests: JobRequestDigest[], listUrl: string): Promise<number> {
+  const messages = digests.map((d) => {
+    const items = d.requests
+      .map(
+        (r) =>
+          `<li style="margin-bottom:8px;"><a href="${r.url}" style="color:#6d28d9;font-weight:600;">${escapeHtml(r.title)}</a><br><span style="color:#64748b;">${r.budget}</span></li>`
+      )
+      .join("");
+    const html = layout(
+      "Yeni iş talepleri",
+      `<p>Merhaba ${escapeHtml(d.name)},</p>
+       <p>Son 24 saatte ilanlarının kategorilerinde açılan talepler:</p>
+       <ul style="padding-left:18px;">${items}</ul>
+       ${button(listUrl, "Tüm Talepleri Gör")}
+       <p style="margin-top:28px;font-size:12px;color:#94a3b8;"><a href="${d.unsubscribeUrl}" style="color:#94a3b8;">Bu özeti almak istemiyorum</a></p>`
+    );
+    return {
+      from: FROM,
+      to: d.email,
+      subject: `Uzmanlığına uygun ${d.requests.length} yeni iş talebi`,
+      html,
+      text: toPlainText(html),
+      replyTo: REPLY_TO,
+      headers: {
+        "List-Unsubscribe": `<${d.oneClickUrl}>`,
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+      },
+    };
+  });
+
+  if (!resend) {
+    console.log(`[email:mock] job request digest recipients=${messages.length}`);
+    return messages.length;
+  }
+
+  let sent = 0;
+  for (let i = 0; i < messages.length; i += 100) {
+    const chunk = messages.slice(i, i + 100);
+    try {
+      const { error } = await resend.batch.send(chunk);
+      if (error) console.error("Job request digest batch failed", error);
+      else sent += chunk.length;
+    } catch (error) {
+      console.error("Job request digest batch failed", error);
+    }
+  }
+  return sent;
+}
