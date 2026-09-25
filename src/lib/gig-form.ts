@@ -30,12 +30,14 @@ const tierNames: Record<PackageTier, string> = {
   BASIC: "Temel Paket",
   STANDARD: "Standart Paket",
   PREMIUM: "Premium Paket",
+  CUSTOM: "Özel Teklif",
 };
 
 const extraFeatures: Record<PackageTier, string[]> = {
   BASIC: ["Temel kapsam"],
   STANDARD: ["Kaynak dosyalar dahil"],
   PREMIUM: ["Kaynak dosyalar dahil", "Ticari kullanım lisansı", "Öncelikli teslimat"],
+  CUSTOM: [],
 };
 
 export function packageData(tier: PackageTier, values: TierInput) {

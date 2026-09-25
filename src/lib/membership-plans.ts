@@ -75,6 +75,10 @@ export async function buildPlanCards(
     }
   }
 
+  // "Ayda 40 teklif hakkı": shown only while İş Talepleri is switched on.
+  const offers = (quota: number) =>
+    settings.jobRequestsEnabled && quota > 0 ? [{ strong: `Ayda ${quota}`, text: "iş talebine teklif hakkı" }] : [];
+
   const plans: PlanCardData[] = [
     {
       key: "FREE",
@@ -87,6 +91,7 @@ export async function buildPlanCards(
       features: [
         { strong: "Sınırsız", text: "ilan yayınlama" },
         { strong: `${settings.portfolioImages}`, text: "örnek iş görseli (ilan başına)" },
+        ...offers(settings.offerQuotaFree),
         { text: "Alıcılarla güvenli mesajlaşma" },
         { text: "Prosinta güvenceli ödeme" },
       ],
@@ -105,6 +110,7 @@ export async function buildPlanCards(
         { strong: "Aramalarda öncelik:", text: "Pro olmayanların önünde" },
         { text: "Alıcıların “Sadece Pro” filtresinde görünme" },
         { strong: `${portfolioLimitFor("PRO", settings)}`, text: "örnek iş görseli (ilan başına)" },
+        ...offers(settings.offerQuotaPro),
         ...(settings.proFreeBoostDays > 0
           ? [{ strong: `Her ay ${settings.proFreeBoostDays} gün`, text: "ücretsiz Öne Çıkar" }]
           : []),
@@ -124,6 +130,7 @@ export async function buildPlanCards(
         { strong: "Aramalarda öncelik:", text: "Pro üyelerin de önünde" },
         { strong: "Freelancer Bul", text: "listesinde en üstte" },
         { strong: `${portfolioLimitFor("PRO_PLUS", settings)}`, text: "örnek iş görseli (ilan başına)" },
+        ...offers(settings.offerQuotaPlus),
         ...(settings.plusFreeBoostDays > 0
           ? [{ strong: `Her ay ${settings.plusFreeBoostDays} gün`, text: "ücretsiz Öne Çıkar" }]
           : []),

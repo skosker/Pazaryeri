@@ -29,7 +29,7 @@ export default async function AdminGigsPage(props: PageProps<"/admin/ilanlar">) 
     include: {
       seller: { select: { name: true } },
       category: { select: { name: true } },
-      packages: { orderBy: { price: "asc" }, take: 1 },
+      packages: { where: { tier: { not: "CUSTOM" as const } }, orderBy: { price: "asc" }, take: 1 },
       _count: { select: { orders: true } },
     },
   });
@@ -40,7 +40,7 @@ export default async function AdminGigsPage(props: PageProps<"/admin/ilanlar">) 
     include: {
       seller: { select: { name: true, email: true } },
       category: { select: { name: true } },
-      packages: { orderBy: { price: "asc" }, take: 1 },
+      packages: { where: { tier: { not: "CUSTOM" as const } }, orderBy: { price: "asc" }, take: 1 },
     },
   });
 

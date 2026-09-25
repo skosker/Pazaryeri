@@ -6,15 +6,17 @@ import { Logo } from "@/components/logo";
 import { LinkButton } from "@/components/ui/button";
 import { MobileNav } from "@/components/mobile-nav";
 import { CategoryMegaMenu } from "@/components/category-mega-menu";
+import { getSettings } from "@/lib/settings";
 
 export async function Header() {
-  const [session, categories, subcategories] = await Promise.all([
+  const [session, categories, subcategories, settings] = await Promise.all([
     auth(),
     prisma.category.findMany({ orderBy: { order: "asc" }, select: { slug: true, name: true, icon: true } }),
     prisma.subcategory.findMany({
       orderBy: { name: "asc" },
       select: { name: true, slug: true, category: { select: { slug: true } } },
     }),
+    getSettings(),
   ]);
 
   const unreadMessages = session?.user?.id ? await unreadConversationCount(session.user.id) : 0;
@@ -34,6 +36,11 @@ export async function Header() {
           <Link href="/freelancerlar" className="transition hover:text-brand-navy">
             Freelancer Bul
           </Link>
+          {settings.jobRequestsEnabled && (
+            <Link href="/is-talepleri" className="transition hover:text-brand-navy">
+              İş Talepleri
+            </Link>
+          )}
           <Link href="/nasil-calisir" className="transition hover:text-brand-navy">
             Nasıl Çalışır?
           </Link>
@@ -115,6 +122,7 @@ export async function Header() {
 
           <MobileNav
             user={session?.user ?? null}
+            jobRequests={settings.jobRequestsEnabled}
             signOutAction={async () => {
               "use server";
               await signOut({ redirectTo: "/" });

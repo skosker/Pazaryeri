@@ -1,6 +1,10 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { siteUrl } from "@/lib/site-url";
+import { getSettings } from "@/lib/settings";
+
+// Hourly, so pages switched on in /admin/ayarlar (İş Talepleri) show up without a deploy.
+export const revalidate = 3600;
 
 /**
  * Every page worth indexing: the fixed pages, one per category, and one per published
@@ -21,6 +25,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/giris",
     "/kayit",
   ];
+
+  if ((await getSettings()).jobRequestsEnabled) staticPaths.push("/is-talepleri");
 
   const [categories, gigs] = await Promise.all([
     prisma.category.findMany({ select: { slug: true }, orderBy: { order: "asc" } }),

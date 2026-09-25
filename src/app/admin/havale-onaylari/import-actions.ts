@@ -77,8 +77,11 @@ export async function importBankTransfersAction(
   if (rows.length === 0) return { error: "Dosyada okunacak satır bulunamadı" };
 
   const pool = await prisma.gig.findMany({
-    where: { published: true, packages: { some: {} } },
-    select: { id: true, packages: { orderBy: { price: "asc" }, take: 1, select: { id: true } } },
+    where: { published: true, packages: { some: { tier: { not: "CUSTOM" } } } },
+    select: {
+      id: true,
+      packages: { where: { tier: { not: "CUSTOM" } }, orderBy: { price: "asc" }, take: 1, select: { id: true } },
+    },
   });
   if (pool.length === 0) {
     return { error: "Sipariş bağlanacak yayında bir ilan yok" };

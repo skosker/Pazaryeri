@@ -4,11 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { ProfileForm } from "./profile-form";
 import { CompanyForm } from "./company-form";
 import { EmailPreferenceForm } from "./email-preference-form";
+import { getSettings } from "@/lib/settings";
 
 export default async function ProfilPage() {
   const session = await auth();
   if (!session?.user) redirect("/giris?callbackUrl=/panel/profil");
 
+  const { jobRequestsEnabled } = await getSettings();
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: {
@@ -26,6 +28,7 @@ export default async function ProfilPage() {
       billingCity: true,
       billingDistrict: true,
       campaignEmails: true,
+      jobRequestEmails: true,
     },
   });
   if (!user) redirect("/giris");
@@ -56,7 +59,10 @@ export default async function ProfilPage() {
       {isFreelancer && (
         <div className="mt-8 max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="mb-4 font-semibold text-brand-navy">E-posta Tercihleri</h2>
-          <EmailPreferenceForm campaignEmails={user.campaignEmails} />
+          <EmailPreferenceForm
+            campaignEmails={user.campaignEmails}
+            jobRequestEmails={jobRequestsEnabled ? user.jobRequestEmails : null}
+          />
         </div>
       )}
 

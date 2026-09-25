@@ -23,7 +23,7 @@ export async function getCategoryPriceComparison(): Promise<CategoryPriceStat[]>
     where: { published: true },
     select: {
       categoryId: true,
-      packages: { orderBy: { price: "asc" }, take: 1, select: { price: true } },
+      packages: { where: { tier: { not: "CUSTOM" as const } }, orderBy: { price: "asc" }, take: 1, select: { price: true } },
     },
   });
 

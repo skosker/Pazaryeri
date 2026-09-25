@@ -69,6 +69,29 @@ function buildFaqGroups(settings: SiteSettings, campaigns: CampaignRow[]): FaqGr
         },
       ],
     },
+    ...(settings.jobRequestsEnabled
+      ? [
+          {
+            id: "is-talepleri",
+            icon: "📋",
+            title: "İş Talepleri",
+            items: [
+              {
+                q: "İş talebi nedir, nasıl açarım?",
+                a: "Aradığın hizmeti hazır ilanlarda bulamazsan ne yaptırmak istediğini, bütçeni ve teslim süreni yazıp İş Talepleri sayfasından ücretsiz talep açarsın. Freelancer'lar sana fiyat ve süre içeren teklifler gönderir; teklifleri Panel → İş Taleplerim'de karşılaştırırsın.",
+              },
+              {
+                q: "Teklifi kabul edince ne olur?",
+                a: "“Teklifi Kabul Et”e bastığında teklif fiyatıyla bir sipariş açılır ve ödeme sayfasına geçersin. Ödeme Prosinta güvencesinde tutulur, işi onaylayana kadar freelancer'a aktarılmaz. Diğer teklifler kapanır.",
+              },
+              {
+                q: "Freelancer olarak kaç teklif verebilirim?",
+                a: `Her ay Ücretsiz pakette ${settings.offerQuotaFree}, Pro'da ${settings.offerQuotaPro}, Pro Plus'ta ${settings.offerQuotaPlus} teklif hakkın olur; hak her ayın başında yenilenir. Verdiğin teklifi güncellemek hak kullanmaz. Teklifler gizlidir: fiyatını yalnızca talebi açan alıcı görür.`,
+              },
+            ],
+          },
+        ]
+      : []),
     {
       id: "mesajlasma",
       icon: "💬",

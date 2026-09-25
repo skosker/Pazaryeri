@@ -3,12 +3,14 @@ import { prisma } from "@/lib/prisma";
 import { siteUrl } from "@/lib/site-url";
 import { sendMembershipEndingEmail } from "@/lib/email";
 import { untilFormat } from "@/lib/membership";
+import { sendJobRequestDigests } from "@/lib/job-requests";
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 /**
  * Daily (vercel.json): e-mail freelancers whose paid or trial membership, and companies
- * whose corporate plan, ends within a week, once per period. Vercel sends `Authorization: Bearer $CRON_SECRET`; without the
+ * whose corporate plan, ends within a week, once per period; then the day's İş Talepleri
+ * digest (see sendJobRequestDigests). Vercel sends `Authorization: Bearer $CRON_SECRET`; without the
  * secret configured nobody can run it.
  */
 export async function GET(request: NextRequest) {
@@ -83,5 +85,7 @@ export async function GET(request: NextRequest) {
     sent++;
   }
 
-  return NextResponse.json({ checked: candidates.length + companies.length, sent });
+  const jobDigests = await sendJobRequestDigests(now);
+
+  return NextResponse.json({ checked: candidates.length + companies.length, sent, jobDigests });
 }
