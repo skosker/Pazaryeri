@@ -348,6 +348,9 @@ model ProPurchase {
   months      Int?
   /// Ön Bilgilendirme Formu ve Mesafeli Hizmet Sözleşmesi'nin onaylandığı an (ödemeden önce zorunlu).
   termsAcceptedAt DateTime?
+  /// Bu satış için Prosinta'nın kestiği fatura (Admin → Faturalar); kesilene kadar NULL.
+  invoiceNo   String?
+  invoicedAt  DateTime?
   token       String?
   rawResponse Json?
   createdAt   DateTime      @default(now())
@@ -385,6 +388,9 @@ model GigBoost {
   creditMonth String?
   /// Ön Bilgilendirme Formu ve Mesafeli Hizmet Sözleşmesi'nin onaylandığı an (ücretli alımda zorunlu).
   termsAcceptedAt DateTime?
+  /// Bu satış için Prosinta'nın kestiği fatura (Admin → Faturalar); kesilene kadar NULL.
+  invoiceNo   String?
+  invoicedAt  DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -451,6 +457,9 @@ model Payout {
   ibanHolder String?
   note       String?
   paidAt     DateTime?
+  /// Komisyon faturası (Prosinta → freelancer); kesilene kadar NULL.
+  invoiceNo  String?
+  invoicedAt DateTime?
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
 
@@ -579,6 +588,8 @@ model SiteSettings {
   boostDays          Int      @default(30)
   /// Hakedişten kesilen komisyon, yüzde olarak (2.5 = %2,5).
   commissionPercent  Decimal  @default(2.5) @db.Decimal(5, 2)
+  /// Prosinta'nın kendi satışlarında (fiyatlar KDV dahil) faturadaki KDV oranı.
+  vatPercent         Decimal  @default(20) @db.Decimal(5, 2)
   founderEnabled     Boolean  @default(true)
   founderLimit       Int      @default(5000)
   /// İlk sipariş indirimi: yüzde, en fazla bu kadar TL. Prosinta karşılar.

@@ -26,6 +26,8 @@ export type SiteSettings = {
   boostDays: number;
   /** 2.5 means %2,5. */
   commissionPercent: number;
+  /** KDV on Prosinta's own sales, whose prices include it; 20 means %20. */
+  vatPercent: number;
   founderEnabled: boolean;
   founderLimit: number;
   firstOrderEnabled: boolean;
@@ -67,6 +69,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   boostPriceTl: 1000,
   boostDays: 30,
   commissionPercent: 2.5,
+  vatPercent: 20,
   founderEnabled: true,
   founderLimit: 5000,
   firstOrderEnabled: true,
@@ -108,6 +111,7 @@ export const getSettings = cache(async (): Promise<SiteSettings> => {
     boostPriceTl: Number(row.boostPriceTl),
     boostDays: row.boostDays,
     commissionPercent: Number(row.commissionPercent),
+    vatPercent: Number(row.vatPercent),
     founderEnabled: row.founderEnabled,
     founderLimit: row.founderLimit,
     firstOrderEnabled: row.firstOrderEnabled,
