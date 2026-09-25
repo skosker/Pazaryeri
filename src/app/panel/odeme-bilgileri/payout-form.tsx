@@ -11,9 +11,11 @@ const fieldClass =
 export function PayoutForm({
   iban,
   ibanHolder,
+  tckn,
 }: {
   iban: string | null;
   ibanHolder: string | null;
+  tckn: string | null;
 }) {
   const [state, formAction, pending] = useActionState(updatePayoutDetailsAction, initialState);
 
@@ -24,7 +26,6 @@ export function PayoutForm({
         <input
           name="iban"
           defaultValue={iban ?? ""}
-          placeholder="TR00 0000 0000 0000 0000 0000 00"
           className={`${fieldClass} font-mono`}
         />
       </label>
@@ -34,7 +35,6 @@ export function PayoutForm({
         <input
           name="ibanHolder"
           defaultValue={ibanHolder ?? ""}
-          placeholder="Hesabın açık olduğu ad soyad"
           className={fieldClass}
         />
         <span className="text-xs font-normal text-slate-400">
@@ -55,6 +55,7 @@ export function PayoutForm({
         </span>
         <input
           name="tckn"
+          defaultValue={tckn ?? ""}
           inputMode="numeric"
           maxLength={11}
           autoComplete="off"

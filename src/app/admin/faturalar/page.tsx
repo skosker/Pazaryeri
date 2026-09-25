@@ -109,6 +109,11 @@ export default async function InvoicesPage(props: PageProps<"/admin/faturalar">)
                           {c.address && <span className="block">{c.address}</span>}
                         </p>
                       )}
+                      {!c.companyName && (
+                        <p className="text-xs text-slate-500">
+                          {c.taxNumber ? `TCKN ${c.taxNumber}` : "TCKN yok · nihai tüketici"}
+                        </p>
+                      )}
                       <p className="text-xs text-slate-400">
                         {c.companyName ? `${c.name} · ` : ""}
                         {c.email}

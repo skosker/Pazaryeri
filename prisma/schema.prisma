@@ -107,6 +107,9 @@ model User {
   billingAddress     String?
   billingCity        String?
   billingDistrict    String?
+  /// Freelancer'ın isteğe bağlı T.C. kimlik numarası: komisyon faturası adına kesilsin diye.
+  /// Yalnızca kendisi ve admin görür.
+  tckn               String?
   /// Kurumsal bakiye (TL): Havale/EFT ile yüklenir, siparişlerde harcanır. Her hareket
   /// BalanceEntry'de kayıtlı; bu alan onların toplamıdır.
   balance            Decimal   @default(0) @db.Decimal(12, 2)
