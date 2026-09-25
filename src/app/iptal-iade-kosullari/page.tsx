@@ -5,7 +5,7 @@ export const metadata: Metadata = { title: "Sipariş İptal ve İade Koşulları
 
 export default function IptalIadeKosullariPage() {
   return (
-    <LegalPage title="Sipariş İptal ve İade Koşulları">
+    <LegalPage title="Sipariş İptal ve İade Koşulları" updatedAt="25 Eylül 2026">
       <h2>1. GENEL İLKELER</h2>
       <p>Prosinta Dijital Teknolojiler A.Ş. (“Platform”), 6563 sayılı Elektronik Ticaretin Düzenlenmesi Hakkında Kanun kapsamında Aracı Hizmet Sağlayıcı olarak faaliyet göstermektedir. Bir siparişin konusu olan hizmet, Platform tarafından değil, ilgili freelancer tarafından ifa edilir; bu nedenle iptal ve iade talepleri öncelikle Alıcı ile Satıcı arasındaki ilişki çerçevesinde değerlendirilir.</p>
       <p>Platform, mevzuattan doğan yükümlülükleri saklı kalmak kaydıyla, taraflar arasındaki iptal ve iade süreçlerinde <strong>destek@prosinta.com</strong> üzerinden teknik ve idari destek sağlar.</p>
