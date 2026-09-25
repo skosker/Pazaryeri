@@ -5,6 +5,7 @@ import { activeUser } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 import { assertMockPaymentAllowed } from "@/lib/paytr";
 import { revalidatePath } from "next/cache";
+import { assertTermsAccepted } from "@/lib/purchase-terms";
 import {
   GigBoostError,
   boostableGig,
@@ -26,6 +27,7 @@ export async function completeMockBoostPayment(gigId: string) {
   assertMockPaymentAllowed();
   const { user } = await requireBoostableGig(gigId);
   const boost = await findOrCreatePendingBoost(user.id, gigId);
+  assertTermsAccepted(boost);
   await markBoostPaid(boost.id);
   redirect("/panel/ilanlarim?one-cikarildi=1");
 }

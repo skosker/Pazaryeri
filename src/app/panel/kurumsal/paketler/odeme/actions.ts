@@ -6,6 +6,7 @@ import { activeUser } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 import { assertMockPaymentAllowed } from "@/lib/paytr";
 import { parsePeriod } from "@/lib/membership";
+import { PurchaseTermsError, assertTermsAccepted } from "@/lib/purchase-terms";
 import { corporatePlanState, findOrCreatePendingCorpPurchase, parseCorpPlan } from "@/lib/corporate-plans";
 import {
   ProPurchaseError,
@@ -29,7 +30,7 @@ export async function payCorpPlanWithBalanceAction(planSlug: string, periodSlug:
   try {
     await payCorpPlanWithBalance(user.id, plan, period);
   } catch (error) {
-    if (!(error instanceof ProPurchaseError)) throw error;
+    if (!(error instanceof ProPurchaseError) && !(error instanceof PurchaseTermsError)) throw error;
     redirect(`${back}&hata=${encodeURIComponent(error.message)}`);
   }
   revalidatePath("/panel", "layout");
@@ -45,6 +46,7 @@ export async function completeMockCorpPayment(planSlug: string, periodSlug: stri
   assertMockPaymentAllowed();
   const { user, plan, period } = await requireCompanyPlan(planSlug, periodSlug);
   const purchase = await findOrCreatePendingCorpPurchase(user.id, plan, period);
+  assertTermsAccepted(purchase);
   await markProPurchasePaid(purchase.id);
   revalidatePath("/panel", "layout");
   redirect("/panel/kurumsal/paketler?odendi=1");

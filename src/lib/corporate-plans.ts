@@ -150,7 +150,7 @@ export async function findOrCreatePendingCorpPurchase(userId: string, plan: Corp
   });
   if (existing) {
     if (existing.plan === plan && existing.months === months && Number(existing.amount) === amount) return existing;
-    return prisma.proPurchase.update({ where: { id: existing.id }, data: { plan, months, amount } });
+    return prisma.proPurchase.update({ where: { id: existing.id }, data: { plan, months, amount, termsAcceptedAt: null } });
   }
   return prisma.proPurchase.create({ data: { userId, plan, months, amount } });
 }

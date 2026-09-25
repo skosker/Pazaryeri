@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { getSettings, type SiteSettings } from "@/lib/settings";
 import type { Prisma } from "@/generated/prisma/client";
+import { assertTermsAccepted } from "@/lib/purchase-terms";
 import {
-  corpPlanPrice,
   corpPlanSelect,
   corporatePlanState,
   extendCorporatePlan,
@@ -49,7 +49,8 @@ export async function findOrCreatePendingProPurchase(userId: string, plan: Plan,
   });
   if (existing) {
     if (existing.plan === plan && existing.months === months && Number(existing.amount) === amount) return existing;
-    return prisma.proPurchase.update({ where: { id: existing.id }, data: { plan, months, amount } });
+    // Different plan or price: the consent given for the old one no longer applies.
+    return prisma.proPurchase.update({ where: { id: existing.id }, data: { plan, months, amount, termsAcceptedAt: null } });
   }
 
   return prisma.proPurchase.create({ data: { userId, plan, months, amount } });
@@ -97,11 +98,17 @@ async function applyPaidPurchase(tx: Prisma.TransactionClient, purchaseId: strin
 export async function payCorpPlanWithBalance(userId: string, plan: CorpPlan, period: Period) {
   const state = await corporatePlanState(userId);
   if (!state.open || !state.settings.corporateEnabled) throw new ProPurchaseError("Kurumsal paketler şu an kullanılamıyor.");
-  const amount = corpPlanPrice(plan, period, state.settings).total;
-  const months = PERIOD_MONTHS[period];
+  // The open purchase the checkout page showed and the buyer consented to.
+  const purchase = await findOrCreatePendingCorpPurchase(userId, plan, period);
+  assertTermsAccepted(purchase);
+  const amount = Number(purchase.amount);
 
   await prisma.$transaction(async (tx) => {
-    const purchase = await tx.proPurchase.create({ data: { userId, plan, months, amount, provider: "bakiye" } });
+    const claimed = await tx.proPurchase.updateMany({
+      where: { id: purchase.id, status: "INITIALIZED" },
+      data: { provider: "bakiye" },
+    });
+    if (claimed.count === 0) throw new ProPurchaseError("Bu satın alma zaten işlendi.");
     const charged = await tx.user.updateMany({
       where: { id: userId, balance: { gte: amount } },
       data: { balance: { decrement: amount } },
@@ -123,6 +130,7 @@ export async function payCorpPlanWithBalance(userId: string, plan: CorpPlan, per
 /** Corporate counterpart of notifyProBankTransfer. */
 export async function notifyCorpBankTransfer(userId: string, plan: CorpPlan, period: Period) {
   const purchase = await findOrCreatePendingCorpPurchase(userId, plan, period);
+  assertTermsAccepted(purchase);
   return prisma.proPurchase.update({ where: { id: purchase.id }, data: { provider: "havale" } });
 }
 
@@ -156,6 +164,7 @@ export async function startProTrial(userId: string) {
  */
 export async function notifyProBankTransfer(userId: string, plan: Plan, period: Period) {
   const purchase = await findOrCreatePendingProPurchase(userId, plan, period);
+  assertTermsAccepted(purchase);
   return prisma.proPurchase.update({ where: { id: purchase.id }, data: { provider: "havale" } });
 }
 

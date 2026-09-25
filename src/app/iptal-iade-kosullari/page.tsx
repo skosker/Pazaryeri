@@ -40,7 +40,18 @@ export default function IptalIadeKosullariPage() {
       </ul>
       <p>İade onaylandıktan sonra işlemin başlatılması makul süre içinde gerçekleştirilir; kartla yapılan ödemelerde nihai süre bankadan bankaya farklılık gösterebilir.</p>
 
-      <h2>7. YÜRÜRLÜK</h2>
+      <h2>7. PLATFORM’UN ÜCRETLİ HİZMETLERİ</h2>
+      <p>Üyelik paketleri (Pro, Pro Plus), Öne Çıkar ve kurumsal paketler (Kurumsal, Kurumsal Plus) Platform’un doğrudan kendisinin sattığı hizmetlerdir ve Üyelik Sözleşmesi’nin 6/A maddesine tabidir:</p>
+      <ul>
+        <li><strong>Cayma hakkı:</strong> Bu hizmetler ödeme onayıyla birlikte elektronik ortamda anında ifa edilmeye başlandığından, Mesafeli Sözleşmeler Yönetmeliği’nin 15 inci maddesi uyarınca cayma hakkı kullanılamaz. Alıcı bunu satın alma sırasında açıkça onaylar.</li>
+        <li><strong>Yenilenme:</strong> Paketler otomatik yenilenmez; süre sonunda ücretsiz pakete dönülür, ek bir ücret alınmaz.</li>
+        <li><strong>Paket değişikliği:</strong> Kalan süre, fiyat oranında yeni paketin süresine aktarılır; kalan süre için nakit iade yapılmaz.</li>
+        <li><strong>İade edilen durumlar:</strong> Hizmetin Platform’dan kaynaklanan bir sebeple sunulamaması, mükerrer ödeme veya hatalı tahsilat hâllerinde tutar, 6 ncı maddedeki yöntemle iade edilir.</li>
+        <li><strong>Havale/EFT:</strong> Ödeme bildirimi onaylanmadan önce destek@prosinta.com adresine yazarak satın almadan vazgeçebilirsin.</li>
+        <li><strong>Kurumsal bakiye:</strong> Kullanılmamış yüklenen tutar (bonuslar hariç) talep üzerine şirket hesabına iade edilir.</li>
+      </ul>
+
+      <h2>8. YÜRÜRLÜK</h2>
       <p>Platform, işbu koşulları mevzuata uygun olmak kaydıyla her zaman değiştirme, güncelleme veya yenileme hakkını saklı tutar. Güncellenen hükümler Platform’da yayımlandığı tarihte yürürlüğe girer.</p>
 
       <h2>Künye</h2>

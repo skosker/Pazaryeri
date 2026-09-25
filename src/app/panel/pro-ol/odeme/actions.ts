@@ -6,6 +6,7 @@ import { activeUser } from "@/lib/active-user";
 import { prisma } from "@/lib/prisma";
 import { assertMockPaymentAllowed } from "@/lib/paytr";
 import { parsePeriod, parsePlan } from "@/lib/membership";
+import { assertTermsAccepted } from "@/lib/purchase-terms";
 import {
   findOrCreatePendingProPurchase,
   markProPurchasePaid,
@@ -27,6 +28,7 @@ export async function completeMockProPayment(planSlug: string, periodSlug: strin
   const { user, plan, period } = await requireFreelancerPlan(planSlug, periodSlug);
 
   const purchase = await findOrCreatePendingProPurchase(user.id, plan, period);
+  assertTermsAccepted(purchase);
   await markProPurchasePaid(purchase.id);
 
   revalidatePath("/", "layout");

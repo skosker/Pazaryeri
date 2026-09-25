@@ -50,8 +50,10 @@ export function CampaignForm({
               <>
                 <Toggle label="Kaydedince freelancer'lara e-posta ile duyur" name="announce" defaultChecked={!values.enabled} />
                 <p className="mt-1 text-xs text-slate-500">
-                  Kampanya açıkken kaydedersen e-postası doğrulanmış {announcement.audience.toLocaleString("tr-TR")} freelancer&apos;a
-                  bir kez gider (duyuruları kapatanlar hariç).
+                  İşaretliyken kampanyayı açık olarak kaydedersen{" "}
+                  <strong>{announcement.audience.toLocaleString("tr-TR")} freelancer&apos;a</strong> &quot;kampanya başladı,
+                  ilanlarını ekle&quot; e-postası gider. Sadece gerçek, e-postasını doğrulamış freelancer&apos;lar sayılır
+                  (vitrin profilleri ve duyuruları kapatanlar hariç); her kampanya için bir kez gönderilir.
                 </p>
               </>
             )}
