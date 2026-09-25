@@ -5,6 +5,9 @@ import { campaignStatus, campaignStatusLabel } from "@/lib/campaign";
 import { toIstanbulInput } from "@/app/admin/settings-fields";
 import { CampaignForm } from "../campaign-form";
 import { deleteCampaignAction, resetCampaignEntriesAction } from "../actions";
+import { announcementAudience } from "@/lib/campaign-announce";
+
+const sentFmt = new Intl.DateTimeFormat("tr-TR", { dateStyle: "long", timeStyle: "short", timeZone: "Europe/Istanbul" });
 
 export default async function EditCampaignPage(props: PageProps<"/admin/kampanyalar/[id]">) {
   const { id } = await props.params;
@@ -13,6 +16,7 @@ export default async function EditCampaignPage(props: PageProps<"/admin/kampanya
     ? null
     : await prisma.campaign.findUnique({ where: { id }, include: { _count: { select: { entries: true } } } });
   if (!isNew && !campaign) notFound();
+  const audience = await prisma.user.count({ where: announcementAudience });
 
   return (
     <div className="max-w-5xl">
@@ -36,6 +40,12 @@ export default async function EditCampaignPage(props: PageProps<"/admin/kampanya
       <div className="mt-6">
         <CampaignForm
           id={campaign?.id ?? null}
+          announcement={{
+            sentLabel: campaign?.announcedAt
+              ? `${sentFmt.format(campaign.announcedAt)} · ${(campaign.announcedCount ?? 0).toLocaleString("tr-TR")} kişi`
+              : null,
+            audience,
+          }}
           values={
             campaign
               ? {

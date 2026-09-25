@@ -19,7 +19,16 @@ export type CampaignFormValues = {
   boostDiscountPercent: number;
 };
 
-export function CampaignForm({ id, values }: { id: string | null; values: CampaignFormValues }) {
+export function CampaignForm({
+  id,
+  values,
+  announcement,
+}: {
+  id: string | null;
+  values: CampaignFormValues;
+  /** Already sent ("15 Ekim 2026 · 312 kişi"), or how many it would go to. */
+  announcement: { sentLabel: string | null; audience: number };
+}) {
   const [state, formAction, pending] = useActionState(saveCampaignAction.bind(null, id), initialState);
   return (
     <form action={formAction}>
@@ -34,6 +43,19 @@ export function CampaignForm({ id, values }: { id: string | null; values: Campai
           <TextField label="Kısa açıklama (kampanya sayfasında)" name="tagline" defaultValue={values.tagline} required={false} wide />
           <DateTimeField label="Başlangıç" name="start" defaultValue={values.start} />
           <DateTimeField label="Bitiş" name="end" defaultValue={values.end} />
+          <div className="sm:col-span-2 border-t border-slate-100 pt-3">
+            {announcement.sentLabel ? (
+              <p className="text-xs text-emerald-700">Freelancer&apos;lara duyuru gönderildi: {announcement.sentLabel}</p>
+            ) : (
+              <>
+                <Toggle label="Kaydedince freelancer'lara e-posta ile duyur" name="announce" defaultChecked={!values.enabled} />
+                <p className="mt-1 text-xs text-slate-500">
+                  Kampanya açıkken kaydedersen e-postası doğrulanmış {announcement.audience.toLocaleString("tr-TR")} freelancer&apos;a
+                  bir kez gider (duyuruları kapatanlar hariç).
+                </p>
+              </>
+            )}
+          </div>
         </SettingsCard>
 
         <SettingsCard
@@ -46,6 +68,11 @@ export function CampaignForm({ id, values }: { id: string | null; values: Campai
           <NumberField label="Öne Çıkar indirimi (%)" name="boostDiscountPercent" defaultValue={values.boostDiscountPercent} />
         </SettingsCard>
       </div>
+      {state.announced !== undefined && (
+        <p className="mt-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          Duyuru {state.announced.toLocaleString("tr-TR")} freelancer&apos;a gönderildi.
+        </p>
+      )}
       <SaveBar pending={pending} error={state.error} saved={state.saved} label={id ? "Kampanyayı Kaydet" : "Kampanyayı Oluştur"} />
     </form>
   );

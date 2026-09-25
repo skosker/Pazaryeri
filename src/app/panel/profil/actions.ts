@@ -95,3 +95,14 @@ export async function updateCompanyAction(_prevState: CompanyFormState, formData
   revalidatePath("/panel/profil");
   return { success: true };
 }
+
+/** "Kampanya duyuruları" e-mail preference, the same switch the e-mail's unsubscribe link flips. */
+export async function updateEmailPreferenceAction(formData: FormData) {
+  const user = await activeUser();
+  if (!user) return;
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { campaignEmails: formData.get("campaignEmails") === "on" },
+  });
+  revalidatePath("/panel/profil");
+}

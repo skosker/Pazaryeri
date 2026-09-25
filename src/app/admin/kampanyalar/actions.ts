@@ -6,8 +6,9 @@ import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
 import { saveSettings, type SiteSettings } from "@/lib/settings";
 import { formNumber as num, isPrice, isWhole, round2 } from "@/app/admin/settings-fields";
+import { announceCampaign } from "@/lib/campaign-announce";
 
-export type FormState = { error?: string; saved?: boolean };
+export type FormState = { error?: string; saved?: boolean; announced?: number };
 
 /** Always-on offers: first-order discount and the referral programme. */
 export async function saveOfferSettingsAction(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -80,9 +81,15 @@ export async function saveCampaignAction(id: string | null, _prev: FormState, fo
     ? await prisma.campaign.update({ where: { id }, data: { ...data, start: data.start, end: data.end } })
     : await prisma.campaign.create({ data: { ...data, start: data.start, end: data.end } });
 
+  // Announce once, when the campaign is (or is being) switched on and has not ended.
+  let announced: number | undefined;
+  if (data.enabled && formData.get("announce") === "on" && data.end > new Date()) {
+    announced = (await announceCampaign(saved.id)) ?? undefined;
+  }
+
   revalidatePath("/", "layout");
   if (!id) redirect(`/admin/kampanyalar/${saved.id}?kaydedildi=1`);
-  return { saved: true };
+  return { saved: true, announced };
 }
 
 export async function deleteCampaignAction(id: string) {
