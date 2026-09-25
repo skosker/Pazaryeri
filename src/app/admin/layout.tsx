@@ -1,9 +1,10 @@
-import Link from "next/link";
 import { requireAdmin } from "@/lib/require-admin";
+import { prisma } from "@/lib/prisma";
+import { AdminNav, type NavGroup } from "./admin-nav";
 
 /** Grouped by purpose so related pages sit together in the sidebar; `label: null` is
  * the lone Genel Bakış link, shown with no group heading above it. */
-const navGroups: { label: string | null; items: { href: string; label: string }[] }[] = [
+const navGroups: NavGroup[] = [
   { label: null, items: [{ href: "/admin", label: "Genel Bakış" }] },
   {
     label: "Finans",
@@ -41,8 +42,24 @@ const navGroups: { label: string | null; items: { href: string; label: string }[
   },
 ];
 
+/** Each group's pages in the order saved by dragging; pages added since go at the end. */
+function applySavedOrder(groups: NavGroup[], saved: unknown): NavGroup[] {
+  const order = (saved && typeof saved === "object" ? saved : {}) as Record<string, string[]>;
+  return groups.map((g) => {
+    const hrefs = g.label ? order[g.label] : undefined;
+    if (!Array.isArray(hrefs)) return g;
+    const rank = (href: string) => {
+      const i = hrefs.indexOf(href);
+      return i < 0 ? hrefs.length : i;
+    };
+    return { ...g, items: [...g.items].sort((a, b) => rank(a.href) - rank(b.href)) };
+  });
+}
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   await requireAdmin();
+  const saved = await prisma.siteSettings.findUnique({ where: { id: 1 }, select: { adminNavOrder: true } });
+  const groups = applySavedOrder(navGroups, saved?.adminNavOrder);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -51,32 +68,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
             Admin Paneli
           </p>
-          {/* Telefonda bağlantılar yatay kayan bir şerit. Etiketlerin tek satırda
-              kalması şart: whitespace-nowrap olmadan uzun olanlar ("Havale/EFT
-              Onayları") ikiye bölünüyor ve satırlar birbirine giriyor. Negatif kenar
-              boşluğu şeridi ekran kenarına kadar uzatıyor, böylece kırpılmış değil
-              kaydırılabilir olduğu anlaşılıyor. Grup başlıkları yalnızca geniş ekranda
-              görünüyor; şeritte yer kaplamalarının anlamı yok. */}
-          <nav className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:flex-col lg:gap-4 lg:overflow-visible lg:px-0 lg:pb-0">
-            {navGroups.map((group) => (
-              <div key={group.label ?? "genel-bakis"} className="flex gap-2 lg:flex-col lg:gap-1">
-                {group.label && (
-                  <p className="hidden px-3 text-[11px] font-bold uppercase tracking-wide text-slate-700 lg:block">
-                    {group.label}
-                  </p>
-                )}
-                {group.items.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="shrink-0 whitespace-nowrap rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-brand-navy lg:border-0"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            ))}
-          </nav>
+          <AdminNav groups={groups} />
         </aside>
 
         <div className="min-w-0 flex-1">{children}</div>

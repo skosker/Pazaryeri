@@ -30,7 +30,7 @@ function Tile({ title, value, hint, tone = "text-brand-navy" }: { title: string;
 
 export default async function RevenuePage() {
   await requireAdmin();
-  const rows = await monthlyRevenue(12);
+  const rows = await monthlyRevenue();
   const current = rows[0];
   const year = sum(rows);
   const net = (m: RevenueMonth) => income(m) - costs(m);
@@ -39,8 +39,9 @@ export default async function RevenuePage() {
     <div className="max-w-6xl">
       <h1 className="text-2xl font-bold text-brand-navy">Gelir Raporu</h1>
       <p className="mt-1 text-sm text-slate-500">
-        Prosinta&apos;nın kendi geliri ve karşıladığı indirimler, İstanbul takvim ayına göre. Tutarlar tahsil edildiği
-        gibi (KDV dahil); sipariş hacmi freelancer&apos;lara giden paranın toplamıdır, gelir değildir.
+        Prosinta&apos;nın kendi geliri ve karşıladığı indirimler, Ağustos 2026&apos;dan itibaren İstanbul takvim ayına göre.
+        Tutarlar tahsil edildiği gibi (KDV dahil); sipariş hacmi freelancer&apos;lara giden paranın toplamıdır, gelir
+        değildir. Excel&apos;den içe aktarılan ve vitrin hesaplarına ait siparişler sayılmaz.
       </p>
 
       <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -87,7 +88,7 @@ export default async function RevenuePage() {
                   key={m.month}
                   className={`border-b border-slate-100 last:border-0 ${isTotal ? "bg-slate-50 font-semibold" : ""}`}
                 >
-                  <td className="px-4 py-2.5 text-left text-slate-600">{isTotal ? "Son 12 ay" : label(m.month)}</td>
+                  <td className="px-4 py-2.5 text-left text-slate-600">{isTotal ? "Toplam" : label(m.month)}</td>
                   <td className="px-3 py-2.5 text-slate-600">{tl(m.membership)}</td>
                   <td className="px-3 py-2.5 text-slate-600">{tl(m.corporatePlans)}</td>
                   <td className="px-3 py-2.5 text-slate-600">{tl(m.boosts)}</td>
@@ -114,7 +115,7 @@ export default async function RevenuePage() {
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3 text-xs text-slate-500 sm:grid-cols-4">
-        <p>İlk sipariş indirimi (12 ay): <strong className="text-slate-700">{formatPrice(year.firstOrderDiscounts)} TL</strong></p>
+        <p>İlk sipariş indirimi (toplam): <strong className="text-slate-700">{formatPrice(year.firstOrderDiscounts)} TL</strong></p>
         <p>Davet ödülleri: <strong className="text-slate-700">{formatPrice(year.referralCredits)} TL</strong></p>
         <p>Kurumsal indirimler: <strong className="text-slate-700">{formatPrice(year.corporateDiscounts)} TL</strong></p>
         <p>Bakiye bonusları: <strong className="text-slate-700">{formatPrice(year.topUpBonuses)} TL</strong></p>

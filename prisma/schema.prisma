@@ -591,6 +591,9 @@ model SiteSettings {
   boostDays          Int      @default(30)
   /// Hakedişten kesilen komisyon, yüzde olarak (2.5 = %2,5).
   commissionPercent  Decimal  @default(2.5) @db.Decimal(5, 2)
+  /// Admin menüsündeki alt menülerin sırası, gruba göre ({"Finans": ["/admin/gelir", ...]}).
+  /// Sürükle-bırakla kaydedilir; listede olmayan (yeni) sayfalar grubun sonuna eklenir.
+  adminNavOrder      Json?
   /// Prosinta'nın kendi satışlarında (fiyatlar KDV dahil) faturadaki KDV oranı.
   vatPercent         Decimal  @default(20) @db.Decimal(5, 2)
   founderEnabled     Boolean  @default(true)
