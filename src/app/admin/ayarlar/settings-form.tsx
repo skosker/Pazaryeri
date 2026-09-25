@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { SiteSettings } from "@/lib/settings";
-import { NumberField, SaveBar, SettingsCard, Toggle } from "@/app/admin/settings-fields";
+import { NumberField, SaveBar, SettingsCard, SettingsMatrix, Toggle } from "@/app/admin/settings-fields";
 import { saveMembershipSettingsAction, type SettingsFormState } from "./actions";
 
 const initialState: SettingsFormState = {};
@@ -14,91 +14,172 @@ function yearly(monthly: number, discountPercent: number): string {
   return `${fmt(Math.round(perMonth * 1200) / 100)} TL (ayda ${fmt(perMonth)} TL)`;
 }
 
-export function MembershipSettingsForm({ settings }: { settings: SiteSettings }) {
+const TABS = [
+  { key: "bireysel", label: "Bireysel", sub: "Freelancer üyelikleri, Öne Çıkar, komisyon" },
+  { key: "kurumsal", label: "Kurumsal", sub: "Şirket bakiyesi ve kurumsal paketler" },
+] as const;
+
+/**
+ * One form in two tabs. Both tabs stay in the page (the hidden one only hidden), so a
+ * single "Ayarları Kaydet" saves every field whichever tab is showing.
+ */
+export function MembershipSettingsForm({ settings: s }: { settings: SiteSettings }) {
   const [state, formAction, pending] = useActionState(saveMembershipSettingsAction, initialState);
+  const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("bireysel");
 
   return (
     <form action={formAction}>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-2 gap-1 rounded-2xl bg-slate-100 p-1" role="tablist">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.key}
+            onClick={() => setTab(t.key)}
+            className={`rounded-xl px-4 py-2 text-left transition ${
+              tab === t.key ? "bg-white shadow-sm" : "hover:bg-white/60"
+            }`}
+          >
+            <span className="block text-sm font-semibold text-brand-navy">{t.label}</span>
+            <span className="block text-[11px] text-slate-500">{t.sub}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className={tab === "bireysel" ? "mt-4 space-y-4" : "hidden"} role="tabpanel">
         <SettingsCard
-          title="Üyelik Paketleri (Pro / Pro Plus)"
-          wide
-          hint="Yalnızca freelancer'lara satılır; aylık ya da yıllık, otomatik yenilenmez. Yıllık fiyat = aylık × 12, yıllık indirimle. Fiyat değişikliği yalnızca yeni satın almalara uygulanır; süresiz Pro üyeler etkilenmez."
+          title="Üyelik Paketleri"
+          hint="Yalnızca freelancer'lara; aylık/yıllık, otomatik yenilenmez. Fiyat değişikliği yeni satın almalara uygulanır."
+          cols={3}
         >
-          <NumberField label="Pro aylık fiyat (TL)" name="proMonthlyTl" defaultValue={settings.proMonthlyTl} step="0.01" />
-          <NumberField label="Pro Plus aylık fiyat (TL)" name="plusMonthlyTl" defaultValue={settings.plusMonthlyTl} step="0.01" />
-          <NumberField label="Yıllık ödemede indirim (%)" name="yearlyDiscountPercent" defaultValue={settings.yearlyDiscountPercent} step="0.01" />
-          <NumberField label="Pro Plus Öne Çıkar indirimi (%)" name="plusBoostDiscountPercent" defaultValue={settings.plusBoostDiscountPercent} step="0.01" />
-          <NumberField label="Aylık ücretsiz Öne Çıkar – Pro (gün)" name="proFreeBoostDays" defaultValue={settings.proFreeBoostDays} />
-          <NumberField label="Aylık ücretsiz Öne Çıkar – Pro Plus (gün)" name="plusFreeBoostDays" defaultValue={settings.plusFreeBoostDays} />
-          <NumberField label="Görsel sınırı (Ücretsiz)" name="portfolioImages" defaultValue={settings.portfolioImages} />
-          <NumberField label="Görsel sınırı (Pro)" name="portfolioImagesPro" defaultValue={settings.portfolioImagesPro} />
-          <NumberField label="Görsel sınırı (Pro Plus)" name="portfolioImagesPlus" defaultValue={settings.portfolioImagesPlus} />
-          <div className="sm:col-span-2 grid grid-cols-1 gap-3 border-t border-slate-100 pt-3 sm:grid-cols-2">
-            <Toggle label="Ücretsiz Pro denemesi açık" name="proTrialEnabled" defaultChecked={settings.proTrialEnabled} />
-            <NumberField label="Deneme süresi (gün)" name="proTrialDays" defaultValue={settings.proTrialDays} />
-          </div>
-          <p className="sm:col-span-2 text-xs text-slate-500">
-            Yıllık: Pro {yearly(settings.proMonthlyTl, settings.yearlyDiscountPercent)} · Pro Plus{" "}
-            {yearly(settings.plusMonthlyTl, settings.yearlyDiscountPercent)} (kaydettikten sonra güncellenir)
+          <SettingsMatrix
+            columns={["Ücretsiz", "Pro", "Pro Plus"]}
+            rows={[
+              {
+                label: "Aylık fiyat (TL)",
+                cells: [
+                  null,
+                  { name: "proMonthlyTl", value: s.proMonthlyTl, step: "0.01" },
+                  { name: "plusMonthlyTl", value: s.plusMonthlyTl, step: "0.01" },
+                ],
+              },
+              {
+                label: "Örnek iş görseli (ilan başına)",
+                cells: [
+                  { name: "portfolioImages", value: s.portfolioImages },
+                  { name: "portfolioImagesPro", value: s.portfolioImagesPro },
+                  { name: "portfolioImagesPlus", value: s.portfolioImagesPlus },
+                ],
+              },
+              {
+                label: "Aylık ücretsiz Öne Çıkar (gün)",
+                cells: [
+                  null,
+                  { name: "proFreeBoostDays", value: s.proFreeBoostDays },
+                  { name: "plusFreeBoostDays", value: s.plusFreeBoostDays },
+                ],
+              },
+              {
+                label: "Öne Çıkar satın alma indirimi (%)",
+                cells: [null, null, { name: "plusBoostDiscountPercent", value: s.plusBoostDiscountPercent, step: "0.01" }],
+              },
+            ]}
+          />
+          <NumberField label="Yıllık ödemede indirim (%)" name="yearlyDiscountPercent" defaultValue={s.yearlyDiscountPercent} step="0.01" />
+          <Toggle label="Ücretsiz Pro denemesi" name="proTrialEnabled" defaultChecked={s.proTrialEnabled} inline />
+          <NumberField label="Deneme süresi (gün)" name="proTrialDays" defaultValue={s.proTrialDays} />
+          <p className="col-span-full text-xs text-slate-500">
+            Yıllık: Pro {yearly(s.proMonthlyTl, s.yearlyDiscountPercent)} · Pro Plus{" "}
+            {yearly(s.plusMonthlyTl, s.yearlyDiscountPercent)}
           </p>
         </SettingsCard>
 
-        <SettingsCard
-          title="Öne Çıkar (Sponsorlu)"
-          status={{ on: settings.boostEnabled }}
-          hint="İlanı ücret karşılığı varsayılan sıralamada en üste taşır. Kapatınca yeni satın alma olmaz, süresi devam edenler biter."
-        >
-          <Toggle label="Satış açık" name="boostEnabled" defaultChecked={settings.boostEnabled} />
-          <NumberField label="Fiyat (TL)" name="boostPriceTl" defaultValue={settings.boostPriceTl} step="0.01" />
-          <NumberField label="Süre (gün)" name="boostDays" defaultValue={settings.boostDays} />
-        </SettingsCard>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <SettingsCard
+            title="Öne Çıkar"
+            status={{ on: s.boostEnabled }}
+            hint="İlanı sıralamada en üste taşır. Kapatınca yeni satış olmaz."
+          >
+            <Toggle label="Satış açık" name="boostEnabled" defaultChecked={s.boostEnabled} />
+            <NumberField label="Fiyat (TL)" name="boostPriceTl" defaultValue={s.boostPriceTl} step="0.01" />
+            <NumberField label="Süre (gün)" name="boostDays" defaultValue={s.boostDays} />
+          </SettingsCard>
 
-        <SettingsCard
-          title="Komisyon"
-          hint="Sipariş tamamlanınca hakedişten kesilir; yalnızca sonraki siparişlere uygulanır, freelancer'a gösterilmez."
-        >
-          <NumberField label="Komisyon oranı (%)" name="commissionPercent" defaultValue={settings.commissionPercent} step="0.01" />
-        </SettingsCard>
+          <SettingsCard
+            title="Kurucu Freelancer"
+            status={{ on: s.founderEnabled }}
+            hint="İlk ilanı onaylananlara kalıcı rozet. Kapatınca verilenler kalır."
+          >
+            <Toggle label="Kampanya açık" name="founderEnabled" defaultChecked={s.founderEnabled} />
+            <NumberField label="Kontenjan (kişi)" name="founderLimit" defaultValue={s.founderLimit} />
+          </SettingsCard>
 
-        <SettingsCard
-          title="Kurucu Freelancer"
-          status={{ on: settings.founderEnabled }}
-          hint="İlk ilanı onaylanan gerçek freelancer'lara kalıcı rozet ve aramada öncelik. Kapatınca yeni rozet verilmez, verilenler kalır."
-        >
-          <Toggle label="Kampanya açık" name="founderEnabled" defaultChecked={settings.founderEnabled} />
-          <NumberField label="Kontenjan (kişi)" name="founderLimit" defaultValue={settings.founderLimit} />
-        </SettingsCard>
+          <SettingsCard
+            title="Komisyon"
+            hint="Tamamlanan siparişin hakedişinden kesilir; freelancer'a gösterilmez."
+            cols={1}
+          >
+            <NumberField label="Komisyon oranı (%)" name="commissionPercent" defaultValue={s.commissionPercent} step="0.01" />
+          </SettingsCard>
+        </div>
+      </div>
 
-        <SettingsCard
-          title="Kurumsal Paket"
-          status={{ on: settings.corporateEnabled }}
-          wide
-          hint="Kapalıyken kullanıcılar görmez. Açınca kurumsal hesaplar Panel → Kurumsal Hesap'tan Havale/EFT ile toplu bakiye yükler (Admin → Kurumsal Hesaplar'dan onaylarsın) ve siparişleri bakiyeyle öder."
-        >
-          <Toggle label="Kurumsal paket açık" name="corporateEnabled" defaultChecked={settings.corporateEnabled} />
-          <NumberField label="En düşük yükleme (TL)" name="corporateMinTopUpTl" defaultValue={settings.corporateMinTopUpTl} step="0.01" />
-          <NumberField label="Yükleme bonusu (%)" name="corporateBonusPercent" defaultValue={settings.corporateBonusPercent} step="0.01" />
-        </SettingsCard>
+      <div className={tab === "kurumsal" ? "mt-4 grid grid-cols-1 gap-4 lg:grid-cols-5" : "hidden"} role="tabpanel">
+        <div className="lg:col-span-2">
+          <SettingsCard
+            title="Kurumsal Hesap (Bakiye)"
+            status={{ on: s.corporateEnabled }}
+            hint="Açıkken şirketler Havale/EFT ile toplu bakiye yükler (Admin → Kurumsal Hesaplar'dan onaylarsın) ve siparişleri bakiyeyle öder."
+          >
+            <Toggle label="Kurumsal hesap açık" name="corporateEnabled" defaultChecked={s.corporateEnabled} />
+            <NumberField label="En düşük yükleme (TL)" name="corporateMinTopUpTl" defaultValue={s.corporateMinTopUpTl} step="0.01" />
+            <NumberField label="Yükleme bonusu (%)" name="corporateBonusPercent" defaultValue={s.corporateBonusPercent} step="0.01" />
+          </SettingsCard>
+        </div>
 
-        <SettingsCard
-          title="Kurumsal Paketler (Abonelik)"
-          status={{ on: settings.corporateEnabled && settings.corporatePlansEnabled }}
-          wide
-          hint="Kurumsal paket ile birlikte açıkken şirket hesapları Panel → Kurumsal Hesap → Kurumsal Paketler'den aylık/yıllık paket alır (yıllık indirim üyelik paketleriyle aynı). Sipariş indirimi ve yükleme bonusunu Prosinta karşılar; indirimin aylık üst sınırını paket fiyatının altında tut."
-        >
-          <div className="sm:col-span-2">
-            <Toggle label="Kurumsal paketler açık" name="corporatePlansEnabled" defaultChecked={settings.corporatePlansEnabled} />
-          </div>
-          <NumberField label="Kurumsal aylık fiyat (TL)" name="corpMonthlyTl" defaultValue={settings.corpMonthlyTl} step="0.01" />
-          <NumberField label="Kurumsal Plus aylık fiyat (TL)" name="corpPlusMonthlyTl" defaultValue={settings.corpPlusMonthlyTl} step="0.01" />
-          <NumberField label="Kurumsal sipariş indirimi (%)" name="corpOrderDiscountPercent" defaultValue={settings.corpOrderDiscountPercent} step="0.01" />
-          <NumberField label="Kurumsal Plus sipariş indirimi (%)" name="corpPlusOrderDiscountPercent" defaultValue={settings.corpPlusOrderDiscountPercent} step="0.01" />
-          <NumberField label="Kurumsal aylık indirim üst sınırı (TL)" name="corpOrderDiscountMaxTl" defaultValue={settings.corpOrderDiscountMaxTl} step="0.01" />
-          <NumberField label="Kurumsal Plus aylık indirim üst sınırı (TL)" name="corpPlusOrderDiscountMaxTl" defaultValue={settings.corpPlusOrderDiscountMaxTl} step="0.01" />
-          <NumberField label="Kurumsal yükleme bonusu (%)" name="corpTopUpBonusPercent" defaultValue={settings.corpTopUpBonusPercent} step="0.01" />
-          <NumberField label="Kurumsal Plus yükleme bonusu (%)" name="corpPlusTopUpBonusPercent" defaultValue={settings.corpPlusTopUpBonusPercent} step="0.01" />
-        </SettingsCard>
+        <div className="lg:col-span-3">
+          <SettingsCard
+            title="Kurumsal Paketler (Abonelik)"
+            status={{ on: s.corporateEnabled && s.corporatePlansEnabled }}
+            hint="Kurumsal hesapla birlikte açıkken aylık/yıllık satılır (yıllık indirim üyeliklerle aynı). İndirim ve bonusu Prosinta karşılar; indirim üst sınırını paket fiyatının altında tut."
+          >
+            <Toggle label="Kurumsal paketler açık" name="corporatePlansEnabled" defaultChecked={s.corporatePlansEnabled} />
+            <SettingsMatrix
+              columns={["Kurumsal", "Kurumsal Plus"]}
+              rows={[
+                {
+                  label: "Aylık fiyat (TL)",
+                  cells: [
+                    { name: "corpMonthlyTl", value: s.corpMonthlyTl, step: "0.01" },
+                    { name: "corpPlusMonthlyTl", value: s.corpPlusMonthlyTl, step: "0.01" },
+                  ],
+                },
+                {
+                  label: "Sipariş indirimi (%)",
+                  cells: [
+                    { name: "corpOrderDiscountPercent", value: s.corpOrderDiscountPercent, step: "0.01" },
+                    { name: "corpPlusOrderDiscountPercent", value: s.corpPlusOrderDiscountPercent, step: "0.01" },
+                  ],
+                },
+                {
+                  label: "Aylık indirim üst sınırı (TL)",
+                  cells: [
+                    { name: "corpOrderDiscountMaxTl", value: s.corpOrderDiscountMaxTl, step: "0.01" },
+                    { name: "corpPlusOrderDiscountMaxTl", value: s.corpPlusOrderDiscountMaxTl, step: "0.01" },
+                  ],
+                },
+                {
+                  label: "Yükleme bonusu (%)",
+                  cells: [
+                    { name: "corpTopUpBonusPercent", value: s.corpTopUpBonusPercent, step: "0.01" },
+                    { name: "corpPlusTopUpBonusPercent", value: s.corpPlusTopUpBonusPercent, step: "0.01" },
+                  ],
+                },
+              ]}
+            />
+          </SettingsCard>
+        </div>
       </div>
 
       <SaveBar pending={pending} error={state.error} saved={state.saved} label="Ayarları Kaydet" />

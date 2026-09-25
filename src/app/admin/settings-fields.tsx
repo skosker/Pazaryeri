@@ -8,6 +8,7 @@ export function SettingsCard({
   status,
   children,
   wide = false,
+  cols = 2,
 }: {
   title: string;
   hint?: string;
@@ -15,6 +16,8 @@ export function SettingsCard({
   status?: { on: boolean; label?: string };
   children: ReactNode;
   wide?: boolean;
+  /** Fields per row from the small breakpoint up. */
+  cols?: 1 | 2 | 3;
 }) {
   return (
     <section className={`rounded-2xl border border-slate-200 bg-white p-5 shadow-sm ${wide ? "lg:col-span-2" : ""}`}>
@@ -31,7 +34,9 @@ export function SettingsCard({
         )}
       </div>
       {hint && <p className="mt-1 text-xs leading-relaxed text-slate-500">{hint}</p>}
-      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">{children}</div>
+      <div className={`mt-4 grid grid-cols-1 gap-3 ${cols === 3 ? "sm:grid-cols-3" : cols === 2 ? "sm:grid-cols-2" : ""}`}>
+        {children}
+      </div>
     </section>
   );
 }
@@ -103,9 +108,22 @@ export function DateTimeField({ label, name, defaultValue }: { label: string; na
   );
 }
 
-export function Toggle({ label, name, defaultChecked }: { label: string; name: string; defaultChecked: boolean }) {
+export function Toggle({
+  label,
+  name,
+  defaultChecked,
+  inline = false,
+}: {
+  label: string;
+  name: string;
+  defaultChecked: boolean;
+  /** Sit in one grid cell (next to fields) instead of taking a whole row. */
+  inline?: boolean;
+}) {
   return (
-    <label className="flex items-center gap-2 text-sm font-medium text-brand-navy sm:col-span-2">
+    <label
+      className={`flex items-center gap-2 text-sm font-medium text-brand-navy ${inline ? "sm:self-end sm:pb-2" : "col-span-full"}`}
+    >
       <input type="checkbox" name={name} defaultChecked={defaultChecked} className="h-4 w-4 accent-purple-600" />
       {label}
     </label>
@@ -136,3 +154,59 @@ export function formNumber(formData: FormData, key: string): number {
 export const isPrice = (v: number) => Number.isFinite(v) && v >= 0 && v <= 1_000_000;
 export const isWhole = (v: number, min: number, max: number) => Number.isInteger(v) && v >= min && v <= max;
 export const round2 = (v: number) => Math.round(v * 100) / 100;
+
+type MatrixCell = { name: string; value: number; step?: string } | null;
+
+/**
+ * Tiers side by side: one column per plan, one row per setting, so a plan's numbers read
+ * down a column instead of being scattered over a long form. A null cell does not apply.
+ */
+export function SettingsMatrix({
+  columns,
+  rows,
+}: {
+  columns: string[];
+  rows: { label: string; cells: MatrixCell[] }[];
+}) {
+  return (
+    <div className="col-span-full -mx-1 overflow-x-auto">
+      <table className="w-full min-w-[26rem] border-separate border-spacing-x-1 border-spacing-y-1.5 text-xs">
+        <thead>
+          <tr>
+            <th className="w-[40%]" />
+            {columns.map((c) => (
+              <th key={c} className="pb-1 text-left font-semibold uppercase tracking-wide text-slate-400">
+                {c}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.label}>
+              <td className="pr-2 font-medium text-slate-600">{row.label}</td>
+              {row.cells.map((cell, i) => (
+                <td key={cell?.name ?? `bos-${i}`}>
+                  {cell ? (
+                    <input
+                      type="number"
+                      name={cell.name}
+                      required
+                      min={0}
+                      step={cell.step ?? "1"}
+                      defaultValue={cell.value}
+                      aria-label={`${row.label} – ${columns[i]}`}
+                      className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm outline-none focus:border-purple-400"
+                    />
+                  ) : (
+                    <span className="block px-2.5 text-slate-300">—</span>
+                  )}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
