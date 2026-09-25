@@ -393,3 +393,78 @@ export async function sendMembershipEndingEmail(params: {
     )
   );
 }
+
+export type CampaignAnnouncement = {
+  name: string;
+  tagline: string | null;
+  start: string;
+  end: string;
+  minPercent: number;
+  maxPercent: number;
+  proDiscountPercent: number;
+  boostDiscountPercent: number;
+  joinUrl: string;
+};
+
+/** The announcement body for one freelancer (exported for previews). */
+export function campaignAnnouncementHtml(campaign: CampaignAnnouncement, name: string, unsubscribeUrl: string): string {
+  const perks = [
+    campaign.proDiscountPercent > 0 ? `Pro üyelikte %${campaign.proDiscountPercent}` : null,
+    campaign.boostDiscountPercent > 0 ? `Öne Çıkar'da %${campaign.boostDiscountPercent}` : null,
+  ].filter(Boolean);
+  return layout(
+    `${escapeHtml(campaign.name)} geliyor`,
+    `<p>Merhaba ${escapeHtml(name)},</p>
+     ${campaign.tagline ? `<p>${escapeHtml(campaign.tagline)}</p>` : ""}
+     <p><strong>${campaign.start} – ${campaign.end}</strong> tarihleri arasında alıcılar kampanyaya katılan ilanları indirimli görecek.</p>
+     <p>İlanlarını <strong>%${campaign.minPercent}–%${campaign.maxPercent}</strong> arasında dilediğin indirimle kampanyaya ekleyebilirsin; indirimi sen seçersin, istediğin zaman değiştirebilir ya da çıkarabilirsin.</p>
+     ${perks.length > 0 ? `<p>Kampanya süresince ${perks.join(", ")} indirim de seni bekliyor.</p>` : ""}
+     ${button(campaign.joinUrl, "Kampanyaya Katıl")}
+     <p style="margin-top:28px;font-size:12px;color:#94a3b8;">Bu e-postayı Prosinta freelancer hesabın olduğu için aldın. <a href="${unsubscribeUrl}" style="color:#94a3b8;">Kampanya duyurularını almak istemiyorum</a></p>`
+  );
+}
+
+/**
+ * One campaign announcement to many freelancers, in batches of 100 (Resend's limit per
+ * call). Each message carries its own unsubscribe link and List-Unsubscribe headers,
+ * which bulk mail needs to reach the inbox. Returns how many were handed to Resend.
+ */
+export async function sendCampaignAnnouncementEmails(
+  campaign: CampaignAnnouncement,
+  recipients: { email: string; name: string; unsubscribeUrl: string; oneClickUrl: string }[]
+): Promise<number> {
+  const subject = `${campaign.name}: ilanlarını kampanyaya ekle`;
+  const messages = recipients.map((r) => {
+    const html = campaignAnnouncementHtml(campaign, r.name, r.unsubscribeUrl);
+    return {
+      from: FROM,
+      to: r.email,
+      subject,
+      html,
+      text: toPlainText(html),
+      replyTo: REPLY_TO,
+      headers: {
+        "List-Unsubscribe": `<${r.oneClickUrl}>`,
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+      },
+    };
+  });
+
+  if (!resend) {
+    console.log(`[email:mock] campaign="${campaign.name}" recipients=${messages.length}`);
+    return messages.length;
+  }
+
+  let sent = 0;
+  for (let i = 0; i < messages.length; i += 100) {
+    const chunk = messages.slice(i, i + 100);
+    try {
+      const { error } = await resend.batch.send(chunk);
+      if (error) console.error("Campaign announcement batch failed", error);
+      else sent += chunk.length;
+    } catch (error) {
+      console.error("Campaign announcement batch failed", error);
+    }
+  }
+  return sent;
+}

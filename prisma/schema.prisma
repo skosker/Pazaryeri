@@ -80,6 +80,8 @@ model User {
   proTrialUsedAt     DateTime?
   /// Bitiş hatırlatmasının gönderildiği proUntil (aynı dönem için ikinci e-posta gitmesin).
   proReminderFor     DateTime?
+  /// Kampanya ve fırsat duyurusu e-postaları; e-postadaki bağlantıyla ya da Profilim'den kapatılır.
+  campaignEmails     Boolean   @default(true)
   /// Kurumsal abonelik (KURUMSAL / KURUMSAL_PLUS) ve bittiği an; geçmişte kalınca düşer.
   corpPlan           MembershipPlan?
   corpPlanUntil      DateTime?
@@ -688,6 +690,9 @@ model Campaign {
   maxPercent           Int      @default(50)
   proDiscountPercent   Int      @default(0)
   boostDiscountPercent Int      @default(0)
+  /// Freelancer'lara duyuru e-postasının gittiği an ve kaç kişiye gittiği (kampanya başına bir kez).
+  announcedAt          DateTime?
+  announcedCount       Int?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
