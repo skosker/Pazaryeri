@@ -9,6 +9,7 @@ import { PERIOD_LABEL, parsePeriod, untilFormat } from "@/lib/membership";
 import {
   CORP_PLAN_LABEL,
   CORP_PLAN_SLUG,
+  corpPerks,
   corpPlanPrice,
   corporatePlanState,
   findOrCreatePendingCorpPurchase,
@@ -18,6 +19,10 @@ import { ProMockCheckoutForm } from "@/app/panel/pro-ol/odeme/pro-mock-checkout-
 import { ProBankTransferPanel } from "@/app/panel/pro-ol/odeme/pro-bank-transfer-panel";
 import { PaymentMethodTabs } from "@/app/odeme/[orderId]/payment-method-tabs";
 import { PaytrEmbed } from "@/app/odeme/[orderId]/paytr-embed";
+import { PurchaseConsent } from "@/components/purchase-consent";
+import { MesafeliHizmetSozlesmesi, OnBilgilendirmeFormu, type PurchaseInfo } from "@/components/purchase-documents";
+import { acceptPurchaseTermsAction } from "@/app/panel/purchase-terms-actions";
+import { purchaseBuyer } from "@/lib/purchase-terms";
 import {
   completeMockCorpPayment,
   failMockCorpPayment,
@@ -45,6 +50,18 @@ export default async function CorporatePlanCheckoutPage(props: PageProps<"/panel
   const balance = Number(user.balance);
   const title = `${CORP_PLAN_LABEL[plan]} · ${PERIOD_LABEL[period]}`;
   const slug = CORP_PLAN_SLUG[plan];
+  const perks = corpPerks(plan, state.settings);
+  const docInfo: PurchaseInfo = {
+    service: `Prosinta ${CORP_PLAN_LABEL[plan]} kurumsal paket (${PERIOD_LABEL[period]}, ${period === "yillik" ? "12 ay" : "1 ay"})`,
+    features: [
+      `Siparişlerde %${perks.orderPercent} indirim (ayda en fazla ${formatPrice(perks.orderMaxTl)} TL; Prosinta karşılar)`,
+      `Bakiye yüklemelerinde %${perks.bonusPercent} bonus`,
+      plan === "KURUMSAL_PLUS" ? "Size özel müşteri temsilcisi" : "Öncelikli destek",
+    ],
+    price,
+    duration: period === "yillik" ? "12 ay" : "1 ay",
+    ...(await purchaseBuyer(session.user.id)),
+  };
 
   const errorMessage =
     searchParams.hata === "odeme-basarisiz"
@@ -98,7 +115,15 @@ export default async function CorporatePlanCheckoutPage(props: PageProps<"/panel
         <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{errorMessage ?? tokenError}</p>
       )}
 
-      <div className="mt-6 rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
+      <div className="mt-6">
+        <PurchaseConsent
+          acceptAction={acceptPurchaseTermsAction.bind(null, "uyelik", purchase.id)}
+          initiallyAccepted={purchase.termsAcceptedAt !== null}
+          consumer={docInfo.consumer}
+          onBilgilendirme={<OnBilgilendirmeFormu info={docInfo} />}
+          sozlesme={<MesafeliHizmetSozlesmesi info={docInfo} />}
+        >
+      <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="font-semibold text-brand-navy">Kurumsal Bakiye ile Öde</p>
@@ -149,6 +174,8 @@ export default async function CorporatePlanCheckoutPage(props: PageProps<"/panel
             />
           }
         />
+      </div>
+        </PurchaseConsent>
       </div>
     </div>
   );

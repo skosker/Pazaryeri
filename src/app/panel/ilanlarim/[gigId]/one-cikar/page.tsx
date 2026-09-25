@@ -10,6 +10,10 @@ import { ProMockCheckoutForm } from "@/app/panel/pro-ol/odeme/pro-mock-checkout-
 import { ProBankTransferPanel } from "@/app/panel/pro-ol/odeme/pro-bank-transfer-panel";
 import { PaymentMethodTabs } from "@/app/odeme/[orderId]/payment-method-tabs";
 import { PaytrEmbed } from "@/app/odeme/[orderId]/paytr-embed";
+import { PurchaseConsent } from "@/components/purchase-consent";
+import { MesafeliHizmetSozlesmesi, OnBilgilendirmeFormu, type PurchaseInfo } from "@/components/purchase-documents";
+import { acceptPurchaseTermsAction } from "@/app/panel/purchase-terms-actions";
+import { purchaseBuyer } from "@/lib/purchase-terms";
 import {
   completeMockBoostPayment,
   failMockBoostPayment,
@@ -70,6 +74,16 @@ export default async function BoostGigPage(props: PageProps<"/panel/ilanlarim/[g
   }
 
   const running = isSponsored(gig.sponsoredUntil);
+  const docInfo: PurchaseInfo = {
+    service: `Prosinta Öne Çıkar (${days} gün) — “${gig.title}” ilanı`,
+    features: [
+      `${days} gün boyunca ilanın kategori ve arama sonuçlarında varsayılan sıralamada üst sıralarda gösterilmesi`,
+      "İlan kartında “Sponsorlu” etiketi",
+    ],
+    price,
+    duration: `${days} gün`,
+    ...(await purchaseBuyer(session.user.id)),
+  };
 
   return (
     <div className="max-w-xl">
@@ -136,6 +150,13 @@ export default async function BoostGigPage(props: PageProps<"/panel/ilanlarim/[g
       )}
 
       <div className="mt-6">
+        <PurchaseConsent
+          acceptAction={acceptPurchaseTermsAction.bind(null, "one-cikar", boost.id)}
+          initiallyAccepted={boost.termsAcceptedAt !== null}
+          consumer={docInfo.consumer}
+          onBilgilendirme={<OnBilgilendirmeFormu info={docInfo} />}
+          sozlesme={<MesafeliHizmetSozlesmesi info={docInfo} />}
+        >
         <PaymentMethodTabs
           cardContent={
             isPaytrTestMode || (isMockPayment && !isMockPaymentAllowed) ? undefined : isMockPayment ? (
@@ -161,6 +182,7 @@ export default async function BoostGigPage(props: PageProps<"/panel/ilanlarim/[g
             />
           }
         />
+        </PurchaseConsent>
       </div>
     </div>
   );

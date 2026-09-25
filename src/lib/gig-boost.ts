@@ -3,6 +3,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { getSettings } from "@/lib/settings";
 import { campaignPrice, livePerkPercents } from "@/lib/campaign";
 import { freeBoostDays, istanbulMonth, membershipSelect, membershipTier } from "@/lib/membership";
+import { assertTermsAccepted } from "@/lib/purchase-terms";
 
 export class GigBoostError extends Error {}
 
@@ -48,7 +49,7 @@ export async function findOrCreatePendingBoost(userId: string, gigId: string) {
     if (Number(existing.amount) === boostPriceTl && existing.days === boostDays) return existing;
     return prisma.gigBoost.update({
       where: { id: existing.id },
-      data: { amount: boostPriceTl, days: boostDays },
+      data: { amount: boostPriceTl, days: boostDays, termsAcceptedAt: null },
     });
   }
 
@@ -163,6 +164,7 @@ export async function markBoostPaid(boostId: string) {
 
 export async function notifyBoostBankTransfer(userId: string, gigId: string) {
   const boost = await findOrCreatePendingBoost(userId, gigId);
+  assertTermsAccepted(boost);
   return prisma.gigBoost.update({ where: { id: boost.id }, data: { provider: "havale" } });
 }
 

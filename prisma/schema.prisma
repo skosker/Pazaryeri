@@ -346,6 +346,8 @@ model ProPurchase {
   plan        MembershipPlan @default(PRO)
   /// 1 = aylık, 12 = yıllık. NULL: eski tek seferlik (süresiz) Pro satın alması.
   months      Int?
+  /// Ön Bilgilendirme Formu ve Mesafeli Hizmet Sözleşmesi'nin onaylandığı an (ödemeden önce zorunlu).
+  termsAcceptedAt DateTime?
   token       String?
   rawResponse Json?
   createdAt   DateTime      @default(now())
@@ -381,6 +383,8 @@ model GigBoost {
   /// Üyelikle gelen aylık ücretsiz Öne Çıkar hakkı ("2026-10"); ücretli satın almada NULL.
   /// Kullanıcı başına ayda bir tane olabilir.
   creditMonth String?
+  /// Ön Bilgilendirme Formu ve Mesafeli Hizmet Sözleşmesi'nin onaylandığı an (ücretli alımda zorunlu).
+  termsAcceptedAt DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 

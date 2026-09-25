@@ -22,6 +22,12 @@ import { ProBankTransferPanel } from "./pro-bank-transfer-panel";
 import { completeMockProPayment, failMockProPayment, notifyProBankTransferAction } from "./actions";
 import { PaymentMethodTabs } from "@/app/odeme/[orderId]/payment-method-tabs";
 import { PaytrEmbed } from "@/app/odeme/[orderId]/paytr-embed";
+import { PurchaseConsent } from "@/components/purchase-consent";
+import { MesafeliHizmetSozlesmesi, OnBilgilendirmeFormu, type PurchaseInfo } from "@/components/purchase-documents";
+import { acceptPurchaseTermsAction } from "@/app/panel/purchase-terms-actions";
+import { purchaseBuyer } from "@/lib/purchase-terms";
+import { getSettings } from "@/lib/settings";
+import { freeBoostDays, portfolioLimitFor } from "@/lib/membership";
 
 export default async function ProOdemePage(props: PageProps<"/panel/pro-ol/odeme">) {
   const session = await auth();
@@ -54,6 +60,23 @@ export default async function ProOdemePage(props: PageProps<"/panel/pro-ol/odeme
   const title = `${PLAN_LABEL[plan]} · ${PERIOD_LABEL[period]}`;
 
   const price = Number(purchase.amount);
+  const [settings, party] = await Promise.all([getSettings(), purchaseBuyer(session.user.id)]);
+  const boostDays = freeBoostDays(plan, settings);
+  const docInfo: PurchaseInfo = {
+    service: `Prosinta ${PLAN_LABEL[plan]} üyelik paketi (${PERIOD_LABEL[period]}, ${period === "yillik" ? "12 ay" : "1 ay"})`,
+    features: [
+      `${PLAN_LABEL[plan]} rozeti ve varsayılan sıralamada öncelik`,
+      `İlan başına ${portfolioLimitFor(plan, settings)} örnek iş görseli`,
+      ...(boostDays > 0 ? [`Her ay ${boostDays} gün ücretsiz Öne Çıkar hakkı`] : []),
+      ...(plan === "PRO_PLUS" ? ["Freelancer Bul listesinde üst sıralar"] : []),
+      ...(plan === "PRO_PLUS" && settings.plusBoostDiscountPercent > 0
+        ? [`Öne Çıkar satın alımlarında %${settings.plusBoostDiscountPercent} indirim`]
+        : []),
+    ],
+    price,
+    duration: period === "yillik" ? "12 ay" : "1 ay",
+    ...party,
+  };
   let paytrToken: string | null = null;
   let tokenError: string | null = null;
 
@@ -114,6 +137,13 @@ export default async function ProOdemePage(props: PageProps<"/panel/pro-ol/odeme
       )}
 
       <div className="mt-6">
+        <PurchaseConsent
+          acceptAction={acceptPurchaseTermsAction.bind(null, "uyelik", purchase.id)}
+          initiallyAccepted={purchase.termsAcceptedAt !== null}
+          consumer={docInfo.consumer}
+          onBilgilendirme={<OnBilgilendirmeFormu info={docInfo} />}
+          sozlesme={<MesafeliHizmetSozlesmesi info={docInfo} />}
+        >
         <PaymentMethodTabs
           cardContent={
             // Unlike order checkout, Pro's card option cannot fall back to hiding just
@@ -143,6 +173,7 @@ export default async function ProOdemePage(props: PageProps<"/panel/pro-ol/odeme
             />
           }
         />
+        </PurchaseConsent>
       </div>
     </div>
   );
