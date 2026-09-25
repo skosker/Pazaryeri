@@ -116,11 +116,11 @@ export function MembershipSettingsForm({ settings: s }: { settings: SiteSettings
           </SettingsCard>
 
           <SettingsCard
-            title="Komisyon"
-            hint="Tamamlanan siparişin hakedişinden kesilir; freelancer'a gösterilmez."
-            cols={1}
+            title="Komisyon ve KDV"
+            hint="Komisyon hakedişten kesilir, freelancer'a gösterilmez. KDV, Faturalar sayfasındaki matrah/KDV ayrımı içindir (fiyatlar KDV dahil)."
           >
             <NumberField label="Komisyon oranı (%)" name="commissionPercent" defaultValue={s.commissionPercent} step="0.01" />
+            <NumberField label="KDV oranı (%)" name="vatPercent" defaultValue={s.vatPercent} step="0.01" />
           </SettingsCard>
         </div>
       </div>

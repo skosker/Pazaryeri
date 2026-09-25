@@ -30,6 +30,7 @@ export async function saveMembershipSettingsAction(
     boostPriceTl: num(formData, "boostPriceTl"),
     boostDays: num(formData, "boostDays"),
     commissionPercent: num(formData, "commissionPercent"),
+    vatPercent: num(formData, "vatPercent"),
     founderEnabled: formData.get("founderEnabled") === "on",
     founderLimit: num(formData, "founderLimit"),
     corporateEnabled: formData.get("corporateEnabled") === "on",
@@ -103,6 +104,10 @@ export async function saveMembershipSettingsAction(
   s.yearlyDiscountPercent = round2(s.yearlyDiscountPercent!);
   s.plusBoostDiscountPercent = round2(s.plusBoostDiscountPercent!);
   s.boostPriceTl = round2(s.boostPriceTl!);
+  if (!(Number.isFinite(s.vatPercent) && s.vatPercent! >= 0 && s.vatPercent! <= 50)) {
+    return { error: "KDV oranı %0 ile %50 arasında olmalı." };
+  }
+  s.vatPercent = round2(s.vatPercent!);
   s.commissionPercent = round2(s.commissionPercent!);
   s.corporateMinTopUpTl = round2(s.corporateMinTopUpTl!);
   s.corporateBonusPercent = round2(s.corporateBonusPercent!);
