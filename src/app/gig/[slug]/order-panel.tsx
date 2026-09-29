@@ -83,7 +83,7 @@ export function OrderPanel({
             {campaign && (
               <span className="mr-2 text-sm text-slate-400 line-through">{formatPrice(pkg.price)} TL</span>
             )}
-            <span className={`text-2xl font-extrabold ${campaign ? "text-rose-600" : "text-brand-navy"}`}>
+            <span className={`text-2xl font-extrabold tracking-tight ${campaign ? "text-rose-600" : "text-brand-navy"}`}>
               {formatPrice(price)} TL
             </span>
             {campaign && (
