@@ -3,12 +3,14 @@ import Link from "next/link";
 import { SearchBar } from "@/components/search-bar";
 import { LinkButton } from "@/components/ui/button";
 import { HomeJobRequests, HomeOffers } from "@/components/home-offers";
+import { getSettings } from "@/lib/settings";
 
 // Fırsatlar and the newest job requests come from the database; refreshed every few minutes
 // (saving /admin/ayarlar refreshes it at once).
 export const revalidate = 300;
 
 export default async function Home() {
+  const settings = await getSettings();
   return (
     <div>
       <section className="relative overflow-hidden bg-brand-navy">
@@ -70,8 +72,15 @@ export default async function Home() {
                 Kayıt ol, ilk ilanını hemen yayınla ve kazanmaya başla.
               </p>
 
-              <div className="mt-8 flex items-center lg:mt-auto lg:h-14">
+              {/* The Pro link shares the button's row, so the row keeps lining up with the search bar. */}
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 lg:mt-auto lg:h-14 lg:justify-start">
                 <LinkButton href="/kayit?role=FREELANCER">Freelancer Ol</LinkButton>
+                <Link href="/uyelik" className="group text-sm font-semibold text-white/80 hover:text-white">
+                  {settings.jobRequestsEnabled
+                    ? `Pro ile öne çık, ayda ${settings.offerQuotaPro} teklif ver`
+                    : "Pro ile aramalarda öne çık"}{" "}
+                  <span className="inline-block transition group-hover:translate-x-0.5">→</span>
+                </Link>
               </div>
             </div>
           </div>

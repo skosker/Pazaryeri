@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
+import { restoreFounder, revokeFounder } from "@/lib/founders";
 
 export async function toggleSuspensionAction(userId: string) {
   const admin = await requireAdmin();
@@ -23,6 +24,16 @@ export async function toggleProFreelancerAction(userId: string) {
 
   await prisma.user.update({ where: { id: userId }, data: { isPro: !user.isPro } });
   revalidatePath("/admin/kullanicilar");
+}
+
+/** Kurucu Freelancer badge: take it back, or give it back after a mistaken revoke. */
+export async function setFounderAction(userId: string, keep: boolean) {
+  await requireAdmin();
+  if (keep) await restoreFounder(userId);
+  else await revokeFounder(userId);
+  revalidatePath(`/admin/kullanicilar/${userId}`);
+  revalidatePath(`/freelancer/${userId}`);
+  revalidatePath("/admin/ayarlar");
 }
 
 /**

@@ -117,6 +117,8 @@ model User {
   balance            Decimal   @default(0) @db.Decimal(12, 2)
   balanceTopUps      BalanceTopUp[]
   balanceEntries     BalanceEntry[]
+  /// Kurucu rozetinin verildiği an. Dolu ama founderNumber boşsa rozet admin tarafından
+  /// geri alınmıştır ve otomatik olarak yeniden verilmez.
   founderAt          DateTime?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
