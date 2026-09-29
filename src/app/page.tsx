@@ -2,8 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { SearchBar } from "@/components/search-bar";
 import { LinkButton } from "@/components/ui/button";
+import { HomeJobRequests, HomeOffers } from "@/components/home-offers";
 
-export default function Home() {
+// Fırsatlar and the newest job requests come from the database; refreshed every few minutes
+// (saving /admin/ayarlar refreshes it at once).
+export const revalidate = 300;
+
+export default async function Home() {
   return (
     <div>
       <section className="relative overflow-hidden bg-brand-navy">
@@ -70,6 +75,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <HomeOffers />
+      <HomeJobRequests />
 
       <section className="bg-white">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8">
