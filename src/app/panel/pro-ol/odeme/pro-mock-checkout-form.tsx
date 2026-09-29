@@ -56,7 +56,7 @@ export function ProMockCheckoutForm({
 
       <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
         <span className="text-sm text-slate-500">Ödenecek tutar</span>
-        <span className="text-xl font-extrabold tracking-tight text-brand-navy">{formatPrice(amount)} TL</span>
+        <span className="text-xl font-extrabold tracking-tight text-purple-600">{formatPrice(amount)} TL</span>
       </div>
 
       <button
