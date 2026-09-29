@@ -4,10 +4,35 @@ import { prisma } from "@/lib/prisma";
 import { unreadConversationCount } from "@/lib/messaging";
 import { PanelNav } from "./panel-nav";
 import { getSettings } from "@/lib/settings";
-import { getOpenCampaigns } from "@/lib/campaign";
+import { campaignStatus, getOpenCampaigns } from "@/lib/campaign";
 import { hasPaidPeriod, membershipSelect, membershipTier, untilFormat } from "@/lib/membership";
 import { ProBadge } from "@/components/pro-badge";
 import Link from "next/link";
+import { CampaignNudge, type CampaignNudgeData } from "./campaign-nudge";
+
+const dayFmt = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", timeZone: "Europe/Istanbul" });
+
+/** The open campaign to remind a freelancer about, while some approved gig is not in it. */
+async function campaignNudge(sellerId: string, campaign: Awaited<ReturnType<typeof getOpenCampaigns>>[number] | undefined, now: Date) {
+  if (!campaign) return null;
+  const [gigCount, joinedCount] = await Promise.all([
+    prisma.gig.count({ where: { sellerId, status: "APPROVED", published: true } }),
+    prisma.campaignEntry.count({ where: { campaignId: campaign.id, gig: { sellerId, status: "APPROVED", published: true } } }),
+  ]);
+  if (gigCount === 0 || joinedCount >= gigCount) return null;
+  const data: CampaignNudgeData = {
+    id: campaign.id,
+    name: campaign.name,
+    live: campaignStatus(campaign, now) === "yayinda",
+    startLabel: dayFmt.format(campaign.start),
+    daysLeft: Math.max(1, Math.ceil((campaign.end.getTime() - now.getTime()) / 86_400_000)),
+    gigCount,
+    joinedCount,
+    proDiscountPercent: campaign.proDiscountPercent,
+    boostDiscountPercent: campaign.boostDiscountPercent,
+  };
+  return data;
+}
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   // activeUser rather than the session: it reads the row, so a suspended account or one
@@ -34,6 +59,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     isFreelancer && user && hasPaidPeriod(user, now) && user.proUntil!.getTime() - now.getTime() < 7 * 24 * 60 * 60 * 1000
       ? user.proUntil!
       : null;
+  const nudge = isFreelancer ? await campaignNudge(account.id, openCampaigns[0], now) : null;
 
   const navItems = [
     { href: "/panel", label: "Genel Bakış" },
@@ -72,6 +98,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         </aside>
 
         <div className="min-w-0 flex-1">
+          {nudge && <CampaignNudge campaign={nudge} />}
           {endingSoon && (
             <p className="mb-6 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
               {tier === "PRO_PLUS" ? "Pro Plus" : "Pro"} üyeliğin {untilFormat.format(endingSoon)} tarihinde bitiyor.{" "}

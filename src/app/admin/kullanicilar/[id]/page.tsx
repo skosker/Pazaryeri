@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { orderStatusLabel, orderStatusColor } from "@/lib/order-status";
 import { formatPrice } from "@/lib/format-price";
 import { maskIban } from "@/lib/iban";
+import { FounderButton } from "../founder-button";
 
 const roleLabel: Record<string, string> = {
   BUYER: "Alıcı",
@@ -39,6 +40,8 @@ export default async function AdminUserDetailPage(props: PageProps<"/admin/kulla
       ...membershipSelect,
       proTrialUsedAt: true,
       synthetic: true,
+      founderNumber: true,
+      founderAt: true,
       emailVerified: true,
       createdAt: true,
       city: true,
@@ -120,6 +123,19 @@ export default async function AdminUserDetailPage(props: PageProps<"/admin/kulla
             {hasPaidPeriod(user) ? ` · ${untilFormat.format(user.proUntil!)} tarihine kadar` : " · Süresiz"}
             {user.proTrialUsedAt ? " · Deneme kullandı" : ""}
           </span>
+        )}
+        {user.founderNumber !== null ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-fuchsia-50 py-0.5 pl-2.5 text-xs font-semibold text-fuchsia-700">
+            Kurucu #{user.founderNumber}
+            <FounderButton userId={user.id} name={user.name} active />
+          </span>
+        ) : (
+          user.founderAt && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 py-0.5 pl-2.5 text-xs font-semibold text-slate-500">
+              Kurucu rozeti geri alındı
+              <FounderButton userId={user.id} name={user.name} active={false} />
+            </span>
+          )
         )}
         {user.synthetic && (
           <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500">
