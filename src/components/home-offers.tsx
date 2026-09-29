@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { getOpenCampaigns, campaignStatus } from "@/lib/campaign";
 import { budgetLabel, openRequestWhere } from "@/lib/job-requests";
+import { ShineOnView } from "@/components/shine-on-view";
 
 const dayFmt = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", timeZone: "Europe/Istanbul" });
 const tl = (n: number) => `${n.toLocaleString("tr-TR")} TL`;
@@ -86,7 +87,9 @@ export async function HomeOffers() {
           </svg>
           Fırsatlar
         </h2>
-        <div className={`mt-6 grid grid-cols-1 gap-4 ${offers.length === 3 ? "lg:grid-cols-3" : offers.length === 2 ? "md:grid-cols-2" : ""}`}>
+        <ShineOnView
+          className={`mt-6 grid grid-cols-1 gap-4 ${offers.length === 3 ? "lg:grid-cols-3" : offers.length === 2 ? "md:grid-cols-2" : ""}`}
+        >
           {offers.map((o, i) => {
             const dark = o.key === "kampanya";
             return (
@@ -109,7 +112,7 @@ export async function HomeOffers() {
               </Link>
             );
           })}
-        </div>
+        </ShineOnView>
       </div>
     </section>
   );

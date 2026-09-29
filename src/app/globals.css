@@ -35,9 +35,10 @@ body {
   color: transparent;
 }
 
-/* Fırsatlar cards on the home page: a soft light sweeps across every few seconds.
-   Off for people who ask their system for less motion. */
-@keyframes offer-shine {
+/* Home page shine: a soft light sweeping across. The hero badge repeats it every few
+   seconds; the Fırsatlar cards play it once each, the first time they come into view
+   (ShineOnView sets data-shine="on"). Off for people who ask their system for less motion. */
+@keyframes shine-sweep {
   0% {
     transform: translateX(-150%) skewX(-20deg);
   }
@@ -47,10 +48,12 @@ body {
   }
 }
 
+/* A Fırsatlar card. Its light is tinted: white would vanish on the pale cards. */
 .offer-shine {
   position: relative;
   overflow: hidden;
   isolation: isolate;
+  --shine-light: linear-gradient(90deg, transparent, rgba(217, 70, 239, 0.16), rgba(129, 140, 248, 0.2), transparent);
 }
 
 /* The light passes behind the text so it never washes the words out. */
@@ -59,20 +62,31 @@ body {
   z-index: 1;
 }
 
-.offer-shine::after {
+/* The light itself, parked out of sight until it moves; its parent clips it. */
+.offer-shine::after,
+.shine-sweep::after {
   content: "";
   position: absolute;
   inset: 0 auto 0 0;
   width: 45%;
-  background: linear-gradient(90deg, transparent, rgba(217, 70, 239, 0.16), rgba(129, 140, 248, 0.2), transparent);
+  background: var(--shine-light, linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent));
   transform: translateX(-150%) skewX(-20deg);
-  animation: offer-shine 5s ease-in-out infinite;
-  animation-delay: var(--shine-delay, 0s);
   pointer-events: none;
 }
 
+.shine-sweep::after {
+  animation: shine-sweep 5s ease-in-out 0.5s infinite;
+}
+
+/* A single run; "both" keeps the light out of sight before it starts and after it ends. */
+[data-shine="on"] .offer-shine::after {
+  animation: shine-sweep 5s ease-in-out both;
+  animation-delay: calc(0.3s + var(--shine-delay, 0s));
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .offer-shine::after {
+  .offer-shine::after,
+  .shine-sweep::after {
     display: none;
   }
 }

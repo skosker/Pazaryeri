@@ -30,7 +30,9 @@ export default async function Home() {
                 aria-hidden
                 className="brand-gradient pointer-events-none absolute -inset-1.5 -z-10 rounded-full opacity-60 blur-lg"
               />
-              <span className="flex items-center gap-2.5">
+              {/* A light sweeping across every few seconds (globals.css), clipped to the pill. */}
+              <span aria-hidden className="shine-sweep pointer-events-none absolute inset-0 overflow-hidden rounded-full" />
+              <span className="relative flex items-center gap-2.5">
                 <svg className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
                   <path d="M10 1.5l1.7 4.6 4.6 1.7-4.6 1.7-1.7 4.6-1.7-4.6L3.7 7.8l4.6-1.7L10 1.5z" />
                 </svg>
