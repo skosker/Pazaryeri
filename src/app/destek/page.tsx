@@ -130,7 +130,7 @@ function buildFaqGroups(settings: SiteSettings, campaigns: CampaignRow[]): FaqGr
           : []),
         {
           q: "Kaç ilan yayınlayabilirim?",
-          a: "Bir sınır yok — istediğin kadar kategori ve alanda ilan açabilirsin.",
+          a: "Bir sınır yok — istediğin kadar kategori ve alanda ilan yayınlayabilirsin.",
         },
       ],
     },

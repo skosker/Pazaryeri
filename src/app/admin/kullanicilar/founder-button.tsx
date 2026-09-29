@@ -11,7 +11,7 @@ export function FounderButton({ userId, name, active }: { userId: string; name: 
     if (
       active &&
       !window.confirm(
-        `"${name}" adlı kullanıcının Kurucu Freelancer rozeti geri alınsın mı? Rozet profilinden ve ilanlarından kalkar, kontenjandaki yeri boşalır ve ilan açsa da otomatik olarak yeniden verilmez.`
+        `"${name}" adlı kullanıcının Kurucu Freelancer rozeti geri alınsın mı? Rozet profilinden ve ilanlarından kalkar, kontenjandaki yeri boşalır ve ilan yayınlasa da otomatik olarak yeniden verilmez.`
       )
     ) {
       return;

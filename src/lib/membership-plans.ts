@@ -85,7 +85,7 @@ export async function buildPlanCards(
       name: "Ücretsiz",
       tagline: "Başlamak için ihtiyacın olan her şey.",
       prices: null,
-      note: "Süre sınırı yok, kart bilgisi gerekmez. Hemen ilan açıp satışa başla.",
+      note: "Süre sınırı yok, kart bilgisi gerekmez. Hemen ilan yayınlayıp satışa başla.",
       badge: viewer?.role === "FREELANCER" && tier === null ? "Mevcut Paketin" : undefined,
       cta: cta("FREE"),
       features: [
