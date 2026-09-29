@@ -34,3 +34,45 @@ body {
   background-clip: text;
   color: transparent;
 }
+
+/* Fırsatlar cards on the home page: a soft light sweeps across every few seconds.
+   Off for people who ask their system for less motion. */
+@keyframes offer-shine {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  45%,
+  100% {
+    transform: translateX(350%) skewX(-20deg);
+  }
+}
+
+.offer-shine {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* The light passes behind the text so it never washes the words out. */
+.offer-shine > * {
+  position: relative;
+  z-index: 1;
+}
+
+.offer-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 45%;
+  background: linear-gradient(90deg, transparent, rgba(217, 70, 239, 0.16), rgba(129, 140, 248, 0.2), transparent);
+  transform: translateX(-150%) skewX(-20deg);
+  animation: offer-shine 5s ease-in-out infinite;
+  animation-delay: var(--shine-delay, 0s);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .offer-shine::after {
+    display: none;
+  }
+}
