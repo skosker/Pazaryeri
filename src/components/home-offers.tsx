@@ -77,9 +77,13 @@ export async function HomeOffers() {
   if (offers.length === 0) return null;
 
   return (
-    <section className="bg-slate-50">
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-extrabold tracking-tight text-brand-navy sm:text-3xl">Fırsatlar</h2>
+    // Pulled up over the bottom of the hero: the heading sits on the navy and the cards
+    // straddle its edge, so the grey starts exactly where the hero ends (top-24 / top-28
+    // match the -mt below).
+    <section className="relative z-10 -mt-24 lg:-mt-28">
+      <div aria-hidden className="absolute inset-x-0 bottom-0 top-24 bg-slate-50 lg:top-28" />
+      <div className="relative mx-auto max-w-6xl px-4 pb-14 sm:px-6 lg:px-8">
+        <h2 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">Fırsatlar</h2>
         <div className={`mt-6 grid grid-cols-1 gap-4 ${offers.length === 3 ? "lg:grid-cols-3" : offers.length === 2 ? "md:grid-cols-2" : ""}`}>
           {offers.map((o) => {
             const dark = o.key === "kampanya";
@@ -87,7 +91,7 @@ export async function HomeOffers() {
               <Link
                 key={o.key}
                 href={o.href}
-                className={`group flex flex-col rounded-2xl bg-gradient-to-br p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${o.tone}`}
+                className={`group flex flex-col rounded-2xl bg-gradient-to-br p-6 shadow-lg shadow-slate-900/10 transition hover:-translate-y-0.5 hover:shadow-xl ${o.tone}`}
               >
                 <span className={`text-xs font-bold uppercase tracking-wide ${dark ? "text-white/80" : "text-purple-600"}`}>
                   {o.eyebrow}

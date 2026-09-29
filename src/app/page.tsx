@@ -21,7 +21,7 @@ export default async function Home() {
           className="pointer-events-none absolute -bottom-40 -left-20 h-96 w-96 rounded-full bg-gradient-to-br from-indigo-600 to-purple-700 opacity-20 blur-3xl"
         />
 
-        <div className="relative mx-auto max-w-6xl px-4 pb-20 pt-10 sm:px-6 lg:px-8 lg:pb-28 lg:pt-14">
+        <div className="relative mx-auto max-w-6xl px-4 pb-32 pt-10 sm:px-6 lg:px-8 lg:pb-44 lg:pt-14">
           <div className="flex justify-center">
             <span className="brand-gradient relative inline-flex items-center rounded-full px-7 py-3 text-center text-sm font-bold tracking-tight text-white shadow-lg shadow-fuchsia-500/40 ring-1 ring-inset ring-white/25 sm:text-base">
               {/* A blurred copy of the pill bleeding past its edge, so the badge reads as
