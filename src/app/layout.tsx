@@ -8,9 +8,11 @@ import { prisma } from "@/lib/prisma";
 import { getLiveCampaign } from "@/lib/campaign";
 import { CampaignBanner } from "@/components/campaign-banner";
 
+// latin-ext carries ğ, ş and İ: preloaded with the rest so Turkish words never flash in a
+// fallback font on first load.
 const geistSans = Geist({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
 });
 
 const geistMono = Geist_Mono({
