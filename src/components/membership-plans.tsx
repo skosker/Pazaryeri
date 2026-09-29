@@ -43,6 +43,9 @@ export function MembershipPlans({
   campaignNote?: string | null;
 }) {
   const [period, setPeriod] = useState<"aylik" | "yillik">("aylik");
+  // The card under the mouse takes the highlighted look; with none, the recommended one keeps it.
+  const [hovered, setHovered] = useState<string | null>(null);
+  const activeKey = hovered ?? plans.find((p) => p.highlight)?.key ?? null;
 
   return (
     <div>
@@ -73,18 +76,20 @@ export function MembershipPlans({
 
       {campaignNote && <p className="mt-3 text-center text-sm font-semibold text-rose-600">{campaignNote}</p>}
 
-      <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-3 md:items-start">
+      <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-3 md:items-start" onMouseLeave={() => setHovered(null)}>
         {plans.map((plan) => {
           const price = plan.prices?.[period] ?? null;
           const discounted = price !== null && price.listPerMonth > price.perMonth;
+          const active = plan.key === activeKey;
           return (
             <section
               key={plan.key}
-              className={`relative flex flex-col rounded-2xl border bg-white p-6 shadow-sm ${
-                plan.highlight ? "border-purple-300 shadow-lg shadow-purple-100 md:-mt-4 md:pb-10" : "border-slate-200"
+              onMouseEnter={() => setHovered(plan.key)}
+              className={`relative flex flex-col rounded-2xl border bg-white p-6 shadow-sm transition-all duration-200 ${
+                active ? "border-purple-300 shadow-lg shadow-purple-100 md:-mt-4 md:pb-10" : "border-slate-200"
               }`}
             >
-              <div className={`absolute inset-x-0 top-0 h-1.5 rounded-t-2xl ${plan.highlight ? "brand-gradient" : "bg-slate-200"}`} />
+              <div className={`absolute inset-x-0 top-0 h-1.5 rounded-t-2xl ${active ? "brand-gradient" : "bg-slate-200"}`} />
               <div className="flex items-center justify-between gap-2">
                 <h2 className="text-xl font-bold text-brand-navy">{plan.name}</h2>
                 {plan.badge && (
@@ -101,7 +106,7 @@ export function MembershipPlans({
                 ) : (
                   <>
                     <p className="flex items-baseline gap-1">
-                      <span className={`text-4xl font-extrabold tracking-tight ${discounted ? "text-rose-600" : "text-brand-navy"}`}>
+                      <span className={`text-4xl font-extrabold tracking-tight ${discounted ? "text-emerald-600" : "text-purple-600"}`}>
                         {formatPrice(price.perMonth)} TL
                       </span>
                       <span className="text-sm text-slate-500">/ ay</span>

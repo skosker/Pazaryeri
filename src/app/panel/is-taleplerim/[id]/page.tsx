@@ -168,7 +168,7 @@ export default async function ManageJobRequestPage(props: PageProps<"/panel/is-t
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-extrabold tracking-tight text-brand-navy">{formatPrice(Number(o.price))} TL</p>
+                    <p className="text-lg font-extrabold tracking-tight text-purple-600">{formatPrice(Number(o.price))} TL</p>
                     <p className="text-xs text-slate-500">{o.deliveryDays} günde teslim</p>
                   </div>
                 </div>

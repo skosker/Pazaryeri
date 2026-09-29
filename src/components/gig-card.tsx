@@ -80,7 +80,7 @@ export function GigCard({ gig }: { gig: GigCardData }) {
             {gig.campaign && (
               <p className="text-[11px] text-slate-400 line-through">{formatPrice(gig.campaign.listPrice)} TL</p>
             )}
-            <p className={`text-base font-extrabold tracking-tight ${gig.campaign ? "text-rose-600" : "text-brand-navy"}`}>
+            <p className={`text-base font-extrabold tracking-tight ${gig.campaign ? "text-rose-600" : "text-purple-600"}`}>
               {formatPrice(gig.startingPrice)} TL
             </p>
             <p className="text-[11px] text-slate-400">Başlangıç</p>
