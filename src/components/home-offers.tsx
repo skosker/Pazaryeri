@@ -79,15 +79,23 @@ export async function HomeOffers() {
   return (
     <section className="bg-slate-50">
       <div className="mx-auto max-w-6xl px-4 pb-14 pt-10 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-extrabold tracking-tight text-brand-navy sm:text-3xl">Fırsatlar</h2>
+        <h2 className="flex items-center gap-2 text-2xl font-extrabold tracking-tight text-brand-navy sm:text-3xl">
+          <svg className="h-6 w-6 text-fuchsia-500 sm:h-7 sm:w-7" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+            <path d="M10 1.5l1.7 4.6 4.6 1.7-4.6 1.7-1.7 4.6-1.7-4.6L3.7 7.8l4.6-1.7L10 1.5z" />
+            <path d="M16 12.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8.8-2z" opacity=".7" />
+          </svg>
+          Fırsatlar
+        </h2>
         <div className={`mt-6 grid grid-cols-1 gap-4 ${offers.length === 3 ? "lg:grid-cols-3" : offers.length === 2 ? "md:grid-cols-2" : ""}`}>
-          {offers.map((o) => {
+          {offers.map((o, i) => {
             const dark = o.key === "kampanya";
             return (
               <Link
                 key={o.key}
                 href={o.href}
-                className={`group flex flex-col rounded-2xl bg-gradient-to-br p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${o.tone}`}
+                // One card after the other, not all at once.
+                style={{ "--shine-delay": `${i * 0.6}s` } as React.CSSProperties}
+                className={`offer-shine group flex flex-col rounded-2xl bg-gradient-to-br p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${o.tone}`}
               >
                 <span className={`text-xs font-bold uppercase tracking-wide ${dark ? "text-white/80" : "text-purple-600"}`}>
                   {o.eyebrow}
