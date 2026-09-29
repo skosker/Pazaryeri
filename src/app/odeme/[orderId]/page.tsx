@@ -129,7 +129,7 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
           )}
           <div className="mt-2 flex justify-between border-t border-emerald-200 pt-2 font-bold text-brand-navy">
             <span>Ödenecek tutar</span>
-            <span>{formatPrice(amount)} TL</span>
+            <span className="font-extrabold tracking-tight">{formatPrice(amount)} TL</span>
           </div>
         </div>
       )}

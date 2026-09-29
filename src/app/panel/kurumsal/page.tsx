@@ -50,7 +50,7 @@ export default async function CorporateAccountPage() {
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 sm:col-span-1">
           <p className="text-xs uppercase tracking-wide text-emerald-700">Bakiye</p>
-          <p className="mt-2 text-3xl font-extrabold text-emerald-700">{formatPrice(account.balance)} TL</p>
+          <p className="mt-2 text-3xl font-extrabold tracking-tight text-emerald-700">{formatPrice(account.balance)} TL</p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600 sm:col-span-2">
           Bakiyen, siparişlerin ödeme sayfasında <strong>Kurumsal Bakiye ile Öde</strong> seçeneğiyle harcanır; tüm

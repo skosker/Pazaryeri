@@ -71,7 +71,7 @@ export default async function JobRequestPage(props: PageProps<"/is-talepleri/[id
         <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
           <div className="rounded-xl bg-slate-50 px-3 py-2">
             <p className="text-[11px] uppercase text-slate-400">Bütçe</p>
-            <p className="font-semibold text-brand-navy">{budgetLabel(request.budgetMin, request.budgetMax)}</p>
+            <p className="font-extrabold tracking-tight text-brand-navy">{budgetLabel(request.budgetMin, request.budgetMax)}</p>
           </div>
           <div className="rounded-xl bg-slate-50 px-3 py-2">
             <p className="text-[11px] uppercase text-slate-400">Teslim</p>

@@ -103,7 +103,7 @@ export default async function JobRequestsPage(props: PageProps<"/is-talepleri">)
                   <p className="mt-1 line-clamp-2 text-sm text-slate-500">{r.description}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-brand-navy">{budgetLabel(r.budgetMin, r.budgetMax)}</p>
+                  <p className="text-lg font-extrabold tracking-tight text-brand-navy">{budgetLabel(r.budgetMin, r.budgetMax)}</p>
                   <p className="text-xs text-slate-500">{r.deliveryDays} günde teslim</p>
                 </div>
               </div>

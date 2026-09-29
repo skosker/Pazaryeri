@@ -101,7 +101,7 @@ export function MembershipPlans({
                 ) : (
                   <>
                     <p className="flex items-baseline gap-1">
-                      <span className={`text-4xl font-bold ${discounted ? "text-rose-600" : "text-brand-navy"}`}>
+                      <span className={`text-4xl font-extrabold tracking-tight ${discounted ? "text-rose-600" : "text-brand-navy"}`}>
                         {formatPrice(price.perMonth)} TL
                       </span>
                       <span className="text-sm text-slate-500">/ ay</span>

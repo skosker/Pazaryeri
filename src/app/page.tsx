@@ -91,7 +91,7 @@ export default async function Home() {
       <HomeJobRequests />
 
       <section className="bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl px-4 pb-20 pt-10 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-3xl font-extrabold tracking-tight text-brand-navy sm:text-4xl">
               Neden <span className="text-purple-600">Prosinta</span>?

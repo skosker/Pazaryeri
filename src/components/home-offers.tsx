@@ -173,7 +173,7 @@ export async function HomeJobRequests() {
                       {r._count.offers > 0 ? `${r._count.offers} teklif` : "İlk teklifi sen ver"}
                     </p>
                   </div>
-                  <span className="shrink-0 text-sm font-bold text-brand-navy">{budgetLabel(r.budgetMin, r.budgetMax)}</span>
+                  <span className="shrink-0 text-sm font-extrabold tracking-tight text-brand-navy">{budgetLabel(r.budgetMin, r.budgetMax)}</span>
                 </Link>
               ))}
             </div>

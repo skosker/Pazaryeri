@@ -69,12 +69,13 @@ body {
   position: absolute;
   inset: 0 auto 0 0;
   width: 45%;
-  background: var(--shine-light, linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent));
+  background: var(--shine-light, linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.35), transparent));
   transform: translateX(-150%) skewX(-20deg);
   pointer-events: none;
 }
 
 .shine-sweep::after {
+  width: 55%;
   animation: shine-sweep 5s ease-in-out 0.5s infinite;
 }
 
