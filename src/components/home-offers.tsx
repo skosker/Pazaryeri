@@ -46,7 +46,7 @@ export async function HomeOffers() {
             tone: "from-rose-600 via-fuchsia-600 to-indigo-600 text-white",
             eyebrow: `Yakında · ${dayFmt.format(campaign.start)}`,
             title: campaign.name,
-            text: "Freelancer'sın? İlanını şimdiden kampanyaya ekle, indirimli ilanlar arasında öne çık.",
+            text: "Freelancer'lar ilanlarını şimdiden kampanyaya ekleyebilir; katılan ilanlar kampanya boyunca öne çıkar.",
             cta: "İlanını Ekle",
             href: "/panel/kampanyalar",
           }
