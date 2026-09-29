@@ -77,8 +77,8 @@ export default async function Home() {
                 <LinkButton href="/kayit?role=FREELANCER">Freelancer Ol</LinkButton>
                 <Link href="/uyelik" className="group text-sm font-semibold text-white/80 hover:text-white">
                   {settings.jobRequestsEnabled
-                    ? `Pro ile öne çık, ayda ${settings.offerQuotaPro} teklif ver`
-                    : "Pro ile aramalarda öne çık"}{" "}
+                    ? `Pro üyelik ile öne çık, ayda ${settings.offerQuotaPro} teklif ver`
+                    : "Pro üyelik ile aramalarda öne çık"}{" "}
                   <span className="inline-block transition group-hover:translate-x-0.5">→</span>
                 </Link>
               </div>
