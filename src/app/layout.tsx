@@ -5,7 +5,7 @@ import "./globals.css";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { prisma } from "@/lib/prisma";
-import { getLiveCampaign } from "@/lib/campaign";
+import { campaignGigCount, campaignPerkText, getLiveCampaign } from "@/lib/campaign";
 import { CampaignBanner } from "@/components/campaign-banner";
 
 // latin-ext carries ğ, ş and İ: preloaded with the rest so Turkish words never flash in a
@@ -49,6 +49,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     .findMany({ orderBy: { order: "asc" }, take: 6, select: { name: true, slug: true } })
     .catch(() => []);
   const liveCampaign = await getLiveCampaign().catch(() => null);
+  // No gig in it yet: point the strip at the campaign's own perks, when it has any.
+  const bannerPerks =
+    liveCampaign && (await campaignGigCount(liveCampaign.id).catch(() => 0)) === 0
+      ? campaignPerkText(liveCampaign)
+      : null;
 
   return (
     <html
@@ -56,7 +61,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
-        {liveCampaign && <CampaignBanner name={liveCampaign.name} />}
+        {liveCampaign && <CampaignBanner name={liveCampaign.name} perkText={bannerPerks} />}
         <Header />
         <main className="flex-1">{children}</main>
         <Footer categories={categories.map((c) => ({ label: c.name, slug: c.slug }))} />
