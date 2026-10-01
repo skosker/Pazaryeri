@@ -46,6 +46,25 @@ export async function getLiveCampaign(now = new Date()): Promise<CampaignRow | n
   return (await getCampaigns()).find((c) => campaignStatus(c, now) === "yayinda") ?? null;
 }
 
+/** Live gigs signed up to the campaign; none means it only discounts Prosinta's own services. */
+export async function campaignGigCount(campaignId: string): Promise<number> {
+  return prisma.campaignEntry.count({
+    where: { campaignId, gig: { published: true, status: "APPROVED" } },
+  });
+}
+
+/**
+ * "Pro üyelik %30, Öne Çıkar %50 indirimli": the campaign's own perks for freelancers, or
+ * null when it has none.
+ */
+export function campaignPerkText(c: Pick<CampaignRow, "proDiscountPercent" | "boostDiscountPercent">): string | null {
+  const parts = [
+    c.proDiscountPercent > 0 ? `Pro üyelik %${c.proDiscountPercent}` : null,
+    c.boostDiscountPercent > 0 ? `Öne Çıkar %${c.boostDiscountPercent}` : null,
+  ].filter(Boolean);
+  return parts.length ? `${parts.join(", ")} indirimli` : null;
+}
+
 /** Campaigns freelancers can join or leave right now (switched on and not over). */
 export async function getOpenCampaigns(now = new Date()): Promise<CampaignRow[]> {
   return (await getCampaigns()).filter((c) => {

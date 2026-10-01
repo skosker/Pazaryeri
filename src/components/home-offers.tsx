@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
-import { getOpenCampaigns, campaignStatus } from "@/lib/campaign";
+import { campaignGigCount, campaignPerkText, campaignStatus, getOpenCampaigns } from "@/lib/campaign";
 import { budgetLabel, openRequestWhere } from "@/lib/job-requests";
 import { ShineOnView } from "@/components/shine-on-view";
 
@@ -31,8 +31,20 @@ export async function HomeOffers() {
   if (campaign) {
     const live = campaignStatus(campaign, now) === "yayinda";
     const daysLeft = Math.max(1, Math.ceil((campaign.end.getTime() - now.getTime()) / 86_400_000));
+    // Live but no gig has joined: offer the campaign's membership/Öne Çıkar perks instead.
+    const perkText = live && (await campaignGigCount(campaign.id)) === 0 ? campaignPerkText(campaign) : null;
     offers.push(
-      live
+      perkText
+        ? {
+            key: "kampanya",
+            tone: "from-rose-600 via-fuchsia-600 to-indigo-600 text-white",
+            eyebrow: daysLeft <= 1 ? "Son gün" : `Bitmesine ${daysLeft} gün`,
+            title: campaign.name,
+            text: `${campaign.tagline ? `${campaign.tagline} ` : ""}Freelancer'lara özel: ${perkText}.`,
+            cta: "Paketleri Gör",
+            href: "/uyelik",
+          }
+        : live
         ? {
             key: "kampanya",
             tone: "from-rose-600 via-fuchsia-600 to-indigo-600 text-white",
