@@ -12,7 +12,7 @@ import {
   UYELIK_SOZLESMESI_VERSION,
   termsAcceptance,
 } from "@/lib/terms-acceptance";
-import { PrintButton } from "./print-button";
+import { PrintButton } from "@/components/print-button";
 
 const dateTimeFmt = new Intl.DateTimeFormat("tr-TR", {
   day: "2-digit",

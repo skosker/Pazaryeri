@@ -13,6 +13,7 @@ const navGroups: NavGroup[] = [
       { href: "/admin/hakedisler", label: "Hakedişler" },
       { href: "/admin/hakedis-odemeleri", label: "Hakediş Ödemeleri" },
       { href: "/admin/gelir", label: "Gelir Raporu" },
+      { href: "/admin/aracilik", label: "Aracılık Dökümleri" },
       { href: "/admin/faturalar", label: "Faturalar" },
       { href: "/admin/freelancer-ibanlari", label: "Freelancer IBAN’ları" },
       { href: "/admin/banka", label: "Şirket Banka Hesapları" },
