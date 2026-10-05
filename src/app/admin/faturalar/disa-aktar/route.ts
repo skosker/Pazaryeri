@@ -1,16 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { activeUser } from "@/lib/active-user";
+import { csvFile } from "@/lib/csv";
 import { getSettings } from "@/lib/settings";
 import { INVOICE_KIND_LABEL, listInvoiceRows, parseInvoiceKind, splitVat } from "@/lib/invoices";
 
 const dateFmt = new Intl.DateTimeFormat("tr-TR", { dateStyle: "short", timeZone: "Europe/Istanbul" });
-
-/** Turkish Excel: ";" between columns, "," for decimals, a BOM so the letters come out right. */
-function cell(value: string | number | null | undefined): string {
-  const text =
-    typeof value === "number" ? value.toFixed(2).replace(".", ",") : String(value ?? "");
-  return /[";\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-}
 
 export async function GET(request: NextRequest) {
   const user = await activeUser();
@@ -30,9 +24,9 @@ export async function GET(request: NextRequest) {
       dateFmt.format(r.date), INVOICE_KIND_LABEL[r.kind], r.customer.name, r.customer.email, r.customer.companyName,
       r.customer.taxOffice, r.customer.taxNumber, r.customer.address, r.service, base, `%${settings.vatPercent}`, vat,
       r.total, r.invoiceNo, `${r.kind}:${r.id}`,
-    ].map(cell).join(";");
+    ];
   });
-  const csv = "﻿" + [header.join(";"), ...lines].join("\r\n");
+  const csv = csvFile([header, ...lines]);
   const stamp = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Istanbul" }).format(new Date());
   return new NextResponse(csv, {
     headers: {
