@@ -148,7 +148,17 @@ export default async function AdminUserDetailPage(props: PageProps<"/admin/kulla
           </span>
         )}
       </div>
-      <p className="mt-1 text-sm text-slate-500">{user.email}</p>
+      <p className="mt-1 text-sm text-slate-500">
+        {user.email}
+        {!user.synthetic && (
+          <>
+            {" · "}
+            <Link href={`/admin/sozlesmeler/${user.id}`} className="font-semibold text-purple-700 hover:underline">
+              Üyelik Sözleşmesi
+            </Link>
+          </>
+        )}
+      </p>
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <InfoCard label="Kayıt Tarihi" value={dateFmt.format(user.createdAt)} />

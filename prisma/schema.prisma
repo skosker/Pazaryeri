@@ -80,6 +80,11 @@ model User {
   proTrialUsedAt     DateTime?
   /// Bitiş hatırlatmasının gönderildiği proUntil (aynı dönem için ikinci e-posta gitmesin).
   proReminderFor     DateTime?
+  /// Kayıt formunda Üyelik Sözleşmesi ve Kullanım Şartları'nın onaylandığı an ve o anki sözleşme
+  /// sürümü ("25 Eylül 2026"). Bu alanlar eklenmeden önce açılan hesaplarda boştur; geriye dönük
+  /// doldurulmaz.
+  termsAcceptedAt    DateTime?
+  termsVersion       String?
   /// Kampanya ve fırsat duyurusu e-postaları; e-postadaki bağlantıyla ya da Profilim'den kapatılır.
   campaignEmails     Boolean   @default(true)
   /// Kategorisinde açılan yeni iş talepleri için günlük özet e-postası (freelancer).
