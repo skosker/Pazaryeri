@@ -20,7 +20,7 @@ const marketplaceLinks: FooterLink[] = [
  */
 export function Footer({ categories }: { categories: FooterCategory[] }) {
   return (
-    <footer className="bg-brand-navy text-sm text-slate-300">
+    <footer className="bg-brand-navy text-sm text-slate-300 print:hidden">
       <div className="mx-auto max-w-7xl px-4 pb-6 pt-14 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:grid-cols-[1.6fr_1fr_1fr_1fr_1.4fr]">
           <div className="col-span-2 sm:col-span-3 lg:col-span-1">

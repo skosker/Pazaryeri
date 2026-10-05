@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { registerSchema, type RegisterInput } from "@/lib/validation";
 import { sendWelcomeVerificationEmail } from "@/lib/email";
 import { referrerByCode } from "@/lib/referrals";
+import { UYELIK_SOZLESMESI_VERSION } from "@/lib/terms-acceptance";
 
 export class RegisterError extends Error {}
 
@@ -26,7 +27,17 @@ export async function registerUser(input: RegisterInput) {
   const passwordHash = await bcrypt.hash(password, 10);
 
   const user = await prisma.user.create({
-    data: { name, email, passwordHash, role, ...(company ?? {}), referredById: referrer?.id ?? null },
+    data: {
+      name,
+      email,
+      passwordHash,
+      role,
+      ...(company ?? {}),
+      referredById: referrer?.id ?? null,
+      // registerSchema refuses the form without the agreement box ticked: record when, and which text.
+      termsAcceptedAt: new Date(),
+      termsVersion: UYELIK_SOZLESMESI_VERSION,
+    },
   });
 
   const token = randomUUID();

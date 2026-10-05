@@ -10,7 +10,7 @@ export function CampaignBanner({ name, perkText }: { name: string; perkText: str
   return (
     <Link
       href={perksOnly ? "/uyelik" : "/kampanya"}
-      className="block bg-gradient-to-r from-rose-600 via-fuchsia-600 to-indigo-600 px-4 py-2 text-center text-sm font-semibold text-white hover:opacity-95"
+      className="block bg-gradient-to-r from-rose-600 via-fuchsia-600 to-indigo-600 px-4 py-2 text-center text-sm font-semibold text-white hover:opacity-95 print:hidden"
     >
       {perksOnly ? `${name}: Freelancer'lara ${perkText}! Paketleri Gör →` : `${name} başladı! İndirimli hizmetleri gör →`}
     </Link>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal-page";
 import { UyelikSozlesmesiText } from "@/components/legal-texts";
+import { UYELIK_SOZLESMESI_VERSION } from "@/lib/terms-acceptance";
 
 export const metadata: Metadata = { title: "Üyelik Sözleşmesi" };
 
@@ -10,7 +11,7 @@ export const metadata: Metadata = { title: "Üyelik Sözleşmesi" };
 // dolduruldu; unvan farklıysa buradan düzeltilir.
 export default function UyelikSozlesmesiPage() {
   return (
-    <LegalPage title="Üyelik Sözleşmesi" updatedAt="25 Eylül 2026">
+    <LegalPage title="Üyelik Sözleşmesi" updatedAt={UYELIK_SOZLESMESI_VERSION}>
       <UyelikSozlesmesiText />
     </LegalPage>
   );

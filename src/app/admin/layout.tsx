@@ -24,6 +24,7 @@ const navGroups: NavGroup[] = [
     items: [
       { href: "/admin/siparisler", label: "Siparişler" },
       { href: "/admin/kullanicilar", label: "Kullanıcılar" },
+      { href: "/admin/sozlesmeler", label: "Freelancer Sözleşmeleri" },
       { href: "/admin/ilanlar", label: "İlanlar" },
       { href: "/admin/is-talepleri", label: "İş Talepleri" },
       { href: "/admin/kategoriler", label: "Kategoriler" },
@@ -65,7 +66,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-8 lg:flex-row">
-        <aside className="w-full shrink-0 lg:w-56">
+        <aside className="w-full shrink-0 lg:w-56 print:hidden">
           <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
             Admin Paneli
           </p>

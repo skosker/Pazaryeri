@@ -4,6 +4,8 @@
  * edit it once, here.
  */
 
+// Metni değiştirince src/lib/terms-acceptance.ts içindeki UYELIK_SOZLESMESI_VERSION'ı da güncelle:
+// yeni kayıtlar onayladıkları sürümü onunla saklıyor.
 export function UyelikSozlesmesiText() {
   return (
     <>
