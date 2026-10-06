@@ -9,7 +9,7 @@ export type FormState = {
   error?: string;
   saved?: boolean;
   /** What was typed, sent back with an error so the edit form keeps it. */
-  values?: { accountHolder: string; bankName: string; iban: string };
+  values?: { accountHolder: string; bankName: string; iban: string; categoryId: string };
 };
 
 /**
@@ -24,7 +24,7 @@ export async function addBankAccountAction(
 ): Promise<FormState> {
   await requireAdmin();
 
-  const account = readAccount(formData);
+  const account = await readAccount(formData);
   if ("error" in account) return account;
 
   const existing = await prisma.bankAccount.findFirst({ where: { iban: account.iban } });
@@ -54,8 +54,9 @@ export async function updateBankAccountAction(
     accountHolder: String(formData.get("accountHolder") ?? ""),
     bankName: String(formData.get("bankName") ?? ""),
     iban: String(formData.get("iban") ?? ""),
+    categoryId: String(formData.get("categoryId") ?? ""),
   };
-  const account = readAccount(formData);
+  const account = await readAccount(formData);
   if ("error" in account) return { error: account.error, values: typed };
 
   const existing = await prisma.bankAccount.findFirst({ where: { iban: account.iban, id: { not: id } } });
@@ -96,11 +97,17 @@ export async function toggleBankAccountActiveAction(id: string) {
   revalidatePath("/odeme", "layout");
 }
 
-/** The form's three fields, trimmed and checked; the IBAN comes back without spaces. */
-function readAccount(formData: FormData): { accountHolder: string; bankName: string; iban: string } | { error: string } {
+/**
+ * The form's fields, trimmed and checked; the IBAN comes back without spaces. An empty
+ * category means "Genel" (null).
+ */
+async function readAccount(
+  formData: FormData
+): Promise<{ accountHolder: string; bankName: string; iban: string; categoryId: string | null } | { error: string }> {
   const accountHolder = String(formData.get("accountHolder") ?? "").trim();
   const bankName = String(formData.get("bankName") ?? "").trim();
   const rawIban = String(formData.get("iban") ?? "");
+  const categoryId = String(formData.get("categoryId") ?? "") || null;
 
   if (!accountHolder) return { error: "Hesap sahibi gerekli" };
   if (!bankName) return { error: "Banka adı gerekli" };
@@ -108,5 +115,9 @@ function readAccount(formData: FormData): { accountHolder: string; bankName: str
   const ibanError = validateTurkishIban(rawIban);
   if (ibanError) return { error: ibanError };
 
-  return { accountHolder, bankName, iban: normalizeIban(rawIban) };
+  if (categoryId && !(await prisma.category.findUnique({ where: { id: categoryId }, select: { id: true } }))) {
+    return { error: "Kategori bulunamadı" };
+  }
+
+  return { accountHolder, bankName, iban: normalizeIban(rawIban), categoryId };
 }

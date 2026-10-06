@@ -8,10 +8,22 @@ const initialState: FormState = {};
 const fieldClass =
   "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-purple-400";
 
-type AccountValues = { accountHolder: string; bankName: string; iban: string };
+type AccountValues = { accountHolder: string; bankName: string; iban: string; categoryId: string };
+export type CategoryOption = { id: string; name: string };
 
-/** Holder, bank and IBAN inputs; `idPrefix` keeps the label ids unique when several forms are on the page. */
-function AccountFields({ idPrefix, values }: { idPrefix: string; values?: AccountValues }) {
+/**
+ * Holder, bank, IBAN and job category inputs; `idPrefix` keeps the label ids unique when
+ * several forms are on the page.
+ */
+function AccountFields({
+  idPrefix,
+  values,
+  categories,
+}: {
+  idPrefix: string;
+  values?: AccountValues;
+  categories: CategoryOption[];
+}) {
   return (
     <>
       <div>
@@ -55,14 +67,35 @@ function AccountFields({ idPrefix, values }: { idPrefix: string; values?: Accoun
           className={`${fieldClass} font-mono`}
         />
       </div>
+
+      <div>
+        <label htmlFor={`${idPrefix}-categoryId`} className="mb-1 block text-xs font-medium text-slate-500">
+          Kategori
+        </label>
+        <select
+          id={`${idPrefix}-categoryId`}
+          name="categoryId"
+          defaultValue={values?.categoryId ?? ""}
+          className={`${fieldClass} bg-white`}
+        >
+          <option value="">Genel (tüm ödemeler)</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+      </div>
     </>
   );
 }
 
 export function AddBankAccountForm({
   action,
+  categories,
 }: {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
+  categories: CategoryOption[];
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const formRef = useRef<HTMLFormElement>(null);
@@ -73,10 +106,10 @@ export function AddBankAccountForm({
   }, [state.saved]);
 
   return (
-    <form ref={formRef} action={formAction} className="grid gap-4 sm:grid-cols-3">
-      <AccountFields idPrefix="new" />
+    <form ref={formRef} action={formAction} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <AccountFields idPrefix="new" categories={categories} />
 
-      <div className="sm:col-span-3 flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 sm:col-span-2 lg:col-span-4">
         <button
           type="submit"
           disabled={pending}
@@ -100,10 +133,12 @@ export function AddBankAccountForm({
 export function EditBankAccountButton({
   id,
   values,
+  categories,
   action,
 }: {
   id: string;
   values: AccountValues;
+  categories: CategoryOption[];
   action: (state: FormState, formData: FormData) => Promise<FormState>;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
@@ -129,7 +164,11 @@ export function EditBankAccountButton({
       >
         <form action={formAction} className="space-y-4 p-6">
           <p className="text-sm font-semibold text-brand-navy">Hesabı Düzenle</p>
-          <AccountFields idPrefix={`edit-${id}`} values={state.error && state.values ? state.values : values} />
+          <AccountFields
+            idPrefix={`edit-${id}`}
+            values={state.error && state.values ? state.values : values}
+            categories={categories}
+          />
           {state.error && <p className="text-sm text-red-600">{state.error}</p>}
           <div className="flex justify-end gap-2 pt-2">
             <button

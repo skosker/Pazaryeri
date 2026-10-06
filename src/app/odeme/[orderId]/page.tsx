@@ -40,7 +40,8 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
   const { discount, creditDiscount, corporateDiscount } = await refreshOrderDiscounts(order);
   // What is actually charged — card, bank transfer and the summary below all use this.
   const amount = payableAmount({ amount: listPrice, discount, creditDiscount, corporateDiscount });
-  const bankAccounts = await getBankAccounts();
+  // The accounts of the gig's job category, or the general ones (see getBankAccounts).
+  const bankAccounts = await getBankAccounts(order.gig.categoryId);
   const errorMessage =
     searchParams.hata === "odeme-basarisiz"
       ? "Ödeme başarısız oldu, tekrar deneyin."

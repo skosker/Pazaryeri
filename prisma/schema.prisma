@@ -189,6 +189,7 @@ model Category {
   gigs          Gig[]
   subcategories Subcategory[]
   jobRequests   JobRequest[]
+  bankAccounts  BankAccount[]
 
   @@map("categories")
 }
@@ -505,9 +506,14 @@ model BankAccount {
   /// Pasife alınan hesap ödeme sayfasında gösterilmez ama silinmez — admin panelinde
   /// kalır, istenirse tekrar aktif edilebilir.
   active        Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  /// Ödemesi bu iş kategorisinde olan siparişlerde gösterilir; boşsa "Genel" hesaptır
+  /// (kategorisinde hesap olmayan siparişler ile Pro, kurumsal ve bakiye ödemeleri).
+  categoryId    String?
+  category      Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
+  @@index([categoryId])
   @@map("bank_accounts")
 }
 
