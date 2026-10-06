@@ -55,6 +55,8 @@ export function Footer({ categories }: { categories: FooterCategory[] }) {
               alt="Mastercard, Visa"
               className="h-7 w-auto rounded-md bg-white px-2 py-1"
             />
+            {/* eslint-disable-next-line @next/next/no-img-element -- static SVG, as above. */}
+            <img src="/sipay-logo-white.svg" alt="Sipay" className="h-6 w-auto" />
           </div>
         </div>
       </div>
