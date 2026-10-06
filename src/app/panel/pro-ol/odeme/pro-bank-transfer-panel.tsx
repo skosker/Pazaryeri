@@ -3,6 +3,7 @@
 import { useTransition, useState } from "react";
 import type { BankTransferInfo } from "@/lib/bank-transfer";
 import { formatPrice } from "@/lib/format-price";
+import { SipayBadge } from "@/components/sipay-badge";
 
 function AccountCard({ account }: { account: BankTransferInfo }) {
   const [copied, setCopied] = useState(false);
@@ -108,6 +109,7 @@ export function ProBankTransferPanel({
         Bildirim sonrası ekibimiz ödemeni kontrol edip onaylayacak, {activatesLabel}{" "}
         etkinleşecek.
       </p>
+      <SipayBadge />
     </div>
   );
 }
