@@ -1,6 +1,11 @@
 import { getAllBankAccountsForAdmin } from "@/lib/bank-transfer";
-import { addBankAccountAction, deleteBankAccountAction, toggleBankAccountActiveAction } from "./actions";
-import { AddBankAccountForm } from "./bank-account-form";
+import {
+  addBankAccountAction,
+  deleteBankAccountAction,
+  toggleBankAccountActiveAction,
+  updateBankAccountAction,
+} from "./actions";
+import { AddBankAccountForm, EditBankAccountButton } from "./bank-account-form";
 
 export default async function AdminBankAccountPage() {
   const persisted = await getAllBankAccountsForAdmin();
@@ -64,7 +69,12 @@ export default async function AdminBankAccountPage() {
                       )}
                     </td>
                     <td className="px-5 py-3">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end gap-2 whitespace-nowrap">
+                        <EditBankAccountButton
+                          id={account.id}
+                          values={{ accountHolder: account.accountHolder, bankName: account.bankName, iban: account.iban }}
+                          action={updateBankAccountAction.bind(null, account.id)}
+                        />
                         <form action={toggleBankAccountActiveAction.bind(null, account.id)}>
                           <button
                             type="submit"
