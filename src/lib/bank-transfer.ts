@@ -30,19 +30,24 @@ const fallback: BankTransferInfo = {
 };
 
 /**
- * Every active company account, oldest first — what the checkout page shows. A
- * deactivated account (admin's "Pasife Al") is excluded here but not deleted, so it can
- * be turned back on later without re-entering its details. Falls back to a single
- * built-in account when no active rows exist, so checkout always has something to show.
+ * The active company accounts a buyer is shown at checkout, oldest first. Accounts can be
+ * tied to a Prosinta job category: an order pays into the accounts of its gig's category.
+ * Without a category (Pro, corporate and balance payments), or when that category has no
+ * active account, the "Genel" accounts (no category) are shown; failing those, every active
+ * account; failing that, the single built-in account, so checkout always has something to
+ * show. A deactivated account (admin's "Pasife Al") is never shown but not deleted either.
  */
-export async function getBankAccounts(): Promise<BankTransferInfo[]> {
+export async function getBankAccounts(categoryId?: string | null): Promise<BankTransferInfo[]> {
   const rows = await prisma.bankAccount.findMany({
     where: { active: true },
     orderBy: { createdAt: "asc" },
   });
-  if (rows.length === 0) return [fallback];
+  const inCategory = categoryId ? rows.filter((row) => row.categoryId === categoryId) : [];
+  const general = rows.filter((row) => row.categoryId === null);
+  const shown = inCategory.length ? inCategory : general.length ? general : rows;
+  if (shown.length === 0) return [fallback];
 
-  return rows.map((row) => ({
+  return shown.map((row) => ({
     id: row.id,
     accountHolder: row.accountHolder,
     bankName: row.bankName,
@@ -50,11 +55,17 @@ export async function getBankAccounts(): Promise<BankTransferInfo[]> {
   }));
 }
 
-export type AdminBankAccount = BankTransferInfo & { active: boolean };
+export type AdminBankAccount = BankTransferInfo & {
+  active: boolean;
+  category: { id: string; name: string } | null;
+};
 
 /** Every company account — active and inactive — for the /admin/banka management screen. */
 export async function getAllBankAccountsForAdmin(): Promise<AdminBankAccount[]> {
-  const rows = await prisma.bankAccount.findMany({ orderBy: { createdAt: "asc" } });
+  const rows = await prisma.bankAccount.findMany({
+    orderBy: { createdAt: "asc" },
+    include: { category: { select: { id: true, name: true } } },
+  });
 
   return rows.map((row) => ({
     id: row.id,
@@ -62,5 +73,6 @@ export async function getAllBankAccountsForAdmin(): Promise<AdminBankAccount[]> 
     bankName: row.bankName,
     iban: formatIban(row.iban),
     active: row.active,
+    category: row.category,
   }));
 }

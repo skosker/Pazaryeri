@@ -1,9 +1,18 @@
+import { prisma } from "@/lib/prisma";
 import { getAllBankAccountsForAdmin } from "@/lib/bank-transfer";
-import { addBankAccountAction, deleteBankAccountAction, toggleBankAccountActiveAction } from "./actions";
-import { AddBankAccountForm } from "./bank-account-form";
+import {
+  addBankAccountAction,
+  deleteBankAccountAction,
+  toggleBankAccountActiveAction,
+  updateBankAccountAction,
+} from "./actions";
+import { AddBankAccountForm, EditBankAccountButton } from "./bank-account-form";
 
 export default async function AdminBankAccountPage() {
-  const persisted = await getAllBankAccountsForAdmin();
+  const [persisted, categories] = await Promise.all([
+    getAllBankAccountsForAdmin(),
+    prisma.category.findMany({ orderBy: { order: "asc" }, select: { id: true, name: true } }),
+  ]);
 
   return (
     <div>
@@ -13,10 +22,16 @@ export default async function AdminBankAccountPage() {
         çok ekleyebilirsin; alıcı kendi bankasına denk geleni seçip masrafsız EFT yapar.
         Buradaki değişiklikler anında geçerli olur, yeni bir dağıtım gerekmez.
       </p>
+      <p className="mt-2 max-w-2xl text-sm text-slate-500">
+        <strong className="font-semibold text-brand-navy">Kategori:</strong> Bir iş kategorisine bağlanan
+        hesap, o kategorideki siparişlerin ödeme sayfasında gösterilir. Kategorisinde aktif hesap
+        olmayan siparişlerde ve Pro, kurumsal, Öne Çıkar ödemelerinde &quot;Genel&quot; hesaplar
+        gösterilir.
+      </p>
 
       <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <p className="mb-4 text-sm font-semibold text-brand-navy">Yeni Hesap Ekle</p>
-        <AddBankAccountForm action={addBankAccountAction} />
+        <AddBankAccountForm action={addBankAccountAction} categories={categories} />
       </div>
 
       <div className="mt-8">
@@ -37,6 +52,7 @@ export default async function AdminBankAccountPage() {
                   <th className="px-5 py-3 font-medium">Hesap Sahibi</th>
                   <th className="px-5 py-3 font-medium">Banka</th>
                   <th className="px-5 py-3 font-medium">IBAN</th>
+                  <th className="px-5 py-3 font-medium">Kategori</th>
                   <th className="px-5 py-3 font-medium">Durum</th>
                   <th className="px-5 py-3 font-medium text-right">İşlem</th>
                 </tr>
@@ -52,6 +68,9 @@ export default async function AdminBankAccountPage() {
                     </td>
                     <td className="px-5 py-3 text-slate-600">{account.bankName}</td>
                     <td className="px-5 py-3 font-mono text-xs text-slate-600">{account.iban}</td>
+                    <td className="px-5 py-3 text-slate-600">
+                      {account.category ? account.category.name : <span className="text-slate-400">Genel</span>}
+                    </td>
                     <td className="px-5 py-3">
                       {account.active ? (
                         <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
@@ -64,7 +83,18 @@ export default async function AdminBankAccountPage() {
                       )}
                     </td>
                     <td className="px-5 py-3">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end gap-2 whitespace-nowrap">
+                        <EditBankAccountButton
+                          id={account.id}
+                          values={{
+                            accountHolder: account.accountHolder,
+                            bankName: account.bankName,
+                            iban: account.iban,
+                            categoryId: account.category?.id ?? "",
+                          }}
+                          categories={categories}
+                          action={updateBankAccountAction.bind(null, account.id)}
+                        />
                         <form action={toggleBankAccountActiveAction.bind(null, account.id)}>
                           <button
                             type="submit"

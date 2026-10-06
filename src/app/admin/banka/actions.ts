@@ -5,7 +5,12 @@ import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
 import { normalizeIban, validateTurkishIban } from "@/lib/iban";
 
-export type FormState = { error?: string; saved?: boolean };
+export type FormState = {
+  error?: string;
+  saved?: boolean;
+  /** What was typed, sent back with an error so the edit form keeps it. */
+  values?: { accountHolder: string; bankName: string; iban: string; categoryId: string };
+};
 
 /**
  * Adds a company account shown on the checkout page. The IBAN is validated with the same
@@ -19,25 +24,47 @@ export async function addBankAccountAction(
 ): Promise<FormState> {
   await requireAdmin();
 
-  const accountHolder = String(formData.get("accountHolder") ?? "").trim();
-  const bankName = String(formData.get("bankName") ?? "").trim();
-  const rawIban = String(formData.get("iban") ?? "");
+  const account = await readAccount(formData);
+  if ("error" in account) return account;
 
-  if (!accountHolder) return { error: "Hesap sahibi gerekli" };
-  if (!bankName) return { error: "Banka adı gerekli" };
-
-  const ibanError = validateTurkishIban(rawIban);
-  if (ibanError) return { error: ibanError };
-
-  const iban = normalizeIban(rawIban);
-
-  const existing = await prisma.bankAccount.findFirst({ where: { iban } });
+  const existing = await prisma.bankAccount.findFirst({ where: { iban: account.iban } });
   if (existing) return { error: "Bu IBAN zaten ekli" };
 
-  await prisma.bankAccount.create({ data: { accountHolder, bankName, iban } });
+  await prisma.bankAccount.create({ data: account });
 
   revalidatePath("/admin/banka");
   // The checkout page lists these accounts, so it has to be rebuilt.
+  revalidatePath("/odeme", "layout");
+
+  return { saved: true };
+}
+
+/**
+ * Corrects a company account's holder, bank or IBAN, with the same checks as adding one.
+ * Its active/inactive state is left as it is.
+ */
+export async function updateBankAccountAction(
+  id: string,
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  await requireAdmin();
+
+  const typed = {
+    accountHolder: String(formData.get("accountHolder") ?? ""),
+    bankName: String(formData.get("bankName") ?? ""),
+    iban: String(formData.get("iban") ?? ""),
+    categoryId: String(formData.get("categoryId") ?? ""),
+  };
+  const account = await readAccount(formData);
+  if ("error" in account) return { error: account.error, values: typed };
+
+  const existing = await prisma.bankAccount.findFirst({ where: { iban: account.iban, id: { not: id } } });
+  if (existing) return { error: "Bu IBAN başka bir hesapta kayıtlı", values: typed };
+
+  await prisma.bankAccount.update({ where: { id }, data: account });
+
+  revalidatePath("/admin/banka");
   revalidatePath("/odeme", "layout");
 
   return { saved: true };
@@ -68,4 +95,29 @@ export async function toggleBankAccountActiveAction(id: string) {
 
   revalidatePath("/admin/banka");
   revalidatePath("/odeme", "layout");
+}
+
+/**
+ * The form's fields, trimmed and checked; the IBAN comes back without spaces. An empty
+ * category means "Genel" (null).
+ */
+async function readAccount(
+  formData: FormData
+): Promise<{ accountHolder: string; bankName: string; iban: string; categoryId: string | null } | { error: string }> {
+  const accountHolder = String(formData.get("accountHolder") ?? "").trim();
+  const bankName = String(formData.get("bankName") ?? "").trim();
+  const rawIban = String(formData.get("iban") ?? "");
+  const categoryId = String(formData.get("categoryId") ?? "") || null;
+
+  if (!accountHolder) return { error: "Hesap sahibi gerekli" };
+  if (!bankName) return { error: "Banka adı gerekli" };
+
+  const ibanError = validateTurkishIban(rawIban);
+  if (ibanError) return { error: ibanError };
+
+  if (categoryId && !(await prisma.category.findUnique({ where: { id: categoryId }, select: { id: true } }))) {
+    return { error: "Kategori bulunamadı" };
+  }
+
+  return { accountHolder, bankName, iban: normalizeIban(rawIban), categoryId };
 }
