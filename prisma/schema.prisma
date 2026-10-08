@@ -835,3 +835,31 @@ model JobOffer {
   @@index([sellerId, createdAt])
   @@map("job_offers")
 }
+
+/// Gider pusulası (VUK m. 234): Prosinta'nın kendi ihtiyacı için vergi mükellefi olmayan
+/// bir kişiden aldığı iş. Sıra numarası kayıt sırasıyla kesintisiz artar; düzenlenen pusula
+/// silinmez, gerekirse gerekçesiyle iptal edilir.
+model ExpenseVoucher {
+  id                 String    @id @default(cuid())
+  number             Int       @unique
+  /// Düzenleme tarihi: işin yapıldığı ve ödendiği gün.
+  issuedAt           DateTime
+  payeeName          String
+  payeeTckn          String
+  payeeAddress       String
+  payeeIban          String?
+  /// [{ description, kind, quantity, unitPrice }]
+  items              Json
+  gross              Decimal   @db.Decimal(12, 2)
+  withholdingPercent Decimal   @db.Decimal(5, 2)
+  withholding        Decimal   @db.Decimal(12, 2)
+  net                Decimal   @db.Decimal(12, 2)
+  cancelledAt        DateTime?
+  cancelReason       String?
+  /// Kaydı oluşturan admin (kullanıcı silinse de iz kalsın diye ilişki değil).
+  createdById        String
+  createdAt          DateTime  @default(now())
+
+  @@index([issuedAt])
+  @@map("expense_vouchers")
+}

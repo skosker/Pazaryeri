@@ -1,6 +1,10 @@
 import Link from "next/link";
 
-export function LogoMark({ size = 32 }: { size?: number }) {
+/**
+ * `idPrefix` keeps the gradient ids unique: an SVG paints with the first element of an id in
+ * the document, so a mark printed while the header's mark is hidden needs its own.
+ */
+export function LogoMark({ size = 32, idPrefix = "prosinta" }: { size?: number; idPrefix?: string }) {
   return (
     <svg
       width={size}
@@ -11,21 +15,21 @@ export function LogoMark({ size = 32 }: { size?: number }) {
       aria-hidden
     >
       <defs>
-        <linearGradient id="prosinta-p" x1="4" y1="2" x2="44" y2="46" gradientUnits="userSpaceOnUse">
+        <linearGradient id={`${idPrefix}-p`} x1="4" y1="2" x2="44" y2="46" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#e879f9" />
           <stop offset="0.5" stopColor="#9333ea" />
           <stop offset="1" stopColor="#4338ca" />
         </linearGradient>
-        <linearGradient id="prosinta-fold" x1="2" y1="24" x2="26" y2="46" gradientUnits="userSpaceOnUse">
+        <linearGradient id={`${idPrefix}-fold`} x1="2" y1="24" x2="26" y2="46" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#c4b5fd" />
           <stop offset="1" stopColor="#312e81" />
         </linearGradient>
       </defs>
       <path
         d="M14 4h14a11 11 0 0 1 0 22H19v-8h9a3 3 0 0 0 0-6H18a4 4 0 0 0-4 4v9L4 35V15A11 11 0 0 1 14 4Z"
-        fill="url(#prosinta-p)"
+        fill={`url(#${idPrefix}-p)`}
       />
-      <path d="M14 26v9L4 44v-9l10-9Z" fill="url(#prosinta-fold)" />
+      <path d="M14 26v9L4 44v-9l10-9Z" fill={`url(#${idPrefix}-fold)`} />
     </svg>
   );
 }

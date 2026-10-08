@@ -14,6 +14,7 @@ const navGroups: NavGroup[] = [
       { href: "/admin/hakedis-odemeleri", label: "Hakediş Ödemeleri" },
       { href: "/admin/gelir", label: "Gelir Raporu" },
       { href: "/admin/aracilik", label: "Aracılık Dökümleri" },
+      { href: "/admin/gider-pusulalari", label: "Gider Pusulaları" },
       { href: "/admin/faturalar", label: "Faturalar" },
       { href: "/admin/freelancer-ibanlari", label: "Freelancer IBAN’ları" },
       { href: "/admin/banka", label: "Şirket Banka Hesapları" },
@@ -65,7 +66,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const groups = applySavedOrder(navGroups, saved?.adminNavOrder);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 print:max-w-none print:p-0">
       <div className="flex flex-col gap-8 lg:flex-row">
         <aside className="w-full shrink-0 lg:w-56 print:hidden">
           <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
