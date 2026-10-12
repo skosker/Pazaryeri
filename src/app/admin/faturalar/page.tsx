@@ -75,7 +75,6 @@ export default async function InvoicesPage(props: PageProps<"/admin/faturalar">)
         ))}
         <span className="ml-auto text-slate-500">
           {rows.length} kayıt · <strong className="text-brand-navy">{formatPrice(total)} TL</strong>
-          {rows.some((r) => r.test) && <span className="text-xs text-slate-400"> (test hesapları hariç)</span>}
         </span>
       </div>
 
@@ -88,7 +87,6 @@ export default async function InvoicesPage(props: PageProps<"/admin/faturalar">)
           <table className="w-full text-left text-sm">
             <thead className="border-b border-slate-100 text-xs uppercase text-slate-400">
               <tr>
-                <th className="px-4 py-3 font-medium">Tarih</th>
                 <th className="px-4 py-3 font-medium">Fatura Edilecek</th>
                 <th className="px-4 py-3 font-medium">Hizmet</th>
                 <th className="px-4 py-3 text-right font-medium">Tutar</th>
@@ -101,22 +99,8 @@ export default async function InvoicesPage(props: PageProps<"/admin/faturalar">)
                 const c = r.customer;
                 return (
                   <tr key={`${r.kind}-${r.id}`} className="border-b border-slate-100 align-top last:border-0">
-                    <td className="whitespace-nowrap px-4 py-3 text-slate-500">
-                      {dateFmt.format(r.date)}
-                      <span className="mt-1 block text-[11px] font-semibold text-purple-700">{INVOICE_KIND_LABEL[r.kind]}</span>
-                    </td>
                     <td className="px-4 py-3">
-                      <p className="font-medium text-brand-navy">
-                        {c.companyName ?? c.name}
-                        {r.test && (
-                          <span
-                            title="Test hesabının alımı: toplama ve Excel'e aktarıma girmez, fatura kesilmez"
-                            className="ml-1.5 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700"
-                          >
-                            Test · fatura kesme
-                          </span>
-                        )}
-                      </p>
+                      <p className="font-medium text-brand-navy">{c.companyName ?? c.name}</p>
                       {c.companyName && (
                         <p className="text-xs text-slate-500">
                           {c.taxOffice} · {c.taxNumber}
@@ -128,12 +112,10 @@ export default async function InvoicesPage(props: PageProps<"/admin/faturalar">)
                           {c.taxNumber ? `TCKN ${c.taxNumber}` : "TCKN yok · nihai tüketici"}
                         </p>
                       )}
-                      <p className="text-xs text-slate-400">
-                        {c.companyName ? `${c.name} · ` : ""}
-                        {c.email}
-                      </p>
+                      {c.companyName && <p className="text-xs text-slate-400">{c.name}</p>}
                     </td>
                     <td className="px-4 py-3 text-slate-600">
+                      <span className="block text-[11px] font-semibold text-purple-700">{INVOICE_KIND_LABEL[r.kind]}</span>
                       {r.service}
                       {r.kind === "uyelik" && (
                         <p className="mt-1">
