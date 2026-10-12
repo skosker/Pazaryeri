@@ -13,6 +13,8 @@ export type RevenueMonth = {
   corporatePlans: number;
   boosts: number;
   commission: number;
+  /** Membership and corporate plan refunds made that month (taken off income). */
+  refunds: number;
   firstOrderDiscounts: number;
   referralCredits: number;
   corporateDiscounts: number;
@@ -64,7 +66,7 @@ export async function monthlyRevenue(): Promise<RevenueMonth[]> {
   const oldest = keys[keys.length - 1].split("-").map(Number);
   const since = new Date(Date.UTC(oldest[0], oldest[1] - 1, 1) - 24 * 60 * 60 * 1000);
 
-  const [membership, corporatePlans, boosts, commission, firstOrder, referral, corporateDisc, bonuses, volume] =
+  const [membership, corporatePlans, boosts, commission, refunds, firstOrder, referral, corporateDisc, bonuses, volume] =
     await Promise.all([
       sumByMonth(
         `SELECT ${monthOf('"updatedAt"')} AS month, SUM(amount) AS total FROM pro_purchases
@@ -85,6 +87,12 @@ export async function monthlyRevenue(): Promise<RevenueMonth[]> {
         `SELECT ${monthOf('p."createdAt"')} AS month, SUM(p.commission) AS total FROM payouts p
          JOIN users s ON s.id = p."sellerId"
          WHERE p.status <> 'FAILED' AND NOT s.synthetic AND p."createdAt" >= $1 GROUP BY 1`,
+        since
+      ),
+      // In the month the money went back, not the month of the sale.
+      sumByMonth(
+        `SELECT ${monthOf('"decidedAt"')} AS month, SUM(amount) AS total FROM membership_refunds
+         WHERE status = 'REFUNDED' AND "decidedAt" >= $1 GROUP BY 1`,
         since
       ),
       sumByMonth(
@@ -121,6 +129,7 @@ export async function monthlyRevenue(): Promise<RevenueMonth[]> {
     corporatePlans: v(corporatePlans, k),
     boosts: v(boosts, k),
     commission: v(commission, k),
+    refunds: v(refunds, k),
     firstOrderDiscounts: v(firstOrder, k),
     referralCredits: v(referral, k),
     corporateDiscounts: v(corporateDisc, k),
@@ -131,7 +140,7 @@ export async function monthlyRevenue(): Promise<RevenueMonth[]> {
 }
 
 export function income(m: RevenueMonth): number {
-  return m.membership + m.corporatePlans + m.boosts + m.commission;
+  return m.membership + m.corporatePlans + m.boosts + m.commission - m.refunds;
 }
 
 export function costs(m: RevenueMonth): number {

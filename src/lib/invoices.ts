@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { PURCHASE_PLAN_LABEL } from "@/lib/membership";
+import { needsNoInvoice, type RefundSummary } from "@/lib/refund-labels";
 
 /**
  * What Prosinta has to invoice, gathered from three places into one list for
@@ -35,6 +36,8 @@ export type InvoiceRow = {
   invoicedAt: Date | null;
   /** Payment provider of a sale ("havale", "paytr", "bakiye"…); null for commission. */
   paidWith: string | null;
+  /** A membership sale's refund (requested, refunded or turned down); null otherwise. */
+  refund: RefundSummary | null;
 };
 
 const customerSelect = {
@@ -78,9 +81,19 @@ function customer(u: CustomerFields): InvoiceRow["customer"] {
 
 const periodLabel = (months: number | null) => (months === 12 ? "Yıllık" : months === 1 ? "Aylık" : "Süresiz");
 
-/** Pending (not yet invoiced) or done, newest first; kind narrows to one source. */
+/** "Prosinta Pro Plus üyelik · Yıllık": how a membership or corporate plan sale is named. */
+export function purchaseServiceLabel(plan: keyof typeof PURCHASE_PLAN_LABEL, months: number | null): string {
+  return `Prosinta ${PURCHASE_PLAN_LABEL[plan]} ${plan.startsWith("KURUMSAL") ? "paket" : "üyelik"} · ${periodLabel(months)}`;
+}
+
+/**
+ * Pending (not yet invoiced) or done, newest first; kind narrows to one source. A sale
+ * refunded in full before it was invoiced is no longer to be invoiced, so it leaves the
+ * pending list.
+ */
 export async function listInvoiceRows(done: boolean, kind?: InvoiceKind): Promise<InvoiceRow[]> {
-  return queryInvoiceRows({ invoiced: done ? { not: null } : null, kind });
+  const rows = await queryInvoiceRows({ invoiced: done ? { not: null } : null, kind });
+  return done ? rows : rows.filter((r) => !needsNoInvoice(r.refund, r.total, r.invoiceNo));
 }
 
 /** Everything one member bought from Prosinta (and, for a freelancer, the commission), invoiced or not. */
@@ -106,6 +119,7 @@ async function queryInvoiceRows({
           select: {
             id: true, plan: true, months: true, amount: true, createdAt: true, invoiceNo: true, invoicedAt: true, provider: true,
             user: { select: customerSelect },
+            refund: { select: { status: true, amount: true, decidedAt: true, rejectReason: true } },
           },
           orderBy: { createdAt: "desc" },
           take,
@@ -144,11 +158,12 @@ async function queryInvoiceRows({
       // Not updatedAt: that moves when the row is marked invoiced.
       date: p.createdAt,
       customer: customer(p.user),
-      service: `Prosinta ${PURCHASE_PLAN_LABEL[p.plan]} ${p.plan.startsWith("KURUMSAL") ? "paket" : "üyelik"} · ${periodLabel(p.months)}`,
+      service: purchaseServiceLabel(p.plan, p.months),
       total: Number(p.amount),
       invoiceNo: p.invoiceNo,
       invoicedAt: p.invoicedAt,
       paidWith: p.provider,
+      refund: p.refund ? { ...p.refund, amount: p.refund.amount === null ? null : Number(p.refund.amount) } : null,
     })),
     ...boosts.map((b) => ({
       kind: "one-cikar" as const,
@@ -160,6 +175,7 @@ async function queryInvoiceRows({
       invoiceNo: b.invoiceNo,
       invoicedAt: b.invoicedAt,
       paidWith: b.provider,
+      refund: null,
     })),
     ...payouts.map((p) => ({
       kind: "komisyon" as const,
@@ -171,6 +187,7 @@ async function queryInvoiceRows({
       invoiceNo: p.invoiceNo,
       invoicedAt: p.invoicedAt,
       paidWith: null,
+      refund: null,
     })),
   ];
   return rows.sort((a, b) => b.date.getTime() - a.date.getTime());

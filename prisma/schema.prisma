@@ -32,6 +32,13 @@ enum PaymentStatus {
   FAILED
 }
 
+/// Üyelik / paket iadesinin durumu (MembershipRefund).
+enum RefundStatus {
+  REQUESTED
+  REFUNDED
+  REJECTED
+}
+
 model User {
   id                 String    @id @default(cuid())
   name               String
@@ -381,9 +388,49 @@ model ProPurchase {
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refund MembershipRefund?
 
   @@index([userId])
   @@map("pro_purchases")
+}
+
+/// Bir üyelik / kurumsal paket satın almasının iadesi (Admin → Üyelik İadeleri). Üye
+/// Faturalarım'dan talep eder ya da admin talep olmadan başlatır; satın alma başına tek kayıt.
+/// Satın alma SUCCESS kalır (para alınmıştı); iade bu kayıtta tutulur.
+model MembershipRefund {
+  id            String       @id @default(cuid())
+  status        RefundStatus @default(REQUESTED)
+  /// MUKERRER | HATALI_TAHSILAT | HIZMET_SUNULAMADI | DIGER (src/lib/refunds.ts)
+  reason        String
+  note          String?
+  /// Havale/EFT ile ödenmiş satın almada iadenin gideceği hesap (üyenin bildirdiği).
+  iban          String?
+  ibanHolder    String?
+  /// Üyenin talep ettiği an; admin talep olmadan başlattıysa NULL.
+  requestedAt   DateTime?
+  /// İade edilen tutar (satın alma tutarından az olabilir: kısmi iade).
+  amount        Decimal?     @db.Decimal(10, 2)
+  /// havale | kart | bakiye
+  method        String?
+  /// Dekont / işlem numarası.
+  reference     String?
+  /// Kesilmiş faturaya ne yapıldığı: kesilmedi | earsiv-iptal | iade-faturasi | bekliyor
+  invoiceAction String?
+  /// İade anında üyeliğin bitişi ve iade sonrası bitişi (değişmediyse ikisi aynı).
+  prevUntil     DateTime?
+  newUntil      DateTime?
+  rejectReason  String?
+  /// İade edildiği ya da reddedildiği an.
+  decidedAt     DateTime?
+  decidedById   String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  purchaseId String      @unique
+  purchase   ProPurchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@map("membership_refunds")
 }
 
 enum MembershipPlan {
@@ -707,6 +754,8 @@ enum BalanceEntryKind {
   ADJUSTMENT
   /// Kurumsal abonelik bakiyeden ödendi.
   PLAN
+  /// Bakiyeden ödenmiş bir paketin iadesi bakiyeye geri yüklendi.
+  REFUND
 }
 
 /// Every change to a corporate balance: + for a confirmed top-up, − for an order paid.

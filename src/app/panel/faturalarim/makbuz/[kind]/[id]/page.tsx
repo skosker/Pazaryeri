@@ -5,6 +5,7 @@ import { COMPANY } from "@/lib/company";
 import { formatPrice } from "@/lib/format-price";
 import { amountInWords } from "@/lib/expense-voucher-math";
 import { PAID_WITH_LABEL, listUserInvoiceRows } from "@/lib/invoices";
+import { needsNoInvoice } from "@/lib/refund-labels";
 import { LogoMark } from "@/components/logo";
 import { PrintButton } from "@/components/print-button";
 
@@ -85,7 +86,19 @@ export default async function PaymentReceiptPage(props: PageProps<"/panel/fatura
             <span className="ml-2 text-xs text-slate-400">KDV dahil</span>
           </Row>
           <Row label="Yalnız">{amountInWords(row.total)}</Row>
-          <Row label="Fatura">{row.invoiceNo ? `e-Arşiv fatura no ${row.invoiceNo}` : "Hazırlanıyor"}</Row>
+          <Row label="Fatura">
+            {row.invoiceNo
+              ? `e-Arşiv fatura no ${row.invoiceNo}`
+              : needsNoInvoice(row.refund, row.total, row.invoiceNo)
+                ? "İade edildiği için kesilmeyecek"
+                : "Hazırlanıyor"}
+          </Row>
+          {row.refund?.status === "REFUNDED" && (
+            <Row label="İade">
+              <span className="font-semibold text-sky-700">{formatPrice(row.refund.amount ?? 0)} TL iade edildi</span>
+              {row.refund.decidedAt && <span className="ml-2 text-xs text-slate-400">{dateTimeFmt.format(row.refund.decidedAt)}</span>}
+            </Row>
+          )}
         </div>
 
         <p className="mt-8 rounded-xl bg-purple-50 px-4 py-3 text-xs leading-relaxed text-purple-900">

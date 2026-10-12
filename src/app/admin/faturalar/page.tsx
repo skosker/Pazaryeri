@@ -5,6 +5,7 @@ import { formatPrice } from "@/lib/format-price";
 import { INVOICE_KIND_LABEL, invoicePdfKeys, listInvoiceRows, parseInvoiceKind, splitVat, type InvoiceKind } from "@/lib/invoices";
 import { clearInvoiceAction, markInvoicedAction, removeInvoicePdfAction, uploadInvoicePdfAction } from "./actions";
 import { InvoicePdfForm } from "./pdf-form";
+import { isPartialRefund } from "@/lib/refund-labels";
 
 const dateFmt = new Intl.DateTimeFormat("tr-TR", { dateStyle: "medium", timeZone: "Europe/Istanbul" });
 
@@ -121,7 +122,28 @@ export default async function InvoicesPage(props: PageProps<"/admin/faturalar">)
                         {c.email}
                       </p>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{r.service}</td>
+                    <td className="px-4 py-3 text-slate-600">
+                      {r.service}
+                      {r.kind === "uyelik" && (
+                        <p className="mt-1">
+                          {r.refund?.status === "REFUNDED" ? (
+                            <Link href={`/admin/iadeler/${r.id}`} className="rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-semibold text-sky-700 hover:bg-sky-100">
+                              {isPartialRefund(r.refund, r.total)
+                                ? `Kısmi iade −${formatPrice(r.refund.amount ?? 0)} TL · net ${formatPrice(r.total - (r.refund.amount ?? 0))} TL`
+                                : "İade edildi"}
+                            </Link>
+                          ) : r.refund?.status === "REQUESTED" ? (
+                            <Link href={`/admin/iadeler/${r.id}`} className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 hover:bg-amber-100">
+                              İade talebi var
+                            </Link>
+                          ) : (
+                            <Link href={`/admin/iadeler/${r.id}`} className="text-[11px] text-slate-400 hover:text-brand-navy hover:underline">
+                              İade
+                            </Link>
+                          )}
+                        </p>
+                      )}
+                    </td>
                     <td className="whitespace-nowrap px-4 py-3 text-right">
                       <p className="font-semibold text-brand-navy">{formatPrice(r.total)} TL</p>
                       <p className="text-[11px] text-slate-400">
