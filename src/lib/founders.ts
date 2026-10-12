@@ -28,6 +28,7 @@ export async function grantFounderIfEligible(userId: string): Promise<void> {
     select: {
       role: true,
       synthetic: true,
+      isTester: true,
       suspended: true,
       passwordHash: true,
       founderNumber: true,
@@ -39,8 +40,9 @@ export async function grantFounderIfEligible(userId: string): Promise<void> {
   });
   // founderAt without a number: an admin took the badge back, so it is not handed out again.
   if (!user || user.founderNumber !== null || user.founderAt !== null) return;
-  // Showcase profiles carry a "!…" no-login marker instead of a bcrypt hash.
-  if (user.role !== "FREELANCER" || user.synthetic || user.suspended || user.passwordHash.startsWith("!")) return;
+  // Showcase profiles carry a "!…" no-login marker instead of a bcrypt hash; test accounts
+  // must not take one of the limited places either.
+  if (user.role !== "FREELANCER" || user.synthetic || user.isTester || user.suspended || user.passwordHash.startsWith("!")) return;
   if (user.gigs.length === 0) return;
 
   const { founderEnabled, founderLimit } = await getSettings();
