@@ -136,17 +136,6 @@ const APPROVED = new Set(["PAID", "IN_PROGRESS", "DELIVERED", "COMPLETED"]);
 const isTestTransfer = (o: { gig: { seller: { synthetic: boolean } }; buyer: { synthetic: boolean } }) =>
   o.gig.seller.synthetic && !o.buyer.synthetic;
 
-function TestBadge() {
-  return (
-    <span
-      title="Test hesabı: para gelmez; onaylarsan gelir raporuna girmez, Faturalar'da Test olarak görünür"
-      className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700"
-    >
-      Test Hesabı · para beklenmez
-    </span>
-  );
-}
-
 export default async function BankTransferApprovalsPage(
   props: PageProps<"/admin/havale-onaylari">
 ) {
@@ -338,11 +327,7 @@ export default async function BankTransferApprovalsPage(
                 {pendingProTransfers.map((purchase) => (
                   <tr key={purchase.id} className="border-b border-slate-100 last:border-0">
                     <td className="px-5 py-4">
-                      <p className="font-medium text-brand-navy">
-                        {purchase.user.name}
-                        {purchase.user.isTester && <TestBadge />}
-                      </p>
-                      <p className="text-xs text-slate-400">{purchase.user.email}</p>
+                      <p className="font-medium text-brand-navy">{purchase.user.name}</p>
                     </td>
                     <td className="px-5 py-4 text-slate-500">
                       {purchase.months === null
@@ -391,11 +376,7 @@ export default async function BankTransferApprovalsPage(
                 {pendingBoostTransfers.map((boost) => (
                   <tr key={boost.id} className="border-b border-slate-100 last:border-0">
                     <td className="px-5 py-4">
-                      <p className="font-medium text-brand-navy">
-                        {boost.user.name}
-                        {boost.user.isTester && <TestBadge />}
-                      </p>
-                      <p className="text-xs text-slate-400">{boost.user.email}</p>
+                      <p className="font-medium text-brand-navy">{boost.user.name}</p>
                     </td>
                     <td className="px-5 py-4">
                       <Link href={`/gig/${boost.gig.slug}`} className="text-slate-600 hover:underline">
