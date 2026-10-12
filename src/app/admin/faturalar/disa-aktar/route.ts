@@ -16,14 +16,17 @@ export async function GET(request: NextRequest) {
 
   const header = [
     "Tarih", "Tür", "Ad Soyad", "E-posta", "Şirket Unvanı", "Vergi Dairesi", "VKN/TCKN", "Adres",
-    "Hizmet", "Matrah", "KDV Oranı", "KDV", "Toplam", "Fatura No", "Kayıt No",
+    "Hizmet", "Matrah", "KDV Oranı", "KDV", "Toplam", "Fatura No", "İade Tutarı", "İade Tarihi", "Kayıt No",
   ];
   const lines = rows.map((r) => {
     const { base, vat } = splitVat(r.total, settings.vatPercent);
     return [
       dateFmt.format(r.date), INVOICE_KIND_LABEL[r.kind], r.customer.name, r.customer.email, r.customer.companyName,
       r.customer.taxOffice, r.customer.taxNumber, r.customer.address, r.service, base, `%${settings.vatPercent}`, vat,
-      r.total, r.invoiceNo, `${r.kind}:${r.id}`,
+      r.total, r.invoiceNo,
+      r.refund?.status === "REFUNDED" ? r.refund.amount : null,
+      r.refund?.status === "REFUNDED" && r.refund.decidedAt ? dateFmt.format(r.refund.decidedAt) : null,
+      `${r.kind}:${r.id}`,
     ];
   });
   const csv = csvFile([header, ...lines]);

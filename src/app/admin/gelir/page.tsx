@@ -40,7 +40,7 @@ export default async function RevenuePage() {
       <h1 className="text-2xl font-bold text-brand-navy">Gelir Raporu</h1>
       <p className="mt-1 text-sm text-slate-500">
         Prosinta&apos;nın kendi geliri ve karşıladığı indirimler, Ağustos 2026&apos;dan itibaren İstanbul takvim ayına göre.
-        Tutarlar tahsil edildiği gibi (KDV dahil); sipariş hacmi freelancer&apos;lara giden paranın toplamıdır, gelir
+        Tutarlar tahsil edildiği gibi (KDV dahil); üyelik iadeleri iade edildiği ayda gelirden düşülür; sipariş hacmi freelancer&apos;lara giden paranın toplamıdır, gelir
         değildir. Excel&apos;den içe aktarılan ve vitrin hesaplarına ait siparişler sayılmaz.
       </p>
 
@@ -73,6 +73,7 @@ export default async function RevenuePage() {
               <th className="px-3 py-3 font-medium">Kurumsal Paket</th>
               <th className="px-3 py-3 font-medium">Öne Çıkar</th>
               <th className="px-3 py-3 font-medium">Komisyon</th>
+              <th className="px-3 py-3 font-medium">İadeler</th>
               <th className="px-3 py-3 font-medium text-brand-navy">Gelir</th>
               <th className="px-3 py-3 font-medium">İndirimler</th>
               <th className="px-3 py-3 font-medium text-brand-navy">Net</th>
@@ -93,6 +94,7 @@ export default async function RevenuePage() {
                   <td className="px-3 py-2.5 text-slate-600">{tl(m.corporatePlans)}</td>
                   <td className="px-3 py-2.5 text-slate-600">{tl(m.boosts)}</td>
                   <td className="px-3 py-2.5 text-slate-600">{tl(m.commission)}</td>
+                  <td className="px-3 py-2.5 text-rose-600">{m.refunds === 0 ? "—" : `−${formatPrice(m.refunds)} TL`}</td>
                   <td className="px-3 py-2.5 font-semibold text-brand-navy">{tl(income(m))}</td>
                   <td
                     className="px-3 py-2.5 text-rose-600"

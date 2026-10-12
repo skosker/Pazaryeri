@@ -16,6 +16,7 @@ const navGroups: NavGroup[] = [
       { href: "/admin/aracilik", label: "Aracılık Dökümleri" },
       { href: "/admin/gider-pusulalari", label: "Gider Pusulaları" },
       { href: "/admin/faturalar", label: "Faturalar" },
+      { href: "/admin/iadeler", label: "Üyelik İadeleri" },
       { href: "/admin/freelancer-ibanlari", label: "Freelancer IBAN’ları" },
       { href: "/admin/banka", label: "Şirket Banka Hesapları" },
       { href: "/admin/kurumsal", label: "Kurumsal Hesaplar" },

@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { formatPrice } from "@/lib/format-price";
 import { invoicePdfKeys, listUserInvoiceRows } from "@/lib/invoices";
+import { isPartialRefund, needsNoInvoice } from "@/lib/refund-labels";
+import { withdrawRefundAction } from "./actions";
 
 const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Europe/Istanbul" });
 
@@ -11,7 +13,8 @@ const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "2-dig
  * "Öne Çıkar") and, for a freelancer, the aracılık hizmet bedeli invoiced to them. Each row
  * shows its e-Arşiv invoice once Prosinta has cut it, and paid sales have a payment receipt.
  */
-export default async function MyInvoicesPage() {
+export default async function MyInvoicesPage(props: PageProps<"/panel/faturalarim">) {
+  const { iade } = await props.searchParams;
   const session = await auth();
   if (!session?.user?.id) redirect("/giris?callbackUrl=/panel/faturalarim");
   const rows = await listUserInvoiceRows(session.user.id);
@@ -24,6 +27,12 @@ export default async function MyInvoicesPage() {
         Prosinta&apos;dan aldığın üyelik, paket ve Öne Çıkar hizmetlerinin faturaları. e-Arşiv faturan kesildiğinde burada
         görünür ve e-posta adresine de gönderilir. Ödemenin hemen ardından ödeme makbuzunu indirebilirsin.
       </p>
+
+      {iade === "talep" && (
+        <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          İade talebin alındı. İnceleme sonucunu burada ve e-postanda göreceksin.
+        </p>
+      )}
 
       {rows.length === 0 ? (
         <p className="mt-6 rounded-2xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-400">
@@ -45,7 +54,33 @@ export default async function MyInvoicesPage() {
               {rows.map((r) => (
                 <tr key={`${r.kind}:${r.id}`} className="border-b border-slate-50 align-top last:border-0">
                   <td className="whitespace-nowrap px-4 py-3 text-slate-600">{dateFmt.format(r.date)}</td>
-                  <td className="px-4 py-3 text-brand-navy">{r.service}</td>
+                  <td className="px-4 py-3 text-brand-navy">
+                    {r.service}
+                    {r.refund?.status === "REQUESTED" && (
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                        <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                          İade talebi inceleniyor
+                        </span>
+                        <form action={withdrawRefundAction.bind(null, r.id)}>
+                          <button className="text-xs text-slate-400 hover:text-red-600">Talebi geri çek</button>
+                        </form>
+                      </div>
+                    )}
+                    {r.refund?.status === "REFUNDED" && (
+                      <p className="mt-1.5">
+                        <span className="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700">
+                          {isPartialRefund(r.refund, r.total) ? "Kısmi iade" : "İade edildi"} · {formatPrice(r.refund.amount ?? 0)} TL
+                          {r.refund.decidedAt ? ` · ${dateFmt.format(r.refund.decidedAt)}` : ""}
+                        </span>
+                      </p>
+                    )}
+                    {r.refund?.status === "REJECTED" && (
+                      <div className="mt-1.5">
+                        <span className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600">İade talebi kabul edilmedi</span>
+                        {r.refund.rejectReason && <p className="mt-1 text-xs text-slate-500">{r.refund.rejectReason}</p>}
+                      </div>
+                    )}
+                  </td>
                   <td className="whitespace-nowrap px-4 py-3 text-right">
                     <p className="font-semibold text-brand-navy">{formatPrice(r.total)} TL</p>
                     <p className="text-[11px] text-slate-400">KDV dahil</p>
@@ -63,6 +98,8 @@ export default async function MyInvoicesPage() {
                           <p className="text-[11px] text-slate-400">e-postana gönderildi</p>
                         )}
                       </>
+                    ) : needsNoInvoice(r.refund, r.total, r.invoiceNo) ? (
+                      <span className="text-xs text-slate-400">İade edildi, fatura kesilmeyecek</span>
                     ) : (
                       <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">Hazırlanıyor</span>
                     )}
@@ -71,6 +108,11 @@ export default async function MyInvoicesPage() {
                     {r.kind !== "komisyon" && (
                       <Link href={`/panel/faturalarim/makbuz/${r.kind}/${r.id}`} className="whitespace-nowrap text-xs font-semibold text-purple-700 hover:underline">
                         Ödeme Makbuzu →
+                      </Link>
+                    )}
+                    {r.kind === "uyelik" && !r.refund && (
+                      <Link href={`/panel/faturalarim/iade/${r.id}`} className="mt-1.5 block whitespace-nowrap text-xs text-slate-400 hover:text-brand-navy hover:underline">
+                        İade Talep Et
                       </Link>
                     )}
                   </td>

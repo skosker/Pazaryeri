@@ -440,7 +440,7 @@ export async function sendCampaignAnnouncementEmails(
   recipients: { email: string; name: string; unsubscribeUrl: string; oneClickUrl: string }[]
 ): Promise<number> {
   const subject = `${campaign.name}: ilanlarını kampanyaya ekle`;
-  const messages = recipients.map((r) => {
+  const messages = recipients.filter((r) => !NO_MAILBOX.test(r.email)).map((r) => {
     const html = campaignAnnouncementHtml(campaign, r.name, r.unsubscribeUrl);
     return {
       from: FROM,
@@ -533,7 +533,7 @@ export type JobRequestDigest = {
  * how many were handed to Resend.
  */
 export async function sendJobRequestDigestEmails(digests: JobRequestDigest[], listUrl: string): Promise<number> {
-  const messages = digests.map((d) => {
+  const messages = digests.filter((d) => !NO_MAILBOX.test(d.email)).map((d) => {
     const items = d.requests
       .map(
         (r) =>
@@ -579,4 +579,49 @@ export async function sendJobRequestDigestEmails(digests: JobRequestDigest[], li
     }
   }
   return sent;
+}
+
+/** Admin: a member asked for a membership refund. */
+export async function sendRefundRequestAdminEmail(params: {
+  adminEmail: string;
+  memberName: string;
+  service: string;
+  amount: number;
+  reason: string;
+  url: string;
+}) {
+  await sendEmail(
+    params.adminEmail,
+    "Üyelik iade talebi — inceleme bekliyor",
+    layout(
+      "Yeni iade talebi",
+      `<p><strong>${escapeHtml(params.memberName)}</strong>, <strong>${escapeHtml(params.service)}</strong> (${formatPrice(params.amount)} TL) için iade talep etti.</p>
+       <p>Gerekçe: ${escapeHtml(params.reason)}</p>
+       ${button(params.url, "Talebi İncele")}`
+    )
+  );
+}
+
+/** Member: their refund was made, or their request turned down. */
+export async function sendRefundDecisionEmail(params: {
+  to: string;
+  name: string;
+  service: string;
+  refunded: boolean;
+  amount?: number;
+  methodLabel?: string;
+  rejectReason?: string;
+  url: string;
+}) {
+  const body = params.refunded
+    ? `<p><strong>${escapeHtml(params.service)}</strong> satın alman için <strong>${formatPrice(params.amount ?? 0)} TL</strong> iade edildi (${escapeHtml(params.methodLabel ?? "")}).</p>
+       <p>Karta yapılan iadelerin hesabına yansıması bankana göre birkaç iş günü sürebilir.</p>`
+    : `<p><strong>${escapeHtml(params.service)}</strong> için iade talebin incelendi ve kabul edilmedi.</p>
+       <p>Gerekçe: ${escapeHtml(params.rejectReason ?? "")}</p>
+       <p>Sorun için destek@prosinta.com adresine yazabilirsin.</p>`;
+  await sendEmail(
+    params.to,
+    params.refunded ? "İaden yapıldı" : "İade talebin hakkında",
+    layout(params.refunded ? "İaden yapıldı" : "İade talebin sonuçlandı", `<p>Merhaba ${escapeHtml(params.name)},</p>${body}${button(params.url, "Faturalarım")}`)
+  );
 }
