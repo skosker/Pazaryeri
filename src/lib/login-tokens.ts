@@ -42,15 +42,18 @@ export async function peekLoginToken(token: string): Promise<TestAccount | null>
   return usableAccount(row.userId);
 }
 
-/** Uses the link up and returns the account to sign in as; null if it is spent, expired or no longer allowed. */
+/**
+ * Uses the link up and returns the account to sign in as; null if it is spent, expired or
+ * no longer allowed. The expiry is checked here, like every other token on the site, not
+ * in SQL: comparing a zone-less timestamp column in the database depends on the server's
+ * TimeZone setting, which turned a 10-minute link into one that was always expired.
+ */
 export async function consumeLoginToken(token: unknown): Promise<TestAccount | null> {
   if (typeof token !== "string" || token.length < 20) return null;
-  const tokenHash = hash(token);
-  const { count } = await prisma.loginToken.updateMany({
-    where: { tokenHash, usedAt: null, expiresAt: { gt: new Date() } },
-    data: { usedAt: new Date() },
-  });
+  const row = await prisma.loginToken.findUnique({ where: { tokenHash: hash(token) } });
+  if (!row || row.usedAt || row.expiresAt <= new Date()) return null;
+  // Claim it: of two presses at once, only one finds usedAt still empty.
+  const { count } = await prisma.loginToken.updateMany({ where: { id: row.id, usedAt: null }, data: { usedAt: new Date() } });
   if (count === 0) return null;
-  const row = await prisma.loginToken.findUnique({ where: { tokenHash }, select: { userId: true } });
-  return row ? usableAccount(row.userId) : null;
+  return usableAccount(row.userId);
 }

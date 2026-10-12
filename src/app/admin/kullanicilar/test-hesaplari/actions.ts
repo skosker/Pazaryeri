@@ -16,6 +16,7 @@ import {
 import { PERIOD_MONTHS, parsePeriod } from "@/lib/membership";
 import { membershipQuote } from "@/lib/pro-purchase";
 import { createLoginToken } from "@/lib/login-tokens";
+import { parseTlAmount } from "@/lib/refund-labels";
 
 export type CreatedAccount = { name: string; email: string; password: string };
 export type TestAccountsState = {
@@ -163,4 +164,62 @@ export async function createAllLoginLinksAction(): Promise<{ links: BulkLoginLin
     if (token) links.push({ name: u.name, email: u.email, path: `/test-giris?t=${token}` });
   }
   return { links, expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString() };
+}
+
+export type TestPriceGroup = { price: number; gigs: { title: string; slug: string }[] };
+export type TestPricesState = { error?: string; groups?: TestPriceGroup[] };
+
+/**
+ * Showcase gigs at given starting prices, for test orders at those amounts. Only gigs of
+ * generated (synthetic) sellers are touched, never a real freelancer's. For each price,
+ * gigs already starting there count first; the rest are repriced so their cheapest
+ * package is exactly that price and the others keep their ratio to it (rounded to 50 TL).
+ */
+export async function setTestPricesAction(_prev: TestPricesState, formData: FormData): Promise<TestPricesState> {
+  await requireAdmin();
+  const prices = String(formData.get("prices") ?? "")
+    .split(/[;\s]+/)
+    .filter(Boolean)
+    .map(parseTlAmount);
+  const count = Number(formData.get("count"));
+  if (prices.length === 0 || prices.length > 5 || prices.some((p) => !(p >= 50 && p <= 1_000_000))) {
+    return { error: "1 ile 5 arasında fiyat gir (50 – 1.000.000 TL), boşlukla ayır: 2000 3000 78000" };
+  }
+  if (!(count >= 1 && count <= 10)) return { error: "Her fiyattan 1 ile 10 arasında ilan seçilebilir." };
+
+  const gigs = await prisma.gig.findMany({
+    where: { published: true, seller: { synthetic: true, suspended: false } },
+    select: { id: true, title: true, slug: true, packages: { where: { tier: { not: "CUSTOM" } }, select: { id: true, price: true } } },
+    orderBy: { createdAt: "asc" },
+    take: 500,
+  });
+  const minOf = (g: (typeof gigs)[number]) => Math.min(...g.packages.map((p) => Number(p.price)));
+  const pool = gigs.filter((g) => g.packages.length > 0);
+  const used = new Set<string>();
+  const groups: TestPriceGroup[] = [];
+
+  for (const price of prices) {
+    const already = pool.filter((g) => !used.has(g.id) && minOf(g) === price).slice(0, count);
+    const picked = [...already];
+    for (const g of pool) {
+      if (picked.length >= count) break;
+      if (used.has(g.id) || picked.includes(g)) continue;
+      const factor = price / minOf(g);
+      await prisma.$transaction(
+        g.packages.map((p) => {
+          const isMin = Number(p.price) === minOf(g);
+          const next = isMin ? price : Math.max(price, Math.round((Number(p.price) * factor) / 50) * 50);
+          return prisma.package.update({ where: { id: p.id }, data: { price: next } });
+        })
+      );
+      picked.push(g);
+    }
+    picked.forEach((g) => used.add(g.id));
+    groups.push({ price, gigs: picked.map((g) => ({ title: g.title, slug: g.slug })) });
+  }
+
+  revalidatePath("/kategoriler");
+  revalidatePath("/");
+  for (const g of groups) for (const x of g.gigs) revalidatePath(`/gig/${x.slug}`);
+  return { groups };
 }
