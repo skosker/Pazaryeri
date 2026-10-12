@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { TEST_EMAIL_DOMAIN } from "@/lib/test-accounts";
 import { hasPaidPeriod, membershipSelect, membershipTier, untilFormat } from "@/lib/membership";
 import { TestAccountsForm } from "./test-accounts-form";
+import { TestTransfersForm } from "./test-transfers-form";
+import { LoginLinkButton } from "./login-link-button";
 import { MembershipForm, RoleForm } from "../account-forms";
 
 const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Istanbul" });
@@ -16,6 +18,14 @@ export default async function TestAccountsPage() {
     orderBy: { createdAt: "desc" },
     take: 200,
   });
+  const waiting = new Set(
+    (
+      await prisma.proPurchase.findMany({
+        where: { userId: { in: accounts.map((a) => a.id) }, provider: "havale", status: "INITIALIZED", plan: { in: ["PRO", "PRO_PLUS"] } },
+        select: { userId: true },
+      })
+    ).map((p) => p.userId)
+  );
 
   return (
     <div>
@@ -28,12 +38,21 @@ export default async function TestAccountsPage() {
         adresiyle, e-postası doğrulanmış bir <strong>Test Hesabı</strong> açılır ve şifresi bir kez gösterilir. Bu adreslere
         e-posta gönderilmez. Test hesapları üretilmiş ilanlardan test siparişi verebilir. Aşağıdaki listeden rolünü
         (Alıcı / Freelancer) ve freelancer üyeliğini (Pro / Pro Plus) değiştirebilirsin; rol değişikliği, kullanıcı çıkış
-        yapıp yeniden girdiğinde geçerli olur.
+        yapıp yeniden girdiğinde geçerli olur. Şifresiz denemek için satırdaki <strong>Giriş Linki</strong>&apos;ni kopyalayıp
+        gizli pencerede aç; link tek kullanımlık ve 10 dakika geçerlidir.
       </p>
 
       <div className="mt-6">
         <TestAccountsForm />
       </div>
+
+      {accounts.some((a) => a.isTester) && (
+        <div className="mt-6">
+          <TestTransfersForm
+            accounts={accounts.filter((a) => a.isTester && !a.suspended).map((a) => ({ id: a.id, name: a.name, waiting: waiting.has(a.id) }))}
+          />
+        </div>
+      )}
 
       <h2 className="mt-10 text-lg font-semibold text-brand-navy">Açılmış Test Hesapları ({accounts.length})</h2>
       {accounts.length === 0 ? (
@@ -48,6 +67,7 @@ export default async function TestAccountsPage() {
                 <th className="px-4 py-3 font-medium">Rol</th>
                 <th className="px-4 py-3 font-medium">Üyelik</th>
                 <th className="px-4 py-3 font-medium">Açılış</th>
+                <th className="px-4 py-3 font-medium">Şifresiz Giriş</th>
               </tr>
             </thead>
             <tbody>
@@ -84,6 +104,7 @@ export default async function TestAccountsPage() {
                       )}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-slate-500">{dateFmt.format(a.createdAt)}</td>
+                    <td className="px-4 py-3">{a.isTester && !a.suspended && <LoginLinkButton userId={a.id} />}</td>
                   </tr>
                 );
               })}

@@ -154,6 +154,7 @@ model User {
 
   @@index([role, synthetic])
   @@map("users")
+  loginTokens        LoginToken[]
 }
 
 model VerificationToken {
@@ -934,4 +935,21 @@ model InvoiceFile {
 
   @@unique([kind, recordId])
   @@map("invoice_files")
+}
+
+/// Tek kullanımlık giriş linki: admin, toplu açılan bir test hesabına şifresiz girmek için
+/// üretir (Admin → Kullanıcılar → Toplu Test Hesabı). Token'ın yalnızca SHA-256 özeti
+/// saklanır; kısa sürelidir ve bir kez kullanılır.
+model LoginToken {
+  id          String    @id @default(cuid())
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdById String
+  createdAt   DateTime  @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("login_tokens")
 }
