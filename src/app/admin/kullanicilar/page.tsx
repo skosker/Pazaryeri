@@ -2,7 +2,7 @@ import { membershipSelect, membershipTier } from "@/lib/membership";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
-import { toggleSuspensionAction, changeUserRoleAction, toggleProFreelancerAction } from "./actions";
+import { toggleSuspensionAction, changeUserRoleAction, toggleProFreelancerAction, toggleTesterAction } from "./actions";
 import { DeleteUserButton } from "./delete-user-button";
 import { FilterSelect } from "./filter-select";
 import type { Prisma } from "@/generated/prisma/client";
@@ -111,6 +111,7 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
       suspended: true,
       ...membershipSelect,
       synthetic: true,
+      isTester: true,
       emailVerified: true,
       importedOrderCount: true,
       createdAt: true,
@@ -175,6 +176,11 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
                     {user.synthetic && (
                       <span className="ml-1.5 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
                         Üretilmiş
+                      </span>
+                    )}
+                    {user.isTester && (
+                      <span className="ml-1.5 inline-block rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                        Test Hesabı
                       </span>
                     )}
                   </p>
@@ -262,6 +268,21 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
                               }`}
                             >
                               {user.isPro ? "Süresiz Pro Kaldır" : "Süresiz Pro Yap"}
+                            </button>
+                          </form>
+                        )}
+                        {!user.synthetic && (
+                          <form action={toggleTesterAction.bind(null, user.id)}>
+                            <button
+                              type="submit"
+                              title="Test hesabı üretilmiş vitrin ilanlarından test siparişi verebilir"
+                              className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                                user.isTester
+                                  ? "bg-amber-50 text-amber-700 hover:bg-amber-100"
+                                  : "border border-slate-300 text-slate-600 hover:bg-slate-50"
+                              }`}
+                            >
+                              {user.isTester ? "Test Hesabını Kaldır" : "Test Hesabı Yap"}
                             </button>
                           </form>
                         )}

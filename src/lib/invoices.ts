@@ -33,6 +33,8 @@ export type InvoiceRow = {
   total: number;
   invoiceNo: string | null;
   invoicedAt: Date | null;
+  /** Payment provider of a sale ("havale", "paytr", "bakiye"…); null for commission. */
+  paidWith: string | null;
 };
 
 const customerSelect = {
@@ -78,25 +80,42 @@ const periodLabel = (months: number | null) => (months === 12 ? "Yıllık" : mon
 
 /** Pending (not yet invoiced) or done, newest first; kind narrows to one source. */
 export async function listInvoiceRows(done: boolean, kind?: InvoiceKind): Promise<InvoiceRow[]> {
-  const invoiced = done ? { not: null } : null;
+  return queryInvoiceRows({ invoiced: done ? { not: null } : null, kind });
+}
+
+/** Everything one member bought from Prosinta (and, for a freelancer, the commission), invoiced or not. */
+export async function listUserInvoiceRows(userId: string): Promise<InvoiceRow[]> {
+  return queryInvoiceRows({ userId });
+}
+
+async function queryInvoiceRows({
+  invoiced,
+  kind,
+  userId,
+}: {
+  invoiced?: { not: null } | null;
+  kind?: InvoiceKind;
+  userId?: string;
+}): Promise<InvoiceRow[]> {
   const take = 500;
+  const invoiceFilter = invoiced === undefined ? {} : { invoiceNo: invoiced };
   const [purchases, boosts, payouts] = await Promise.all([
     !kind || kind === "uyelik"
       ? prisma.proPurchase.findMany({
-          where: { status: "SUCCESS", amount: { gt: 0 }, invoiceNo: invoiced },
+          where: { status: "SUCCESS", amount: { gt: 0 }, ...invoiceFilter, ...(userId ? { userId } : {}) },
           select: {
-            id: true, plan: true, months: true, amount: true, updatedAt: true, invoiceNo: true, invoicedAt: true,
+            id: true, plan: true, months: true, amount: true, createdAt: true, invoiceNo: true, invoicedAt: true, provider: true,
             user: { select: customerSelect },
           },
-          orderBy: { updatedAt: "desc" },
+          orderBy: { createdAt: "desc" },
           take,
         })
       : [],
     !kind || kind === "one-cikar"
       ? prisma.gigBoost.findMany({
-          where: { status: "SUCCESS", amount: { gt: 0 }, creditMonth: null, invoiceNo: invoiced },
+          where: { status: "SUCCESS", amount: { gt: 0 }, creditMonth: null, ...invoiceFilter, ...(userId ? { userId } : {}) },
           select: {
-            id: true, days: true, amount: true, activatedAt: true, updatedAt: true, invoiceNo: true, invoicedAt: true,
+            id: true, days: true, amount: true, activatedAt: true, updatedAt: true, invoiceNo: true, invoicedAt: true, provider: true,
             gig: { select: { title: true } },
             user: { select: customerSelect },
           },
@@ -106,7 +125,7 @@ export async function listInvoiceRows(done: boolean, kind?: InvoiceKind): Promis
       : [],
     !kind || kind === "komisyon"
       ? prisma.payout.findMany({
-          where: { status: { not: "FAILED" }, commission: { gt: 0 }, invoiceNo: invoiced },
+          where: { status: { not: "FAILED" }, commission: { gt: 0 }, ...invoiceFilter, ...(userId ? { sellerId: userId } : {}) },
           select: {
             id: true, commission: true, createdAt: true, paidAt: true, invoiceNo: true, invoicedAt: true,
             order: { select: { id: true, gig: { select: { title: true } } } },
@@ -122,12 +141,14 @@ export async function listInvoiceRows(done: boolean, kind?: InvoiceKind): Promis
     ...purchases.map((p) => ({
       kind: "uyelik" as const,
       id: p.id,
-      date: p.updatedAt,
+      // Not updatedAt: that moves when the row is marked invoiced.
+      date: p.createdAt,
       customer: customer(p.user),
       service: `Prosinta ${PURCHASE_PLAN_LABEL[p.plan]} ${p.plan.startsWith("KURUMSAL") ? "paket" : "üyelik"} · ${periodLabel(p.months)}`,
       total: Number(p.amount),
       invoiceNo: p.invoiceNo,
       invoicedAt: p.invoicedAt,
+      paidWith: p.provider,
     })),
     ...boosts.map((b) => ({
       kind: "one-cikar" as const,
@@ -138,6 +159,7 @@ export async function listInvoiceRows(done: boolean, kind?: InvoiceKind): Promis
       total: Number(b.amount),
       invoiceNo: b.invoiceNo,
       invoicedAt: b.invoicedAt,
+      paidWith: b.provider,
     })),
     ...payouts.map((p) => ({
       kind: "komisyon" as const,
@@ -148,6 +170,7 @@ export async function listInvoiceRows(done: boolean, kind?: InvoiceKind): Promis
       total: Number(p.commission),
       invoiceNo: p.invoiceNo,
       invoicedAt: p.invoicedAt,
+      paidWith: null,
     })),
   ];
   return rows.sort((a, b) => b.date.getTime() - a.date.getTime());
@@ -170,3 +193,27 @@ export async function setInvoice(kind: InvoiceKind, id: string, invoiceNo: strin
 export function parseInvoiceKind(value: unknown): InvoiceKind | undefined {
   return value === "uyelik" || value === "one-cikar" || value === "komisyon" ? value : undefined;
 }
+
+/** Which of these rows have an e-Arşiv PDF on file, as "kind:id" keys. */
+export async function invoicePdfKeys(rows: Pick<InvoiceRow, "kind" | "id">[]): Promise<Set<string>> {
+  if (rows.length === 0) return new Set();
+  const files = await prisma.invoiceFile.findMany({
+    where: { recordId: { in: rows.map((r) => r.id) } },
+    select: { kind: true, recordId: true },
+  });
+  return new Set(files.map((f) => `${f.kind}:${f.recordId}`));
+}
+
+/** The member a sale (or commission) belongs to; null when the record does not exist. */
+export async function invoiceOwnerId(kind: InvoiceKind, id: string): Promise<string | null> {
+  if (kind === "uyelik") return (await prisma.proPurchase.findUnique({ where: { id }, select: { userId: true } }))?.userId ?? null;
+  if (kind === "one-cikar") return (await prisma.gigBoost.findUnique({ where: { id }, select: { userId: true } }))?.userId ?? null;
+  return (await prisma.payout.findUnique({ where: { id }, select: { sellerId: true } }))?.sellerId ?? null;
+}
+
+export const PAID_WITH_LABEL: Record<string, string> = {
+  havale: "Havale/EFT",
+  paytr: "Kredi / banka kartı",
+  iyzico: "Kredi / banka kartı",
+  bakiye: "Kurumsal bakiye",
+};

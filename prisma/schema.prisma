@@ -866,3 +866,20 @@ model ExpenseVoucher {
   @@index([issuedAt])
   @@map("expense_vouchers")
 }
+
+/// e-Arşiv fatura PDF'i: admin, faturayı entegratörde/GİB portalında kestikten sonra
+/// Admin → Faturalar'dan yükler; üye Panel → Faturalarım'dan indirir. Kayıt başına bir dosya.
+model InvoiceFile {
+  id        String   @id @default(cuid())
+  /// "uyelik" | "one-cikar" | "komisyon" (lib/invoices InvoiceKind)
+  kind      String
+  /// ProPurchase, GigBoost ya da Payout id'si.
+  recordId  String
+  fileName  String
+  data      Bytes
+  size      Int
+  createdAt DateTime @default(now())
+
+  @@unique([kind, recordId])
+  @@map("invoice_files")
+}
