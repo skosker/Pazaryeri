@@ -270,14 +270,7 @@ export default async function BankTransferApprovalsPage(
                     <tr key={order.id} className="border-b border-slate-100 last:border-0">
                       <td className="px-5 py-4 text-slate-500">{dateFmt.format(order.createdAt)}</td>
                       <td className="px-5 py-4">
-                        <p className="font-medium text-brand-navy">
-                          {order.gig.title}
-                          {isTestTransfer(order) && (
-                            <span className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
-                              Test siparişi · para beklenmez
-                            </span>
-                          )}
-                        </p>
+                        <p className="font-medium text-brand-navy">{order.gig.title}</p>
                       </td>
                       <td className="px-5 py-4 text-slate-600">{order.buyer.name}</td>
                       <td className="px-5 py-4 text-slate-600">{order.gig.seller.name}</td>
