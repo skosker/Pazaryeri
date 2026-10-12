@@ -45,6 +45,8 @@ export default async function AdminUserDetailPage(props: PageProps<"/admin/kulla
       proTrialUsedAt: true,
       synthetic: true,
       isTester: true,
+      importedOrderCount: true,
+      _count: { select: { gigs: true, ordersMade: true } },
       founderNumber: true,
       founderAt: true,
       emailVerified: true,
@@ -198,8 +200,9 @@ export default async function AdminUserDetailPage(props: PageProps<"/admin/kulla
         </div>
       )}
 
-      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-5">
         <InfoCard label="Kayıt Tarihi" value={dateFmt.format(user.createdAt)} />
+        <InfoCard label="İlan / Sipariş" value={`${user._count.gigs} ilan · ${user.importedOrderCount ?? user._count.ordersMade} sipariş`} />
         <InfoCard
           label="E-posta"
           value={user.emailVerified ? `Doğrulandı (${dateFmt.format(user.emailVerified)})` : "Doğrulanmadı"}

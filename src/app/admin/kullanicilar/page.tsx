@@ -14,7 +14,6 @@ const roleLabel: Record<string, string> = {
   ADMIN: "Admin",
 };
 
-const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
 
 const PAGE_SIZE = 50;
 
@@ -114,8 +113,6 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
       synthetic: true,
       isTester: true,
       emailVerified: true,
-      importedOrderCount: true,
-      createdAt: true,
       _count: { select: { gigs: true, ordersMade: true } },
     },
   });
@@ -171,8 +168,6 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
               <th className="px-5 py-3 font-medium">Kullanıcı</th>
               <th className="px-5 py-3 font-medium">Rol</th>
               <th className="px-5 py-3 font-medium">Durum</th>
-              <th className="px-5 py-3 font-medium">İlan / Sipariş</th>
-              <th className="px-5 py-3 font-medium">Kayıt Tarihi</th>
               <th className="px-5 py-3 font-medium text-right">İşlem</th>
             </tr>
           </thead>
@@ -212,11 +207,6 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
                     </span>
                   )}
                 </td>
-                <td className="px-5 py-4 text-slate-500">
-                  {user._count.gigs} ilan ·{" "}
-                  {user.importedOrderCount ?? user._count.ordersMade} sipariş
-                </td>
-                <td className="px-5 py-4 text-slate-500">{dateFmt.format(user.createdAt)}</td>
                 <td className="px-5 py-4">
                   <div className="flex flex-wrap items-center justify-end gap-2">
                     <Link
