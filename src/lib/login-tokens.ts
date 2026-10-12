@@ -35,11 +35,16 @@ export async function createLoginToken(userId: string, adminId: string): Promise
   return token;
 }
 
-/** Whose link this is, without using it up (for the page that asks to confirm). */
-export async function peekLoginToken(token: string): Promise<TestAccount | null> {
-  const row = await prisma.loginToken.findUnique({ where: { tokenHash: hash(token) } });
-  if (!row || row.usedAt || row.expiresAt <= new Date()) return null;
-  return usableAccount(row.userId);
+export type LinkProblem = "bulunamadi" | "kullanildi" | "suresi-doldu" | "hesap-uygun-degil";
+
+/** Whose link this is, without using it up (for the page that asks to confirm), or why it cannot be used. */
+export async function peekLoginToken(token: string): Promise<{ account: TestAccount } | { problem: LinkProblem }> {
+  const row = token ? await prisma.loginToken.findUnique({ where: { tokenHash: hash(token) } }) : null;
+  if (!row) return { problem: "bulunamadi" };
+  if (row.usedAt) return { problem: "kullanildi" };
+  if (row.expiresAt <= new Date()) return { problem: "suresi-doldu" };
+  const account = await usableAccount(row.userId);
+  return account ? { account } : { problem: "hesap-uygun-degil" };
 }
 
 /**

@@ -9,7 +9,7 @@ export async function testLoginAction(token: string) {
   try {
     await signIn("test-login", { token, redirectTo: "/panel" });
   } catch (error) {
-    if (error instanceof AuthError) redirect("/test-giris?hata=1");
+    if (error instanceof AuthError) redirect(`/test-giris?hata=${encodeURIComponent(error.type)}`);
     throw error;
   }
 }

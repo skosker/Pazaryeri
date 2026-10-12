@@ -4,6 +4,13 @@ import { auth } from "@/auth";
 import { peekLoginToken } from "@/lib/login-tokens";
 import { testLoginAction } from "./actions";
 
+const PROBLEM_TEXT = {
+  bulunamadi: "Bu link bulunamadı. Linkin tamamı kopyalanmamış olabilir; admin panelinden yeni link oluştur.",
+  kullanildi: "Bu link daha önce kullanılmış. Her link tek kullanımlıktır; yeni link oluştur.",
+  "suresi-doldu": "Bu linkin 10 dakikalık süresi dolmuş; yeni link oluştur.",
+  "hesap-uygun-degil": "Bu hesap artık test hesabı değil, askıda ya da e-postası doğrulanmamış.",
+} as const;
+
 export const metadata: Metadata = { title: "Test Hesabı Girişi", robots: { index: false, follow: false } };
 
 /**
@@ -13,7 +20,14 @@ export const metadata: Metadata = { title: "Test Hesabı Girişi", robots: { ind
 export default async function TestLoginPage(props: PageProps<"/test-giris">) {
   const { t, hata } = await props.searchParams;
   const token = typeof t === "string" ? t : "";
-  const [account, session] = await Promise.all([token ? peekLoginToken(token) : null, auth()]);
+  const [peek, session] = await Promise.all([peekLoginToken(token), auth()]);
+  const account = "account" in peek ? peek.account : null;
+  const reason =
+    typeof hata === "string"
+      ? `Giriş sırasında hata oluştu (${hata}). Link kullanılmış sayılır; yeni link oluşturup tekrar dene.`
+      : "problem" in peek
+        ? PROBLEM_TEXT[peek.problem]
+        : "";
 
   return (
     <div className="mx-auto max-w-md px-4 py-16">
@@ -39,10 +53,7 @@ export default async function TestLoginPage(props: PageProps<"/test-giris">) {
         ) : (
           <>
             <h1 className="mt-2 text-xl font-bold text-brand-navy">Link geçersiz</h1>
-            <p className="mt-2 text-sm text-slate-500">
-              {hata ? "Giriş yapılamadı: " : ""}Bu giriş linki kullanılmış ya da süresi dolmuş. Admin panelinden yeni bir link
-              oluştur.
-            </p>
+            <p className="mt-2 text-sm text-slate-500">{reason}</p>
             <Link href="/giris" className="mt-6 inline-block text-sm font-semibold text-purple-700 hover:underline">
               Normal giriş sayfası →
             </Link>
