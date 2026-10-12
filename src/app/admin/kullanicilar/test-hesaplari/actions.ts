@@ -1,6 +1,7 @@
 "use server";
 
 import bcrypt from "bcryptjs";
+import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@/generated/prisma/client";
 import { requireAdmin } from "@/lib/require-admin";
@@ -14,7 +15,9 @@ import {
   parseNames,
 } from "@/lib/test-accounts";
 import { PERIOD_MONTHS, parsePeriod } from "@/lib/membership";
-import { membershipQuote } from "@/lib/pro-purchase";
+import { markProPurchasePaid, membershipQuote } from "@/lib/pro-purchase";
+import { createOrder, refreshOrderDiscounts } from "@/lib/orders";
+import { markOrderPaid } from "@/lib/order-actions";
 import { createLoginToken } from "@/lib/login-tokens";
 import { parseTlAmount } from "@/lib/refund-labels";
 
@@ -222,4 +225,95 @@ export async function setTestPricesAction(_prev: TestPricesState, formData: Form
   revalidatePath("/");
   for (const g of groups) for (const x of g.gigs) revalidatePath(`/gig/${x.slug}`);
   return { groups };
+}
+
+export type SampleDataState = {
+  error?: string;
+  done?: { accounts: number; paidMemberships: number; pendingMemberships: number; pendingOrders: number; paidOrders: number; skipped: number };
+};
+
+/**
+ * Example records for every active test account, made through the site's own order and
+ * payment code so every screen shows them as it would a member's: by turns a paid Pro Plus
+ * (aylık), a paid Pro (yıllık) or a Pro Plus bank transfer still waiting for approval, and
+ * two orders on showcase gigs — one waiting for transfer approval, one paid. An account
+ * that already has a membership purchase or an order is left alone, so pressing it again
+ * adds nothing twice. Test accounts stay out of revenue; mail to them is not sent.
+ */
+export async function createSampleDataAction(): Promise<SampleDataState> {
+  await requireAdmin();
+  const accounts = await prisma.user.findMany({
+    where: { isTester: true, suspended: false, email: { endsWith: `@${TEST_EMAIL_DOMAIN}` } },
+    select: {
+      id: true,
+      role: true,
+      _count: { select: { ordersMade: true, proPurchases: { where: { plan: { in: ["PRO", "PRO_PLUS"] }, status: { not: "FAILED" } } } } },
+    },
+    orderBy: { name: "asc" },
+  });
+  const gigs = await prisma.gig.findMany({
+    where: { published: true, seller: { synthetic: true, suspended: false } },
+    select: { packages: { where: { tier: { not: "CUSTOM" } }, orderBy: { price: "asc" }, take: 1, select: { id: true } } },
+    orderBy: { createdAt: "asc" },
+    take: 100,
+  });
+  const packages = gigs.map((g) => g.packages[0]?.id).filter((id): id is string => Boolean(id));
+  if (packages.length < 2) return { error: "Örnek sipariş için yayında vitrin ilanı yok." };
+
+  const done = { accounts: accounts.length, paidMemberships: 0, pendingMemberships: 0, pendingOrders: 0, paidOrders: 0, skipped: 0 };
+  const plans = [
+    { plan: "PRO_PLUS", period: "aylik", paid: true },
+    { plan: "PRO", period: "yillik", paid: true },
+    { plan: "PRO_PLUS", period: "aylik", paid: false },
+  ] as const;
+  let next = 0;
+
+  for (const [i, u] of accounts.entries()) {
+    if (u._count.proPurchases > 0 && u._count.ordersMade > 0) {
+      done.skipped++;
+      continue;
+    }
+    if (u._count.proPurchases === 0) {
+      const { plan, period, paid } = plans[i % plans.length];
+      if (u.role === "BUYER") await prisma.user.update({ where: { id: u.id }, data: { role: "FREELANCER" } });
+      const { amount } = await membershipQuote(plan, period);
+      const purchase = await prisma.proPurchase.create({
+        data: { userId: u.id, plan, months: PERIOD_MONTHS[period], amount, provider: "havale" },
+      });
+      if (paid) {
+        await markProPurchasePaid(purchase.id);
+        done.paidMemberships++;
+      } else {
+        done.pendingMemberships++;
+      }
+    }
+    if (u._count.ordersMade === 0) {
+      for (const paid of [false, true]) {
+        const order = await createOrder(u.id, packages[next++ % packages.length]);
+        await refreshOrderDiscounts(order);
+        await prisma.payment.create({
+          data: {
+            orderId: order.id,
+            provider: "havale",
+            status: paid ? "SUCCESS" : "INITIALIZED",
+            conversationId: randomUUID(),
+            rawResponse: { mode: "havale", notifiedAt: new Date().toISOString(), sample: true },
+          },
+        });
+        await prisma.order.update({ where: { id: order.id }, data: { status: "PENDING_VERIFICATION" } });
+        if (paid) {
+          await markOrderPaid(order.id);
+          done.paidOrders++;
+        } else {
+          done.pendingOrders++;
+        }
+      }
+    }
+  }
+
+  revalidatePath("/admin/havale-onaylari");
+  revalidatePath("/admin/faturalar");
+  revalidatePath("/admin/siparisler");
+  revalidatePath("/admin/kullanicilar/test-hesaplari");
+  return { done };
 }
