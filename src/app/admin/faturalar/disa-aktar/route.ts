@@ -12,7 +12,9 @@ export async function GET(request: NextRequest) {
 
   const done = request.nextUrl.searchParams.get("durum") === "kesilen";
   const kind = parseInvoiceKind(request.nextUrl.searchParams.get("tur"));
-  const [rows, settings] = await Promise.all([listInvoiceRows(done, kind), getSettings()]);
+  const [all, settings] = await Promise.all([listInvoiceRows(done, kind), getSettings()]);
+  // The export goes to accounting: test accounts' purchases are not invoiced.
+  const rows = all.filter((r) => !r.test);
 
   const header = [
     "Tarih", "Tür", "Ad Soyad", "E-posta", "Şirket Unvanı", "Vergi Dairesi", "VKN/TCKN", "Adres",

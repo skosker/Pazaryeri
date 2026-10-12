@@ -41,7 +41,7 @@ export default async function RevenuePage() {
       <p className="mt-1 text-sm text-slate-500">
         Prosinta&apos;nın kendi geliri ve karşıladığı indirimler, Ağustos 2026&apos;dan itibaren İstanbul takvim ayına göre.
         Tutarlar tahsil edildiği gibi (KDV dahil); üyelik iadeleri iade edildiği ayda gelirden düşülür; sipariş hacmi freelancer&apos;lara giden paranın toplamıdır, gelir
-        değildir. Excel&apos;den içe aktarılan ve vitrin hesaplarına ait siparişler sayılmaz.
+        değildir. Excel&apos;den içe aktarılan ve vitrin hesaplarına ait siparişler ile test hesaplarının alımları sayılmaz.
       </p>
 
       <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">

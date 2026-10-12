@@ -70,7 +70,7 @@ export async function markProPurchasePaid(purchaseId: string) {
 async function applyPaidPurchase(tx: Prisma.TransactionClient, purchaseId: string, settings: SiteSettings) {
   const { count } = await tx.proPurchase.updateMany({
     where: { id: purchaseId, status: { not: "SUCCESS" } },
-    data: { status: "SUCCESS" },
+    data: { status: "SUCCESS", paidAt: new Date() },
   });
   if (count === 0) return;
 
@@ -185,7 +185,7 @@ export async function pendingProBankTransfer(userId: string, corporate = false) 
 export async function listPendingProBankTransfers() {
   return prisma.proPurchase.findMany({
     where: { provider: "havale", status: "INITIALIZED" },
-    include: { user: { select: { name: true, email: true, role: true } } },
+    include: { user: { select: { name: true, email: true, role: true, isTester: true } } },
     orderBy: { createdAt: "desc" },
   });
 }
