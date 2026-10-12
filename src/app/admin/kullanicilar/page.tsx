@@ -2,7 +2,8 @@ import { membershipSelect, membershipTier } from "@/lib/membership";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
-import { toggleSuspensionAction, changeUserRoleAction, toggleProFreelancerAction, toggleTesterAction } from "./actions";
+import { toggleSuspensionAction, toggleTesterAction } from "./actions";
+import { MembershipForm, RoleForm } from "./account-forms";
 import { DeleteUserButton } from "./delete-user-button";
 import { FilterSelect } from "./filter-select";
 import type { Prisma } from "@/generated/prisma/client";
@@ -186,11 +187,6 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
                         Üretilmiş
                       </span>
                     )}
-                    {user.isTester && (
-                      <span className="ml-1.5 inline-block rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
-                        Test Hesabı
-                      </span>
-                    )}
                   </p>
                 </td>
                 <td className="px-5 py-4 text-slate-600">
@@ -233,26 +229,7 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
                       <p className="text-xs text-slate-400">Bu sensin</p>
                     ) : (
                       <>
-                        <form
-                          action={changeUserRoleAction.bind(null, user.id)}
-                          className="flex items-center gap-1.5"
-                        >
-                          <select
-                            name="role"
-                            defaultValue={user.role}
-                            className="rounded-lg border border-slate-300 px-2 py-1.5 text-xs text-slate-600 focus:border-purple-400 focus:outline-none"
-                          >
-                            <option value="BUYER">Alıcı</option>
-                            <option value="FREELANCER">Freelancer</option>
-                            <option value="ADMIN">Admin</option>
-                          </select>
-                          <button
-                            type="submit"
-                            className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-                          >
-                            Kaydet
-                          </button>
-                        </form>
+                        <RoleForm userId={user.id} role={user.role} />
                         <form action={toggleSuspensionAction.bind(null, user.id)}>
                           <button
                             type="submit"
@@ -265,20 +242,7 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
                             {user.suspended ? "Askıyı Kaldır" : "Askıya Al"}
                           </button>
                         </form>
-                        {user.role === "FREELANCER" && (
-                          <form action={toggleProFreelancerAction.bind(null, user.id)}>
-                            <button
-                              type="submit"
-                              className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                                user.isPro
-                                  ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                                  : "bg-amber-50 text-amber-700 hover:bg-amber-100"
-                              }`}
-                            >
-                              {user.isPro ? "Süresiz Pro Kaldır" : "Süresiz Pro Yap"}
-                            </button>
-                          </form>
-                        )}
+                        {user.role === "FREELANCER" && <MembershipForm userId={user.id} />}
                         {!user.synthetic && (
                           <form action={toggleTesterAction.bind(null, user.id)}>
                             <button

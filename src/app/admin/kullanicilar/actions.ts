@@ -4,6 +4,16 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from "@/lib/prisma";
 import { restoreFounder, revokeFounder } from "@/lib/founders";
+import { addMonths } from "@/lib/membership";
+import { ADMIN_MEMBERSHIP_OPTIONS, type AdminMembershipOption } from "./membership-options";
+
+/** Every admin page that shows a user's role or membership. */
+function revalidateUser(userId: string) {
+  revalidatePath("/admin/kullanicilar");
+  revalidatePath(`/admin/kullanicilar/${userId}`);
+  revalidatePath("/admin/kullanicilar/test-hesaplari");
+  revalidatePath(`/freelancer/${userId}`);
+}
 
 export async function toggleSuspensionAction(userId: string) {
   const admin = await requireAdmin();
@@ -16,14 +26,31 @@ export async function toggleSuspensionAction(userId: string) {
   revalidatePath("/admin/kullanicilar");
 }
 
-export async function toggleProFreelancerAction(userId: string) {
+/**
+ * Admin sets a freelancer's membership outright (no payment): free, Pro or Pro Plus for a
+ * month or a year from now, or süresiz Pro. It replaces what they had rather than adding
+ * to it; a running paid period is ended, not erased, so its history stays.
+ */
+export async function setMembershipAction(userId: string, formData: FormData) {
   await requireAdmin();
+  const choice = String(formData.get("membership") ?? "");
+  if (!Object.hasOwn(ADMIN_MEMBERSHIP_OPTIONS, choice)) return;
+  const option = ADMIN_MEMBERSHIP_OPTIONS[choice as AdminMembershipOption];
 
-  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true, proUntil: true } });
   if (!user || user.role !== "FREELANCER") return;
 
-  await prisma.user.update({ where: { id: userId }, data: { isPro: !user.isPro } });
-  revalidatePath("/admin/kullanicilar");
+  const now = new Date();
+  const endRunning = user.proUntil && user.proUntil > now ? now : user.proUntil;
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      isPro: option.forever,
+      proPlus: option.plus,
+      proUntil: option.months ? addMonths(now, option.months) : endRunning,
+    },
+  });
+  revalidateUser(userId);
 }
 
 /**
@@ -101,5 +128,5 @@ export async function changeUserRoleAction(userId: string, formData: FormData) {
   if (!user) return;
 
   await prisma.user.update({ where: { id: userId }, data: { role: role as (typeof assignableRoles)[number] } });
-  revalidatePath("/admin/kullanicilar");
+  revalidateUser(userId);
 }
