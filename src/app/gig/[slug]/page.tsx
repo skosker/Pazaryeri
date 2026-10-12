@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { getGigBySlug, getRelatedGigs } from "@/lib/gigs";
 import { GigCover } from "@/components/gig-cover";
 import { UserAvatar } from "@/components/user-avatar";
@@ -44,7 +45,12 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
       : null;
 
   const errorMessage = typeof searchParams.hata === "string" ? searchParams.hata : null;
-  const acceptingOrders = sellerTakesOrders(gig.seller);
+  // A test account (admin-flagged, for a testing firm) may order from showcase gigs too.
+  const viewer = session?.user?.id
+    ? await prisma.user.findUnique({ where: { id: session.user.id }, select: { isTester: true } })
+    : null;
+  const acceptingOrders = sellerTakesOrders(gig.seller, viewer);
+  const testOrderOnly = acceptingOrders && gig.seller.synthetic;
   const isOwnGig = session?.user?.id === gig.sellerId;
   const [relatedGigs, offer, campaign] = await Promise.all([
     getRelatedGigs(gig.category.slug, gig.slug),
@@ -80,6 +86,12 @@ export default async function GigDetailPage(props: PageProps<"/gig/[slug]">) {
       {errorMessage && (
         <p className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
           {errorMessage}
+        </p>
+      )}
+      {testOrderOnly && (
+        <p className="mb-6 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <strong>Test hesabı:</strong> Bu ilan üretilmiş bir vitrin ilanı; buradan verilen sipariş test siparişidir.
+          Gerçek ödeme gönderme, satıcı teslim yapmaz.
         </p>
       )}
 

@@ -32,7 +32,7 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
   if (order.buyerId !== session.user.id) notFound();
   if (order.status !== "PENDING_PAYMENT") redirect(`/siparis/${orderId}`);
   // An unpaid order left over from before the seller stopped taking orders must not be paid.
-  if (!sellerTakesOrders(order.gig.seller)) {
+  if (!sellerTakesOrders(order.gig.seller, order.buyer)) {
     redirect(`/gig/${order.gig.slug}?hata=${encodeURIComponent(NOT_TAKING_ORDERS)}`);
   }
 
@@ -135,7 +135,8 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
         </div>
       )}
 
-      {corporate.usable && (
+      {/* Prepaid corporate balance is real money: never spent on a test order. */}
+      {corporate.usable && !order.gig.seller.synthetic && (
         <div className="mt-6 rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -160,6 +161,13 @@ export default async function CheckoutPage(props: PageProps<"/odeme/[orderId]">)
             )}
           </div>
         </div>
+      )}
+
+      {order.gig.seller.synthetic && (
+        <p className="mt-6 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <strong>Test siparişi:</strong> Bu sipariş üretilmiş bir vitrin ilanına verildi. Gerçek ödeme gönderme;
+          akışı ilerletmek için &quot;Ödeme Bildirimi Yap&quot; yeterli.
+        </p>
       )}
 
       <div className="mt-6">
