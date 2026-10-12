@@ -7,6 +7,7 @@ import { orderStatusLabel, orderStatusColor } from "@/lib/order-status";
 import { formatPrice } from "@/lib/format-price";
 import { maskIban } from "@/lib/iban";
 import { FounderButton } from "../founder-button";
+import { toggleTesterAction } from "../actions";
 
 const roleLabel: Record<string, string> = {
   BUYER: "Alıcı",
@@ -40,6 +41,7 @@ export default async function AdminUserDetailPage(props: PageProps<"/admin/kulla
       ...membershipSelect,
       proTrialUsedAt: true,
       synthetic: true,
+      isTester: true,
       founderNumber: true,
       founderAt: true,
       emailVerified: true,
@@ -146,6 +148,20 @@ export default async function AdminUserDetailPage(props: PageProps<"/admin/kulla
           <span className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600">
             Askıya Alındı
           </span>
+        )}
+        {!user.synthetic && (
+          <form action={toggleTesterAction.bind(null, user.id)}>
+            <button
+              title="Test hesabı üretilmiş vitrin ilanlarından test siparişi verebilir"
+              className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                user.isTester
+                  ? "bg-amber-50 text-amber-700 hover:bg-amber-100"
+                  : "border border-slate-200 text-slate-500 hover:border-slate-300"
+              }`}
+            >
+              {user.isTester ? "Test Hesabı · Kaldır" : "Test Hesabı Yap"}
+            </button>
+          </form>
         )}
       </div>
       <p className="mt-1 text-sm text-slate-500">

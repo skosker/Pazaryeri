@@ -26,6 +26,19 @@ export async function toggleProFreelancerAction(userId: string) {
   revalidatePath("/admin/kullanicilar");
 }
 
+/**
+ * Test hesabı (e.g. a testing firm's accounts): may order from showcase gigs to walk the
+ * order flow. Showcase profiles themselves cannot be flagged.
+ */
+export async function toggleTesterAction(userId: string) {
+  await requireAdmin();
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { isTester: true, synthetic: true } });
+  if (!user || user.synthetic) return;
+  await prisma.user.update({ where: { id: userId }, data: { isTester: !user.isTester } });
+  revalidatePath(`/admin/kullanicilar/${userId}`);
+  revalidatePath("/admin/kullanicilar");
+}
+
 /** Kurucu Freelancer badge: take it back, or give it back after a mistaken revoke. */
 export async function setFounderAction(userId: string, keep: boolean) {
   await requireAdmin();

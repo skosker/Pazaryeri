@@ -20,11 +20,14 @@ export async function completeMockPayment(orderId: string) {
 
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { gig: { select: { slug: true, seller: { select: { synthetic: true, suspended: true } } } } },
+    include: {
+      gig: { select: { slug: true, seller: { select: { synthetic: true, suspended: true } } } },
+      buyer: { select: { isTester: true } },
+    },
   });
   if (!order || order.buyerId !== buyer.id) redirect("/panel");
   if (order.status !== "PENDING_PAYMENT") redirect(`/siparis/${orderId}`);
-  if (!sellerTakesOrders(order.gig.seller)) {
+  if (!sellerTakesOrders(order.gig.seller, order.buyer)) {
     redirect(`/gig/${order.gig.slug}?hata=${encodeURIComponent(NOT_TAKING_ORDERS)}`);
   }
   // The discounts are fixed here, before the order is marked paid (see refreshOrderDiscounts).
@@ -88,7 +91,7 @@ export async function notifyBankTransfer(orderId: string) {
   });
   if (!order || order.buyerId !== buyer.id) redirect("/panel");
   if (order.status !== "PENDING_PAYMENT") redirect(`/siparis/${orderId}`);
-  if (!sellerTakesOrders(order.gig.seller)) {
+  if (!sellerTakesOrders(order.gig.seller, order.buyer)) {
     redirect(`/gig/${order.gig.slug}?hata=${encodeURIComponent(NOT_TAKING_ORDERS)}`);
   }
   const discounts = await refreshOrderDiscounts(order);

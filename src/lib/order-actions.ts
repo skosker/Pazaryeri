@@ -174,13 +174,17 @@ export async function buyerCompleteOrder(orderId: string, buyerId: string) {
           title: true,
           sellerId: true,
           // The payout row copies the account details in, so they are needed here.
-          seller: { select: { name: true, email: true, iban: true, ibanHolder: true } },
+          seller: { select: { name: true, email: true, iban: true, ibanHolder: true, synthetic: true } },
         },
       },
     },
   });
   if (!order || order.buyerId !== buyerId) throw new OrderActionError("Yetkisiz işlem");
   if (order.status !== "DELIVERED") throw new OrderActionError("Sipariş bu aşamada değil");
+  // A test order (showcase seller) moves no money: it never becomes a payout.
+  if (order.gig.seller.synthetic) {
+    return prisma.order.update({ where: { id: orderId }, data: { status: "COMPLETED" } });
+  }
 
   // Orders that completed before the service fee was introduced keep a zero-fee payout
   // row (the upsert never updates), so only new completions are split here.

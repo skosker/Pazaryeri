@@ -10,11 +10,20 @@ export const NOT_TAKING_ORDERS = "Bu satıcı şu an yeni sipariş almıyor";
 
 /**
  * Showcase sellers cannot log in, so an order to one would be paid for and never delivered;
- * suspended sellers must not take new work either.
+ * suspended sellers must not take new work either. The one exception is a test account
+ * (User.isTester, set by an admin for a testing firm): it may order from showcase gigs to
+ * walk the order flow, and nobody pays — those orders are test orders throughout.
  */
-export function sellerTakesOrders(seller: { synthetic: boolean; suspended: boolean }): boolean {
-  return !seller.synthetic && !seller.suspended;
+export function sellerTakesOrders(
+  seller: { synthetic: boolean; suspended: boolean },
+  buyer?: { isTester: boolean } | null
+): boolean {
+  if (seller.suspended) return false;
+  return !seller.synthetic || Boolean(buyer?.isTester);
 }
+
+/** An order to a showcase seller: only test accounts can place one, and no money moves. */
+export const isTestOrder = (order: { gig: { seller: { synthetic: boolean } } }) => order.gig.seller.synthetic;
 
 type Money = number | { toString(): string };
 
@@ -125,7 +134,8 @@ export async function createOrder(buyerId: string, packageId: string) {
   if (!pkg.gig.published) {
     throw new OrderError("Bu ilan şu anda sipariş almıyor");
   }
-  if (!sellerTakesOrders(pkg.gig.seller)) {
+  const buyer = await prisma.user.findUnique({ where: { id: buyerId }, select: { isTester: true } });
+  if (!sellerTakesOrders(pkg.gig.seller, buyer)) {
     throw new OrderError(NOT_TAKING_ORDERS);
   }
   if (pkg.gig.sellerId === buyerId) {
