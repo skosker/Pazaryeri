@@ -6,6 +6,7 @@ import { hasPaidPeriod, membershipSelect, membershipTier, untilFormat } from "@/
 import { TestAccountsForm } from "./test-accounts-form";
 import { TestTransfersForm } from "./test-transfers-form";
 import { LoginLinkButton } from "./login-link-button";
+import { BulkLoginLinks } from "./bulk-login-links";
 import { MembershipForm, RoleForm } from "../account-forms";
 
 const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Istanbul" });
@@ -45,6 +46,12 @@ export default async function TestAccountsPage() {
       <div className="mt-6">
         <TestAccountsForm />
       </div>
+
+      {accounts.some((a) => a.isTester) && (
+        <div className="mt-6">
+          <BulkLoginLinks />
+        </div>
+      )}
 
       {accounts.some((a) => a.isTester) && (
         <div className="mt-6">

@@ -146,3 +146,21 @@ export async function createLoginLinkAction(userId: string): Promise<{ path?: st
   if (!token) return { error: "Bu hesap için link oluşturulamaz (test hesabı değil ya da askıda)." };
   return { path: `/test-giris?t=${token}` };
 }
+
+export type BulkLoginLink = { name: string; email: string; path: string };
+
+/** Fresh one-time links for every active bulk-opened test account at once. */
+export async function createAllLoginLinksAction(): Promise<{ links: BulkLoginLink[]; expiresAt: string }> {
+  const admin = await requireAdmin();
+  const users = await prisma.user.findMany({
+    where: { isTester: true, suspended: false, email: { endsWith: `@${TEST_EMAIL_DOMAIN}` } },
+    select: { id: true, name: true, email: true },
+    orderBy: { name: "asc" },
+  });
+  const links: BulkLoginLink[] = [];
+  for (const u of users) {
+    const token = await createLoginToken(u.id, admin.id);
+    if (token) links.push({ name: u.name, email: u.email, path: `/test-giris?t=${token}` });
+  }
+  return { links, expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString() };
+}
