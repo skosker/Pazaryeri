@@ -50,8 +50,8 @@ function buildWhere(filters: FreelancerFilters): Prisma.UserWhereInput {
   if (filters.q) {
     const q = filters.q.trim();
     if (q.length > 0) {
+      // Profession and skills only: the directory is not searchable by a person's name.
       where.OR = [
-        { name: { contains: q, mode: "insensitive" } },
         { title: { contains: q, mode: "insensitive" } },
         // Skills are stored as whole labels, so this matches "Figma", not "fig".
         { skills: { has: q } },

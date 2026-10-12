@@ -39,7 +39,7 @@ export function FilterBar({
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="İsim, meslek veya uzmanlık ara"
+          placeholder="Meslek veya uzmanlık ara"
           className="w-full text-sm text-slate-600 outline-none placeholder:text-slate-400"
         />
         <button type="submit" className="text-sm font-semibold text-purple-700">
