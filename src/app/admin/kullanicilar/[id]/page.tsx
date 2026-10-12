@@ -8,6 +8,8 @@ import { formatPrice } from "@/lib/format-price";
 import { maskIban } from "@/lib/iban";
 import { FounderButton } from "../founder-button";
 import { toggleTesterAction } from "../actions";
+import { ResetTestPasswordButton } from "../reset-test-password-button";
+import { isBulkTestEmail } from "@/lib/test-accounts";
 
 const roleLabel: Record<string, string> = {
   BUYER: "Alıcı",
@@ -172,6 +174,12 @@ export default async function AdminUserDetailPage(props: PageProps<"/admin/kulla
             <Link href={`/admin/sozlesmeler/${user.id}`} className="font-semibold text-purple-700 hover:underline">
               Üyelik Sözleşmesi
             </Link>
+          </>
+        )}
+        {user.isTester && isBulkTestEmail(user.email) && (
+          <>
+            {" · "}
+            <ResetTestPasswordButton userId={user.id} name={user.name} />
           </>
         )}
       </p>

@@ -121,7 +121,15 @@ export default async function AdminUsersPage(props: PageProps<"/admin/kullanicil
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-brand-navy">Kullanıcılar</h1>
+      <div className="flex flex-wrap items-center gap-3">
+        <h1 className="text-2xl font-bold text-brand-navy">Kullanıcılar</h1>
+        <Link
+          href="/admin/kullanicilar/test-hesaplari"
+          className="ml-auto rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800 hover:border-amber-300"
+        >
+          Toplu Test Hesabı
+        </Link>
+      </div>
 
       <form method="get" className="mt-4 flex flex-wrap items-center gap-3">
         <input

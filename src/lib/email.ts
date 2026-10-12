@@ -37,8 +37,14 @@ function toPlainText(html: string) {
     .trim();
 }
 
+/**
+ * Addresses Prosinta makes up itself — bulk test accounts and showcase profiles — have no
+ * mailbox; sending there would only bounce and hurt the sender's reputation.
+ */
+const NO_MAILBOX = /@(test|demo)\.prosinta\.com$/i;
+
 async function sendEmail(to: string, subject: string, html: string) {
-  if (!resend) {
+  if (!resend || NO_MAILBOX.test(to)) {
     console.log(`[email:mock] to=${to} subject="${subject}"`);
     return;
   }

@@ -37,9 +37,9 @@ export async function referrerByCode(code: string | undefined | null) {
   if (!code || !REFERRAL_CODE_PATTERN.test(code)) return null;
   const user = await prisma.user.findUnique({
     where: { referralCode: code },
-    select: { id: true, name: true, suspended: true, synthetic: true },
+    select: { id: true, name: true, suspended: true, synthetic: true, isTester: true },
   });
-  if (!user || user.suspended || user.synthetic) return null;
+  if (!user || user.suspended || user.synthetic || user.isTester) return null;
   return { id: user.id, name: user.name };
 }
 
@@ -57,11 +57,13 @@ export async function grantReferralReward(order: { id: string; buyerId: string }
     select: {
       name: true,
       synthetic: true,
-      referredBy: { select: { id: true, name: true, email: true, suspended: true, synthetic: true } },
+      isTester: true,
+      referredBy: { select: { id: true, name: true, email: true, suspended: true, synthetic: true, isTester: true } },
     },
   });
   const referrer = buyer?.referredBy;
-  if (!buyer || buyer.synthetic || !referrer || referrer.suspended || referrer.synthetic) return;
+  // Test accounts neither earn nor bring in a reward: their orders are not real business.
+  if (!buyer || buyer.synthetic || buyer.isTester || !referrer || referrer.suspended || referrer.synthetic || referrer.isTester) return;
 
   try {
     await prisma.referralReward.create({
