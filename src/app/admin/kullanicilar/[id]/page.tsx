@@ -9,6 +9,7 @@ import { maskIban } from "@/lib/iban";
 import { FounderButton } from "../founder-button";
 import { toggleTesterAction } from "../actions";
 import { ResetTestPasswordButton } from "../reset-test-password-button";
+import { MembershipForm, RoleForm } from "../account-forms";
 import { isBulkTestEmail } from "@/lib/test-accounts";
 
 const roleLabel: Record<string, string> = {
@@ -183,6 +184,19 @@ export default async function AdminUserDetailPage(props: PageProps<"/admin/kulla
           </>
         )}
       </p>
+
+      {!user.synthetic && user.role !== "ADMIN" && (
+        <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs text-slate-500">
+          <span className="flex items-center gap-2">
+            Rol <RoleForm userId={user.id} role={user.role} />
+          </span>
+          {user.role === "FREELANCER" && (
+            <span className="flex items-center gap-2">
+              Üyelik <MembershipForm userId={user.id} />
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <InfoCard label="Kayıt Tarihi" value={dateFmt.format(user.createdAt)} />
