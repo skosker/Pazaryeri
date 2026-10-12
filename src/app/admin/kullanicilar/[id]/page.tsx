@@ -9,6 +9,7 @@ import { maskIban } from "@/lib/iban";
 import { FounderButton } from "../founder-button";
 import { toggleTesterAction } from "../actions";
 import { ResetTestPasswordButton } from "../reset-test-password-button";
+import { LoginLinkButton } from "../test-hesaplari/login-link-button";
 import { MembershipForm, RoleForm } from "../account-forms";
 import { isBulkTestEmail } from "@/lib/test-accounts";
 
@@ -186,6 +187,12 @@ export default async function AdminUserDetailPage(props: PageProps<"/admin/kulla
           </>
         )}
       </p>
+      {user.isTester && !user.suspended && isBulkTestEmail(user.email) && (
+        <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
+          Şifresiz giriş: <LoginLinkButton userId={user.id} />
+          <span className="text-slate-400">linki gizli pencerede aç</span>
+        </div>
+      )}
 
       {!user.synthetic && user.role !== "ADMIN" && (
         <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs text-slate-500">
