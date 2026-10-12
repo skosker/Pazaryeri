@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { consumeLoginToken } from "@/lib/login-tokens";
 
 export const { handlers, auth, signIn, signOut, unstable_update: updateSession } = NextAuth({
   session: { strategy: "jwt" },
@@ -39,6 +40,16 @@ export const { handlers, auth, signIn, signOut, unstable_update: updateSession }
           role: user.role,
           image: user.image,
         };
+      },
+    }),
+    // One-time link an admin makes for a bulk-opened test account (src/lib/login-tokens.ts).
+    Credentials({
+      id: "test-login",
+      name: "test-login",
+      credentials: { token: { label: "Token", type: "text" } },
+      authorize: async (credentials) => {
+        const user = await consumeLoginToken(credentials?.token);
+        return user ? { id: user.id, name: user.name, email: user.email, role: user.role, image: user.image } : null;
       },
     }),
   ],
