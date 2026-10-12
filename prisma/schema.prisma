@@ -381,6 +381,9 @@ model ProPurchase {
   /// Bu satış için Prosinta'nın kestiği fatura (Admin → Faturalar); kesilene kadar NULL.
   invoiceNo   String?
   invoicedAt  DateTime?
+  /// Ödemenin onaylandığı an (kart bildirimi, havale onayı ya da bakiyeden ödeme). Gelir
+  /// Raporu ve makbuz bunu kullanır; updatedAt fatura no girilince de değiştiği için olmaz.
+  paidAt      DateTime?
   token       String?
   rawResponse Json?
   createdAt   DateTime      @default(now())

@@ -38,6 +38,8 @@ export type InvoiceRow = {
   paidWith: string | null;
   /** A membership sale's refund (requested, refunded or turned down); null otherwise. */
   refund: RefundSummary | null;
+  /** Bought by a test account: shown, but left out of totals and the export, and not invoiced. */
+  test: boolean;
 };
 
 const customerSelect = {
@@ -50,6 +52,7 @@ const customerSelect = {
   billingDistrict: true,
   billingCity: true,
   tckn: true,
+  isTester: true,
 } as const;
 
 type CustomerFields = {
@@ -62,6 +65,7 @@ type CustomerFields = {
   billingDistrict: string | null;
   billingCity: string | null;
   tckn: string | null;
+  isTester: boolean;
 };
 
 function customer(u: CustomerFields): InvoiceRow["customer"] {
@@ -117,7 +121,7 @@ async function queryInvoiceRows({
       ? prisma.proPurchase.findMany({
           where: { status: "SUCCESS", amount: { gt: 0 }, ...invoiceFilter, ...(userId ? { userId } : {}) },
           select: {
-            id: true, plan: true, months: true, amount: true, createdAt: true, invoiceNo: true, invoicedAt: true, provider: true,
+            id: true, plan: true, months: true, amount: true, createdAt: true, paidAt: true, invoiceNo: true, invoicedAt: true, provider: true,
             user: { select: customerSelect },
             refund: { select: { status: true, amount: true, decidedAt: true, rejectReason: true } },
           },
@@ -156,7 +160,7 @@ async function queryInvoiceRows({
       kind: "uyelik" as const,
       id: p.id,
       // Not updatedAt: that moves when the row is marked invoiced.
-      date: p.createdAt,
+      date: p.paidAt ?? p.createdAt,
       customer: customer(p.user),
       service: purchaseServiceLabel(p.plan, p.months),
       total: Number(p.amount),
@@ -164,6 +168,7 @@ async function queryInvoiceRows({
       invoicedAt: p.invoicedAt,
       paidWith: p.provider,
       refund: p.refund ? { ...p.refund, amount: p.refund.amount === null ? null : Number(p.refund.amount) } : null,
+      test: p.user.isTester,
     })),
     ...boosts.map((b) => ({
       kind: "one-cikar" as const,
@@ -176,6 +181,7 @@ async function queryInvoiceRows({
       invoicedAt: b.invoicedAt,
       paidWith: b.provider,
       refund: null,
+      test: b.user.isTester,
     })),
     ...payouts.map((p) => ({
       kind: "komisyon" as const,
@@ -188,6 +194,7 @@ async function queryInvoiceRows({
       invoicedAt: p.invoicedAt,
       paidWith: null,
       refund: null,
+      test: p.seller.isTester,
     })),
   ];
   return rows.sort((a, b) => b.date.getTime() - a.date.getTime());

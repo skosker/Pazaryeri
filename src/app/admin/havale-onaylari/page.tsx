@@ -129,6 +129,24 @@ function parseDate(value: string, end = false): Date | undefined {
 
 const APPROVED = new Set(["PAID", "IN_PROGRESS", "DELIVERED", "COMPLETED"]);
 
+/**
+ * A test account's order on a showcase gig: no money comes in. Imported history also sits
+ * on showcase gigs but with a generated buyer, so it is not one of these.
+ */
+const isTestTransfer = (o: { gig: { seller: { synthetic: boolean } }; buyer: { synthetic: boolean } }) =>
+  o.gig.seller.synthetic && !o.buyer.synthetic;
+
+function TestBadge() {
+  return (
+    <span
+      title="Test hesabı: para gelmez; onaylarsan gelir raporuna girmez, Faturalar'da Test olarak görünür"
+      className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700"
+    >
+      Test Hesabı · para beklenmez
+    </span>
+  );
+}
+
 export default async function BankTransferApprovalsPage(
   props: PageProps<"/admin/havale-onaylari">
 ) {
@@ -156,7 +174,7 @@ export default async function BankTransferApprovalsPage(
   // No `to: now` here on purpose: a row's time-of-day is a synthetic offset, not a real
   // event time, so a transfer recorded "later today" than the current instant is still
   // today's data — an upper bound on the exact moment would clip it out of today's row.
-  const reportRows = await listBankTransfers({ from: REPORT_START });
+  const reportRows = (await listBankTransfers({ from: REPORT_START })).filter((o) => !isTestTransfer(o));
   const approvedCount = reportRows.filter((o) => APPROVED.has(o.status)).length;
   // Bank transfers: what the buyer actually sent, after any first-order discount.
   const reportTotal = reportRows.reduce((sum, o) => sum + payableAmount(o), 0);
@@ -179,7 +197,7 @@ export default async function BankTransferApprovalsPage(
         <StatCard label="Toplam Tutar" value={`${formatPrice(reportTotal)} TL`} />
       </div>
       <p className="mt-2 text-xs text-slate-400">
-        1 Ağustos 2026&apos;dan bugüne, aşağıdaki tarih filtresinden bağımsız.
+        1 Ağustos 2026&apos;dan bugüne, aşağıdaki tarih filtresinden bağımsız; test hesaplarının siparişleri sayılmaz.
       </p>
 
       <div className="mt-6">
@@ -265,7 +283,7 @@ export default async function BankTransferApprovalsPage(
                       <td className="px-5 py-4">
                         <p className="font-medium text-brand-navy">
                           {order.gig.title}
-                          {order.gig.seller.synthetic && (
+                          {isTestTransfer(order) && (
                             <span className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
                               Test siparişi · para beklenmez
                             </span>
@@ -320,7 +338,10 @@ export default async function BankTransferApprovalsPage(
                 {pendingProTransfers.map((purchase) => (
                   <tr key={purchase.id} className="border-b border-slate-100 last:border-0">
                     <td className="px-5 py-4">
-                      <p className="font-medium text-brand-navy">{purchase.user.name}</p>
+                      <p className="font-medium text-brand-navy">
+                        {purchase.user.name}
+                        {purchase.user.isTester && <TestBadge />}
+                      </p>
                       <p className="text-xs text-slate-400">{purchase.user.email}</p>
                     </td>
                     <td className="px-5 py-4 text-slate-500">
@@ -370,7 +391,10 @@ export default async function BankTransferApprovalsPage(
                 {pendingBoostTransfers.map((boost) => (
                   <tr key={boost.id} className="border-b border-slate-100 last:border-0">
                     <td className="px-5 py-4">
-                      <p className="font-medium text-brand-navy">{boost.user.name}</p>
+                      <p className="font-medium text-brand-navy">
+                        {boost.user.name}
+                        {boost.user.isTester && <TestBadge />}
+                      </p>
                       <p className="text-xs text-slate-400">{boost.user.email}</p>
                     </td>
                     <td className="px-5 py-4">

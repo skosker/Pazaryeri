@@ -268,7 +268,7 @@ export async function refundStats() {
   const [requested, refundedThisMonth, invoicePending] = await Promise.all([
     prisma.membershipRefund.count({ where: { status: "REQUESTED" } }),
     prisma.membershipRefund.aggregate({
-      where: { status: "REFUNDED", decidedAt: { gte: istanbulMonthStart() } },
+      where: { status: "REFUNDED", decidedAt: { gte: istanbulMonthStart() }, purchase: { user: { isTester: false } } },
       _sum: { amount: true },
       _count: true,
     }),

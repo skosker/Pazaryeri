@@ -16,7 +16,7 @@ export default async function InvoicesPage(props: PageProps<"/admin/faturalar">)
   const kind = parseInvoiceKind(searchParams.tur);
   const [rows, settings] = await Promise.all([listInvoiceRows(done, kind), getSettings()]);
   const pdfs = await invoicePdfKeys(rows.filter((r) => r.invoiceNo));
-  const total = rows.reduce((sum, r) => sum + r.total, 0);
+  const total = rows.reduce((sum, r) => sum + (r.test ? 0 : r.total), 0);
   const href = (next: { durum?: string; tur?: InvoiceKind | null }) => {
     const q = new URLSearchParams();
     const durum = next.durum ?? (done ? "kesilen" : "bekleyen");
@@ -75,6 +75,7 @@ export default async function InvoicesPage(props: PageProps<"/admin/faturalar">)
         ))}
         <span className="ml-auto text-slate-500">
           {rows.length} kayıt · <strong className="text-brand-navy">{formatPrice(total)} TL</strong>
+          {rows.some((r) => r.test) && <span className="text-xs text-slate-400"> (test hesapları hariç)</span>}
         </span>
       </div>
 
@@ -105,7 +106,17 @@ export default async function InvoicesPage(props: PageProps<"/admin/faturalar">)
                       <span className="mt-1 block text-[11px] font-semibold text-purple-700">{INVOICE_KIND_LABEL[r.kind]}</span>
                     </td>
                     <td className="px-4 py-3">
-                      <p className="font-medium text-brand-navy">{c.companyName ?? c.name}</p>
+                      <p className="font-medium text-brand-navy">
+                        {c.companyName ?? c.name}
+                        {r.test && (
+                          <span
+                            title="Test hesabının alımı: toplama ve Excel'e aktarıma girmez, fatura kesilmez"
+                            className="ml-1.5 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700"
+                          >
+                            Test · fatura kesme
+                          </span>
+                        )}
+                      </p>
                       {c.companyName && (
                         <p className="text-xs text-slate-500">
                           {c.taxOffice} · {c.taxNumber}

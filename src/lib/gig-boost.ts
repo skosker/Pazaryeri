@@ -172,7 +172,7 @@ export async function listPendingBoostBankTransfers() {
   return prisma.gigBoost.findMany({
     where: { provider: "havale", status: "INITIALIZED" },
     include: {
-      user: { select: { name: true, email: true } },
+      user: { select: { name: true, email: true, isTester: true } },
       gig: { select: { title: true, slug: true } },
     },
     orderBy: { createdAt: "desc" },

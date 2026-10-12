@@ -43,6 +43,16 @@ const REAL_ORDERS = `FROM orders o
   JOIN users s ON s.id = g."sellerId"
   WHERE NOT b.synthetic AND NOT s.synthetic AND o.status NOT IN ('PENDING_PAYMENT', 'CANCELLED')`;
 
+/**
+ * Paid membership and corporate plan sales, test accounts' left out (they buy to walk the
+ * flow, not as customers). Counted in the month of payment: paidAt, or for a row from
+ * before that column the updatedAt the migration filled it from.
+ */
+const REAL_PURCHASES = `FROM pro_purchases p
+  JOIN users u ON u.id = p."userId"
+  WHERE p.status = 'SUCCESS' AND NOT u."isTester"`;
+const PAID_AT = `COALESCE(p."paidAt", p."updatedAt")`;
+
 async function sumByMonth(sql: string, since: Date): Promise<Map<string, { total: number; count: number }>> {
   const rows = await prisma.$queryRawUnsafe<Row[]>(sql, since);
   return new Map(rows.map((r) => [r.month, { total: Number(r.total ?? 0), count: Number(r.count ?? 0) }]));
@@ -69,18 +79,19 @@ export async function monthlyRevenue(): Promise<RevenueMonth[]> {
   const [membership, corporatePlans, boosts, commission, refunds, firstOrder, referral, corporateDisc, bonuses, volume] =
     await Promise.all([
       sumByMonth(
-        `SELECT ${monthOf('"updatedAt"')} AS month, SUM(amount) AS total FROM pro_purchases
-         WHERE status = 'SUCCESS' AND plan IN ('PRO', 'PRO_PLUS') AND "updatedAt" >= $1 GROUP BY 1`,
+        `SELECT ${monthOf(PAID_AT)} AS month, SUM(p.amount) AS total ${REAL_PURCHASES}
+         AND p.plan IN ('PRO', 'PRO_PLUS') AND ${PAID_AT} >= $1 GROUP BY 1`,
         since
       ),
       sumByMonth(
-        `SELECT ${monthOf('"updatedAt"')} AS month, SUM(amount) AS total FROM pro_purchases
-         WHERE status = 'SUCCESS' AND plan IN ('KURUMSAL', 'KURUMSAL_PLUS') AND "updatedAt" >= $1 GROUP BY 1`,
+        `SELECT ${monthOf(PAID_AT)} AS month, SUM(p.amount) AS total ${REAL_PURCHASES}
+         AND p.plan IN ('KURUMSAL', 'KURUMSAL_PLUS') AND ${PAID_AT} >= $1 GROUP BY 1`,
         since
       ),
       sumByMonth(
-        `SELECT ${monthOf('"activatedAt"')} AS month, SUM(amount) AS total FROM gig_boosts
-         WHERE status = 'SUCCESS' AND "creditMonth" IS NULL AND "activatedAt" >= $1 GROUP BY 1`,
+        `SELECT ${monthOf('b."activatedAt"')} AS month, SUM(b.amount) AS total FROM gig_boosts b
+         JOIN users u ON u.id = b."userId"
+         WHERE b.status = 'SUCCESS' AND b."creditMonth" IS NULL AND NOT u."isTester" AND b."activatedAt" >= $1 GROUP BY 1`,
         since
       ),
       sumByMonth(
@@ -91,8 +102,10 @@ export async function monthlyRevenue(): Promise<RevenueMonth[]> {
       ),
       // In the month the money went back, not the month of the sale.
       sumByMonth(
-        `SELECT ${monthOf('"decidedAt"')} AS month, SUM(amount) AS total FROM membership_refunds
-         WHERE status = 'REFUNDED' AND "decidedAt" >= $1 GROUP BY 1`,
+        `SELECT ${monthOf('r."decidedAt"')} AS month, SUM(r.amount) AS total FROM membership_refunds r
+         JOIN pro_purchases p ON p.id = r."purchaseId"
+         JOIN users u ON u.id = p."userId"
+         WHERE r.status = 'REFUNDED' AND NOT u."isTester" AND r."decidedAt" >= $1 GROUP BY 1`,
         since
       ),
       sumByMonth(
