@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { formatPrice } from "@/lib/format-price";
-import { invoicePdfKeys, listUserInvoiceRows } from "@/lib/invoices";
+import { invoicePdfKeys, listUserInvoiceRows, purchaseServiceLabel } from "@/lib/invoices";
+import { prisma } from "@/lib/prisma";
 import { isPartialRefund, needsNoInvoice } from "@/lib/refund-labels";
 import { withdrawRefundAction } from "./actions";
 
@@ -17,8 +18,26 @@ export default async function MyInvoicesPage(props: PageProps<"/panel/faturalari
   const { iade } = await props.searchParams;
   const session = await auth();
   if (!session?.user?.id) redirect("/giris?callbackUrl=/panel/faturalarim");
-  const rows = await listUserInvoiceRows(session.user.id);
+  const userId = session.user.id;
+  const [rows, waitingPurchases, waitingBoosts] = await Promise.all([
+    listUserInvoiceRows(userId),
+    prisma.proPurchase.findMany({
+      where: { userId, provider: "havale", status: "INITIALIZED" },
+      select: { id: true, plan: true, months: true, amount: true, createdAt: true },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.gigBoost.findMany({
+      where: { userId, provider: "havale", status: "INITIALIZED" },
+      select: { id: true, days: true, amount: true, createdAt: true, gig: { select: { title: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
   const pdfs = await invoicePdfKeys(rows);
+  // Bank transfers declared but not yet confirmed by Prosinta: no invoice or receipt until then.
+  const waiting = [
+    ...waitingPurchases.map((p) => ({ id: p.id, date: p.createdAt, service: purchaseServiceLabel(p.plan, p.months), total: Number(p.amount) })),
+    ...waitingBoosts.map((b) => ({ id: b.id, date: b.createdAt, service: `Öne Çıkar (${b.days} gün) · ${b.gig.title}`, total: Number(b.amount) })),
+  ];
 
   return (
     <div>
@@ -34,10 +53,32 @@ export default async function MyInvoicesPage(props: PageProps<"/panel/faturalari
         </p>
       )}
 
+      {waiting.length > 0 && (
+        <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50/60 p-5">
+          <p className="text-sm font-semibold text-amber-900">Onay Bekleyen Ödemeler</p>
+          <p className="mt-0.5 text-xs text-amber-800">
+            Havale/EFT bildirimin Prosinta ekibi tarafından kontrol ediliyor. Onaylanınca üyeliğin açılır, ödeme makbuzu ve
+            faturası aşağıdaki listeye gelir.
+          </p>
+          <ul className="mt-3 divide-y divide-amber-100 text-sm">
+            {waiting.map((w) => (
+              <li key={w.id} className="flex flex-wrap items-center gap-x-4 gap-y-1 py-2">
+                <span className="text-slate-600">{dateFmt.format(w.date)}</span>
+                <span className="text-brand-navy">{w.service}</span>
+                <span className="ml-auto font-semibold text-brand-navy">{formatPrice(w.total)} TL</span>
+                <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-amber-700">Ödeme onayı bekleniyor</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {rows.length === 0 ? (
-        <p className="mt-6 rounded-2xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-400">
-          Henüz faturalanacak bir alımın yok.
-        </p>
+        waiting.length === 0 && (
+          <p className="mt-6 rounded-2xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-400">
+            Henüz faturalanacak bir alımın yok.
+          </p>
+        )
       ) : (
         <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
           <table className="w-full text-left text-sm">
