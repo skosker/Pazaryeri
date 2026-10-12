@@ -71,6 +71,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     ...(isFreelancer && openCampaigns.length > 0 ? [{ href: "/panel/kampanyalar", label: "Kampanyalar" }] : []),
     ...(isFreelancer ? [{ href: "/panel/odeme-bilgileri", label: "Ödeme Bilgileri" }] : []),
     ...(corporateEnabled && user?.companyName ? [{ href: "/panel/kurumsal", label: "Kurumsal Hesap" }] : []),
+    { href: "/panel/faturalarim", label: "Faturalarım" },
     { href: "/panel/davet", label: "Davet Et" },
     { href: "/panel/profil", label: "Profilim" },
     { href: "/panel/sifre", label: "Şifre Değiştir" },
@@ -80,9 +81,9 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   ];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 print:max-w-none print:p-0">
       <div className="flex flex-col gap-8 lg:flex-row">
-        <aside className="w-full shrink-0 lg:w-56">
+        <aside className="w-full shrink-0 lg:w-56 print:hidden">
           <div className="flex items-center gap-1.5">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
               {isFreelancer ? "Freelancer Paneli" : "Alıcı Paneli"}
@@ -98,9 +99,9 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         </aside>
 
         <div className="min-w-0 flex-1">
-          {nudge && <CampaignNudge campaign={nudge} />}
+          {nudge && <div className="print:hidden"><CampaignNudge campaign={nudge} /></div>}
           {endingSoon && (
-            <p className="mb-6 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <p className="mb-6 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900 print:hidden">
               {tier === "PRO_PLUS" ? "Pro Plus" : "Pro"} üyeliğin {untilFormat.format(endingSoon)} tarihinde bitiyor.{" "}
               <Link href="/panel/pro-ol" className="font-semibold underline">
                 Üyeliğini Yenile

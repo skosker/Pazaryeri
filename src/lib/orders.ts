@@ -147,6 +147,19 @@ export async function createOrder(buyerId: string, packageId: string) {
   const percent = activeCampaignPercent(await getCampaignPricing(), pkg.gigId);
   const amount = campaignPrice(Number(pkg.price), percent);
 
+  // Pressing "Devam Et" again for the same package returns to the order already waiting
+  // for payment instead of piling up unpaid copies; its price is brought up to date.
+  const unpaid = await prisma.order.findFirst({
+    where: { buyerId, packageId: pkg.id, status: "PENDING_PAYMENT" },
+    orderBy: { createdAt: "desc" },
+  });
+  if (unpaid) {
+    return prisma.order.update({
+      where: { id: unpaid.id },
+      data: { amount, discount: await firstOrderDiscount(buyerId, amount, unpaid.id) },
+    });
+  }
+
   return prisma.order.create({
     data: {
       buyerId,

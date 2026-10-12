@@ -2,8 +2,9 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/require-admin";
 import { getSettings } from "@/lib/settings";
 import { formatPrice } from "@/lib/format-price";
-import { INVOICE_KIND_LABEL, listInvoiceRows, parseInvoiceKind, splitVat, type InvoiceKind } from "@/lib/invoices";
-import { clearInvoiceAction, markInvoicedAction } from "./actions";
+import { INVOICE_KIND_LABEL, invoicePdfKeys, listInvoiceRows, parseInvoiceKind, splitVat, type InvoiceKind } from "@/lib/invoices";
+import { clearInvoiceAction, markInvoicedAction, removeInvoicePdfAction, uploadInvoicePdfAction } from "./actions";
+import { InvoicePdfForm } from "./pdf-form";
 
 const dateFmt = new Intl.DateTimeFormat("tr-TR", { dateStyle: "medium", timeZone: "Europe/Istanbul" });
 
@@ -13,6 +14,7 @@ export default async function InvoicesPage(props: PageProps<"/admin/faturalar">)
   const done = searchParams.durum === "kesilen";
   const kind = parseInvoiceKind(searchParams.tur);
   const [rows, settings] = await Promise.all([listInvoiceRows(done, kind), getSettings()]);
+  const pdfs = await invoicePdfKeys(rows.filter((r) => r.invoiceNo));
   const total = rows.reduce((sum, r) => sum + r.total, 0);
   const href = (next: { durum?: string; tur?: InvoiceKind | null }) => {
     const q = new URLSearchParams();
@@ -139,6 +141,18 @@ export default async function InvoicesPage(props: PageProps<"/admin/faturalar">)
                             </button>
                           </form>
                         </div>
+                      ) : null}
+                      {r.invoiceNo && pdfs.has(`${r.kind}:${r.id}`) ? (
+                        <div className="mt-1.5 flex items-center gap-2 text-[11px]">
+                          <a href={`/panel/faturalarim/pdf/${r.kind}/${r.id}`} target="_blank" className="font-semibold text-purple-700 hover:underline">
+                            PDF ✓ Görüntüle
+                          </a>
+                          <form action={removeInvoicePdfAction.bind(null, r.kind, r.id)}>
+                            <button className="text-slate-400 hover:text-red-600">Kaldır</button>
+                          </form>
+                        </div>
+                      ) : r.invoiceNo ? (
+                        <InvoicePdfForm action={uploadInvoicePdfAction.bind(null, r.kind, r.id)} />
                       ) : (
                         <form action={markInvoicedAction.bind(null, r.kind, r.id)} className="flex gap-1.5">
                           <input
