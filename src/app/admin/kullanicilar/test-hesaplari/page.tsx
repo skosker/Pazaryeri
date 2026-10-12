@@ -67,7 +67,6 @@ export default async function TestAccountsPage() {
                 <th className="px-4 py-3 font-medium">Rol</th>
                 <th className="px-4 py-3 font-medium">Üyelik</th>
                 <th className="px-4 py-3 font-medium">Açılış</th>
-                <th className="px-4 py-3 font-medium">Şifresiz Giriş</th>
               </tr>
             </thead>
             <tbody>
@@ -81,6 +80,11 @@ export default async function TestAccountsPage() {
                       </Link>
                       {a.suspended && <span className="ml-1.5 text-xs font-semibold text-red-600">Askıda</span>}
                       {!a.isTester && <span className="block text-[11px] text-slate-400">test işareti kaldırıldı</span>}
+                      {a.isTester && !a.suspended && (
+                        <div className="mt-1.5">
+                          <LoginLinkButton userId={a.id} />
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3 font-mono text-xs text-slate-600">{a.email}</td>
                     <td className="px-4 py-3">
@@ -104,7 +108,6 @@ export default async function TestAccountsPage() {
                       )}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-slate-500">{dateFmt.format(a.createdAt)}</td>
-                    <td className="px-4 py-3">{a.isTester && !a.suspended && <LoginLinkButton userId={a.id} />}</td>
                   </tr>
                 );
               })}
