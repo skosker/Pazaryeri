@@ -104,7 +104,7 @@ export function RefundForm({
             value={reference}
             onChange={(e) => setReference(e.target.value)}
             required={method !== "bakiye"}
-            placeholder={method === "kart" ? "Sipay iade işlem no" : method === "havale" ? "EFT dekont no" : ""}
+            placeholder={method === "kart" ? "Kart iade işlem no" : method === "havale" ? "EFT dekont no" : ""}
             className={`${field} font-mono`}
           />
         </div>
