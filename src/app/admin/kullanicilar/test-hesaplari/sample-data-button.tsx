@@ -2,13 +2,14 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { createSampleDataAction, type SampleDataState } from "./actions";
+import { createSampleDataAction, createSampleRefundsAction, type SampleDataState } from "./actions";
 
 /** One press: example memberships and orders for every test account. */
 export function SampleDataButton() {
   const [pending, startTransition] = useTransition();
   const [state, setState] = useState<SampleDataState>({});
   const d = state.done;
+  const [refunds, setRefunds] = useState<number | null>(null);
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6">
@@ -32,6 +33,31 @@ export function SampleDataButton() {
         >
           {pending ? "Oluşturuluyor..." : "Örnek Üyelik ve Sipariş Oluştur"}
         </button>
+      </div>
+      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-4">
+        <p className="max-w-2xl text-xs text-slate-500">
+          Ödenmiş üyeliği olan her test hesabı için bir <strong>iade talebi</strong> açar (gerekçeler sırayla; havale ile
+          ödenenlerde test IBAN&apos;ı). Talepleri Üyelik İadeleri&apos;nde inceleyip iade et ya da reddet.
+        </p>
+        <button
+          type="button"
+          disabled={pending}
+          onClick={() =>
+            startTransition(async () => {
+              const result = await createSampleRefundsAction();
+              setRefunds(result.created);
+            })
+          }
+          className="ml-auto rounded-full border border-purple-200 px-5 py-2 text-sm font-semibold text-purple-700 hover:bg-purple-50 disabled:opacity-60"
+        >
+          Örnek İade Talepleri Oluştur
+        </button>
+        {refunds !== null && (
+          <p className="w-full text-sm text-emerald-700">
+            {refunds === 0 ? "Yeni talep açılmadı; ödenmiş üyeliklerin hepsinde zaten iade kaydı var." : `${refunds} iade talebi açıldı`} ·{" "}
+            <Link href="/admin/iadeler" className="font-semibold underline">Üyelik İadeleri</Link>
+          </p>
+        )}
       </div>
       {state.error && <p className="mt-3 text-sm text-red-600">{state.error}</p>}
       {d && (

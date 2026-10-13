@@ -20,6 +20,10 @@ import { createOrder, refreshOrderDiscounts } from "@/lib/orders";
 import { markOrderPaid } from "@/lib/order-actions";
 import { createLoginToken } from "@/lib/login-tokens";
 import { parseTlAmount } from "@/lib/refund-labels";
+import { createSampleRefundRequests } from "@/lib/test-refunds";
+import { getSettings } from "@/lib/settings";
+import { corpPlanPrice, corpPlansOpen } from "@/lib/corporate-plans";
+import { isValidTaxNumber } from "@/lib/tax-number";
 
 export type CreatedAccount = { name: string; email: string; password: string };
 export type TestAccountsState = {
@@ -316,4 +320,85 @@ export async function createSampleDataAction(): Promise<SampleDataState> {
   revalidatePath("/admin/siparisler");
   revalidatePath("/admin/kullanicilar/test-hesaplari");
   return { done };
+}
+
+/** Example refund requests for every paid test membership that has none yet. */
+export async function createSampleRefundsAction(): Promise<{ created: number }> {
+  await requireAdmin();
+  const result = await createSampleRefundRequests();
+  revalidatePath("/admin/iadeler");
+  revalidatePath("/admin/faturalar");
+  revalidatePath("/panel/faturalarim");
+  return result;
+}
+
+export type TestCorporateState = { error?: string; created?: number; skipped?: string[]; plansClosed?: boolean };
+
+/** A made-up but checksum-valid VKN for a test company (the 10th digit is the check digit). */
+function testTaxNumber(seed: number): string {
+  const base = String(1000000000 + seed * 7919).slice(0, 9);
+  for (let d = 0; d < 10; d++) if (isValidTaxNumber(base + d)) return base + d;
+  return base + "0";
+}
+
+/**
+ * Kurumsal / Kurumsal Plus packages for the chosen test accounts, as buyers: each is made
+ * a buyer with a test company (name, vergi dairesi, valid-looking VKN, address) if it has
+ * none, then gets the package either paid (the plan opens and the sale lands in Faturalar)
+ * or as a bank-transfer notice waiting in Havale/EFT Onayları. An account that already
+ * has a corporate purchase is skipped.
+ */
+export async function createTestCorporateAction(
+  _prev: TestCorporateState,
+  formData: FormData
+): Promise<TestCorporateState> {
+  await requireAdmin();
+  const ids = formData.getAll("userId").map(String);
+  const plan = formData.get("plan") === "KURUMSAL_PLUS" ? "KURUMSAL_PLUS" : formData.get("plan") === "KURUMSAL" ? "KURUMSAL" : null;
+  const period = parsePeriod(formData.get("period"));
+  const paid = formData.get("state") === "paid";
+  if (ids.length === 0) return { error: "En az bir test hesabı seç." };
+  if (!plan || !period) return { error: "Paket ve süreyi seç." };
+
+  const settings = await getSettings();
+  const amount = corpPlanPrice(plan, period, settings).total;
+  const users = await prisma.user.findMany({
+    where: { id: { in: ids }, isTester: true },
+    select: { id: true, name: true, companyName: true, _count: { select: { proPurchases: { where: { plan: { in: ["KURUMSAL", "KURUMSAL_PLUS"] }, status: { not: "FAILED" } } } } } },
+  });
+  let created = 0;
+  const skipped: string[] = [];
+  for (const [i, u] of users.entries()) {
+    if (u._count.proPurchases > 0) {
+      skipped.push(u.name);
+      continue;
+    }
+    await prisma.user.update({
+      where: { id: u.id },
+      data: {
+        role: "BUYER",
+        ...(u.companyName
+          ? {}
+          : {
+              companyName: `${u.name} Test Şirketi A.Ş.`,
+              taxOffice: "Kadıköy Vergi Dairesi",
+              taxNumber: testTaxNumber(i + 1 + Math.floor(Date.now() / 1000) % 1000),
+              billingAddress: "Örnek Mah. Test Sk. No: 1",
+              billingCity: "İstanbul",
+              billingDistrict: "Kadıköy",
+            }),
+      },
+    });
+    const purchase = await prisma.proPurchase.create({
+      data: { userId: u.id, plan, months: PERIOD_MONTHS[period], amount, provider: "havale" },
+    });
+    if (paid) await markProPurchasePaid(purchase.id);
+    created++;
+  }
+
+  revalidatePath("/admin/havale-onaylari");
+  revalidatePath("/admin/faturalar");
+  revalidatePath("/admin/kurumsal");
+  revalidatePath("/admin/kullanicilar/test-hesaplari");
+  return { created, skipped, plansClosed: !corpPlansOpen(settings) };
 }
