@@ -4,7 +4,6 @@ import { useTransition, useState } from "react";
 import { notifyBankTransfer } from "./actions";
 import type { BankTransferInfo } from "@/lib/bank-transfer";
 import { formatPrice } from "@/lib/format-price";
-import { SipayBadge } from "@/components/sipay-badge";
 
 function AccountCard({ account }: { account: BankTransferInfo }) {
   const [copied, setCopied] = useState(false);
@@ -90,7 +89,6 @@ export function BankTransferPanel({
       <p className="mt-3 text-center text-xs text-slate-400">
         Bildirim sonrası satıcı ödemeyi kontrol edip onaylayacak, siparişin durumu güncellenecek.
       </p>
-      <SipayBadge />
     </div>
   );
 }
