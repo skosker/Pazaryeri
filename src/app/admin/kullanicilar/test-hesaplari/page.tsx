@@ -9,6 +9,7 @@ import { LoginLinkButton } from "./login-link-button";
 import { BulkLoginLinks } from "./bulk-login-links";
 import { TestPricesForm } from "./test-prices-form";
 import { SampleDataButton } from "./sample-data-button";
+import { TestCorporateForm } from "./test-corporate-form";
 import { MembershipForm, RoleForm } from "../account-forms";
 
 const dateFmt = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Istanbul" });
@@ -66,6 +67,12 @@ export default async function TestAccountsPage() {
       {accounts.some((a) => a.isTester) && (
         <div className="mt-6">
           <SampleDataButton />
+        </div>
+      )}
+
+      {accounts.some((a) => a.isTester) && (
+        <div className="mt-6">
+          <TestCorporateForm accounts={accounts.filter((a) => a.isTester && !a.suspended).map((a) => ({ id: a.id, name: a.name }))} />
         </div>
       )}
 
