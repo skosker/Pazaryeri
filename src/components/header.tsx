@@ -85,12 +85,15 @@ export async function Header() {
                   </span>
                 </Link>
               )}
-              <Link
-                href="/panel"
-                className="hidden text-sm font-medium text-slate-600 hover:text-brand-navy md:block"
-              >
-                {session.user.name?.split(" ")[0]} · Panelim
-              </Link>
+              {/* An admin has the Admin link; their name and "Panelim" are not shown. */}
+              {session.user.role !== "ADMIN" && (
+                <Link
+                  href="/panel"
+                  className="hidden text-sm font-medium text-slate-600 hover:text-brand-navy md:block"
+                >
+                  {session.user.name?.split(" ")[0]} · Panelim
+                </Link>
+              )}
               <form
                 action={async () => {
                   "use server";
