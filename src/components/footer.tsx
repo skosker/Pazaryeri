@@ -48,13 +48,6 @@ export function Footer({ categories }: { categories: FooterCategory[] }) {
             <a href="mailto:destek@prosinta.com" className="transition hover:text-purple-300">
               destek@prosinta.com
             </a>
-            {/* eslint-disable-next-line @next/next/no-img-element -- a static SVG trust
-                badge, not a photo; next/image's optimizer offers nothing for a vector file. */}
-            <img
-              src="/odeme-logolari.svg"
-              alt="Mastercard, Visa"
-              className="h-7 w-auto rounded-md bg-white px-2 py-1"
-            />
           </div>
         </div>
       </div>
