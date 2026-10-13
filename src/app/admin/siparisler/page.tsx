@@ -34,16 +34,38 @@ const tabs: { key: OrderStatus | "TUMU"; label: string }[] = [
   { key: "CANCELLED", label: "İptal Edildi" },
 ];
 
+const one = (v: string | string[] | undefined) => (typeof v === "string" ? v.trim() : "");
+/** "2026-10-12" read as that day in Istanbul; anything else → null. */
+const istanbulDay = (v: string, end: boolean) =>
+  /^\d{4}-\d{2}-\d{2}$/.test(v) ? new Date(`${v}T${end ? "23:59:59.999" : "00:00:00"}+03:00`) : null;
+
 export default async function AdminOrdersPage(props: PageProps<"/admin/siparisler">) {
   const searchParams = await props.searchParams;
   const durum = typeof searchParams.durum === "string" ? searchParams.durum : "TUMU";
   const activeStatus = tabs.some((t) => t.key === durum) ? durum : "TUMU";
+  const alici = one(searchParams.alici);
+  const bas = one(searchParams.bas);
+  const bit = one(searchParams.bit);
+  const from = istanbulDay(bas, false);
+  const to = istanbulDay(bit, true);
+  const filtered = Boolean(alici || from || to);
+  // Tab links keep the buyer and date filters.
+  const tabHref = (key: string) => {
+    const q = new URLSearchParams();
+    if (key !== "TUMU") q.set("durum", key);
+    if (alici) q.set("alici", alici);
+    if (from) q.set("bas", bas);
+    if (to) q.set("bit", bit);
+    const qs = q.toString();
+    return qs ? `/admin/siparisler?${qs}` : "/admin/siparisler";
+  };
 
   const orders = await prisma.order.findMany({
     // Showcase buyers' orders (seeded for the public review history) are not real
     // business and would bury real orders in this newest-first list.
     where: {
-      buyer: { synthetic: false },
+      buyer: { synthetic: false, ...(alici ? { name: { contains: alici, mode: "insensitive" as const } } : {}) },
+      ...(from || to ? { createdAt: { ...(from ? { gte: from } : {}), ...(to ? { lte: to } : {}) } } : {}),
       ...(activeStatus === "TUMU" ? {} : { status: activeStatus as OrderStatus }),
     },
     orderBy: { createdAt: "desc" },
@@ -58,11 +80,42 @@ export default async function AdminOrdersPage(props: PageProps<"/admin/siparisle
     <div>
       <h1 className="text-2xl font-bold text-brand-navy">Siparişler</h1>
 
-      <div className="mt-6 flex flex-wrap gap-2">
+      <form method="get" className="mt-4 flex flex-wrap items-end gap-3">
+        {activeStatus !== "TUMU" && <input type="hidden" name="durum" value={activeStatus} />}
+        <div>
+          <label htmlFor="alici" className="mb-1 block text-xs font-medium text-slate-500">Alıcı Adı</label>
+          <input
+            id="alici"
+            name="alici"
+            defaultValue={alici}
+            placeholder="Alıcı adına göre ara…"
+            className="w-56 rounded-full border border-slate-300 px-4 py-2 text-sm outline-none focus:border-purple-400"
+          />
+        </div>
+        <div>
+          <label htmlFor="bas" className="mb-1 block text-xs font-medium text-slate-500">Başlangıç Tarihi</label>
+          <input id="bas" name="bas" type="date" defaultValue={bas} className="rounded-full border border-slate-300 px-4 py-2 text-sm outline-none focus:border-purple-400" />
+        </div>
+        <div>
+          <label htmlFor="bit" className="mb-1 block text-xs font-medium text-slate-500">Bitiş Tarihi</label>
+          <input id="bit" name="bit" type="date" defaultValue={bit} className="rounded-full border border-slate-300 px-4 py-2 text-sm outline-none focus:border-purple-400" />
+        </div>
+        <button type="submit" className="rounded-full bg-purple-600 px-5 py-2 text-sm font-semibold text-white hover:bg-purple-700">
+          Filtrele
+        </button>
+        {filtered && (
+          <Link href={tabHref(activeStatus).split("?")[0] + (activeStatus !== "TUMU" ? `?durum=${activeStatus}` : "")} className="pb-2 text-sm font-medium text-slate-500 hover:text-brand-navy">
+            Temizle
+          </Link>
+        )}
+        <span className="ml-auto pb-2 text-sm text-slate-400">{orders.length} sipariş{orders.length === 100 ? " (en yeni 100)" : ""}</span>
+      </form>
+
+      <div className="mt-4 flex flex-wrap gap-2">
         {tabs.map((tab) => (
           <Link
             key={tab.key}
-            href={tab.key === "TUMU" ? "/admin/siparisler" : `/admin/siparisler?durum=${tab.key}`}
+            href={tabHref(tab.key)}
             className={`rounded-full px-4 py-1.5 text-xs font-semibold ${
               activeStatus === tab.key
                 ? "bg-brand-navy text-white"
@@ -91,7 +144,7 @@ export default async function AdminOrdersPage(props: PageProps<"/admin/siparisle
             {orders.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-5 py-10 text-center text-sm text-slate-400">
-                  Bu durumda sipariş yok.
+                  {filtered ? "Bu filtreyle sipariş bulunamadı." : "Bu durumda sipariş yok."}
                 </td>
               </tr>
             ) : (
